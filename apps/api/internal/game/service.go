@@ -30,6 +30,7 @@ func (s *Service) List(ctx context.Context, viewer actor.Actor, query ListQuery)
 		Visibility:     Visibility{ExcludeRated: !viewer.IncludesRated(), OnlyWithResources: onlyWithResources},
 		DeveloperID:    nonZero(query.DeveloperID),
 		CharacterID:    nonZero(query.CharacterID),
+		TranslatorID:   nonZero(query.TranslatorID),
 		Tags:           query.Tags,
 		ExcludeTags:    query.ExcludeTags,
 		Platforms:      query.Platforms,

@@ -50,6 +50,7 @@ type Modules struct {
 	Handlers        []Registrar
 	Jobs            Jobs
 	Backfill        *scan.BackfillService
+	Legacy          *download.LegacyService
 	Stalled         *scan.StalledService
 }
 

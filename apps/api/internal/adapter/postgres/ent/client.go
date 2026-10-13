@@ -46,6 +46,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
@@ -64,6 +65,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
@@ -143,6 +146,8 @@ type Client struct {
 	GameDownloadResourceFileHistory *GameDownloadResourceFileHistoryClient
 	// GameDownloadResourceReport is the client for interacting with the GameDownloadResourceReport builders.
 	GameDownloadResourceReport *GameDownloadResourceReportClient
+	// GameDownloadResourceTranslator is the client for interacting with the GameDownloadResourceTranslator builders.
+	GameDownloadResourceTranslator *GameDownloadResourceTranslatorClient
 	// GameImage is the client for interacting with the GameImage builders.
 	GameImage *GameImageClient
 	// GameLink is the client for interacting with the GameLink builders.
@@ -179,6 +184,10 @@ type Client struct {
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
+	// Translator is the client for interacting with the Translator builders.
+	Translator *TranslatorClient
+	// TranslatorDistinction is the client for interacting with the TranslatorDistinction builders.
+	TranslatorDistinction *TranslatorDistinctionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserBannedRecord is the client for interacting with the UserBannedRecord builders.
@@ -237,6 +246,7 @@ func (c *Client) init() {
 	c.GameDownloadResourceFile = NewGameDownloadResourceFileClient(c.config)
 	c.GameDownloadResourceFileHistory = NewGameDownloadResourceFileHistoryClient(c.config)
 	c.GameDownloadResourceReport = NewGameDownloadResourceReportClient(c.config)
+	c.GameDownloadResourceTranslator = NewGameDownloadResourceTranslatorClient(c.config)
 	c.GameImage = NewGameImageClient(c.config)
 	c.GameLink = NewGameLinkClient(c.config)
 	c.GameRelation = NewGameRelationClient(c.config)
@@ -255,6 +265,8 @@ func (c *Client) init() {
 	c.SiteDailyStat = NewSiteDailyStatClient(c.config)
 	c.SponsorOrder = NewSponsorOrderClient(c.config)
 	c.Tag = NewTagClient(c.config)
+	c.Translator = NewTranslatorClient(c.config)
+	c.TranslatorDistinction = NewTranslatorDistinctionClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserBannedRecord = NewUserBannedRecordClient(c.config)
 	c.UserFieldPermission = NewUserFieldPermissionClient(c.config)
@@ -386,6 +398,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GameDownloadResourceFile:        NewGameDownloadResourceFileClient(cfg),
 		GameDownloadResourceFileHistory: NewGameDownloadResourceFileHistoryClient(cfg),
 		GameDownloadResourceReport:      NewGameDownloadResourceReportClient(cfg),
+		GameDownloadResourceTranslator:  NewGameDownloadResourceTranslatorClient(cfg),
 		GameImage:                       NewGameImageClient(cfg),
 		GameLink:                        NewGameLinkClient(cfg),
 		GameRelation:                    NewGameRelationClient(cfg),
@@ -404,6 +417,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SiteDailyStat:                   NewSiteDailyStatClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
+		Translator:                      NewTranslatorClient(cfg),
+		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
 		User:                            NewUserClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
 		UserFieldPermission:             NewUserFieldPermissionClient(cfg),
@@ -462,6 +477,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GameDownloadResourceFile:        NewGameDownloadResourceFileClient(cfg),
 		GameDownloadResourceFileHistory: NewGameDownloadResourceFileHistoryClient(cfg),
 		GameDownloadResourceReport:      NewGameDownloadResourceReportClient(cfg),
+		GameDownloadResourceTranslator:  NewGameDownloadResourceTranslatorClient(cfg),
 		GameImage:                       NewGameImageClient(cfg),
 		GameLink:                        NewGameLinkClient(cfg),
 		GameRelation:                    NewGameRelationClient(cfg),
@@ -480,6 +496,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SiteDailyStat:                   NewSiteDailyStatClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
+		Translator:                      NewTranslatorClient(cfg),
+		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
 		User:                            NewUserClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
 		UserFieldPermission:             NewUserFieldPermissionClient(cfg),
@@ -525,13 +543,14 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
-		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
-		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
+		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
+		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
+		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
+		c.TranslatorDistinction, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -549,13 +568,14 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
-		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
-		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
+		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
+		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
+		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
+		c.TranslatorDistinction, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -626,6 +646,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GameDownloadResourceFileHistory.mutate(ctx, m)
 	case *GameDownloadResourceReportMutation:
 		return c.GameDownloadResourceReport.mutate(ctx, m)
+	case *GameDownloadResourceTranslatorMutation:
+		return c.GameDownloadResourceTranslator.mutate(ctx, m)
 	case *GameImageMutation:
 		return c.GameImage.mutate(ctx, m)
 	case *GameLinkMutation:
@@ -662,6 +684,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SponsorOrder.mutate(ctx, m)
 	case *TagMutation:
 		return c.Tag.mutate(ctx, m)
+	case *TranslatorMutation:
+		return c.Translator.mutate(ctx, m)
+	case *TranslatorDistinctionMutation:
+		return c.TranslatorDistinction.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserBannedRecordMutation:
@@ -5656,6 +5682,22 @@ func (c *GameDownloadResourceClient) QueryEvents(_m *GameDownloadResource) *Game
 	return query
 }
 
+// QueryTranslatorCredits queries the translator_credits edge of a GameDownloadResource.
+func (c *GameDownloadResourceClient) QueryTranslatorCredits(_m *GameDownloadResource) *GameDownloadResourceTranslatorQuery {
+	query := (&GameDownloadResourceTranslatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
+			sqlgraph.To(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.TranslatorCreditsTable, gamedownloadresource.TranslatorCreditsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *GameDownloadResourceClient) Hooks() []Hook {
 	return c.hooks.GameDownloadResource
@@ -6450,6 +6492,171 @@ func (c *GameDownloadResourceReportClient) mutate(ctx context.Context, m *GameDo
 		return (&GameDownloadResourceReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown GameDownloadResourceReport mutation op: %q", m.Op())
+	}
+}
+
+// GameDownloadResourceTranslatorClient is a client for the GameDownloadResourceTranslator schema.
+type GameDownloadResourceTranslatorClient struct {
+	config
+}
+
+// NewGameDownloadResourceTranslatorClient returns a client for the GameDownloadResourceTranslator from the given config.
+func NewGameDownloadResourceTranslatorClient(c config) *GameDownloadResourceTranslatorClient {
+	return &GameDownloadResourceTranslatorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `gamedownloadresourcetranslator.Hooks(f(g(h())))`.
+func (c *GameDownloadResourceTranslatorClient) Use(hooks ...Hook) {
+	c.hooks.GameDownloadResourceTranslator = append(c.hooks.GameDownloadResourceTranslator, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `gamedownloadresourcetranslator.Intercept(f(g(h())))`.
+func (c *GameDownloadResourceTranslatorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GameDownloadResourceTranslator = append(c.inters.GameDownloadResourceTranslator, interceptors...)
+}
+
+// Create returns a builder for creating a GameDownloadResourceTranslator entity.
+func (c *GameDownloadResourceTranslatorClient) Create() *GameDownloadResourceTranslatorCreate {
+	mutation := newGameDownloadResourceTranslatorMutation(c.config, OpCreate)
+	return &GameDownloadResourceTranslatorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GameDownloadResourceTranslator entities.
+func (c *GameDownloadResourceTranslatorClient) CreateBulk(builders ...*GameDownloadResourceTranslatorCreate) *GameDownloadResourceTranslatorCreateBulk {
+	return &GameDownloadResourceTranslatorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameDownloadResourceTranslatorClient) MapCreateBulk(slice any, setFunc func(*GameDownloadResourceTranslatorCreate, int)) *GameDownloadResourceTranslatorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameDownloadResourceTranslatorCreateBulk{err: fmt.Errorf("calling to GameDownloadResourceTranslatorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameDownloadResourceTranslatorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameDownloadResourceTranslatorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GameDownloadResourceTranslator.
+func (c *GameDownloadResourceTranslatorClient) Update() *GameDownloadResourceTranslatorUpdate {
+	mutation := newGameDownloadResourceTranslatorMutation(c.config, OpUpdate)
+	return &GameDownloadResourceTranslatorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameDownloadResourceTranslatorClient) UpdateOne(_m *GameDownloadResourceTranslator) *GameDownloadResourceTranslatorUpdateOne {
+	mutation := newGameDownloadResourceTranslatorMutation(c.config, OpUpdateOne, withGameDownloadResourceTranslator(_m))
+	return &GameDownloadResourceTranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameDownloadResourceTranslatorClient) UpdateOneID(id int) *GameDownloadResourceTranslatorUpdateOne {
+	mutation := newGameDownloadResourceTranslatorMutation(c.config, OpUpdateOne, withGameDownloadResourceTranslatorID(id))
+	return &GameDownloadResourceTranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GameDownloadResourceTranslator.
+func (c *GameDownloadResourceTranslatorClient) Delete() *GameDownloadResourceTranslatorDelete {
+	mutation := newGameDownloadResourceTranslatorMutation(c.config, OpDelete)
+	return &GameDownloadResourceTranslatorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameDownloadResourceTranslatorClient) DeleteOne(_m *GameDownloadResourceTranslator) *GameDownloadResourceTranslatorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameDownloadResourceTranslatorClient) DeleteOneID(id int) *GameDownloadResourceTranslatorDeleteOne {
+	builder := c.Delete().Where(gamedownloadresourcetranslator.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameDownloadResourceTranslatorDeleteOne{builder}
+}
+
+// Query returns a query builder for GameDownloadResourceTranslator.
+func (c *GameDownloadResourceTranslatorClient) Query() *GameDownloadResourceTranslatorQuery {
+	return &GameDownloadResourceTranslatorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGameDownloadResourceTranslator},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GameDownloadResourceTranslator entity by its id.
+func (c *GameDownloadResourceTranslatorClient) Get(ctx context.Context, id int) (*GameDownloadResourceTranslator, error) {
+	return c.Query().Where(gamedownloadresourcetranslator.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameDownloadResourceTranslatorClient) GetX(ctx context.Context, id int) *GameDownloadResourceTranslator {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryResource queries the resource edge of a GameDownloadResourceTranslator.
+func (c *GameDownloadResourceTranslatorClient) QueryResource(_m *GameDownloadResourceTranslator) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID, id),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcetranslator.ResourceTable, gamedownloadresourcetranslator.ResourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTranslator queries the translator edge of a GameDownloadResourceTranslator.
+func (c *GameDownloadResourceTranslatorClient) QueryTranslator(_m *GameDownloadResourceTranslator) *TranslatorQuery {
+	query := (&TranslatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID, id),
+			sqlgraph.To(translator.Table, translator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcetranslator.TranslatorTable, gamedownloadresourcetranslator.TranslatorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GameDownloadResourceTranslatorClient) Hooks() []Hook {
+	return c.hooks.GameDownloadResourceTranslator
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameDownloadResourceTranslatorClient) Interceptors() []Interceptor {
+	return c.inters.GameDownloadResourceTranslator
+}
+
+func (c *GameDownloadResourceTranslatorClient) mutate(ctx context.Context, m *GameDownloadResourceTranslatorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameDownloadResourceTranslatorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameDownloadResourceTranslatorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameDownloadResourceTranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameDownloadResourceTranslatorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown GameDownloadResourceTranslator mutation op: %q", m.Op())
 	}
 }
 
@@ -9278,6 +9485,288 @@ func (c *TagClient) mutate(ctx context.Context, m *TagMutation) (Value, error) {
 	}
 }
 
+// TranslatorClient is a client for the Translator schema.
+type TranslatorClient struct {
+	config
+}
+
+// NewTranslatorClient returns a client for the Translator from the given config.
+func NewTranslatorClient(c config) *TranslatorClient {
+	return &TranslatorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `translator.Hooks(f(g(h())))`.
+func (c *TranslatorClient) Use(hooks ...Hook) {
+	c.hooks.Translator = append(c.hooks.Translator, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `translator.Intercept(f(g(h())))`.
+func (c *TranslatorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Translator = append(c.inters.Translator, interceptors...)
+}
+
+// Create returns a builder for creating a Translator entity.
+func (c *TranslatorClient) Create() *TranslatorCreate {
+	mutation := newTranslatorMutation(c.config, OpCreate)
+	return &TranslatorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Translator entities.
+func (c *TranslatorClient) CreateBulk(builders ...*TranslatorCreate) *TranslatorCreateBulk {
+	return &TranslatorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TranslatorClient) MapCreateBulk(slice any, setFunc func(*TranslatorCreate, int)) *TranslatorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TranslatorCreateBulk{err: fmt.Errorf("calling to TranslatorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TranslatorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TranslatorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Translator.
+func (c *TranslatorClient) Update() *TranslatorUpdate {
+	mutation := newTranslatorMutation(c.config, OpUpdate)
+	return &TranslatorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TranslatorClient) UpdateOne(_m *Translator) *TranslatorUpdateOne {
+	mutation := newTranslatorMutation(c.config, OpUpdateOne, withTranslator(_m))
+	return &TranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TranslatorClient) UpdateOneID(id int) *TranslatorUpdateOne {
+	mutation := newTranslatorMutation(c.config, OpUpdateOne, withTranslatorID(id))
+	return &TranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Translator.
+func (c *TranslatorClient) Delete() *TranslatorDelete {
+	mutation := newTranslatorMutation(c.config, OpDelete)
+	return &TranslatorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TranslatorClient) DeleteOne(_m *Translator) *TranslatorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TranslatorClient) DeleteOneID(id int) *TranslatorDeleteOne {
+	builder := c.Delete().Where(translator.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TranslatorDeleteOne{builder}
+}
+
+// Query returns a query builder for Translator.
+func (c *TranslatorClient) Query() *TranslatorQuery {
+	return &TranslatorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTranslator},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Translator entity by its id.
+func (c *TranslatorClient) Get(ctx context.Context, id int) (*Translator, error) {
+	return c.Query().Where(translator.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TranslatorClient) GetX(ctx context.Context, id int) *Translator {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCredits queries the credits edge of a Translator.
+func (c *TranslatorClient) QueryCredits(_m *Translator) *GameDownloadResourceTranslatorQuery {
+	query := (&GameDownloadResourceTranslatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(translator.Table, translator.FieldID, id),
+			sqlgraph.To(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, translator.CreditsTable, translator.CreditsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TranslatorClient) Hooks() []Hook {
+	return c.hooks.Translator
+}
+
+// Interceptors returns the client interceptors.
+func (c *TranslatorClient) Interceptors() []Interceptor {
+	return c.inters.Translator
+}
+
+func (c *TranslatorClient) mutate(ctx context.Context, m *TranslatorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TranslatorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TranslatorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TranslatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TranslatorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Translator mutation op: %q", m.Op())
+	}
+}
+
+// TranslatorDistinctionClient is a client for the TranslatorDistinction schema.
+type TranslatorDistinctionClient struct {
+	config
+}
+
+// NewTranslatorDistinctionClient returns a client for the TranslatorDistinction from the given config.
+func NewTranslatorDistinctionClient(c config) *TranslatorDistinctionClient {
+	return &TranslatorDistinctionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `translatordistinction.Hooks(f(g(h())))`.
+func (c *TranslatorDistinctionClient) Use(hooks ...Hook) {
+	c.hooks.TranslatorDistinction = append(c.hooks.TranslatorDistinction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `translatordistinction.Intercept(f(g(h())))`.
+func (c *TranslatorDistinctionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TranslatorDistinction = append(c.inters.TranslatorDistinction, interceptors...)
+}
+
+// Create returns a builder for creating a TranslatorDistinction entity.
+func (c *TranslatorDistinctionClient) Create() *TranslatorDistinctionCreate {
+	mutation := newTranslatorDistinctionMutation(c.config, OpCreate)
+	return &TranslatorDistinctionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TranslatorDistinction entities.
+func (c *TranslatorDistinctionClient) CreateBulk(builders ...*TranslatorDistinctionCreate) *TranslatorDistinctionCreateBulk {
+	return &TranslatorDistinctionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TranslatorDistinctionClient) MapCreateBulk(slice any, setFunc func(*TranslatorDistinctionCreate, int)) *TranslatorDistinctionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TranslatorDistinctionCreateBulk{err: fmt.Errorf("calling to TranslatorDistinctionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TranslatorDistinctionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TranslatorDistinctionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TranslatorDistinction.
+func (c *TranslatorDistinctionClient) Update() *TranslatorDistinctionUpdate {
+	mutation := newTranslatorDistinctionMutation(c.config, OpUpdate)
+	return &TranslatorDistinctionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TranslatorDistinctionClient) UpdateOne(_m *TranslatorDistinction) *TranslatorDistinctionUpdateOne {
+	mutation := newTranslatorDistinctionMutation(c.config, OpUpdateOne, withTranslatorDistinction(_m))
+	return &TranslatorDistinctionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TranslatorDistinctionClient) UpdateOneID(id int) *TranslatorDistinctionUpdateOne {
+	mutation := newTranslatorDistinctionMutation(c.config, OpUpdateOne, withTranslatorDistinctionID(id))
+	return &TranslatorDistinctionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TranslatorDistinction.
+func (c *TranslatorDistinctionClient) Delete() *TranslatorDistinctionDelete {
+	mutation := newTranslatorDistinctionMutation(c.config, OpDelete)
+	return &TranslatorDistinctionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TranslatorDistinctionClient) DeleteOne(_m *TranslatorDistinction) *TranslatorDistinctionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TranslatorDistinctionClient) DeleteOneID(id int) *TranslatorDistinctionDeleteOne {
+	builder := c.Delete().Where(translatordistinction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TranslatorDistinctionDeleteOne{builder}
+}
+
+// Query returns a query builder for TranslatorDistinction.
+func (c *TranslatorDistinctionClient) Query() *TranslatorDistinctionQuery {
+	return &TranslatorDistinctionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTranslatorDistinction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TranslatorDistinction entity by its id.
+func (c *TranslatorDistinctionClient) Get(ctx context.Context, id int) (*TranslatorDistinction, error) {
+	return c.Query().Where(translatordistinction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TranslatorDistinctionClient) GetX(ctx context.Context, id int) *TranslatorDistinction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TranslatorDistinctionClient) Hooks() []Hook {
+	return c.hooks.TranslatorDistinction
+}
+
+// Interceptors returns the client interceptors.
+func (c *TranslatorDistinctionClient) Interceptors() []Interceptor {
+	return c.inters.TranslatorDistinction
+}
+
+func (c *TranslatorDistinctionClient) mutate(ctx context.Context, m *TranslatorDistinctionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TranslatorDistinctionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TranslatorDistinctionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TranslatorDistinctionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TranslatorDistinctionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TranslatorDistinction mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -11055,11 +11544,12 @@ type (
 		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
 		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
 		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
-		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
-		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
-		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport,
+		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
+		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
+		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
+		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
+		Translator, TranslatorDistinction, User, UserBannedRecord, UserFieldPermission,
 		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
 		Walkthrough []ent.Hook
 	}
@@ -11070,11 +11560,12 @@ type (
 		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
 		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
 		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
-		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
-		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
-		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport,
+		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
+		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
+		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
+		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
+		Translator, TranslatorDistinction, User, UserBannedRecord, UserFieldPermission,
 		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
 		Walkthrough []ent.Interceptor
 	}

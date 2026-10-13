@@ -99,6 +99,9 @@ type GameDownloadResourceFileHistory func(*sql.Selector)
 // GameDownloadResourceReport is the predicate function for gamedownloadresourcereport builders.
 type GameDownloadResourceReport func(*sql.Selector)
 
+// GameDownloadResourceTranslator is the predicate function for gamedownloadresourcetranslator builders.
+type GameDownloadResourceTranslator func(*sql.Selector)
+
 // GameImage is the predicate function for gameimage builders.
 type GameImage func(*sql.Selector)
 
@@ -152,6 +155,12 @@ type SponsorOrder func(*sql.Selector)
 
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
+
+// Translator is the predicate function for translator builders.
+type Translator func(*sql.Selector)
+
+// TranslatorDistinction is the predicate function for translatordistinction builders.
+type TranslatorDistinction func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

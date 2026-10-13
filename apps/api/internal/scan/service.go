@@ -291,6 +291,11 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 	if err != nil {
 		return err
 	}
+	if slices.ContainsFunc(found.contents.Draft.Entries, func(entry inspection.DraftEntry) bool { return entry.Kind == inspection.KindDisc }) {
+		if err := s.files.DiscFound(ctx, unit.Entry().ResourceID); err != nil {
+			return err
+		}
+	}
 	if found.report.Infected {
 		err = s.quarantine(ctx, unit, found.report, result, awaitingSameUpload)
 	} else {

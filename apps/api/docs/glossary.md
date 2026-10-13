@@ -49,6 +49,8 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Content limit | The viewer's NSFW preference: 0 guest, 1 never show, 2 show with spoiler, 3 just show. "Includes rated" means 2 or 3. |
 | Standing | What a user is right now: role and content limit (`auth.Standing`). It is read for every authenticated request and never taken from a token, so a change applies to the next request. |
 | Catalog source | A pluggable provider of game, developer and character metadata (Hikarinagi Open API by default). |
+| Translator | Who made a fan translation: a group or a single person (汉化组 in the web client), `translator.Translator`. A resource credits its translators in order; names are matched by `translator.Key` (width, case and spacing ignored), so one translator is stored once however its name is typed. |
+| Resource information | What a download resource says about itself besides platform and language: translation, translators, patch version, release page, edition, form and extras (`download.Info`). |
 | AI provider | An upstream AI account configured in the admin panel: kind, base URL, API key, price multiplier (`ai.Provider`). |
 | Payment provider | What takes the money for a sponsor order, behind the port `sponsor.Provider` (支付网关 in the admin panel). Each is an adapter known by a name that orders remember; iDataRiver is the only one. No vendor name, field or code leaves its adapter (ADR 0015). |
 | Payment method brand | The vendor-neutral identity of a way to pay (`alipay`, `wechat_pay`, `paypal`, `google_pay`, `apple_pay`, `usdt`), assigned by a provider's adapter to the methods it recognises (`sponsor.MethodBrand`). |

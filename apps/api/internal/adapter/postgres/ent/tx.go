@@ -76,6 +76,8 @@ type Tx struct {
 	GameDownloadResourceFileHistory *GameDownloadResourceFileHistoryClient
 	// GameDownloadResourceReport is the client for interacting with the GameDownloadResourceReport builders.
 	GameDownloadResourceReport *GameDownloadResourceReportClient
+	// GameDownloadResourceTranslator is the client for interacting with the GameDownloadResourceTranslator builders.
+	GameDownloadResourceTranslator *GameDownloadResourceTranslatorClient
 	// GameImage is the client for interacting with the GameImage builders.
 	GameImage *GameImageClient
 	// GameLink is the client for interacting with the GameLink builders.
@@ -112,6 +114,10 @@ type Tx struct {
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
+	// Translator is the client for interacting with the Translator builders.
+	Translator *TranslatorClient
+	// TranslatorDistinction is the client for interacting with the TranslatorDistinction builders.
+	TranslatorDistinction *TranslatorDistinctionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserBannedRecord is the client for interacting with the UserBannedRecord builders.
@@ -290,6 +296,7 @@ func (tx *Tx) init() {
 	tx.GameDownloadResourceFile = NewGameDownloadResourceFileClient(tx.config)
 	tx.GameDownloadResourceFileHistory = NewGameDownloadResourceFileHistoryClient(tx.config)
 	tx.GameDownloadResourceReport = NewGameDownloadResourceReportClient(tx.config)
+	tx.GameDownloadResourceTranslator = NewGameDownloadResourceTranslatorClient(tx.config)
 	tx.GameImage = NewGameImageClient(tx.config)
 	tx.GameLink = NewGameLinkClient(tx.config)
 	tx.GameRelation = NewGameRelationClient(tx.config)
@@ -308,6 +315,8 @@ func (tx *Tx) init() {
 	tx.SiteDailyStat = NewSiteDailyStatClient(tx.config)
 	tx.SponsorOrder = NewSponsorOrderClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
+	tx.Translator = NewTranslatorClient(tx.config)
+	tx.TranslatorDistinction = NewTranslatorDistinctionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserBannedRecord = NewUserBannedRecordClient(tx.config)
 	tx.UserFieldPermission = NewUserFieldPermissionClient(tx.config)

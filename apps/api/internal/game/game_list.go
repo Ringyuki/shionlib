@@ -36,29 +36,31 @@ const (
 )
 
 type ListQuery struct {
-	Page        Page
-	DeveloperID *int
-	CharacterID *int
-	Tags        []string
-	ExcludeTags []string
-	Platforms   []string
-	Years       []int
-	Months      []int
-	SortBy      SortBy
-	SortOrder   SortOrder
-	StartDate   *time.Time
-	EndDate     *time.Time
-	Resources   ResourceRule
+	Page         Page
+	DeveloperID  *int
+	CharacterID  *int
+	TranslatorID *int
+	Tags         []string
+	ExcludeTags  []string
+	Platforms    []string
+	Years        []int
+	Months       []int
+	SortBy       SortBy
+	SortOrder    SortOrder
+	StartDate    *time.Time
+	EndDate      *time.Time
+	Resources    ResourceRule
 }
 
 func (q ListQuery) entityPage() bool {
-	return (q.DeveloperID != nil && *q.DeveloperID != 0) || (q.CharacterID != nil && *q.CharacterID != 0)
+	return (q.DeveloperID != nil && *q.DeveloperID != 0) || (q.CharacterID != nil && *q.CharacterID != 0) || (q.TranslatorID != nil && *q.TranslatorID != 0)
 }
 
 type ListFilter struct {
 	Visibility
 	DeveloperID    *int
 	CharacterID    *int
+	TranslatorID   *int
 	Tags           []string
 	ExcludeTags    []string
 	Platforms      []string

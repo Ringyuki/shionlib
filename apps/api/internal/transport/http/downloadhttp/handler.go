@@ -77,6 +77,7 @@ func (h *Handler) create(ctx context.Context, in *createDownloadSourceInput) (*r
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
 		Note:      in.Body.Note,
+		Info:      in.Body.info(),
 		Files:     fileUploads(in.Body.Files),
 	})
 	if err != nil {
@@ -131,11 +132,12 @@ func (h *Handler) delete(ctx context.Context, in *downloadResourcePathInput) (*r
 }
 
 func (h *Handler) edit(ctx context.Context, in *editDownloadSourceInput) (*response.EmptyOutput, error) {
-	err := h.service.Edit(ctx, actor.From(ctx), in.ID, download.ResourceChanges{
+	err := h.service.Edit(ctx, actor.From(ctx), in.ID, download.EditInput{
 		Platforms: in.Body.Platform,
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
 		Note:      in.Body.Note,
+		Info:      in.Body.info(),
 	})
 	if err != nil {
 		return nil, err

@@ -27,6 +27,20 @@ const (
 	FieldLanguage = "language"
 	// FieldNote holds the string denoting the note field in the database.
 	FieldNote = "note"
+	// FieldTranslation holds the string denoting the translation field in the database.
+	FieldTranslation = "translation"
+	// FieldPatchVersion holds the string denoting the patch_version field in the database.
+	FieldPatchVersion = "patch_version"
+	// FieldReleaseURL holds the string denoting the release_url field in the database.
+	FieldReleaseURL = "release_url"
+	// FieldEdition holds the string denoting the edition field in the database.
+	FieldEdition = "edition"
+	// FieldEditionName holds the string denoting the edition_name field in the database.
+	FieldEditionName = "edition_name"
+	// FieldForm holds the string denoting the form field in the database.
+	FieldForm = "form"
+	// FieldExtras holds the string denoting the extras field in the database.
+	FieldExtras = "extras"
 	// FieldDownloads holds the string denoting the downloads field in the database.
 	FieldDownloads = "downloads"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
@@ -55,6 +69,8 @@ const (
 	EdgeInspections = "inspections"
 	// EdgeEvents holds the string denoting the events edge name in mutations.
 	EdgeEvents = "events"
+	// EdgeTranslatorCredits holds the string denoting the translator_credits edge name in mutations.
+	EdgeTranslatorCredits = "translator_credits"
 	// Table holds the table name of the gamedownloadresource in the database.
 	Table = "game_download_resources"
 	// GameTable is the table that holds the game relation/edge.
@@ -113,6 +129,13 @@ const (
 	EventsInverseTable = "game_download_resource_events"
 	// EventsColumn is the table column denoting the events relation/edge.
 	EventsColumn = "resource_id"
+	// TranslatorCreditsTable is the table that holds the translator_credits relation/edge.
+	TranslatorCreditsTable = "game_download_resource_translators"
+	// TranslatorCreditsInverseTable is the table name for the GameDownloadResourceTranslator entity.
+	// It exists in this package in order to avoid circular dependency with the "gamedownloadresourcetranslator" package.
+	TranslatorCreditsInverseTable = "game_download_resource_translators"
+	// TranslatorCreditsColumn is the table column denoting the translator_credits relation/edge.
+	TranslatorCreditsColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for gamedownloadresource fields.
@@ -124,6 +147,13 @@ var Columns = []string{
 	FieldSimulator,
 	FieldLanguage,
 	FieldNote,
+	FieldTranslation,
+	FieldPatchVersion,
+	FieldReleaseURL,
+	FieldEdition,
+	FieldEditionName,
+	FieldForm,
+	FieldExtras,
 	FieldDownloads,
 	FieldPublishedAt,
 	FieldCheckRetryAt,
@@ -147,6 +177,18 @@ var (
 	DefaultStatus int
 	// NoteValidator is a validator for the "note" field. It is called by the builders before save.
 	NoteValidator func(string) error
+	// TranslationValidator is a validator for the "translation" field. It is called by the builders before save.
+	TranslationValidator func(string) error
+	// PatchVersionValidator is a validator for the "patch_version" field. It is called by the builders before save.
+	PatchVersionValidator func(string) error
+	// ReleaseURLValidator is a validator for the "release_url" field. It is called by the builders before save.
+	ReleaseURLValidator func(string) error
+	// EditionValidator is a validator for the "edition" field. It is called by the builders before save.
+	EditionValidator func(string) error
+	// EditionNameValidator is a validator for the "edition_name" field. It is called by the builders before save.
+	EditionNameValidator func(string) error
+	// FormValidator is a validator for the "form" field. It is called by the builders before save.
+	FormValidator func(string) error
 	// DefaultDownloads holds the default value on creation for the "downloads" field.
 	DefaultDownloads int
 	// DefaultCreated holds the default value on creation for the "created" field.
@@ -218,6 +260,41 @@ func ByLanguage(opts ...sql.OrderTermOption) OrderOption {
 // ByNote orders the results by the note field.
 func ByNote(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNote, opts...).ToFunc()
+}
+
+// ByTranslation orders the results by the translation field.
+func ByTranslation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTranslation, opts...).ToFunc()
+}
+
+// ByPatchVersion orders the results by the patch_version field.
+func ByPatchVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPatchVersion, opts...).ToFunc()
+}
+
+// ByReleaseURL orders the results by the release_url field.
+func ByReleaseURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReleaseURL, opts...).ToFunc()
+}
+
+// ByEdition orders the results by the edition field.
+func ByEdition(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEdition, opts...).ToFunc()
+}
+
+// ByEditionName orders the results by the edition_name field.
+func ByEditionName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEditionName, opts...).ToFunc()
+}
+
+// ByForm orders the results by the form field.
+func ByForm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldForm, opts...).ToFunc()
+}
+
+// ByExtras orders the results by the extras field.
+func ByExtras(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExtras, opts...).ToFunc()
 }
 
 // ByDownloads orders the results by the downloads field.
@@ -347,6 +424,20 @@ func ByEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTranslatorCreditsCount orders the results by translator_credits count.
+func ByTranslatorCreditsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTranslatorCreditsStep(), opts...)
+	}
+}
+
+// ByTranslatorCredits orders the results by translator_credits terms.
+func ByTranslatorCredits(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTranslatorCreditsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newGameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -401,5 +492,12 @@ func newEventsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(EventsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, EventsTable, EventsColumn),
+	)
+}
+func newTranslatorCreditsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TranslatorCreditsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TranslatorCreditsTable, TranslatorCreditsColumn),
 	)
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -801,4 +802,89 @@ func TestListAwaitingStore(t *testing.T) {
 		t.Fatalf("files of removed resources are not stored: %v %v", removed, err)
 	}
 
+}
+
+func TestResourceInformationAndCredits(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	seed := func(name string) translator.Ref {
+		row, err := f.db.Ent.Translator.Create().SetName(name).SetNameKey(translator.Key(name)).Save(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return translator.Ref{ID: row.ID, Name: row.Name}
+	}
+	tea, panda := seed("绿茶汉化组"), seed("熊喵守护协会")
+	info := download.Info{
+		Translation: ptr(download.TranslationGroup), Translators: []translator.Ref{panda, tea}, PatchVersion: ptr("v1.1"), ReleaseURL: ptr("https://example.org/release"),
+		Edition: ptr(download.EditionDownload), EditionName: ptr("初回限定版"), Form: ptr(download.FormPortable), Extras: []string{"save", "bonus"},
+	}
+	created, err := f.repo.CreateResource(ctx, download.NewResource{GameID: gameID, Platforms: []string{"win"}, Languages: []string{"zh"}, Info: info, CreatorID: creator})
+	if err != nil {
+		t.Fatal(err)
+	}
+	same := func(got download.Info, want download.Info) bool {
+		value := func(p *string) string {
+			if p == nil {
+				return "<nil>"
+			}
+			return *p
+		}
+		return value((*string)(got.Translation)) == value((*string)(want.Translation)) && slices.Equal(got.Translators, want.Translators) &&
+			value(got.PatchVersion) == value(want.PatchVersion) && value(got.ReleaseURL) == value(want.ReleaseURL) && value((*string)(got.Edition)) == value((*string)(want.Edition)) &&
+			value(got.EditionName) == value(want.EditionName) && value((*string)(got.Form)) == value((*string)(want.Form)) && slices.Equal(got.Extras, want.Extras)
+	}
+	if !same(created.Info, info) {
+		t.Fatalf("created %+v", created.Info)
+	}
+	for name, read := range map[string]func() (download.Resource, error){
+		"get":  func() (download.Resource, error) { return f.repo.GetResource(ctx, created.ID) },
+		"lock": func() (download.Resource, error) { return f.repo.LockResource(ctx, created.ID) },
+	} {
+		if got, err := read(); err != nil || !same(got.Info, info) {
+			t.Fatalf("%s keeps the information and the order of the translators: %+v %v", name, got.Info, err)
+		}
+	}
+	listed, err := f.repo.ListGameResources(ctx, gameID)
+	if err != nil || len(listed) != 1 || !same(listed[0].Info, info) {
+		t.Fatalf("listed %+v %v", listed, err)
+	}
+
+	next := download.Info{Translation: ptr(download.TranslationMachine), Translators: []translator.Ref{}, PatchVersion: ptr("v2"), Form: ptr(download.FormInstaller), Extras: []string{}}
+	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: next}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, created.ID); !same(got.Info, next) {
+		t.Fatalf("updated %+v", got.Info)
+	}
+	credited := download.Info{Translation: ptr(download.TranslationGroup), Translators: []translator.Ref{tea}, Extras: []string{}}
+	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: credited}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, created.ID); !same(got.Info, credited) {
+		t.Fatalf("credited again %+v", got.Info)
+	}
+
+	unknown := download.Info{Translation: ptr(download.TranslationGroup), Translators: []translator.Ref{{ID: 987654, Name: "不存在"}}}
+	if _, err := f.repo.CreateResource(ctx, download.NewResource{GameID: gameID, Platforms: []string{"win"}, Languages: []string{"zh"}, Info: unknown, CreatorID: creator}); !errors.Is(err, translator.ErrNotFound) {
+		t.Fatalf("an unknown translator: %v", err)
+	}
+	legacy := f.resource(t, gameID, creator)
+	if got, err := f.repo.GetResource(ctx, legacy.ID); err != nil || got.Info.Translation != nil || got.Info.Form != nil || got.Info.Translators == nil || got.Info.Extras == nil {
+		t.Fatalf("a resource without information: %+v %v", got.Info, err)
+	}
+	before, err := f.repo.GetResource(ctx, legacy.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repo.SetForm(ctx, legacy.ID, download.FormDisc); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, legacy.ID); got.Info.Form == nil || *got.Info.Form != download.FormDisc || !got.Updated.Equal(before.Updated) {
+		t.Fatalf("the form is set and the update time is kept: %+v %v %v", got.Info, got.Updated, before.Updated)
+	}
+	if err := f.repo.SetForm(ctx, 987654, download.FormDisc); !errors.Is(err, download.ErrResourceNotFound) {
+		t.Fatalf("missing resource: %v", err)
+	}
 }

@@ -623,6 +623,9 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 	if err := s.seedInspection(ctx, tx, reportableID, reportable.ID); err != nil {
 		return err
 	}
+	if err := s.seedTranslators(ctx, tx, content.adminID, reportableID); err != nil {
+		return err
+	}
 	resourceID, file, err := s.createResource(ctx, tx, content.malwareGameID, content.adminID, e2eMalwareResource, e2eMalwareFile)
 	if err != nil {
 		return err

@@ -1553,6 +1553,145 @@
         ],
         "type": "object"
       },
+      "AdminTranslatorClusterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "translators": {
+            "items": {
+              "$ref": "#/components/schemas/AdminTranslatorItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "translators"
+        ],
+        "type": "object"
+      },
+      "AdminTranslatorDismissInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "Translators that are not the same despite their similar names",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 50,
+            "minItems": 2,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
+      "AdminTranslatorEditInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "homepage": {
+            "description": "An empty text clears the homepage",
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdminTranslatorItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "homepage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "latest_credit": {
+            "description": "When the latest resource crediting the translator was published; null without credits",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "resources_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "works_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "homepage",
+          "works_count",
+          "resources_count",
+          "latest_credit"
+        ],
+        "type": "object"
+      },
+      "AdminTranslatorMergeInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "merged_ids": {
+            "description": "Translators whose credits and names move to the one in the path",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "merged_ids"
+        ],
+        "type": "object"
+      },
       "AdminUserAllowMaskDTO": {
         "additionalProperties": false,
         "properties": {
@@ -5656,6 +5795,10 @@
           570106,
           580101,
           590101,
+          600101,
+          600102,
+          600103,
+          600104,
           610101,
           610102,
           620101,
@@ -5817,6 +5960,10 @@
           "SPONSOR_MODULE_DISABLED",
           "AD_NOT_FOUND",
           "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE",
+          "TRANSLATOR_NOT_FOUND",
+          "TRANSLATOR_NAME_TAKEN",
+          "TRANSLATOR_TOO_MANY",
+          "TRANSLATOR_MERGE_NEEDS_OTHERS",
           "MOYU_PATCH_NOT_FOUND",
           "MOYU_REQUEST_FAILED",
           "CATALOG_SOURCE_UNAVAILABLE",
@@ -7446,7 +7593,15 @@
               "platforms",
               "languages",
               "simulator",
-              "note"
+              "note",
+              "translation",
+              "translators",
+              "patch_version",
+              "release_url",
+              "edition",
+              "edition_name",
+              "form",
+              "extras"
             ],
             "type": "string"
           },
@@ -7521,7 +7676,7 @@
             "type": "integer"
           },
           "kind": {
-            "description": "What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan",
+            "description": "What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc",
             "enum": [
               "published",
               "file_replaced",
@@ -7529,7 +7684,8 @@
               "file_added",
               "file_removed",
               "edited",
-              "review_cleared"
+              "review_cleared",
+              "disc_found"
             ],
             "type": "string"
           },
@@ -8230,6 +8386,36 @@
             "format": "int64",
             "type": "integer"
           },
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "edition_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extras": {
+            "items": {
+              "enum": [
+                "save",
+                "bonus"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "files": {
             "description": "The files in the order they are read: the volumes of a set together and in their own order, sets and single files by the first of their files that was added",
             "items": {
@@ -8237,6 +8423,18 @@
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "form": {
+            "description": "How the game is packed; null when nobody has said",
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -8269,6 +8467,12 @@
               "null"
             ]
           },
+          "patch_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "platform": {
             "items": {
               "type": "string"
@@ -8286,9 +8490,39 @@
               "null"
             ]
           },
+          "release_url": {
+            "description": "The page the translation was released on",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "simulator": {
             "type": [
               "string",
+              "null"
+            ]
+          },
+          "translation": {
+            "description": "Where the text in a language other than Japanese comes from; null when nobody has said",
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translators": {
+            "description": "The translators credited, in the order they were given; empty unless the translation is by a group",
+            "items": {
+              "$ref": "#/components/schemas/DownloadTranslatorDTO"
+            },
+            "type": [
+              "array",
               "null"
             ]
           },
@@ -8311,6 +8545,14 @@
           "language",
           "simulator",
           "note",
+          "translation",
+          "translators",
+          "patch_version",
+          "release_url",
+          "edition",
+          "edition_name",
+          "form",
+          "extras",
           "downloads",
           "creator",
           "published_at",
@@ -8371,6 +8613,34 @@
       "DownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": "string"
+          },
+          "edition_name": {
+            "description": "The name of the edition, such as 初回限定版",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "extras": {
+            "items": {
+              "enum": [
+                "save",
+                "bonus"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "files": {
             "description": "Completed upload sessions to attach, one per file",
             "items": {
@@ -8382,6 +8652,15 @@
               "array",
               "null"
             ]
+          },
+          "form": {
+            "description": "How the game is packed: a disc image, an installer, or a folder that runs as it is",
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": "string"
           },
           "language": {
             "items": {
@@ -8401,6 +8680,11 @@
           },
           "note": {
             "maxLength": 255,
+            "type": "string"
+          },
+          "patch_version": {
+            "maxLength": 32,
+            "minLength": 0,
             "type": "string"
           },
           "platform": {
@@ -8426,6 +8710,12 @@
               "null"
             ]
           },
+          "release_url": {
+            "description": "The page the translation was released on",
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string"
+          },
           "simulator": {
             "enum": [
               "KRKR",
@@ -8434,12 +8724,51 @@
               "OTHER"
             ],
             "type": "string"
+          },
+          "translation": {
+            "description": "Where the text in a language other than Japanese comes from; required when the languages include one",
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": "string"
+          },
+          "translators": {
+            "description": "Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
           "platform",
           "language",
+          "form",
           "files"
+        ],
+        "type": "object"
+      },
+      "DownloadTranslatorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ],
         "type": "object"
       },
@@ -8610,6 +8939,43 @@
       "EditDownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": "string"
+          },
+          "edition_name": {
+            "description": "The name of the edition, such as 初回限定版",
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "extras": {
+            "items": {
+              "enum": [
+                "save",
+                "bonus"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "form": {
+            "description": "Left out for a resource whose form is not known",
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": "string"
+          },
           "language": {
             "items": {
               "enum": [
@@ -8628,6 +8994,11 @@
           },
           "note": {
             "maxLength": 255,
+            "type": "string"
+          },
+          "patch_version": {
+            "maxLength": 32,
+            "minLength": 0,
             "type": "string"
           },
           "platform": {
@@ -8653,6 +9024,12 @@
               "null"
             ]
           },
+          "release_url": {
+            "description": "The page the translation was released on",
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string"
+          },
           "simulator": {
             "enum": [
               "KRKR",
@@ -8661,6 +9038,27 @@
               "OTHER"
             ],
             "type": "string"
+          },
+          "translation": {
+            "description": "Where the text in a language other than Japanese comes from; required when the languages include one",
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": "string"
+          },
+          "translators": {
+            "description": "Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
@@ -11097,6 +11495,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListAdminTranslatorClusterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdminTranslatorClusterDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListAiBreakdownRowDTO": {
         "additionalProperties": false,
         "properties": {
@@ -11877,6 +12314,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListTranslatorListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/TranslatorListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListValue": {
         "additionalProperties": false,
         "properties": {
@@ -12226,6 +12702,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageAdminGameItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminTranslatorItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminTranslatorItemDTO"
           },
           "message": {
             "type": "string"
@@ -12853,6 +13362,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageSponsorWallEntryDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageTranslatorListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageTranslatorListItemDTO"
           },
           "message": {
             "type": "string"
@@ -13550,6 +14092,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/StorageListingDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeTranslatorDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TranslatorDetailDTO"
           },
           "message": {
             "type": "string"
@@ -17166,6 +17741,28 @@
         ],
         "type": "object"
       },
+      "PageAdminTranslatorItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminTranslatorItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageAdminUserItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -17601,6 +18198,28 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/SponsorWallEntryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageTranslatorListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TranslatorListItemDTO"
             },
             "type": [
               "array",
@@ -19677,6 +20296,77 @@
         "required": [
           "Key",
           "Size"
+        ],
+        "type": "object"
+      },
+      "TranslatorDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "homepage": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "works_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "homepage",
+          "works_count"
+        ],
+        "type": "object"
+      },
+      "TranslatorListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "works_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "works_count"
         ],
         "type": "object"
       },
@@ -26394,6 +27084,357 @@
         ]
       }
     },
+    "/admin/content/translators": {
+      "get": {
+        "operationId": "adminTranslator.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive substring of the name or an alias",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive substring of the name or an alias",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "works",
+              "enum": [
+                "works",
+                "resources",
+                "latest",
+                "name"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminTranslatorItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List translators for administration",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/translators/duplicates": {
+      "get": {
+        "operationId": "adminTranslator.duplicates",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListAdminTranslatorClusterDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List translators whose names differ only in writing",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/translators/duplicates/dismiss": {
+      "post": {
+        "operationId": "adminTranslator.dismiss",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTranslatorDismissInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Record that similar names are different translators",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/translators/{id}": {
+      "patch": {
+        "operationId": "adminTranslator.edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTranslatorEditInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a translator",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/translators/{id}/merge": {
+      "post": {
+        "operationId": "adminTranslator.merge",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTranslatorMergeInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Merge other translators into this one",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/pending": {
       "get": {
         "operationId": "adminStats.pending",
@@ -32432,6 +33473,17 @@
             }
           },
           {
+            "description": "Only games with a published resource credited to this translator; the resource setting is ignored",
+            "explode": false,
+            "in": "query",
+            "name": "translator_id",
+            "schema": {
+              "description": "Only games with a published resource credited to this translator; the resource setting is ignored",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
             "description": "Games carrying any of these tags",
             "explode": true,
             "in": "query",
@@ -35240,6 +36292,184 @@
         "summary": "Search tags",
         "tags": [
           "tags"
+        ]
+      }
+    },
+    "/translator/list": {
+      "get": {
+        "operationId": "translator.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Matches names and aliases",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches names and aliases",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageTranslatorListItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List translators that have published works",
+        "tags": [
+          "translator"
+        ]
+      }
+    },
+    "/translator/suggest": {
+      "get": {
+        "operationId": "translator.suggest",
+        "parameters": [
+          {
+            "description": "Matches names and aliases, including translators without published works; left empty, the translators with the most works are suggested",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches names and aliases, including translators without published works; left empty, the translators with the most works are suggested",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListTranslatorListItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Suggest translators for a name being typed",
+        "tags": [
+          "translator"
+        ]
+      }
+    },
+    "/translator/{id}": {
+      "get": {
+        "operationId": "translator.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeTranslatorDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a translator",
+        "tags": [
+          "translator"
         ]
       }
     },

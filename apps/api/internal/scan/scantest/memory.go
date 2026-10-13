@@ -31,6 +31,7 @@ type MemoryRepository struct {
 	Titles    map[int]scan.GameTitles
 	Keys      map[int][]string
 	TakenDown []int
+	Discs     []int
 	Purged    []string
 	Cleared   []ClearedReview
 	Digests   map[int]string
@@ -409,6 +410,16 @@ func (r *MemoryRepository) TakeDown(_ context.Context, resourceID int) ([]string
 	r.resources[resourceID] = false
 	r.TakenDown = append(r.TakenDown, resourceID)
 	return r.Keys[resourceID], nil
+}
+
+func (r *MemoryRepository) DiscFound(_ context.Context, resourceID int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if !r.resources[resourceID] {
+		return download.ErrResourceNotFound
+	}
+	r.Discs = append(r.Discs, resourceID)
+	return nil
 }
 
 func (r *MemoryRepository) ReviewCleared(_ context.Context, resourceID int, fileName string, reviewerID *int) error {

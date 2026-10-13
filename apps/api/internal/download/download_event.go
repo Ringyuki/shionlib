@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -18,6 +19,7 @@ const (
 	EventFileRemoved   EventKind = "file_removed"
 	EventEdited        EventKind = "edited"
 	EventReviewCleared EventKind = "review_cleared"
+	EventDiscFound     EventKind = "disc_found"
 )
 
 const (
@@ -38,6 +40,15 @@ const (
 	FieldLanguages EventField = "languages"
 	FieldSimulator EventField = "simulator"
 	FieldNote      EventField = "note"
+
+	FieldTranslation  EventField = "translation"
+	FieldTranslators  EventField = "translators"
+	FieldPatchVersion EventField = "patch_version"
+	FieldReleaseURL   EventField = "release_url"
+	FieldEdition      EventField = "edition"
+	FieldEditionName  EventField = "edition_name"
+	FieldForm         EventField = "form"
+	FieldExtras       EventField = "extras"
 )
 
 type FieldChange struct {
@@ -88,7 +99,33 @@ func (r Resource) ChangesTo(changes ResourceChanges) []FieldChange {
 			out = append(out, FieldChange{Field: FieldNote, Old: before, New: after})
 		}
 	}
+	return append(out, r.Info.changesTo(changes.Info)...)
+}
+
+func (i Info) changesTo(next Info) []FieldChange {
+	var out []FieldChange
+	compare := func(field EventField, before, after []string) {
+		if !slices.Equal(before, after) {
+			out = append(out, FieldChange{Field: field, Old: before, New: after})
+		}
+	}
+	compare(FieldTranslation, optional((*string)(i.Translation)), optional((*string)(next.Translation)))
+	compare(FieldTranslators, translatorNames(i.Translators), translatorNames(next.Translators))
+	compare(FieldPatchVersion, optional(i.PatchVersion), optional(next.PatchVersion))
+	compare(FieldReleaseURL, optional(i.ReleaseURL), optional(next.ReleaseURL))
+	compare(FieldEdition, optional((*string)(i.Edition)), optional((*string)(next.Edition)))
+	compare(FieldEditionName, optional(i.EditionName), optional(next.EditionName))
+	compare(FieldForm, optional((*string)(i.Form)), optional((*string)(next.Form)))
+	compare(FieldExtras, slices.Clone(i.Extras), slices.Clone(next.Extras))
 	return out
+}
+
+func translatorNames(refs []translator.Ref) []string {
+	names := make([]string, len(refs))
+	for i, ref := range refs {
+		names[i] = ref.Name
+	}
+	return names
 }
 
 func optional(value *string) []string {

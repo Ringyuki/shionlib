@@ -16,6 +16,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator/translatortest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
@@ -27,6 +29,7 @@ var (
 	admin      = actor.Actor{UserID: 3, Role: actor.RoleAdmin}
 	superAdmin = actor.Actor{UserID: 4, Role: actor.RoleSuperAdmin}
 	now        = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
+	portable   = download.InfoInput{Form: ptr(download.FormPortable)}
 )
 
 type sessions struct {
@@ -47,39 +50,42 @@ func (s *sessions) Claim(_ context.Context, who actor.Actor, id int) (upload.Ses
 }
 
 type fixture struct {
-	repo     *downloadtest.MemoryRepository
-	spool    *uploadtest.MemorySpool
-	sessions *sessions
-	events   *downloadtest.Recorder
-	store    *downloadtest.ObjectStore
-	service  *download.Service
-	details  *download.DetailService
+	repo        *downloadtest.MemoryRepository
+	translators *translatortest.MemoryRepository
+	spool       *uploadtest.MemorySpool
+	sessions    *sessions
+	events      *downloadtest.Recorder
+	store       *downloadtest.ObjectStore
+	service     *download.Service
+	details     *download.DetailService
 }
 
 func newFixture() fixture {
 	repo := downloadtest.NewMemoryRepository(func() time.Time { return now })
 	f := fixture{
-		repo:     repo,
-		spool:    uploadtest.NewMemorySpool(),
-		sessions: &sessions{byID: map[int]upload.Session{}},
-		events:   &downloadtest.Recorder{},
-		store:    downloadtest.NewObjectStore(),
+		repo:        repo,
+		translators: translatortest.NewMemoryRepository(),
+		spool:       uploadtest.NewMemorySpool(),
+		sessions:    &sessions{byID: map[int]upload.Session{}},
+		events:      &downloadtest.Recorder{},
+		store:       downloadtest.NewObjectStore(),
 	}
 	discussions := downloadtest.Discussions{Counts: map[int]int{1: 4}}
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", TitleZH: "游戏", TitleEN: "Game"}, game.Card{ID: 11})
 	f.service = download.NewService(download.Deps{
-		Repo:       repo,
-		Games:      cards,
-		Comments:   discussions,
-		Sessions:   f.sessions,
-		Activities: f.events,
-		Messages:   f.events,
-		Tx:         &txtest.Immediate{},
-		Queue:      f.events,
-		Store:      f.store,
-		Local:      f.spool,
-		Settings:   settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3),
-		Now:        func() time.Time { return now },
+		Repo:        repo,
+		Games:       cards,
+		Comments:    discussions,
+		Translators: translator.NewService(f.translators),
+		Sessions:    f.sessions,
+		Activities:  f.events,
+		Messages:    f.events,
+		Tx:          &txtest.Immediate{},
+		Queue:       f.events,
+		Store:       f.store,
+		Local:       f.spool,
+		Settings:    settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3),
+		Now:         func() time.Time { return now },
 	})
 	f.details = download.NewDetailService(repo, cards, discussions, settingtest.Source{})
 	return f
@@ -203,7 +209,7 @@ func TestCreateAttachesEveryUpload(t *testing.T) {
 	f.completed(5, "game.part1.rar", 2048)
 	f.completed(6, "game.part2.rar", 1024)
 	f.sessions.byID[7] = upload.Session{ID: 7, Status: upload.StatusUploading, CreatorID: owner.UserID}
-	input := download.CreateInput{Platforms: []string{"and"}, Languages: []string{"jp"}, Simulator: ptr("KRKR"), Files: []download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6, Name: "第二卷.rar"}}}
+	input := download.CreateInput{Platforms: []string{"and"}, Languages: []string{"jp"}, Simulator: ptr("KRKR"), Info: portable, Files: []download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6, Name: "第二卷.rar"}}}
 
 	_, err := f.service.Create(ctx, owner, 404, input)
 	expectCode(t, err, game.ErrNotFound)
@@ -222,7 +228,7 @@ func TestCreateAttachesEveryUpload(t *testing.T) {
 		fresh.completed(5, "game.part1.rar", 2048)
 		fresh.completed(6, "game.part2.rar", 1024)
 		fresh.sessions.byID[7] = f.sessions.byID[7]
-		_, err := fresh.service.Create(ctx, owner, 10, download.CreateInput{Files: tc.files})
+		_, err := fresh.service.Create(ctx, owner, 10, download.CreateInput{Languages: []string{"jp"}, Info: portable, Files: tc.files})
 		expectCode(t, err, tc.want)
 	}
 	_, err = f.service.Create(ctx, other, 10, input)
@@ -246,7 +252,7 @@ func TestCreateAttachesEveryUpload(t *testing.T) {
 	if len(recorded) != 2 || recorded[0].Type != activity.TypeFileUploadToServer || *recorded[1].FileSize != 1024 || *recorded[1].GameID != 10 {
 		t.Fatalf("activities %+v", recorded)
 	}
-	_, err = f.service.Create(ctx, owner, 11, download.CreateInput{Files: []download.FileUpload{{UploadSessionID: 6}}})
+	_, err = f.service.Create(ctx, owner, 11, download.CreateInput{Languages: []string{"jp"}, Info: portable, Files: []download.FileUpload{{UploadSessionID: 6}}})
 	expectCode(t, err, download.ErrSessionAlreadyUsed)
 }
 
@@ -350,7 +356,7 @@ func TestEditRules(t *testing.T) {
 	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Note: ptr("old"), Simulator: ptr("ONS")})
 	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z"})
 	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved})
-	changes := download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}}
+	changes := download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}}
 
 	expectCode(t, f.service.Edit(ctx, owner, 999, changes), download.ErrResourceNotFound)
 	expectCode(t, f.service.Edit(ctx, owner, removed.ID, changes), download.ErrResourceNotFound)
@@ -687,7 +693,7 @@ func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
 	if err := f.service.RenameFile(ctx, owner, stored.ID, "本体.7z"); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
+	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
 		t.Fatal(err)
 	}
 	if recorded := f.repo.Events(resource.ID); len(recorded) != 0 {
@@ -711,10 +717,10 @@ func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
 	if err := f.service.RenameFile(ctx, admin, stored.ID, "game v2.7z"); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
+	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, Note: ptr("官方中文")}); err != nil {
+	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Note: ptr("官方中文")}); err != nil {
 		t.Fatal(err)
 	}
 	f.sessions.byID[42] = upload.Session{ID: 42, Status: upload.StatusCompleted, CreatorID: owner.UserID, StoragePath: "/spool/42.part", TotalSize: 120, FileHash: "new", HashAlgorithm: upload.HashSHA256}
@@ -754,4 +760,134 @@ func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
 	if renamed := events[4]; renamed.Actor.ID != admin.UserID || renamed.Data.OldName != "本体.7z" || renamed.Data.Name != "game v2.7z" {
 		t.Fatalf("renamed file: %+v", renamed)
 	}
+}
+
+func TestCreateKeepsTheInformationAndCreditsTranslators(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	known := f.translators.Seed(translator.Translator{Name: "绿茶汉化组", Aliases: []string{"绿茶汉化"}})
+	f.completed(5, "game.zip", 2048)
+	info := download.InfoInput{
+		Translation: ptr(download.TranslationGroup), Translators: []string{"绿茶汉化", " 熊喵守护协会 ", ""},
+		PatchVersion: ptr(" v1.1 "), ReleaseURL: ptr("https://example.org/release"), Edition: ptr(download.EditionDownload), EditionName: ptr(" 初回限定版 "),
+		Form: ptr(download.FormPortable), Extras: []string{"bonus", "save", "unknown"},
+	}
+	resource, err := f.service.Create(ctx, owner, 10, download.CreateInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: info, Files: []download.FileUpload{{UploadSessionID: 5}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := f.repo.GetResource(ctx, resource.ID)
+	got := stored.Info
+	if *got.Translation != download.TranslationGroup || len(got.Translators) != 2 || got.Translators[0] != (translator.Ref{ID: known.ID, Name: "绿茶汉化组"}) || got.Translators[1].Name != "熊喵守护协会" {
+		t.Fatalf("translators %+v", got)
+	}
+	if *got.PatchVersion != "v1.1" || *got.ReleaseURL != "https://example.org/release" || *got.Edition != download.EditionDownload || *got.EditionName != "初回限定版" || *got.Form != download.FormPortable || !slices.Equal(got.Extras, []string{"save", "bonus"}) {
+		t.Fatalf("information %+v", got)
+	}
+	created, err := f.translators.Get(ctx, got.Translators[1].ID)
+	if err != nil || created.CreatorID == nil || *created.CreatorID != owner.UserID {
+		t.Fatalf("a new name creates its translator: %+v %v", created, err)
+	}
+}
+
+func TestCreateRefusesIncompleteInformation(t *testing.T) {
+	ctx := context.Background()
+	for name, tc := range map[string]struct {
+		languages []string
+		info      download.InfoInput
+		field     string
+	}{
+		"no form":               {[]string{"jp"}, download.InfoInput{}, "form"},
+		"no translation":        {[]string{"jp", "zh"}, portable, "translation"},
+		"a group without names": {[]string{"zh"}, download.InfoInput{Form: ptr(download.FormPortable), Translation: ptr(download.TranslationGroup), Translators: []string{" "}}, "translators"},
+		"a release page that is not a web address": {[]string{"zh"}, download.InfoInput{Form: ptr(download.FormPortable), Translation: ptr(download.TranslationMachine), ReleaseURL: ptr("javascript:alert(1)")}, "release_url"},
+		"an unknown form":                          {[]string{"jp"}, download.InfoInput{Form: ptr(download.Form("floppy"))}, "form"},
+	} {
+		f := newFixture()
+		f.completed(5, "game.zip", 2048)
+		_, err := f.service.Create(ctx, owner, 10, download.CreateInput{Platforms: []string{"win"}, Languages: tc.languages, Info: tc.info, Files: []download.FileUpload{{UploadSessionID: 5}}})
+		var failure *apperror.Error
+		if !errors.As(err, &failure) || !errors.Is(err, apperror.ErrValidationFailed) || len(failure.Fields()) != 1 || failure.Fields()[0].Field != tc.field {
+			t.Fatalf("%s: %v", name, err)
+		}
+	}
+	f := newFixture()
+	f.completed(5, "game.zip", 2048)
+	many := []string{"一", "二", "三", "四", "五", "六", "七"}
+	_, err := f.service.Create(ctx, owner, 10, download.CreateInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: download.InfoInput{Form: ptr(download.FormPortable), Translation: ptr(download.TranslationGroup), Translators: many}, Files: []download.FileUpload{{UploadSessionID: 5}}})
+	expectCode(t, err, translator.ErrTooMany)
+}
+
+func TestEditRecordsInformationChanges(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	tea := f.translators.Seed(translator.Translator{Name: "绿茶汉化组"})
+	resource := f.repo.SeedResource(download.Resource{
+		GameID: 10, CreatorID: owner.UserID, Platforms: []string{"win"}, Languages: []string{"zh"}, PublishedAt: ptr(now),
+		Info: download.Info{Translation: ptr(download.TranslationGroup), Translators: []translator.Ref{{ID: tea.ID, Name: tea.Name}}, Form: ptr(download.FormPortable), Extras: []string{}},
+	})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z", Status: download.FileInObjectStore})
+	same := download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: download.InfoInput{Translation: ptr(download.TranslationGroup), Translators: []string{"绿茶汉化组"}, Form: ptr(download.FormPortable)}}
+	if err := f.service.Edit(ctx, owner, resource.ID, same); err != nil {
+		t.Fatal(err)
+	}
+	if recorded := f.repo.Events(resource.ID); len(recorded) != 0 {
+		t.Fatalf("an edit that changes nothing records nothing: %+v", recorded)
+	}
+	next := download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: download.InfoInput{
+		Translation: ptr(download.TranslationGroup), Translators: []string{"绿茶汉化组", "熊喵守护协会"}, PatchVersion: ptr("v1.2"),
+		Edition: ptr(download.EditionSteam), Form: ptr(download.FormInstaller), Extras: []string{"save"},
+	}}
+	if err := f.service.Edit(ctx, owner, resource.ID, next); err != nil {
+		t.Fatal(err)
+	}
+	recorded := f.repo.Events(resource.ID)
+	if len(recorded) != 1 || recorded[0].Kind != download.EventEdited {
+		t.Fatalf("events %+v", recorded)
+	}
+	fields := make([]download.EventField, len(recorded[0].Data.Changes))
+	for i, change := range recorded[0].Data.Changes {
+		fields[i] = change.Field
+	}
+	if !slices.Equal(fields, []download.EventField{download.FieldTranslators, download.FieldPatchVersion, download.FieldEdition, download.FieldForm, download.FieldExtras}) {
+		t.Fatalf("changed fields %v", fields)
+	}
+	if names := recorded[0].Data.Changes[0]; !slices.Equal(names.Old, []string{"绿茶汉化组"}) || !slices.Equal(names.New, []string{"绿茶汉化组", "熊喵守护协会"}) {
+		t.Fatalf("translators change %+v", names)
+	}
+	japanese := download.EditInput{Platforms: []string{"win"}, Languages: []string{"jp"}, Info: download.InfoInput{Translation: ptr(download.TranslationGroup), Translators: []string{"绿茶汉化组"}, PatchVersion: ptr("v1.2")}}
+	if err := f.service.Edit(ctx, owner, resource.ID, japanese); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := f.repo.GetResource(ctx, resource.ID)
+	if *stored.Info.Translation != download.TranslationNone || len(stored.Info.Translators) != 0 || stored.Info.PatchVersion != nil || stored.Info.Form != nil {
+		t.Fatalf("a resource in Japanese only has no translation, and an edit may leave the form unknown: %+v", stored.Info)
+	}
+}
+
+func TestDiscFoundCorrectsTheFormAndTellsThePublishedHistory(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	fresh := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Info: download.Info{Form: ptr(download.FormPortable)}})
+	if err := f.service.DiscFound(ctx, fresh.ID); err != nil {
+		t.Fatal(err)
+	}
+	if stored, _ := f.repo.GetResource(ctx, fresh.ID); *stored.Info.Form != download.FormDisc || len(f.repo.Events(fresh.ID)) != 0 {
+		t.Fatalf("an unpublished resource is corrected without an entry: %+v %+v", stored.Info, f.repo.Events(fresh.ID))
+	}
+	published := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	if err := f.service.DiscFound(ctx, published.ID); err != nil {
+		t.Fatal(err)
+	}
+	recorded := f.repo.Events(published.ID)
+	if len(recorded) != 1 || recorded[0].Kind != download.EventDiscFound || recorded[0].Actor != nil || len(recorded[0].Data.Changes) != 1 {
+		t.Fatalf("events %+v", recorded)
+	}
+	if change := recorded[0].Data.Changes[0]; change.Field != download.FieldForm || len(change.Old) != 0 || !slices.Equal(change.New, []string{"disc"}) {
+		t.Fatalf("change %+v", change)
+	}
+	if err := f.service.DiscFound(ctx, published.ID); err != nil || len(f.repo.Events(published.ID)) != 1 {
+		t.Fatalf("a resource already known as a disc image is left alone: %v %+v", err, f.repo.Events(published.ID))
+	}
+	expectCode(t, f.service.DiscFound(ctx, 999), download.ErrResourceNotFound)
 }

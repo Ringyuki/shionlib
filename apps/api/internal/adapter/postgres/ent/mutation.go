@@ -43,6 +43,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
@@ -62,6 +63,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
@@ -113,6 +116,7 @@ const (
 	TypeGameDownloadResourceFile        = "GameDownloadResourceFile"
 	TypeGameDownloadResourceFileHistory = "GameDownloadResourceFileHistory"
 	TypeGameDownloadResourceReport      = "GameDownloadResourceReport"
+	TypeGameDownloadResourceTranslator  = "GameDownloadResourceTranslator"
 	TypeGameImage                       = "GameImage"
 	TypeGameLink                        = "GameLink"
 	TypeGameRelation                    = "GameRelation"
@@ -131,6 +135,8 @@ const (
 	TypeSiteDailyStat                   = "SiteDailyStat"
 	TypeSponsorOrder                    = "SponsorOrder"
 	TypeTag                             = "Tag"
+	TypeTranslator                      = "Translator"
+	TypeTranslatorDistinction           = "TranslatorDistinction"
 	TypeUser                            = "User"
 	TypeUserBannedRecord                = "UserBannedRecord"
 	TypeUserFieldPermission             = "UserFieldPermission"
@@ -33484,6 +33490,13 @@ type GameDownloadResourceMutation struct {
 	simulator                 *gamedownloadresource.Simulator
 	language                  *pgvalue.Strings
 	note                      *string
+	translation               *string
+	patch_version             *string
+	release_url               *string
+	edition                   *string
+	edition_name              *string
+	form                      *string
+	extras                    *pgvalue.Strings
 	downloads                 *int
 	adddownloads              *int
 	published_at              *time.Time
@@ -33513,6 +33526,9 @@ type GameDownloadResourceMutation struct {
 	events                    map[int]struct{}
 	removedevents             map[int]struct{}
 	clearedevents             bool
+	translator_credits        map[int]struct{}
+	removedtranslator_credits map[int]struct{}
+	clearedtranslator_credits bool
 	done                      bool
 	oldValue                  func(context.Context) (*GameDownloadResource, error)
 	predicates                []predicate.GameDownloadResource
@@ -33908,6 +33924,349 @@ func (m *GameDownloadResourceMutation) NoteCleared() bool {
 func (m *GameDownloadResourceMutation) ResetNote() {
 	m.note = nil
 	delete(m.clearedFields, gamedownloadresource.FieldNote)
+}
+
+// SetTranslation sets the "translation" field.
+func (m *GameDownloadResourceMutation) SetTranslation(s string) {
+	m.translation = &s
+}
+
+// Translation returns the value of the "translation" field in the mutation.
+func (m *GameDownloadResourceMutation) Translation() (r string, exists bool) {
+	v := m.translation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTranslation returns the old "translation" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldTranslation(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTranslation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTranslation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTranslation: %w", err)
+	}
+	return oldValue.Translation, nil
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (m *GameDownloadResourceMutation) ClearTranslation() {
+	m.translation = nil
+	m.clearedFields[gamedownloadresource.FieldTranslation] = struct{}{}
+}
+
+// TranslationCleared returns if the "translation" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) TranslationCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldTranslation]
+	return ok
+}
+
+// ResetTranslation resets all changes to the "translation" field.
+func (m *GameDownloadResourceMutation) ResetTranslation() {
+	m.translation = nil
+	delete(m.clearedFields, gamedownloadresource.FieldTranslation)
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (m *GameDownloadResourceMutation) SetPatchVersion(s string) {
+	m.patch_version = &s
+}
+
+// PatchVersion returns the value of the "patch_version" field in the mutation.
+func (m *GameDownloadResourceMutation) PatchVersion() (r string, exists bool) {
+	v := m.patch_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatchVersion returns the old "patch_version" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldPatchVersion(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatchVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatchVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatchVersion: %w", err)
+	}
+	return oldValue.PatchVersion, nil
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (m *GameDownloadResourceMutation) ClearPatchVersion() {
+	m.patch_version = nil
+	m.clearedFields[gamedownloadresource.FieldPatchVersion] = struct{}{}
+}
+
+// PatchVersionCleared returns if the "patch_version" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) PatchVersionCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldPatchVersion]
+	return ok
+}
+
+// ResetPatchVersion resets all changes to the "patch_version" field.
+func (m *GameDownloadResourceMutation) ResetPatchVersion() {
+	m.patch_version = nil
+	delete(m.clearedFields, gamedownloadresource.FieldPatchVersion)
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (m *GameDownloadResourceMutation) SetReleaseURL(s string) {
+	m.release_url = &s
+}
+
+// ReleaseURL returns the value of the "release_url" field in the mutation.
+func (m *GameDownloadResourceMutation) ReleaseURL() (r string, exists bool) {
+	v := m.release_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReleaseURL returns the old "release_url" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldReleaseURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReleaseURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReleaseURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReleaseURL: %w", err)
+	}
+	return oldValue.ReleaseURL, nil
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (m *GameDownloadResourceMutation) ClearReleaseURL() {
+	m.release_url = nil
+	m.clearedFields[gamedownloadresource.FieldReleaseURL] = struct{}{}
+}
+
+// ReleaseURLCleared returns if the "release_url" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) ReleaseURLCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldReleaseURL]
+	return ok
+}
+
+// ResetReleaseURL resets all changes to the "release_url" field.
+func (m *GameDownloadResourceMutation) ResetReleaseURL() {
+	m.release_url = nil
+	delete(m.clearedFields, gamedownloadresource.FieldReleaseURL)
+}
+
+// SetEdition sets the "edition" field.
+func (m *GameDownloadResourceMutation) SetEdition(s string) {
+	m.edition = &s
+}
+
+// Edition returns the value of the "edition" field in the mutation.
+func (m *GameDownloadResourceMutation) Edition() (r string, exists bool) {
+	v := m.edition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEdition returns the old "edition" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldEdition(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEdition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEdition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEdition: %w", err)
+	}
+	return oldValue.Edition, nil
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (m *GameDownloadResourceMutation) ClearEdition() {
+	m.edition = nil
+	m.clearedFields[gamedownloadresource.FieldEdition] = struct{}{}
+}
+
+// EditionCleared returns if the "edition" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) EditionCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldEdition]
+	return ok
+}
+
+// ResetEdition resets all changes to the "edition" field.
+func (m *GameDownloadResourceMutation) ResetEdition() {
+	m.edition = nil
+	delete(m.clearedFields, gamedownloadresource.FieldEdition)
+}
+
+// SetEditionName sets the "edition_name" field.
+func (m *GameDownloadResourceMutation) SetEditionName(s string) {
+	m.edition_name = &s
+}
+
+// EditionName returns the value of the "edition_name" field in the mutation.
+func (m *GameDownloadResourceMutation) EditionName() (r string, exists bool) {
+	v := m.edition_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEditionName returns the old "edition_name" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldEditionName(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEditionName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEditionName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEditionName: %w", err)
+	}
+	return oldValue.EditionName, nil
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (m *GameDownloadResourceMutation) ClearEditionName() {
+	m.edition_name = nil
+	m.clearedFields[gamedownloadresource.FieldEditionName] = struct{}{}
+}
+
+// EditionNameCleared returns if the "edition_name" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) EditionNameCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldEditionName]
+	return ok
+}
+
+// ResetEditionName resets all changes to the "edition_name" field.
+func (m *GameDownloadResourceMutation) ResetEditionName() {
+	m.edition_name = nil
+	delete(m.clearedFields, gamedownloadresource.FieldEditionName)
+}
+
+// SetForm sets the "form" field.
+func (m *GameDownloadResourceMutation) SetForm(s string) {
+	m.form = &s
+}
+
+// Form returns the value of the "form" field in the mutation.
+func (m *GameDownloadResourceMutation) Form() (r string, exists bool) {
+	v := m.form
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldForm returns the old "form" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldForm(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldForm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldForm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldForm: %w", err)
+	}
+	return oldValue.Form, nil
+}
+
+// ClearForm clears the value of the "form" field.
+func (m *GameDownloadResourceMutation) ClearForm() {
+	m.form = nil
+	m.clearedFields[gamedownloadresource.FieldForm] = struct{}{}
+}
+
+// FormCleared returns if the "form" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) FormCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldForm]
+	return ok
+}
+
+// ResetForm resets all changes to the "form" field.
+func (m *GameDownloadResourceMutation) ResetForm() {
+	m.form = nil
+	delete(m.clearedFields, gamedownloadresource.FieldForm)
+}
+
+// SetExtras sets the "extras" field.
+func (m *GameDownloadResourceMutation) SetExtras(pg pgvalue.Strings) {
+	m.extras = &pg
+}
+
+// Extras returns the value of the "extras" field in the mutation.
+func (m *GameDownloadResourceMutation) Extras() (r pgvalue.Strings, exists bool) {
+	v := m.extras
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtras returns the old "extras" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldExtras(ctx context.Context) (v pgvalue.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtras is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtras requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtras: %w", err)
+	}
+	return oldValue.Extras, nil
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (m *GameDownloadResourceMutation) ClearExtras() {
+	m.extras = nil
+	m.clearedFields[gamedownloadresource.FieldExtras] = struct{}{}
+}
+
+// ExtrasCleared returns if the "extras" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) ExtrasCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldExtras]
+	return ok
+}
+
+// ResetExtras resets all changes to the "extras" field.
+func (m *GameDownloadResourceMutation) ResetExtras() {
+	m.extras = nil
+	delete(m.clearedFields, gamedownloadresource.FieldExtras)
 }
 
 // SetDownloads sets the "downloads" field.
@@ -34550,6 +34909,60 @@ func (m *GameDownloadResourceMutation) ResetEvents() {
 	m.removedevents = nil
 }
 
+// AddTranslatorCreditIDs adds the "translator_credits" edge to the GameDownloadResourceTranslator entity by ids.
+func (m *GameDownloadResourceMutation) AddTranslatorCreditIDs(ids ...int) {
+	if m.translator_credits == nil {
+		m.translator_credits = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.translator_credits[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTranslatorCredits clears the "translator_credits" edge to the GameDownloadResourceTranslator entity.
+func (m *GameDownloadResourceMutation) ClearTranslatorCredits() {
+	m.clearedtranslator_credits = true
+}
+
+// TranslatorCreditsCleared reports if the "translator_credits" edge to the GameDownloadResourceTranslator entity was cleared.
+func (m *GameDownloadResourceMutation) TranslatorCreditsCleared() bool {
+	return m.clearedtranslator_credits
+}
+
+// RemoveTranslatorCreditIDs removes the "translator_credits" edge to the GameDownloadResourceTranslator entity by IDs.
+func (m *GameDownloadResourceMutation) RemoveTranslatorCreditIDs(ids ...int) {
+	if m.removedtranslator_credits == nil {
+		m.removedtranslator_credits = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.translator_credits, ids[i])
+		m.removedtranslator_credits[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTranslatorCredits returns the removed IDs of the "translator_credits" edge to the GameDownloadResourceTranslator entity.
+func (m *GameDownloadResourceMutation) RemovedTranslatorCreditsIDs() (ids []int) {
+	for id := range m.removedtranslator_credits {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TranslatorCreditsIDs returns the "translator_credits" edge IDs in the mutation.
+func (m *GameDownloadResourceMutation) TranslatorCreditsIDs() (ids []int) {
+	for id := range m.translator_credits {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTranslatorCredits resets all changes to the "translator_credits" edge.
+func (m *GameDownloadResourceMutation) ResetTranslatorCredits() {
+	m.translator_credits = nil
+	m.clearedtranslator_credits = false
+	m.removedtranslator_credits = nil
+}
+
 // Where appends a list predicates to the GameDownloadResourceMutation builder.
 func (m *GameDownloadResourceMutation) Where(ps ...predicate.GameDownloadResource) {
 	m.predicates = append(m.predicates, ps...)
@@ -34584,7 +34997,7 @@ func (m *GameDownloadResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 19)
 	if m.status != nil {
 		fields = append(fields, gamedownloadresource.FieldStatus)
 	}
@@ -34602,6 +35015,27 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	}
 	if m.note != nil {
 		fields = append(fields, gamedownloadresource.FieldNote)
+	}
+	if m.translation != nil {
+		fields = append(fields, gamedownloadresource.FieldTranslation)
+	}
+	if m.patch_version != nil {
+		fields = append(fields, gamedownloadresource.FieldPatchVersion)
+	}
+	if m.release_url != nil {
+		fields = append(fields, gamedownloadresource.FieldReleaseURL)
+	}
+	if m.edition != nil {
+		fields = append(fields, gamedownloadresource.FieldEdition)
+	}
+	if m.edition_name != nil {
+		fields = append(fields, gamedownloadresource.FieldEditionName)
+	}
+	if m.form != nil {
+		fields = append(fields, gamedownloadresource.FieldForm)
+	}
+	if m.extras != nil {
+		fields = append(fields, gamedownloadresource.FieldExtras)
 	}
 	if m.downloads != nil {
 		fields = append(fields, gamedownloadresource.FieldDownloads)
@@ -34641,6 +35075,20 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Language()
 	case gamedownloadresource.FieldNote:
 		return m.Note()
+	case gamedownloadresource.FieldTranslation:
+		return m.Translation()
+	case gamedownloadresource.FieldPatchVersion:
+		return m.PatchVersion()
+	case gamedownloadresource.FieldReleaseURL:
+		return m.ReleaseURL()
+	case gamedownloadresource.FieldEdition:
+		return m.Edition()
+	case gamedownloadresource.FieldEditionName:
+		return m.EditionName()
+	case gamedownloadresource.FieldForm:
+		return m.Form()
+	case gamedownloadresource.FieldExtras:
+		return m.Extras()
 	case gamedownloadresource.FieldDownloads:
 		return m.Downloads()
 	case gamedownloadresource.FieldPublishedAt:
@@ -34674,6 +35122,20 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldLanguage(ctx)
 	case gamedownloadresource.FieldNote:
 		return m.OldNote(ctx)
+	case gamedownloadresource.FieldTranslation:
+		return m.OldTranslation(ctx)
+	case gamedownloadresource.FieldPatchVersion:
+		return m.OldPatchVersion(ctx)
+	case gamedownloadresource.FieldReleaseURL:
+		return m.OldReleaseURL(ctx)
+	case gamedownloadresource.FieldEdition:
+		return m.OldEdition(ctx)
+	case gamedownloadresource.FieldEditionName:
+		return m.OldEditionName(ctx)
+	case gamedownloadresource.FieldForm:
+		return m.OldForm(ctx)
+	case gamedownloadresource.FieldExtras:
+		return m.OldExtras(ctx)
 	case gamedownloadresource.FieldDownloads:
 		return m.OldDownloads(ctx)
 	case gamedownloadresource.FieldPublishedAt:
@@ -34736,6 +35198,55 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNote(v)
+		return nil
+	case gamedownloadresource.FieldTranslation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTranslation(v)
+		return nil
+	case gamedownloadresource.FieldPatchVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatchVersion(v)
+		return nil
+	case gamedownloadresource.FieldReleaseURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReleaseURL(v)
+		return nil
+	case gamedownloadresource.FieldEdition:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEdition(v)
+		return nil
+	case gamedownloadresource.FieldEditionName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEditionName(v)
+		return nil
+	case gamedownloadresource.FieldForm:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetForm(v)
+		return nil
+	case gamedownloadresource.FieldExtras:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtras(v)
 		return nil
 	case gamedownloadresource.FieldDownloads:
 		v, ok := value.(int)
@@ -34848,6 +35359,27 @@ func (m *GameDownloadResourceMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedownloadresource.FieldNote) {
 		fields = append(fields, gamedownloadresource.FieldNote)
 	}
+	if m.FieldCleared(gamedownloadresource.FieldTranslation) {
+		fields = append(fields, gamedownloadresource.FieldTranslation)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldPatchVersion) {
+		fields = append(fields, gamedownloadresource.FieldPatchVersion)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldReleaseURL) {
+		fields = append(fields, gamedownloadresource.FieldReleaseURL)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldEdition) {
+		fields = append(fields, gamedownloadresource.FieldEdition)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldEditionName) {
+		fields = append(fields, gamedownloadresource.FieldEditionName)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldForm) {
+		fields = append(fields, gamedownloadresource.FieldForm)
+	}
+	if m.FieldCleared(gamedownloadresource.FieldExtras) {
+		fields = append(fields, gamedownloadresource.FieldExtras)
+	}
 	if m.FieldCleared(gamedownloadresource.FieldPublishedAt) {
 		fields = append(fields, gamedownloadresource.FieldPublishedAt)
 	}
@@ -34879,6 +35411,27 @@ func (m *GameDownloadResourceMutation) ClearField(name string) error {
 		return nil
 	case gamedownloadresource.FieldNote:
 		m.ClearNote()
+		return nil
+	case gamedownloadresource.FieldTranslation:
+		m.ClearTranslation()
+		return nil
+	case gamedownloadresource.FieldPatchVersion:
+		m.ClearPatchVersion()
+		return nil
+	case gamedownloadresource.FieldReleaseURL:
+		m.ClearReleaseURL()
+		return nil
+	case gamedownloadresource.FieldEdition:
+		m.ClearEdition()
+		return nil
+	case gamedownloadresource.FieldEditionName:
+		m.ClearEditionName()
+		return nil
+	case gamedownloadresource.FieldForm:
+		m.ClearForm()
+		return nil
+	case gamedownloadresource.FieldExtras:
+		m.ClearExtras()
 		return nil
 	case gamedownloadresource.FieldPublishedAt:
 		m.ClearPublishedAt()
@@ -34912,6 +35465,27 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 	case gamedownloadresource.FieldNote:
 		m.ResetNote()
 		return nil
+	case gamedownloadresource.FieldTranslation:
+		m.ResetTranslation()
+		return nil
+	case gamedownloadresource.FieldPatchVersion:
+		m.ResetPatchVersion()
+		return nil
+	case gamedownloadresource.FieldReleaseURL:
+		m.ResetReleaseURL()
+		return nil
+	case gamedownloadresource.FieldEdition:
+		m.ResetEdition()
+		return nil
+	case gamedownloadresource.FieldEditionName:
+		m.ResetEditionName()
+		return nil
+	case gamedownloadresource.FieldForm:
+		m.ResetForm()
+		return nil
+	case gamedownloadresource.FieldExtras:
+		m.ResetExtras()
+		return nil
 	case gamedownloadresource.FieldDownloads:
 		m.ResetDownloads()
 		return nil
@@ -34936,7 +35510,7 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.game != nil {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34960,6 +35534,9 @@ func (m *GameDownloadResourceMutation) AddedEdges() []string {
 	}
 	if m.events != nil {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
+	}
+	if m.translator_credits != nil {
+		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
 	}
 	return edges
 }
@@ -35012,13 +35589,19 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeTranslatorCredits:
+		ids := make([]ent.Value, 0, len(m.translator_credits))
+		for id := range m.translator_credits {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.removedfiles != nil {
 		edges = append(edges, gamedownloadresource.EdgeFiles)
 	}
@@ -35036,6 +35619,9 @@ func (m *GameDownloadResourceMutation) RemovedEdges() []string {
 	}
 	if m.removedevents != nil {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
+	}
+	if m.removedtranslator_credits != nil {
+		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
 	}
 	return edges
 }
@@ -35080,13 +35666,19 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeTranslatorCredits:
+		ids := make([]ent.Value, 0, len(m.removedtranslator_credits))
+		for id := range m.removedtranslator_credits {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.clearedgame {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -35111,6 +35703,9 @@ func (m *GameDownloadResourceMutation) ClearedEdges() []string {
 	if m.clearedevents {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
 	}
+	if m.clearedtranslator_credits {
+		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
+	}
 	return edges
 }
 
@@ -35134,6 +35729,8 @@ func (m *GameDownloadResourceMutation) EdgeCleared(name string) bool {
 		return m.clearedinspections
 	case gamedownloadresource.EdgeEvents:
 		return m.clearedevents
+	case gamedownloadresource.EdgeTranslatorCredits:
+		return m.clearedtranslator_credits
 	}
 	return false
 }
@@ -35179,6 +35776,9 @@ func (m *GameDownloadResourceMutation) ResetEdge(name string) error {
 		return nil
 	case gamedownloadresource.EdgeEvents:
 		m.ResetEvents()
+		return nil
+	case gamedownloadresource.EdgeTranslatorCredits:
+		m.ResetTranslatorCredits()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource edge %s", name)
@@ -40457,6 +41057,636 @@ func (m *GameDownloadResourceReportMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResourceReport edge %s", name)
+}
+
+// GameDownloadResourceTranslatorMutation represents an operation that mutates the GameDownloadResourceTranslator nodes in the graph.
+type GameDownloadResourceTranslatorMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	position          *int
+	addposition       *int
+	created           *time.Time
+	clearedFields     map[string]struct{}
+	resource          *int
+	clearedresource   bool
+	translator        *int
+	clearedtranslator bool
+	done              bool
+	oldValue          func(context.Context) (*GameDownloadResourceTranslator, error)
+	predicates        []predicate.GameDownloadResourceTranslator
+}
+
+var _ ent.Mutation = (*GameDownloadResourceTranslatorMutation)(nil)
+
+// gamedownloadresourcetranslatorOption allows management of the mutation configuration using functional options.
+type gamedownloadresourcetranslatorOption func(*GameDownloadResourceTranslatorMutation)
+
+// newGameDownloadResourceTranslatorMutation creates new mutation for the GameDownloadResourceTranslator entity.
+func newGameDownloadResourceTranslatorMutation(c config, op Op, opts ...gamedownloadresourcetranslatorOption) *GameDownloadResourceTranslatorMutation {
+	m := &GameDownloadResourceTranslatorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGameDownloadResourceTranslator,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGameDownloadResourceTranslatorID sets the ID field of the mutation.
+func withGameDownloadResourceTranslatorID(id int) gamedownloadresourcetranslatorOption {
+	return func(m *GameDownloadResourceTranslatorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GameDownloadResourceTranslator
+		)
+		m.oldValue = func(ctx context.Context) (*GameDownloadResourceTranslator, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GameDownloadResourceTranslator.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGameDownloadResourceTranslator sets the old GameDownloadResourceTranslator of the mutation.
+func withGameDownloadResourceTranslator(node *GameDownloadResourceTranslator) gamedownloadresourcetranslatorOption {
+	return func(m *GameDownloadResourceTranslatorMutation) {
+		m.oldValue = func(context.Context) (*GameDownloadResourceTranslator, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GameDownloadResourceTranslatorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GameDownloadResourceTranslatorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of GameDownloadResourceTranslator entities.
+func (m *GameDownloadResourceTranslatorMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GameDownloadResourceTranslatorMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GameDownloadResourceTranslatorMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GameDownloadResourceTranslator.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *GameDownloadResourceTranslatorMutation) SetResourceID(i int) {
+	m.resource = &i
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *GameDownloadResourceTranslatorMutation) ResourceID() (r int, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the GameDownloadResourceTranslator entity.
+// If the GameDownloadResourceTranslator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceTranslatorMutation) OldResourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *GameDownloadResourceTranslatorMutation) ResetResourceID() {
+	m.resource = nil
+}
+
+// SetTranslatorID sets the "translator_id" field.
+func (m *GameDownloadResourceTranslatorMutation) SetTranslatorID(i int) {
+	m.translator = &i
+}
+
+// TranslatorID returns the value of the "translator_id" field in the mutation.
+func (m *GameDownloadResourceTranslatorMutation) TranslatorID() (r int, exists bool) {
+	v := m.translator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTranslatorID returns the old "translator_id" field's value of the GameDownloadResourceTranslator entity.
+// If the GameDownloadResourceTranslator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceTranslatorMutation) OldTranslatorID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTranslatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTranslatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTranslatorID: %w", err)
+	}
+	return oldValue.TranslatorID, nil
+}
+
+// ResetTranslatorID resets all changes to the "translator_id" field.
+func (m *GameDownloadResourceTranslatorMutation) ResetTranslatorID() {
+	m.translator = nil
+}
+
+// SetPosition sets the "position" field.
+func (m *GameDownloadResourceTranslatorMutation) SetPosition(i int) {
+	m.position = &i
+	m.addposition = nil
+}
+
+// Position returns the value of the "position" field in the mutation.
+func (m *GameDownloadResourceTranslatorMutation) Position() (r int, exists bool) {
+	v := m.position
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPosition returns the old "position" field's value of the GameDownloadResourceTranslator entity.
+// If the GameDownloadResourceTranslator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceTranslatorMutation) OldPosition(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPosition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
+	}
+	return oldValue.Position, nil
+}
+
+// AddPosition adds i to the "position" field.
+func (m *GameDownloadResourceTranslatorMutation) AddPosition(i int) {
+	if m.addposition != nil {
+		*m.addposition += i
+	} else {
+		m.addposition = &i
+	}
+}
+
+// AddedPosition returns the value that was added to the "position" field in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) AddedPosition() (r int, exists bool) {
+	v := m.addposition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPosition resets all changes to the "position" field.
+func (m *GameDownloadResourceTranslatorMutation) ResetPosition() {
+	m.position = nil
+	m.addposition = nil
+}
+
+// SetCreated sets the "created" field.
+func (m *GameDownloadResourceTranslatorMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *GameDownloadResourceTranslatorMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the GameDownloadResourceTranslator entity.
+// If the GameDownloadResourceTranslator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceTranslatorMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *GameDownloadResourceTranslatorMutation) ResetCreated() {
+	m.created = nil
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (m *GameDownloadResourceTranslatorMutation) ClearResource() {
+	m.clearedresource = true
+	m.clearedFields[gamedownloadresourcetranslator.FieldResourceID] = struct{}{}
+}
+
+// ResourceCleared reports if the "resource" edge to the GameDownloadResource entity was cleared.
+func (m *GameDownloadResourceTranslatorMutation) ResourceCleared() bool {
+	return m.clearedresource
+}
+
+// ResourceIDs returns the "resource" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResourceID instead. It exists only for internal usage by the builders.
+func (m *GameDownloadResourceTranslatorMutation) ResourceIDs() (ids []int) {
+	if id := m.resource; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResource resets all changes to the "resource" edge.
+func (m *GameDownloadResourceTranslatorMutation) ResetResource() {
+	m.resource = nil
+	m.clearedresource = false
+}
+
+// ClearTranslator clears the "translator" edge to the Translator entity.
+func (m *GameDownloadResourceTranslatorMutation) ClearTranslator() {
+	m.clearedtranslator = true
+	m.clearedFields[gamedownloadresourcetranslator.FieldTranslatorID] = struct{}{}
+}
+
+// TranslatorCleared reports if the "translator" edge to the Translator entity was cleared.
+func (m *GameDownloadResourceTranslatorMutation) TranslatorCleared() bool {
+	return m.clearedtranslator
+}
+
+// TranslatorIDs returns the "translator" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TranslatorID instead. It exists only for internal usage by the builders.
+func (m *GameDownloadResourceTranslatorMutation) TranslatorIDs() (ids []int) {
+	if id := m.translator; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTranslator resets all changes to the "translator" edge.
+func (m *GameDownloadResourceTranslatorMutation) ResetTranslator() {
+	m.translator = nil
+	m.clearedtranslator = false
+}
+
+// Where appends a list predicates to the GameDownloadResourceTranslatorMutation builder.
+func (m *GameDownloadResourceTranslatorMutation) Where(ps ...predicate.GameDownloadResourceTranslator) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the GameDownloadResourceTranslatorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GameDownloadResourceTranslatorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GameDownloadResourceTranslator, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *GameDownloadResourceTranslatorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GameDownloadResourceTranslatorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (GameDownloadResourceTranslator).
+func (m *GameDownloadResourceTranslatorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GameDownloadResourceTranslatorMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.resource != nil {
+		fields = append(fields, gamedownloadresourcetranslator.FieldResourceID)
+	}
+	if m.translator != nil {
+		fields = append(fields, gamedownloadresourcetranslator.FieldTranslatorID)
+	}
+	if m.position != nil {
+		fields = append(fields, gamedownloadresourcetranslator.FieldPosition)
+	}
+	if m.created != nil {
+		fields = append(fields, gamedownloadresourcetranslator.FieldCreated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GameDownloadResourceTranslatorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case gamedownloadresourcetranslator.FieldResourceID:
+		return m.ResourceID()
+	case gamedownloadresourcetranslator.FieldTranslatorID:
+		return m.TranslatorID()
+	case gamedownloadresourcetranslator.FieldPosition:
+		return m.Position()
+	case gamedownloadresourcetranslator.FieldCreated:
+		return m.Created()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GameDownloadResourceTranslatorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case gamedownloadresourcetranslator.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case gamedownloadresourcetranslator.FieldTranslatorID:
+		return m.OldTranslatorID(ctx)
+	case gamedownloadresourcetranslator.FieldPosition:
+		return m.OldPosition(ctx)
+	case gamedownloadresourcetranslator.FieldCreated:
+		return m.OldCreated(ctx)
+	}
+	return nil, fmt.Errorf("unknown GameDownloadResourceTranslator field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameDownloadResourceTranslatorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case gamedownloadresourcetranslator.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case gamedownloadresourcetranslator.FieldTranslatorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTranslatorID(v)
+		return nil
+	case gamedownloadresourcetranslator.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPosition(v)
+		return nil
+	case gamedownloadresourcetranslator.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceTranslator field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GameDownloadResourceTranslatorMutation) AddedFields() []string {
+	var fields []string
+	if m.addposition != nil {
+		fields = append(fields, gamedownloadresourcetranslator.FieldPosition)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GameDownloadResourceTranslatorMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case gamedownloadresourcetranslator.FieldPosition:
+		return m.AddedPosition()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameDownloadResourceTranslatorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case gamedownloadresourcetranslator.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPosition(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceTranslator numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GameDownloadResourceTranslatorMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GameDownloadResourceTranslatorMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown GameDownloadResourceTranslator nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GameDownloadResourceTranslatorMutation) ResetField(name string) error {
+	switch name {
+	case gamedownloadresourcetranslator.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case gamedownloadresourcetranslator.FieldTranslatorID:
+		m.ResetTranslatorID()
+		return nil
+	case gamedownloadresourcetranslator.FieldPosition:
+		m.ResetPosition()
+		return nil
+	case gamedownloadresourcetranslator.FieldCreated:
+		m.ResetCreated()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceTranslator field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.resource != nil {
+		edges = append(edges, gamedownloadresourcetranslator.EdgeResource)
+	}
+	if m.translator != nil {
+		edges = append(edges, gamedownloadresourcetranslator.EdgeTranslator)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case gamedownloadresourcetranslator.EdgeResource:
+		if id := m.resource; id != nil {
+			return []ent.Value{*id}
+		}
+	case gamedownloadresourcetranslator.EdgeTranslator:
+		if id := m.translator; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedresource {
+		edges = append(edges, gamedownloadresourcetranslator.EdgeResource)
+	}
+	if m.clearedtranslator {
+		edges = append(edges, gamedownloadresourcetranslator.EdgeTranslator)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GameDownloadResourceTranslatorMutation) EdgeCleared(name string) bool {
+	switch name {
+	case gamedownloadresourcetranslator.EdgeResource:
+		return m.clearedresource
+	case gamedownloadresourcetranslator.EdgeTranslator:
+		return m.clearedtranslator
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GameDownloadResourceTranslatorMutation) ClearEdge(name string) error {
+	switch name {
+	case gamedownloadresourcetranslator.EdgeResource:
+		m.ClearResource()
+		return nil
+	case gamedownloadresourcetranslator.EdgeTranslator:
+		m.ClearTranslator()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceTranslator unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GameDownloadResourceTranslatorMutation) ResetEdge(name string) error {
+	switch name {
+	case gamedownloadresourcetranslator.EdgeResource:
+		m.ResetResource()
+		return nil
+	case gamedownloadresourcetranslator.EdgeTranslator:
+		m.ResetTranslator()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceTranslator edge %s", name)
 }
 
 // GameImageMutation represents an operation that mutates the GameImage nodes in the graph.
@@ -58824,6 +60054,1434 @@ func (m *TagMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Tag edge %s", name)
+}
+
+// TranslatorMutation represents an operation that mutates the Translator nodes in the graph.
+type TranslatorMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	name           *string
+	name_key       *string
+	aliases        *pgvalue.Strings
+	alias_keys     *pgvalue.Strings
+	homepage       *string
+	creator_id     *int
+	addcreator_id  *int
+	created        *time.Time
+	updated        *time.Time
+	clearedFields  map[string]struct{}
+	credits        map[int]struct{}
+	removedcredits map[int]struct{}
+	clearedcredits bool
+	done           bool
+	oldValue       func(context.Context) (*Translator, error)
+	predicates     []predicate.Translator
+}
+
+var _ ent.Mutation = (*TranslatorMutation)(nil)
+
+// translatorOption allows management of the mutation configuration using functional options.
+type translatorOption func(*TranslatorMutation)
+
+// newTranslatorMutation creates new mutation for the Translator entity.
+func newTranslatorMutation(c config, op Op, opts ...translatorOption) *TranslatorMutation {
+	m := &TranslatorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTranslator,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTranslatorID sets the ID field of the mutation.
+func withTranslatorID(id int) translatorOption {
+	return func(m *TranslatorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Translator
+		)
+		m.oldValue = func(ctx context.Context) (*Translator, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Translator.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTranslator sets the old Translator of the mutation.
+func withTranslator(node *Translator) translatorOption {
+	return func(m *TranslatorMutation) {
+		m.oldValue = func(context.Context) (*Translator, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TranslatorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TranslatorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Translator entities.
+func (m *TranslatorMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TranslatorMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TranslatorMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Translator.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *TranslatorMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TranslatorMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TranslatorMutation) ResetName() {
+	m.name = nil
+}
+
+// SetNameKey sets the "name_key" field.
+func (m *TranslatorMutation) SetNameKey(s string) {
+	m.name_key = &s
+}
+
+// NameKey returns the value of the "name_key" field in the mutation.
+func (m *TranslatorMutation) NameKey() (r string, exists bool) {
+	v := m.name_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameKey returns the old "name_key" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldNameKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameKey: %w", err)
+	}
+	return oldValue.NameKey, nil
+}
+
+// ResetNameKey resets all changes to the "name_key" field.
+func (m *TranslatorMutation) ResetNameKey() {
+	m.name_key = nil
+}
+
+// SetAliases sets the "aliases" field.
+func (m *TranslatorMutation) SetAliases(pg pgvalue.Strings) {
+	m.aliases = &pg
+}
+
+// Aliases returns the value of the "aliases" field in the mutation.
+func (m *TranslatorMutation) Aliases() (r pgvalue.Strings, exists bool) {
+	v := m.aliases
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAliases returns the old "aliases" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldAliases(ctx context.Context) (v pgvalue.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAliases is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAliases requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAliases: %w", err)
+	}
+	return oldValue.Aliases, nil
+}
+
+// ClearAliases clears the value of the "aliases" field.
+func (m *TranslatorMutation) ClearAliases() {
+	m.aliases = nil
+	m.clearedFields[translator.FieldAliases] = struct{}{}
+}
+
+// AliasesCleared returns if the "aliases" field was cleared in this mutation.
+func (m *TranslatorMutation) AliasesCleared() bool {
+	_, ok := m.clearedFields[translator.FieldAliases]
+	return ok
+}
+
+// ResetAliases resets all changes to the "aliases" field.
+func (m *TranslatorMutation) ResetAliases() {
+	m.aliases = nil
+	delete(m.clearedFields, translator.FieldAliases)
+}
+
+// SetAliasKeys sets the "alias_keys" field.
+func (m *TranslatorMutation) SetAliasKeys(pg pgvalue.Strings) {
+	m.alias_keys = &pg
+}
+
+// AliasKeys returns the value of the "alias_keys" field in the mutation.
+func (m *TranslatorMutation) AliasKeys() (r pgvalue.Strings, exists bool) {
+	v := m.alias_keys
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAliasKeys returns the old "alias_keys" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldAliasKeys(ctx context.Context) (v pgvalue.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAliasKeys is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAliasKeys requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAliasKeys: %w", err)
+	}
+	return oldValue.AliasKeys, nil
+}
+
+// ClearAliasKeys clears the value of the "alias_keys" field.
+func (m *TranslatorMutation) ClearAliasKeys() {
+	m.alias_keys = nil
+	m.clearedFields[translator.FieldAliasKeys] = struct{}{}
+}
+
+// AliasKeysCleared returns if the "alias_keys" field was cleared in this mutation.
+func (m *TranslatorMutation) AliasKeysCleared() bool {
+	_, ok := m.clearedFields[translator.FieldAliasKeys]
+	return ok
+}
+
+// ResetAliasKeys resets all changes to the "alias_keys" field.
+func (m *TranslatorMutation) ResetAliasKeys() {
+	m.alias_keys = nil
+	delete(m.clearedFields, translator.FieldAliasKeys)
+}
+
+// SetHomepage sets the "homepage" field.
+func (m *TranslatorMutation) SetHomepage(s string) {
+	m.homepage = &s
+}
+
+// Homepage returns the value of the "homepage" field in the mutation.
+func (m *TranslatorMutation) Homepage() (r string, exists bool) {
+	v := m.homepage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHomepage returns the old "homepage" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldHomepage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHomepage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHomepage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHomepage: %w", err)
+	}
+	return oldValue.Homepage, nil
+}
+
+// ClearHomepage clears the value of the "homepage" field.
+func (m *TranslatorMutation) ClearHomepage() {
+	m.homepage = nil
+	m.clearedFields[translator.FieldHomepage] = struct{}{}
+}
+
+// HomepageCleared returns if the "homepage" field was cleared in this mutation.
+func (m *TranslatorMutation) HomepageCleared() bool {
+	_, ok := m.clearedFields[translator.FieldHomepage]
+	return ok
+}
+
+// ResetHomepage resets all changes to the "homepage" field.
+func (m *TranslatorMutation) ResetHomepage() {
+	m.homepage = nil
+	delete(m.clearedFields, translator.FieldHomepage)
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *TranslatorMutation) SetCreatorID(i int) {
+	m.creator_id = &i
+	m.addcreator_id = nil
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *TranslatorMutation) CreatorID() (r int, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldCreatorID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// AddCreatorID adds i to the "creator_id" field.
+func (m *TranslatorMutation) AddCreatorID(i int) {
+	if m.addcreator_id != nil {
+		*m.addcreator_id += i
+	} else {
+		m.addcreator_id = &i
+	}
+}
+
+// AddedCreatorID returns the value that was added to the "creator_id" field in this mutation.
+func (m *TranslatorMutation) AddedCreatorID() (r int, exists bool) {
+	v := m.addcreator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatorID clears the value of the "creator_id" field.
+func (m *TranslatorMutation) ClearCreatorID() {
+	m.creator_id = nil
+	m.addcreator_id = nil
+	m.clearedFields[translator.FieldCreatorID] = struct{}{}
+}
+
+// CreatorIDCleared returns if the "creator_id" field was cleared in this mutation.
+func (m *TranslatorMutation) CreatorIDCleared() bool {
+	_, ok := m.clearedFields[translator.FieldCreatorID]
+	return ok
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *TranslatorMutation) ResetCreatorID() {
+	m.creator_id = nil
+	m.addcreator_id = nil
+	delete(m.clearedFields, translator.FieldCreatorID)
+}
+
+// SetCreated sets the "created" field.
+func (m *TranslatorMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *TranslatorMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *TranslatorMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *TranslatorMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *TranslatorMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the Translator entity.
+// If the Translator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *TranslatorMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// AddCreditIDs adds the "credits" edge to the GameDownloadResourceTranslator entity by ids.
+func (m *TranslatorMutation) AddCreditIDs(ids ...int) {
+	if m.credits == nil {
+		m.credits = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.credits[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCredits clears the "credits" edge to the GameDownloadResourceTranslator entity.
+func (m *TranslatorMutation) ClearCredits() {
+	m.clearedcredits = true
+}
+
+// CreditsCleared reports if the "credits" edge to the GameDownloadResourceTranslator entity was cleared.
+func (m *TranslatorMutation) CreditsCleared() bool {
+	return m.clearedcredits
+}
+
+// RemoveCreditIDs removes the "credits" edge to the GameDownloadResourceTranslator entity by IDs.
+func (m *TranslatorMutation) RemoveCreditIDs(ids ...int) {
+	if m.removedcredits == nil {
+		m.removedcredits = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.credits, ids[i])
+		m.removedcredits[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCredits returns the removed IDs of the "credits" edge to the GameDownloadResourceTranslator entity.
+func (m *TranslatorMutation) RemovedCreditsIDs() (ids []int) {
+	for id := range m.removedcredits {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CreditsIDs returns the "credits" edge IDs in the mutation.
+func (m *TranslatorMutation) CreditsIDs() (ids []int) {
+	for id := range m.credits {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCredits resets all changes to the "credits" edge.
+func (m *TranslatorMutation) ResetCredits() {
+	m.credits = nil
+	m.clearedcredits = false
+	m.removedcredits = nil
+}
+
+// Where appends a list predicates to the TranslatorMutation builder.
+func (m *TranslatorMutation) Where(ps ...predicate.Translator) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TranslatorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TranslatorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Translator, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TranslatorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TranslatorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Translator).
+func (m *TranslatorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TranslatorMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.name != nil {
+		fields = append(fields, translator.FieldName)
+	}
+	if m.name_key != nil {
+		fields = append(fields, translator.FieldNameKey)
+	}
+	if m.aliases != nil {
+		fields = append(fields, translator.FieldAliases)
+	}
+	if m.alias_keys != nil {
+		fields = append(fields, translator.FieldAliasKeys)
+	}
+	if m.homepage != nil {
+		fields = append(fields, translator.FieldHomepage)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, translator.FieldCreatorID)
+	}
+	if m.created != nil {
+		fields = append(fields, translator.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, translator.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TranslatorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case translator.FieldName:
+		return m.Name()
+	case translator.FieldNameKey:
+		return m.NameKey()
+	case translator.FieldAliases:
+		return m.Aliases()
+	case translator.FieldAliasKeys:
+		return m.AliasKeys()
+	case translator.FieldHomepage:
+		return m.Homepage()
+	case translator.FieldCreatorID:
+		return m.CreatorID()
+	case translator.FieldCreated:
+		return m.Created()
+	case translator.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TranslatorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case translator.FieldName:
+		return m.OldName(ctx)
+	case translator.FieldNameKey:
+		return m.OldNameKey(ctx)
+	case translator.FieldAliases:
+		return m.OldAliases(ctx)
+	case translator.FieldAliasKeys:
+		return m.OldAliasKeys(ctx)
+	case translator.FieldHomepage:
+		return m.OldHomepage(ctx)
+	case translator.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case translator.FieldCreated:
+		return m.OldCreated(ctx)
+	case translator.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown Translator field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TranslatorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case translator.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case translator.FieldNameKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameKey(v)
+		return nil
+	case translator.FieldAliases:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAliases(v)
+		return nil
+	case translator.FieldAliasKeys:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAliasKeys(v)
+		return nil
+	case translator.FieldHomepage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHomepage(v)
+		return nil
+	case translator.FieldCreatorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case translator.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case translator.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Translator field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TranslatorMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreator_id != nil {
+		fields = append(fields, translator.FieldCreatorID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TranslatorMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case translator.FieldCreatorID:
+		return m.AddedCreatorID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TranslatorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case translator.FieldCreatorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Translator numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TranslatorMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(translator.FieldAliases) {
+		fields = append(fields, translator.FieldAliases)
+	}
+	if m.FieldCleared(translator.FieldAliasKeys) {
+		fields = append(fields, translator.FieldAliasKeys)
+	}
+	if m.FieldCleared(translator.FieldHomepage) {
+		fields = append(fields, translator.FieldHomepage)
+	}
+	if m.FieldCleared(translator.FieldCreatorID) {
+		fields = append(fields, translator.FieldCreatorID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TranslatorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TranslatorMutation) ClearField(name string) error {
+	switch name {
+	case translator.FieldAliases:
+		m.ClearAliases()
+		return nil
+	case translator.FieldAliasKeys:
+		m.ClearAliasKeys()
+		return nil
+	case translator.FieldHomepage:
+		m.ClearHomepage()
+		return nil
+	case translator.FieldCreatorID:
+		m.ClearCreatorID()
+		return nil
+	}
+	return fmt.Errorf("unknown Translator nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TranslatorMutation) ResetField(name string) error {
+	switch name {
+	case translator.FieldName:
+		m.ResetName()
+		return nil
+	case translator.FieldNameKey:
+		m.ResetNameKey()
+		return nil
+	case translator.FieldAliases:
+		m.ResetAliases()
+		return nil
+	case translator.FieldAliasKeys:
+		m.ResetAliasKeys()
+		return nil
+	case translator.FieldHomepage:
+		m.ResetHomepage()
+		return nil
+	case translator.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case translator.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case translator.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown Translator field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TranslatorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.credits != nil {
+		edges = append(edges, translator.EdgeCredits)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TranslatorMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case translator.EdgeCredits:
+		ids := make([]ent.Value, 0, len(m.credits))
+		for id := range m.credits {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TranslatorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedcredits != nil {
+		edges = append(edges, translator.EdgeCredits)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TranslatorMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case translator.EdgeCredits:
+		ids := make([]ent.Value, 0, len(m.removedcredits))
+		for id := range m.removedcredits {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TranslatorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedcredits {
+		edges = append(edges, translator.EdgeCredits)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TranslatorMutation) EdgeCleared(name string) bool {
+	switch name {
+	case translator.EdgeCredits:
+		return m.clearedcredits
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TranslatorMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Translator unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TranslatorMutation) ResetEdge(name string) error {
+	switch name {
+	case translator.EdgeCredits:
+		m.ResetCredits()
+		return nil
+	}
+	return fmt.Errorf("unknown Translator edge %s", name)
+}
+
+// TranslatorDistinctionMutation represents an operation that mutates the TranslatorDistinction nodes in the graph.
+type TranslatorDistinctionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	low_id        *int
+	addlow_id     *int
+	high_id       *int
+	addhigh_id    *int
+	created       *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*TranslatorDistinction, error)
+	predicates    []predicate.TranslatorDistinction
+}
+
+var _ ent.Mutation = (*TranslatorDistinctionMutation)(nil)
+
+// translatordistinctionOption allows management of the mutation configuration using functional options.
+type translatordistinctionOption func(*TranslatorDistinctionMutation)
+
+// newTranslatorDistinctionMutation creates new mutation for the TranslatorDistinction entity.
+func newTranslatorDistinctionMutation(c config, op Op, opts ...translatordistinctionOption) *TranslatorDistinctionMutation {
+	m := &TranslatorDistinctionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTranslatorDistinction,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTranslatorDistinctionID sets the ID field of the mutation.
+func withTranslatorDistinctionID(id int) translatordistinctionOption {
+	return func(m *TranslatorDistinctionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TranslatorDistinction
+		)
+		m.oldValue = func(ctx context.Context) (*TranslatorDistinction, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TranslatorDistinction.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTranslatorDistinction sets the old TranslatorDistinction of the mutation.
+func withTranslatorDistinction(node *TranslatorDistinction) translatordistinctionOption {
+	return func(m *TranslatorDistinctionMutation) {
+		m.oldValue = func(context.Context) (*TranslatorDistinction, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TranslatorDistinctionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TranslatorDistinctionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TranslatorDistinction entities.
+func (m *TranslatorDistinctionMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TranslatorDistinctionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TranslatorDistinctionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TranslatorDistinction.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetLowID sets the "low_id" field.
+func (m *TranslatorDistinctionMutation) SetLowID(i int) {
+	m.low_id = &i
+	m.addlow_id = nil
+}
+
+// LowID returns the value of the "low_id" field in the mutation.
+func (m *TranslatorDistinctionMutation) LowID() (r int, exists bool) {
+	v := m.low_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLowID returns the old "low_id" field's value of the TranslatorDistinction entity.
+// If the TranslatorDistinction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorDistinctionMutation) OldLowID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLowID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLowID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLowID: %w", err)
+	}
+	return oldValue.LowID, nil
+}
+
+// AddLowID adds i to the "low_id" field.
+func (m *TranslatorDistinctionMutation) AddLowID(i int) {
+	if m.addlow_id != nil {
+		*m.addlow_id += i
+	} else {
+		m.addlow_id = &i
+	}
+}
+
+// AddedLowID returns the value that was added to the "low_id" field in this mutation.
+func (m *TranslatorDistinctionMutation) AddedLowID() (r int, exists bool) {
+	v := m.addlow_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLowID resets all changes to the "low_id" field.
+func (m *TranslatorDistinctionMutation) ResetLowID() {
+	m.low_id = nil
+	m.addlow_id = nil
+}
+
+// SetHighID sets the "high_id" field.
+func (m *TranslatorDistinctionMutation) SetHighID(i int) {
+	m.high_id = &i
+	m.addhigh_id = nil
+}
+
+// HighID returns the value of the "high_id" field in the mutation.
+func (m *TranslatorDistinctionMutation) HighID() (r int, exists bool) {
+	v := m.high_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHighID returns the old "high_id" field's value of the TranslatorDistinction entity.
+// If the TranslatorDistinction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorDistinctionMutation) OldHighID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHighID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHighID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHighID: %w", err)
+	}
+	return oldValue.HighID, nil
+}
+
+// AddHighID adds i to the "high_id" field.
+func (m *TranslatorDistinctionMutation) AddHighID(i int) {
+	if m.addhigh_id != nil {
+		*m.addhigh_id += i
+	} else {
+		m.addhigh_id = &i
+	}
+}
+
+// AddedHighID returns the value that was added to the "high_id" field in this mutation.
+func (m *TranslatorDistinctionMutation) AddedHighID() (r int, exists bool) {
+	v := m.addhigh_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetHighID resets all changes to the "high_id" field.
+func (m *TranslatorDistinctionMutation) ResetHighID() {
+	m.high_id = nil
+	m.addhigh_id = nil
+}
+
+// SetCreated sets the "created" field.
+func (m *TranslatorDistinctionMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *TranslatorDistinctionMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the TranslatorDistinction entity.
+// If the TranslatorDistinction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TranslatorDistinctionMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *TranslatorDistinctionMutation) ResetCreated() {
+	m.created = nil
+}
+
+// Where appends a list predicates to the TranslatorDistinctionMutation builder.
+func (m *TranslatorDistinctionMutation) Where(ps ...predicate.TranslatorDistinction) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TranslatorDistinctionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TranslatorDistinctionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TranslatorDistinction, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TranslatorDistinctionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TranslatorDistinctionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TranslatorDistinction).
+func (m *TranslatorDistinctionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TranslatorDistinctionMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.low_id != nil {
+		fields = append(fields, translatordistinction.FieldLowID)
+	}
+	if m.high_id != nil {
+		fields = append(fields, translatordistinction.FieldHighID)
+	}
+	if m.created != nil {
+		fields = append(fields, translatordistinction.FieldCreated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TranslatorDistinctionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case translatordistinction.FieldLowID:
+		return m.LowID()
+	case translatordistinction.FieldHighID:
+		return m.HighID()
+	case translatordistinction.FieldCreated:
+		return m.Created()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TranslatorDistinctionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case translatordistinction.FieldLowID:
+		return m.OldLowID(ctx)
+	case translatordistinction.FieldHighID:
+		return m.OldHighID(ctx)
+	case translatordistinction.FieldCreated:
+		return m.OldCreated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TranslatorDistinction field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TranslatorDistinctionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case translatordistinction.FieldLowID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLowID(v)
+		return nil
+	case translatordistinction.FieldHighID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHighID(v)
+		return nil
+	case translatordistinction.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TranslatorDistinction field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TranslatorDistinctionMutation) AddedFields() []string {
+	var fields []string
+	if m.addlow_id != nil {
+		fields = append(fields, translatordistinction.FieldLowID)
+	}
+	if m.addhigh_id != nil {
+		fields = append(fields, translatordistinction.FieldHighID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TranslatorDistinctionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case translatordistinction.FieldLowID:
+		return m.AddedLowID()
+	case translatordistinction.FieldHighID:
+		return m.AddedHighID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TranslatorDistinctionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case translatordistinction.FieldLowID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLowID(v)
+		return nil
+	case translatordistinction.FieldHighID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHighID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TranslatorDistinction numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TranslatorDistinctionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TranslatorDistinctionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TranslatorDistinctionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TranslatorDistinction nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TranslatorDistinctionMutation) ResetField(name string) error {
+	switch name {
+	case translatordistinction.FieldLowID:
+		m.ResetLowID()
+		return nil
+	case translatordistinction.FieldHighID:
+		m.ResetHighID()
+		return nil
+	case translatordistinction.FieldCreated:
+		m.ResetCreated()
+		return nil
+	}
+	return fmt.Errorf("unknown TranslatorDistinction field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TranslatorDistinctionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TranslatorDistinctionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TranslatorDistinctionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TranslatorDistinctionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TranslatorDistinctionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TranslatorDistinctionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TranslatorDistinctionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TranslatorDistinction unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TranslatorDistinctionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TranslatorDistinction edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

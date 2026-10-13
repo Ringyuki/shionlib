@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"slices"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -55,8 +58,10 @@ func run(ctx context.Context, args []string) error {
 		return inspect(ctx, args[1:])
 	case "recheck":
 		return recheck(ctx, args[1:])
+	case "describe":
+		return describe(ctx, args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit], recheck [file id ...])", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit], recheck [file id ...], describe [apply])", command)
 	}
 }
 
@@ -178,6 +183,34 @@ func recheck(ctx context.Context, args []string) error {
 		logger.Info("check resumed", "resource_id", unit.ResourceID, "files", unit.Files)
 	}
 	logger.Info("recheck finished", "resumed", len(resumed))
+	return err
+}
+
+func describe(ctx context.Context, args []string) error {
+	apply := slices.Equal(args, []string{"apply"})
+	if len(args) > 0 && !apply {
+		return fmt.Errorf("describe takes nothing to report what it reads, or apply to write it, got %q", strings.Join(args, " "))
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	logger := bootstrap.NewLogger(cfg)
+	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = infra.Close(context.WithoutCancel(ctx)) }()
+	modules := bootstrap.BuildModules(infra)
+	if err := modules.Settings.Reload(ctx); err != nil {
+		return err
+	}
+	tally, err := modules.Legacy.Describe(ctx, apply)
+	for _, name := range slices.Sorted(maps.Keys(tally.Translators)) {
+		logger.Info("translator read", "name", name, "resources", tally.Translators[name])
+	}
+	logger.Info("description finished", "applied", apply, "resources", tally.Resources, "translations", tally.Translations,
+		"translators", len(tally.Translators), "editions", tally.Editions, "discs", tally.Discs, "notes_cleared", tally.NotesCleared)
 	return err
 }
 

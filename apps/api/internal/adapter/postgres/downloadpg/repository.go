@@ -13,6 +13,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -21,10 +22,12 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 )
 
 const (
 	resourceGameFK        = "game_download_resources_game_id_fkey"
+	creditTranslatorFK    = "game_download_resource_translators_translator_id_fkey"
 	fileResourceFK        = "game_download_resource_files_game_download_resource_id_fkey"
 	fileSessionFK         = "game_download_resource_files_upload_session_id_fkey"
 	uniqueFileSession     = "game_download_resource_files_upload_session_id_key"
@@ -57,9 +60,14 @@ func (r *Repository) ListGameResources(ctx context.Context, gameID int) ([]downl
 	return r.gameResources(ctx, rows)
 }
 
+func creditedTranslators(q *ent.GameDownloadResourceTranslatorQuery) {
+	q.Order(ent.Asc(gamedownloadresourcetranslator.FieldPosition), ent.Asc(gamedownloadresourcetranslator.FieldID)).WithTranslator()
+}
+
 func withFileDetails(query *ent.GameDownloadResourceQuery) *ent.GameDownloadResourceQuery {
 	return query.
 		WithCreator(userpg.SelectSummary).
+		WithTranslatorCredits(creditedTranslators).
 		WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
 			q.Order(ent.Asc(gamedownloadresourcefile.FieldID)).
 				WithCreator(userpg.SelectSummary).
@@ -185,6 +193,7 @@ func (r *Repository) listListed(ctx context.Context, excludeRated bool, page dow
 		Offset(page.Offset()).
 		Limit(page.Size).
 		WithCreator(userpg.SelectSummary).
+		WithTranslatorCredits(creditedTranslators).
 		WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
 			q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldGameDownloadResourceID).
 				Order(ent.Asc(gamedownloadresourcefile.FieldID))
@@ -212,6 +221,13 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 		SetPlatform(textArray(in.Platforms)).
 		SetLanguage(textArray(in.Languages)).
 		SetNillableNote(in.Note).
+		SetNillableTranslation((*string)(in.Info.Translation)).
+		SetNillablePatchVersion(in.Info.PatchVersion).
+		SetNillableReleaseURL(in.Info.ReleaseURL).
+		SetNillableEdition((*string)(in.Info.Edition)).
+		SetNillableEditionName(in.Info.EditionName).
+		SetNillableForm((*string)(in.Info.Form)).
+		SetExtras(textArray(in.Info.Extras)).
 		SetCreatorID(in.CreatorID)
 	if in.Simulator != nil {
 		create.SetSimulator(gamedownloadresource.Simulator(*in.Simulator))
@@ -223,29 +239,57 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 	case err != nil:
 		return download.Resource{}, fmt.Errorf("create download resource: %w", err)
 	}
+	if err := r.credit(ctx, row.ID, in.Info.Translators); err != nil {
+		return download.Resource{}, err
+	}
+	resource := toResource(row)
+	resource.Info.Translators = append(resource.Info.Translators, in.Info.Translators...)
+	return resource, nil
+}
+
+func (r *Repository) credit(ctx context.Context, resourceID int, translators []translator.Ref) error {
+	return credit(ctx, r.db(ctx), resourceID, translators)
+}
+
+func credit(ctx context.Context, db *ent.Client, resourceID int, translators []translator.Ref) error {
+	if len(translators) == 0 {
+		return nil
+	}
+	builders := make([]*ent.GameDownloadResourceTranslatorCreate, len(translators))
+	for position, credited := range translators {
+		builders[position] = db.GameDownloadResourceTranslator.Create().SetResourceID(resourceID).SetTranslatorID(credited.ID).SetPosition(position)
+	}
+	err := db.GameDownloadResourceTranslator.CreateBulk(builders...).Exec(ctx)
+	switch {
+	case postgres.IsForeignKeyViolation(err, creditTranslatorFK):
+		return translator.ErrNotFound
+	case err != nil:
+		return fmt.Errorf("credit translators of download resource %d: %w", resourceID, err)
+	}
+	return nil
+}
+
+func (r *Repository) resource(ctx context.Context, id int, lock bool) (download.Resource, error) {
+	query := r.db(ctx).GameDownloadResource.Query().Where(gamedownloadresource.ID(id)).WithTranslatorCredits(creditedTranslators)
+	if lock {
+		query = query.ForUpdate()
+	}
+	row, err := query.Only(ctx)
+	if postgres.IsNotFound(err) {
+		return download.Resource{}, download.ErrResourceNotFound
+	}
+	if err != nil {
+		return download.Resource{}, fmt.Errorf("read download resource %d: %w", id, err)
+	}
 	return toResource(row), nil
 }
 
 func (r *Repository) GetResource(ctx context.Context, id int) (download.Resource, error) {
-	row, err := r.db(ctx).GameDownloadResource.Get(ctx, id)
-	if postgres.IsNotFound(err) {
-		return download.Resource{}, download.ErrResourceNotFound
-	}
-	if err != nil {
-		return download.Resource{}, fmt.Errorf("get download resource %d: %w", id, err)
-	}
-	return toResource(row), nil
+	return r.resource(ctx, id, false)
 }
 
 func (r *Repository) LockResource(ctx context.Context, id int) (download.Resource, error) {
-	row, err := r.db(ctx).GameDownloadResource.Query().Where(gamedownloadresource.ID(id)).ForUpdate().Only(ctx)
-	if postgres.IsNotFound(err) {
-		return download.Resource{}, download.ErrResourceNotFound
-	}
-	if err != nil {
-		return download.Resource{}, fmt.Errorf("lock download resource %d: %w", id, err)
-	}
-	return toResource(row), nil
+	return r.resource(ctx, id, true)
 }
 
 func (r *Repository) UpdateResource(ctx context.Context, id int, changes download.ResourceChanges) error {
@@ -268,10 +312,43 @@ func (r *Repository) UpdateResource(ctx context.Context, id int, changes downloa
 	if changes.Note != nil {
 		update.SetNote(*changes.Note)
 	}
+	info := changes.Info
+	setOrClear(info.Translation != nil, func() { update.SetTranslation(string(*info.Translation)) }, func() { update.ClearTranslation() })
+	setOrClear(info.PatchVersion != nil, func() { update.SetPatchVersion(*info.PatchVersion) }, func() { update.ClearPatchVersion() })
+	setOrClear(info.ReleaseURL != nil, func() { update.SetReleaseURL(*info.ReleaseURL) }, func() { update.ClearReleaseURL() })
+	setOrClear(info.Edition != nil, func() { update.SetEdition(string(*info.Edition)) }, func() { update.ClearEdition() })
+	setOrClear(info.EditionName != nil, func() { update.SetEditionName(*info.EditionName) }, func() { update.ClearEditionName() })
+	setOrClear(info.Form != nil, func() { update.SetForm(string(*info.Form)) }, func() { update.ClearForm() })
+	update.SetExtras(textArray(info.Extras))
 	if err := update.Exec(ctx); err != nil {
 		return fmt.Errorf("update download resource %d: %w", id, err)
 	}
+	if _, err := r.db(ctx).GameDownloadResourceTranslator.Delete().Where(gamedownloadresourcetranslator.ResourceID(id)).Exec(ctx); err != nil {
+		return fmt.Errorf("clear translators of download resource %d: %w", id, err)
+	}
+	return r.credit(ctx, id, info.Translators)
+}
+
+func (r *Repository) SetForm(ctx context.Context, id int, form download.Form) error {
+	current, err := r.db(ctx).GameDownloadResource.Query().Where(gamedownloadresource.ID(id)).Select(gamedownloadresource.FieldUpdated).Only(ctx)
+	if postgres.IsNotFound(err) {
+		return download.ErrResourceNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("read download resource %d: %w", id, err)
+	}
+	if err := r.db(ctx).GameDownloadResource.UpdateOneID(id).SetForm(string(form)).SetUpdated(current.Updated).Exec(ctx); err != nil {
+		return fmt.Errorf("set the form of download resource %d: %w", id, err)
+	}
 	return nil
+}
+
+func setOrClear(present bool, set, clear func()) {
+	if present {
+		set()
+		return
+	}
+	clear()
 }
 
 func (r *Repository) PublishIfReady(ctx context.Context, id int, at time.Time) (bool, error) {

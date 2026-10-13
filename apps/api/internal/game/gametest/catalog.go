@@ -11,13 +11,14 @@ import (
 )
 
 type Entry struct {
-	Detail       game.Detail
-	Views        int
-	Hidden       bool
-	HasResources bool
-	Resources    game.ResourceSummary
-	DeveloperIDs []int
-	CharacterIDs []int
+	Detail        game.Detail
+	Views         int
+	Hidden        bool
+	HasResources  bool
+	Resources     game.ResourceSummary
+	DeveloperIDs  []int
+	CharacterIDs  []int
+	TranslatorIDs []int
 }
 
 type Catalog struct {
@@ -82,6 +83,9 @@ func (c *Catalog) List(_ context.Context, filter game.ListFilter, page game.Page
 			continue
 		}
 		if filter.CharacterID != nil && !slices.Contains(entry.CharacterIDs, *filter.CharacterID) {
+			continue
+		}
+		if filter.TranslatorID != nil && !slices.Contains(entry.TranslatorIDs, *filter.TranslatorID) {
 			continue
 		}
 		if filter.RequiresPublicResource() && entry.Resources.Count == 0 {

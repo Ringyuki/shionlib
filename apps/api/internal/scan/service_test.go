@@ -541,6 +541,9 @@ func TestAnApprovedFileGetsTheRecordOfWhatTheCheckFound(t *testing.T) {
 		t.Fatalf("recorded %d inspections", len(f.inspections.Drafts))
 	}
 	draft := f.inspections.Drafts[0]
+	if len(f.repo.Discs) != 0 {
+		t.Fatalf("an archive without a disc image reports none: %v", f.repo.Discs)
+	}
 	if draft.ResourceID != 10 || draft.Status != inspection.StatusReady || !draft.Verified {
 		t.Fatalf("unexpected draft %+v", draft)
 	}
@@ -616,6 +619,9 @@ func TestAnArchiveSevenZipCannotUnpackPassesWithWhatCouldNotBeScanned(t *testing
 	}
 	if !entryNamed(draft, "disc.iso").Unreadable || !entryNamed(draft, "bonus.zip").Unreadable || len(f.inspections.Previews) != 0 {
 		t.Fatalf("what could not be taken out is not read: %v %v", tree(draft), f.inspections.Previews)
+	}
+	if !slices.Equal(f.repo.Discs, []int{10}) {
+		t.Fatalf("a disc image in the archive is reported for its resource: %v", f.repo.Discs)
 	}
 }
 

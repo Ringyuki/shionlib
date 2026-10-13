@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
@@ -138,6 +139,12 @@ func filterPredicates(filter game.ListFilter) []predicate.Game {
 	}
 	if filter.CharacterID != nil {
 		predicates = append(predicates, entgame.HasCharactersWith(gamecharacterrelation.CharacterID(*filter.CharacterID)))
+	}
+	if filter.TranslatorID != nil {
+		predicates = append(predicates, entgame.HasDownloadResourcesWith(
+			PublicResource(),
+			gamedownloadresource.HasTranslatorCreditsWith(gamedownloadresourcetranslator.TranslatorID(*filter.TranslatorID)),
+		))
 	}
 	if len(filter.Tags) > 0 {
 		predicates = append(predicates, entgame.HasTagsWith(tagNamed(filter.Tags)))

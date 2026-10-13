@@ -381,6 +381,18 @@ func (f GameDownloadResourceReportFunc) Mutate(ctx context.Context, m ent.Mutati
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameDownloadResourceReportMutation", m)
 }
 
+// The GameDownloadResourceTranslatorFunc type is an adapter to allow the use of ordinary
+// function as GameDownloadResourceTranslator mutator.
+type GameDownloadResourceTranslatorFunc func(context.Context, *ent.GameDownloadResourceTranslatorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameDownloadResourceTranslatorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.GameDownloadResourceTranslatorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameDownloadResourceTranslatorMutation", m)
+}
+
 // The GameImageFunc type is an adapter to allow the use of ordinary
 // function as GameImage mutator.
 type GameImageFunc func(context.Context, *ent.GameImageMutation) (ent.Value, error)
@@ -595,6 +607,30 @@ func (f TagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TagMutation", m)
+}
+
+// The TranslatorFunc type is an adapter to allow the use of ordinary
+// function as Translator mutator.
+type TranslatorFunc func(context.Context, *ent.TranslatorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TranslatorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TranslatorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TranslatorMutation", m)
+}
+
+// The TranslatorDistinctionFunc type is an adapter to allow the use of ordinary
+// function as TranslatorDistinction mutator.
+type TranslatorDistinctionFunc func(context.Context, *ent.TranslatorDistinctionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TranslatorDistinctionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TranslatorDistinctionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TranslatorDistinctionMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

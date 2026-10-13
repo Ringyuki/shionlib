@@ -122,6 +122,7 @@ type checkLine struct {
 	inspections *inspection.Service
 	previews    *inspection.PreviewService
 	visible     *inspectiontest.Resources
+	files       *scantest.MemoryRepository
 	events      *downloadtest.Recorder
 	now         time.Time
 }
@@ -139,6 +140,7 @@ func newCheckLine(t *testing.T, binary string) checkLine {
 	stored := inspectiontest.NewPreviewStore()
 	visible := &inspectiontest.Resources{Visible: map[int][]int{}}
 	events := &downloadtest.Recorder{}
+	files := scantest.NewMemoryRepository(clock)
 	scans := scan.NewService(scan.Deps{
 		Repo:        scanpg.NewRepository(db.Ent),
 		Archives:    archives,
@@ -146,7 +148,7 @@ func newCheckLine(t *testing.T, binary string) checkLine {
 		Workspace:   workspace,
 		Contents:    scan.NewContentService(scan.ContentDeps{Archives: archives, Names: zipnames.NewReader(), Discs: discimage.NewReader(), Workspace: workspace, Spool: &scantest.Spool{Room: 1 << 30}, Scanner: scanner}),
 		Inspections: inspection.NewRecordService(inspectionRepo, stored, imaging.NewTranscoder(), tx, clock),
-		Files:       scantest.NewMemoryRepository(clock),
+		Files:       files,
 		Activities:  events,
 		Messages:    events,
 		Banner:      &scantest.Banner{},
@@ -165,6 +167,7 @@ func newCheckLine(t *testing.T, binary string) checkLine {
 		inspections: inspection.NewService(inspectionRepo, visible),
 		previews:    inspection.NewPreviewService(inspectionRepo, visible, stored),
 		visible:     visible,
+		files:       files,
 		events:      events,
 		now:         now,
 	}
@@ -189,6 +192,7 @@ func (l checkLine) upload(t *testing.T, path string) (int, int) {
 		SetFileStatus(download.FileOnServer).
 		SetCreatorID(creator).
 		SaveX(ctx)
+	l.files.SeedFile(scan.PendingFile{ID: uploaded.ID, ResourceID: resource.ID})
 	return resource.ID, uploaded.ID
 }
 
@@ -546,6 +550,9 @@ func TestDiscImagesInsideAnUploadAreReadLikeFolders(t *testing.T) {
 	found := views[0]
 	if found.Totals.Files != 5 || found.Totals.Folders != 1 || found.Totals.Discs != 2 || found.Totals.DiscFiles != 5 || found.Scan.Scanned != 1 {
 		t.Fatalf("unexpected totals %+v scan %+v", found.Totals, found.Scan)
+	}
+	if !slices.Equal(line.files.Discs, []int{resourceID}) {
+		t.Fatalf("the resource is told that it holds disc images: %v", line.files.Discs)
 	}
 	if len(found.Discs) != 2 {
 		t.Fatalf("unexpected disc images %+v", found.Discs)

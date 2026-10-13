@@ -30,6 +30,7 @@ type MemoryRepository struct {
 	ratedGames    map[int]bool
 	gameTitles    map[int]string
 	Strikes       map[int]int
+	Discs         map[int]bool
 	GameDownloads map[int]int
 }
 
@@ -44,6 +45,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		ratedGames:    map[int]bool{},
 		gameTitles:    map[int]string{},
 		Strikes:       map[int]int{},
+		Discs:         map[int]bool{},
 		GameDownloads: map[int]int{},
 	}
 }
@@ -362,6 +364,7 @@ func (r *MemoryRepository) CreateResource(_ context.Context, in download.NewReso
 		Languages: slices.Clone(in.Languages),
 		Simulator: in.Simulator,
 		Note:      in.Note,
+		Info:      cloneInfo(in.Info),
 		CreatorID: in.CreatorID,
 		Created:   r.now(),
 		Updated:   r.now(),
@@ -433,14 +436,67 @@ func (r *MemoryRepository) UpdateResource(_ context.Context, id int, changes dow
 	if changes.Note != nil {
 		resource.Note = changes.Note
 	}
+	resource.Info = cloneInfo(changes.Info)
 	r.resources[id] = resource
 	return nil
+}
+
+func cloneInfo(info download.Info) download.Info {
+	info.Translators = slices.Clone(info.Translators)
+	info.Extras = slices.Clone(info.Extras)
+	return info
 }
 
 func (r *MemoryRepository) SetResourceStatus(_ context.Context, id, status int, updated time.Time) error {
 	return r.mutateResource(id, func(res *download.Resource) {
 		res.Status = status
 		res.Updated = updated
+	})
+}
+
+func (r *MemoryRepository) SetForm(_ context.Context, id int, form download.Form) error {
+	return r.mutateResource(id, func(res *download.Resource) { res.Info.Form = &form })
+}
+
+func (r *MemoryRepository) ListLegacy(_ context.Context, afterID, limit int) ([]download.LegacyResource, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var out []download.LegacyResource
+	for _, resource := range r.sortedResources() {
+		if resource.ID <= afterID || len(out) == limit {
+			continue
+		}
+		out = append(out, download.LegacyResource{
+			ID:        resource.ID,
+			CreatorID: resource.CreatorID,
+			Languages: slices.Clone(resource.Languages),
+			Note:      resource.Note,
+			FileNames: r.names(resource.ID),
+			Discs:     r.Discs[resource.ID],
+			Info:      cloneInfo(resource.Info),
+		})
+	}
+	return out, nil
+}
+
+func (r *MemoryRepository) Describe(_ context.Context, id int, description download.LegacyDescription) error {
+	return r.mutateResource(id, func(res *download.Resource) {
+		if description.Translation != nil {
+			res.Info.Translation = description.Translation
+			res.Info.Translators = slices.Clone(description.Translators)
+		}
+		if description.ReleaseURL != nil {
+			res.Info.ReleaseURL = description.ReleaseURL
+		}
+		if description.Edition != nil {
+			res.Info.Edition = description.Edition
+		}
+		if description.Form != nil {
+			res.Info.Form = description.Form
+		}
+		if description.ClearNote {
+			res.Note = nil
+		}
 	})
 }
 

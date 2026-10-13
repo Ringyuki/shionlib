@@ -14,6 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/searchpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/sitemappg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/translatorpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/bangumiredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/gameredis"
@@ -25,11 +26,13 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sitemap"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/characterhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/developerhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/searchhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/sitemaphttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/translatorhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/gamejobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/searchjobs"
 )
@@ -77,6 +80,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		gamehttp.NewBangumiHandler(bangumiLink, shared.Builder, cfg.App.SiteURL, shared.Logger),
 		characterhttp.NewHandler(character.NewService(characters, shared.Transactor), shared.Builder),
 		developerhttp.NewHandler(developer.NewService(developers, shared.Transactor), shared.Builder),
+		translatorhttp.NewHandler(translator.NewService(translatorpg.NewRepository(infra.Ent)), shared.Builder),
 		searchhttp.NewHandler(searchService, shared.Builder),
 		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache, shared.Now), cfg.App.SiteURL),
 	)

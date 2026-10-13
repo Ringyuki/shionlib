@@ -108,6 +108,12 @@ func TestListResolvesVisibilityAndResourcePreference(t *testing.T) {
 	if !slices.Equal(ids(cards), []int{9}) || f.catalog.LastFilter.OnlyWithResources {
 		t.Fatalf("developer pages show every game: %v %+v", ids(cards), f.catalog.LastFilter)
 	}
+
+	f.catalog.Put(gametest.Entry{Detail: game.Detail{ID: 10}, TranslatorIDs: []int{4}})
+	cards, _, _ = f.service.List(ctx, guest, game.ListQuery{Page: page, TranslatorID: ptr(4)})
+	if !slices.Equal(ids(cards), []int{10}) || f.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("translator pages list the games they are credited on: %v %+v", ids(cards), f.catalog.LastFilter)
+	}
 }
 
 func TestListForwardsFilters(t *testing.T) {

@@ -48,12 +48,25 @@ type downloadFileDTO struct {
 	InspectionID         *int                     `json:"inspection_id" doc:"The record of what the check found in the file; volumes of one archive share it. Null until the file has been read"`
 }
 
+type downloadTranslatorDTO struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type downloadResourceDTO struct {
 	ID              int                     `json:"id"`
 	Platform        []string                `json:"platform"`
 	Language        []string                `json:"language"`
 	Simulator       *string                 `json:"simulator"`
 	Note            *string                 `json:"note"`
+	Translation     *download.Translation   `json:"translation" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; null when nobody has said"`
+	Translators     []downloadTranslatorDTO `json:"translators" doc:"The translators credited, in the order they were given; empty unless the translation is by a group"`
+	PatchVersion    *string                 `json:"patch_version"`
+	ReleaseURL      *string                 `json:"release_url" doc:"The page the translation was released on"`
+	Edition         *download.Edition       `json:"edition" enum:"download,package,steam"`
+	EditionName     *string                 `json:"edition_name"`
+	Form            *download.Form          `json:"form" enum:"disc,installer,portable" doc:"How the game is packed; null when nobody has said"`
+	Extras          []string                `json:"extras" enum:"save,bonus"`
 	Downloads       int                     `json:"downloads"`
 	Creator         userhttp.UserSummaryDTO `json:"creator"`
 	PublishedAt     *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
@@ -76,14 +89,14 @@ type downloadEventFileDTO struct {
 }
 
 type downloadEventChangeDTO struct {
-	Field download.EventField `json:"field" enum:"platforms,languages,simulator,note"`
+	Field download.EventField `json:"field" enum:"platforms,languages,simulator,note,translation,translators,patch_version,release_url,edition,edition_name,form,extras"`
 	Old   []string            `json:"old" doc:"Values before the edit; empty when the field was unset"`
 	New   []string            `json:"new" doc:"Values after the edit; empty when the field was cleared"`
 }
 
 type downloadEventDTO struct {
 	ID      int                      `json:"id"`
-	Kind    download.EventKind       `json:"kind" enum:"published,file_replaced,file_renamed,file_added,file_removed,edited,review_cleared" doc:"What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan"`
+	Kind    download.EventKind       `json:"kind" enum:"published,file_replaced,file_renamed,file_added,file_removed,edited,review_cleared,disc_found" doc:"What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc"`
 	Actor   *userhttp.UserSummaryDTO `json:"actor" doc:"Who did it; null when the account no longer exists"`
 	Created time.Time                `json:"created"`
 	Files   []downloadEventFileDTO   `json:"files" doc:"Files the resource was published with, or the file added or removed"`
@@ -249,6 +262,14 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 		Language:       nonNil(r.Languages),
 		Simulator:      r.Simulator,
 		Note:           r.Note,
+		Translation:    r.Info.Translation,
+		Translators:    make([]downloadTranslatorDTO, len(r.Info.Translators)),
+		PatchVersion:   r.Info.PatchVersion,
+		ReleaseURL:     r.Info.ReleaseURL,
+		Edition:        r.Info.Edition,
+		EditionName:    r.Info.EditionName,
+		Form:           r.Info.Form,
+		Extras:         nonNil(r.Info.Extras),
 		Downloads:      r.Downloads,
 		Creator:        userhttp.ToUserSummary(r.Creator, now),
 		PublishedAt:    r.PublishedAt,
@@ -257,6 +278,9 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 		Comments:       r.Comments,
 		Files:          make([]downloadFileDTO, len(r.Files)),
 		MissingVolumes: []string{},
+	}
+	for i, credited := range r.Info.Translators {
+		out.Translators[i] = downloadTranslatorDTO(credited)
 	}
 	if r.Awaited != nil {
 		out.MissingVolumes, out.VolumesDeadline = r.Awaited.Names, &r.Awaited.Deadline

@@ -35,6 +35,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
@@ -53,6 +54,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
@@ -833,16 +836,40 @@ func init() {
 	gamedownloadresourceDescNote := gamedownloadresourceFields[6].Descriptor()
 	// gamedownloadresource.NoteValidator is a validator for the "note" field. It is called by the builders before save.
 	gamedownloadresource.NoteValidator = gamedownloadresourceDescNote.Validators[0].(func(string) error)
+	// gamedownloadresourceDescTranslation is the schema descriptor for translation field.
+	gamedownloadresourceDescTranslation := gamedownloadresourceFields[7].Descriptor()
+	// gamedownloadresource.TranslationValidator is a validator for the "translation" field. It is called by the builders before save.
+	gamedownloadresource.TranslationValidator = gamedownloadresourceDescTranslation.Validators[0].(func(string) error)
+	// gamedownloadresourceDescPatchVersion is the schema descriptor for patch_version field.
+	gamedownloadresourceDescPatchVersion := gamedownloadresourceFields[8].Descriptor()
+	// gamedownloadresource.PatchVersionValidator is a validator for the "patch_version" field. It is called by the builders before save.
+	gamedownloadresource.PatchVersionValidator = gamedownloadresourceDescPatchVersion.Validators[0].(func(string) error)
+	// gamedownloadresourceDescReleaseURL is the schema descriptor for release_url field.
+	gamedownloadresourceDescReleaseURL := gamedownloadresourceFields[9].Descriptor()
+	// gamedownloadresource.ReleaseURLValidator is a validator for the "release_url" field. It is called by the builders before save.
+	gamedownloadresource.ReleaseURLValidator = gamedownloadresourceDescReleaseURL.Validators[0].(func(string) error)
+	// gamedownloadresourceDescEdition is the schema descriptor for edition field.
+	gamedownloadresourceDescEdition := gamedownloadresourceFields[10].Descriptor()
+	// gamedownloadresource.EditionValidator is a validator for the "edition" field. It is called by the builders before save.
+	gamedownloadresource.EditionValidator = gamedownloadresourceDescEdition.Validators[0].(func(string) error)
+	// gamedownloadresourceDescEditionName is the schema descriptor for edition_name field.
+	gamedownloadresourceDescEditionName := gamedownloadresourceFields[11].Descriptor()
+	// gamedownloadresource.EditionNameValidator is a validator for the "edition_name" field. It is called by the builders before save.
+	gamedownloadresource.EditionNameValidator = gamedownloadresourceDescEditionName.Validators[0].(func(string) error)
+	// gamedownloadresourceDescForm is the schema descriptor for form field.
+	gamedownloadresourceDescForm := gamedownloadresourceFields[12].Descriptor()
+	// gamedownloadresource.FormValidator is a validator for the "form" field. It is called by the builders before save.
+	gamedownloadresource.FormValidator = gamedownloadresourceDescForm.Validators[0].(func(string) error)
 	// gamedownloadresourceDescDownloads is the schema descriptor for downloads field.
-	gamedownloadresourceDescDownloads := gamedownloadresourceFields[7].Descriptor()
+	gamedownloadresourceDescDownloads := gamedownloadresourceFields[14].Descriptor()
 	// gamedownloadresource.DefaultDownloads holds the default value on creation for the downloads field.
 	gamedownloadresource.DefaultDownloads = gamedownloadresourceDescDownloads.Default.(int)
 	// gamedownloadresourceDescCreated is the schema descriptor for created field.
-	gamedownloadresourceDescCreated := gamedownloadresourceFields[11].Descriptor()
+	gamedownloadresourceDescCreated := gamedownloadresourceFields[18].Descriptor()
 	// gamedownloadresource.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresource.DefaultCreated = gamedownloadresourceDescCreated.Default.(func() time.Time)
 	// gamedownloadresourceDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourceDescUpdated := gamedownloadresourceFields[12].Descriptor()
+	gamedownloadresourceDescUpdated := gamedownloadresourceFields[19].Descriptor()
 	// gamedownloadresource.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -923,6 +950,16 @@ func init() {
 	gamedownloadresourcereport.DefaultUpdated = gamedownloadresourcereportDescUpdated.Default.(func() time.Time)
 	// gamedownloadresourcereport.UpdateDefaultUpdated holds the default value on update for the updated field.
 	gamedownloadresourcereport.UpdateDefaultUpdated = gamedownloadresourcereportDescUpdated.UpdateDefault.(func() time.Time)
+	gamedownloadresourcetranslatorFields := schema.GameDownloadResourceTranslator{}.Fields()
+	_ = gamedownloadresourcetranslatorFields
+	// gamedownloadresourcetranslatorDescPosition is the schema descriptor for position field.
+	gamedownloadresourcetranslatorDescPosition := gamedownloadresourcetranslatorFields[3].Descriptor()
+	// gamedownloadresourcetranslator.DefaultPosition holds the default value on creation for the position field.
+	gamedownloadresourcetranslator.DefaultPosition = gamedownloadresourcetranslatorDescPosition.Default.(int)
+	// gamedownloadresourcetranslatorDescCreated is the schema descriptor for created field.
+	gamedownloadresourcetranslatorDescCreated := gamedownloadresourcetranslatorFields[4].Descriptor()
+	// gamedownloadresourcetranslator.DefaultCreated holds the default value on creation for the created field.
+	gamedownloadresourcetranslator.DefaultCreated = gamedownloadresourcetranslatorDescCreated.Default.(func() time.Time)
 	gameimageFields := schema.GameImage{}.Fields()
 	_ = gameimageFields
 	// gameimageDescCreated is the schema descriptor for created field.
@@ -1333,6 +1370,36 @@ func init() {
 	tag.DefaultUpdated = tagDescUpdated.Default.(func() time.Time)
 	// tag.UpdateDefaultUpdated holds the default value on update for the updated field.
 	tag.UpdateDefaultUpdated = tagDescUpdated.UpdateDefault.(func() time.Time)
+	translatorFields := schema.Translator{}.Fields()
+	_ = translatorFields
+	// translatorDescName is the schema descriptor for name field.
+	translatorDescName := translatorFields[1].Descriptor()
+	// translator.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	translator.NameValidator = translatorDescName.Validators[0].(func(string) error)
+	// translatorDescNameKey is the schema descriptor for name_key field.
+	translatorDescNameKey := translatorFields[2].Descriptor()
+	// translator.NameKeyValidator is a validator for the "name_key" field. It is called by the builders before save.
+	translator.NameKeyValidator = translatorDescNameKey.Validators[0].(func(string) error)
+	// translatorDescHomepage is the schema descriptor for homepage field.
+	translatorDescHomepage := translatorFields[5].Descriptor()
+	// translator.HomepageValidator is a validator for the "homepage" field. It is called by the builders before save.
+	translator.HomepageValidator = translatorDescHomepage.Validators[0].(func(string) error)
+	// translatorDescCreated is the schema descriptor for created field.
+	translatorDescCreated := translatorFields[7].Descriptor()
+	// translator.DefaultCreated holds the default value on creation for the created field.
+	translator.DefaultCreated = translatorDescCreated.Default.(func() time.Time)
+	// translatorDescUpdated is the schema descriptor for updated field.
+	translatorDescUpdated := translatorFields[8].Descriptor()
+	// translator.DefaultUpdated holds the default value on creation for the updated field.
+	translator.DefaultUpdated = translatorDescUpdated.Default.(func() time.Time)
+	// translator.UpdateDefaultUpdated holds the default value on update for the updated field.
+	translator.UpdateDefaultUpdated = translatorDescUpdated.UpdateDefault.(func() time.Time)
+	translatordistinctionFields := schema.TranslatorDistinction{}.Fields()
+	_ = translatordistinctionFields
+	// translatordistinctionDescCreated is the schema descriptor for created field.
+	translatordistinctionDescCreated := translatordistinctionFields[3].Descriptor()
+	// translatordistinction.DefaultCreated holds the default value on creation for the created field.
+	translatordistinction.DefaultCreated = translatordistinctionDescCreated.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

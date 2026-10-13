@@ -81,6 +81,41 @@ func Note(v string) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldNote, v))
 }
 
+// Translation applies equality check predicate on the "translation" field. It's identical to TranslationEQ.
+func Translation(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldTranslation, v))
+}
+
+// PatchVersion applies equality check predicate on the "patch_version" field. It's identical to PatchVersionEQ.
+func PatchVersion(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldPatchVersion, v))
+}
+
+// ReleaseURL applies equality check predicate on the "release_url" field. It's identical to ReleaseURLEQ.
+func ReleaseURL(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldReleaseURL, v))
+}
+
+// Edition applies equality check predicate on the "edition" field. It's identical to EditionEQ.
+func Edition(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldEdition, v))
+}
+
+// EditionName applies equality check predicate on the "edition_name" field. It's identical to EditionNameEQ.
+func EditionName(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldEditionName, v))
+}
+
+// Form applies equality check predicate on the "form" field. It's identical to FormEQ.
+func Form(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldForm, v))
+}
+
+// Extras applies equality check predicate on the "extras" field. It's identical to ExtrasEQ.
+func Extras(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldExtras, v))
+}
+
 // Downloads applies equality check predicate on the "downloads" field. It's identical to DownloadsEQ.
 func Downloads(v int) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldDownloads, v))
@@ -374,6 +409,506 @@ func NoteEqualFold(v string) predicate.GameDownloadResource {
 // NoteContainsFold applies the ContainsFold predicate on the "note" field.
 func NoteContainsFold(v string) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldNote, v))
+}
+
+// TranslationEQ applies the EQ predicate on the "translation" field.
+func TranslationEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldTranslation, v))
+}
+
+// TranslationNEQ applies the NEQ predicate on the "translation" field.
+func TranslationNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldTranslation, v))
+}
+
+// TranslationIn applies the In predicate on the "translation" field.
+func TranslationIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldTranslation, vs...))
+}
+
+// TranslationNotIn applies the NotIn predicate on the "translation" field.
+func TranslationNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldTranslation, vs...))
+}
+
+// TranslationGT applies the GT predicate on the "translation" field.
+func TranslationGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldTranslation, v))
+}
+
+// TranslationGTE applies the GTE predicate on the "translation" field.
+func TranslationGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldTranslation, v))
+}
+
+// TranslationLT applies the LT predicate on the "translation" field.
+func TranslationLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldTranslation, v))
+}
+
+// TranslationLTE applies the LTE predicate on the "translation" field.
+func TranslationLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldTranslation, v))
+}
+
+// TranslationContains applies the Contains predicate on the "translation" field.
+func TranslationContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldTranslation, v))
+}
+
+// TranslationHasPrefix applies the HasPrefix predicate on the "translation" field.
+func TranslationHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldTranslation, v))
+}
+
+// TranslationHasSuffix applies the HasSuffix predicate on the "translation" field.
+func TranslationHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldTranslation, v))
+}
+
+// TranslationIsNil applies the IsNil predicate on the "translation" field.
+func TranslationIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldTranslation))
+}
+
+// TranslationNotNil applies the NotNil predicate on the "translation" field.
+func TranslationNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldTranslation))
+}
+
+// TranslationEqualFold applies the EqualFold predicate on the "translation" field.
+func TranslationEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldTranslation, v))
+}
+
+// TranslationContainsFold applies the ContainsFold predicate on the "translation" field.
+func TranslationContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldTranslation, v))
+}
+
+// PatchVersionEQ applies the EQ predicate on the "patch_version" field.
+func PatchVersionEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldPatchVersion, v))
+}
+
+// PatchVersionNEQ applies the NEQ predicate on the "patch_version" field.
+func PatchVersionNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldPatchVersion, v))
+}
+
+// PatchVersionIn applies the In predicate on the "patch_version" field.
+func PatchVersionIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldPatchVersion, vs...))
+}
+
+// PatchVersionNotIn applies the NotIn predicate on the "patch_version" field.
+func PatchVersionNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldPatchVersion, vs...))
+}
+
+// PatchVersionGT applies the GT predicate on the "patch_version" field.
+func PatchVersionGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldPatchVersion, v))
+}
+
+// PatchVersionGTE applies the GTE predicate on the "patch_version" field.
+func PatchVersionGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldPatchVersion, v))
+}
+
+// PatchVersionLT applies the LT predicate on the "patch_version" field.
+func PatchVersionLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldPatchVersion, v))
+}
+
+// PatchVersionLTE applies the LTE predicate on the "patch_version" field.
+func PatchVersionLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldPatchVersion, v))
+}
+
+// PatchVersionContains applies the Contains predicate on the "patch_version" field.
+func PatchVersionContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldPatchVersion, v))
+}
+
+// PatchVersionHasPrefix applies the HasPrefix predicate on the "patch_version" field.
+func PatchVersionHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldPatchVersion, v))
+}
+
+// PatchVersionHasSuffix applies the HasSuffix predicate on the "patch_version" field.
+func PatchVersionHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldPatchVersion, v))
+}
+
+// PatchVersionIsNil applies the IsNil predicate on the "patch_version" field.
+func PatchVersionIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldPatchVersion))
+}
+
+// PatchVersionNotNil applies the NotNil predicate on the "patch_version" field.
+func PatchVersionNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldPatchVersion))
+}
+
+// PatchVersionEqualFold applies the EqualFold predicate on the "patch_version" field.
+func PatchVersionEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldPatchVersion, v))
+}
+
+// PatchVersionContainsFold applies the ContainsFold predicate on the "patch_version" field.
+func PatchVersionContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldPatchVersion, v))
+}
+
+// ReleaseURLEQ applies the EQ predicate on the "release_url" field.
+func ReleaseURLEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldReleaseURL, v))
+}
+
+// ReleaseURLNEQ applies the NEQ predicate on the "release_url" field.
+func ReleaseURLNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldReleaseURL, v))
+}
+
+// ReleaseURLIn applies the In predicate on the "release_url" field.
+func ReleaseURLIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldReleaseURL, vs...))
+}
+
+// ReleaseURLNotIn applies the NotIn predicate on the "release_url" field.
+func ReleaseURLNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldReleaseURL, vs...))
+}
+
+// ReleaseURLGT applies the GT predicate on the "release_url" field.
+func ReleaseURLGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldReleaseURL, v))
+}
+
+// ReleaseURLGTE applies the GTE predicate on the "release_url" field.
+func ReleaseURLGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldReleaseURL, v))
+}
+
+// ReleaseURLLT applies the LT predicate on the "release_url" field.
+func ReleaseURLLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldReleaseURL, v))
+}
+
+// ReleaseURLLTE applies the LTE predicate on the "release_url" field.
+func ReleaseURLLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldReleaseURL, v))
+}
+
+// ReleaseURLContains applies the Contains predicate on the "release_url" field.
+func ReleaseURLContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldReleaseURL, v))
+}
+
+// ReleaseURLHasPrefix applies the HasPrefix predicate on the "release_url" field.
+func ReleaseURLHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldReleaseURL, v))
+}
+
+// ReleaseURLHasSuffix applies the HasSuffix predicate on the "release_url" field.
+func ReleaseURLHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldReleaseURL, v))
+}
+
+// ReleaseURLIsNil applies the IsNil predicate on the "release_url" field.
+func ReleaseURLIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldReleaseURL))
+}
+
+// ReleaseURLNotNil applies the NotNil predicate on the "release_url" field.
+func ReleaseURLNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldReleaseURL))
+}
+
+// ReleaseURLEqualFold applies the EqualFold predicate on the "release_url" field.
+func ReleaseURLEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldReleaseURL, v))
+}
+
+// ReleaseURLContainsFold applies the ContainsFold predicate on the "release_url" field.
+func ReleaseURLContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldReleaseURL, v))
+}
+
+// EditionEQ applies the EQ predicate on the "edition" field.
+func EditionEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldEdition, v))
+}
+
+// EditionNEQ applies the NEQ predicate on the "edition" field.
+func EditionNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldEdition, v))
+}
+
+// EditionIn applies the In predicate on the "edition" field.
+func EditionIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldEdition, vs...))
+}
+
+// EditionNotIn applies the NotIn predicate on the "edition" field.
+func EditionNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldEdition, vs...))
+}
+
+// EditionGT applies the GT predicate on the "edition" field.
+func EditionGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldEdition, v))
+}
+
+// EditionGTE applies the GTE predicate on the "edition" field.
+func EditionGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldEdition, v))
+}
+
+// EditionLT applies the LT predicate on the "edition" field.
+func EditionLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldEdition, v))
+}
+
+// EditionLTE applies the LTE predicate on the "edition" field.
+func EditionLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldEdition, v))
+}
+
+// EditionContains applies the Contains predicate on the "edition" field.
+func EditionContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldEdition, v))
+}
+
+// EditionHasPrefix applies the HasPrefix predicate on the "edition" field.
+func EditionHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldEdition, v))
+}
+
+// EditionHasSuffix applies the HasSuffix predicate on the "edition" field.
+func EditionHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldEdition, v))
+}
+
+// EditionIsNil applies the IsNil predicate on the "edition" field.
+func EditionIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldEdition))
+}
+
+// EditionNotNil applies the NotNil predicate on the "edition" field.
+func EditionNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldEdition))
+}
+
+// EditionEqualFold applies the EqualFold predicate on the "edition" field.
+func EditionEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldEdition, v))
+}
+
+// EditionContainsFold applies the ContainsFold predicate on the "edition" field.
+func EditionContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldEdition, v))
+}
+
+// EditionNameEQ applies the EQ predicate on the "edition_name" field.
+func EditionNameEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldEditionName, v))
+}
+
+// EditionNameNEQ applies the NEQ predicate on the "edition_name" field.
+func EditionNameNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldEditionName, v))
+}
+
+// EditionNameIn applies the In predicate on the "edition_name" field.
+func EditionNameIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldEditionName, vs...))
+}
+
+// EditionNameNotIn applies the NotIn predicate on the "edition_name" field.
+func EditionNameNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldEditionName, vs...))
+}
+
+// EditionNameGT applies the GT predicate on the "edition_name" field.
+func EditionNameGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldEditionName, v))
+}
+
+// EditionNameGTE applies the GTE predicate on the "edition_name" field.
+func EditionNameGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldEditionName, v))
+}
+
+// EditionNameLT applies the LT predicate on the "edition_name" field.
+func EditionNameLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldEditionName, v))
+}
+
+// EditionNameLTE applies the LTE predicate on the "edition_name" field.
+func EditionNameLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldEditionName, v))
+}
+
+// EditionNameContains applies the Contains predicate on the "edition_name" field.
+func EditionNameContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldEditionName, v))
+}
+
+// EditionNameHasPrefix applies the HasPrefix predicate on the "edition_name" field.
+func EditionNameHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldEditionName, v))
+}
+
+// EditionNameHasSuffix applies the HasSuffix predicate on the "edition_name" field.
+func EditionNameHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldEditionName, v))
+}
+
+// EditionNameIsNil applies the IsNil predicate on the "edition_name" field.
+func EditionNameIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldEditionName))
+}
+
+// EditionNameNotNil applies the NotNil predicate on the "edition_name" field.
+func EditionNameNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldEditionName))
+}
+
+// EditionNameEqualFold applies the EqualFold predicate on the "edition_name" field.
+func EditionNameEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldEditionName, v))
+}
+
+// EditionNameContainsFold applies the ContainsFold predicate on the "edition_name" field.
+func EditionNameContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldEditionName, v))
+}
+
+// FormEQ applies the EQ predicate on the "form" field.
+func FormEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldForm, v))
+}
+
+// FormNEQ applies the NEQ predicate on the "form" field.
+func FormNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldForm, v))
+}
+
+// FormIn applies the In predicate on the "form" field.
+func FormIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldForm, vs...))
+}
+
+// FormNotIn applies the NotIn predicate on the "form" field.
+func FormNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldForm, vs...))
+}
+
+// FormGT applies the GT predicate on the "form" field.
+func FormGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldForm, v))
+}
+
+// FormGTE applies the GTE predicate on the "form" field.
+func FormGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldForm, v))
+}
+
+// FormLT applies the LT predicate on the "form" field.
+func FormLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldForm, v))
+}
+
+// FormLTE applies the LTE predicate on the "form" field.
+func FormLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldForm, v))
+}
+
+// FormContains applies the Contains predicate on the "form" field.
+func FormContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldForm, v))
+}
+
+// FormHasPrefix applies the HasPrefix predicate on the "form" field.
+func FormHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldForm, v))
+}
+
+// FormHasSuffix applies the HasSuffix predicate on the "form" field.
+func FormHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldForm, v))
+}
+
+// FormIsNil applies the IsNil predicate on the "form" field.
+func FormIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldForm))
+}
+
+// FormNotNil applies the NotNil predicate on the "form" field.
+func FormNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldForm))
+}
+
+// FormEqualFold applies the EqualFold predicate on the "form" field.
+func FormEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldForm, v))
+}
+
+// FormContainsFold applies the ContainsFold predicate on the "form" field.
+func FormContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldForm, v))
+}
+
+// ExtrasEQ applies the EQ predicate on the "extras" field.
+func ExtrasEQ(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldExtras, v))
+}
+
+// ExtrasNEQ applies the NEQ predicate on the "extras" field.
+func ExtrasNEQ(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldExtras, v))
+}
+
+// ExtrasIn applies the In predicate on the "extras" field.
+func ExtrasIn(vs ...pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldExtras, vs...))
+}
+
+// ExtrasNotIn applies the NotIn predicate on the "extras" field.
+func ExtrasNotIn(vs ...pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldExtras, vs...))
+}
+
+// ExtrasGT applies the GT predicate on the "extras" field.
+func ExtrasGT(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldExtras, v))
+}
+
+// ExtrasGTE applies the GTE predicate on the "extras" field.
+func ExtrasGTE(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldExtras, v))
+}
+
+// ExtrasLT applies the LT predicate on the "extras" field.
+func ExtrasLT(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldExtras, v))
+}
+
+// ExtrasLTE applies the LTE predicate on the "extras" field.
+func ExtrasLTE(v pgvalue.Strings) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldExtras, v))
+}
+
+// ExtrasIsNil applies the IsNil predicate on the "extras" field.
+func ExtrasIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldExtras))
+}
+
+// ExtrasNotNil applies the NotNil predicate on the "extras" field.
+func ExtrasNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldExtras))
 }
 
 // DownloadsEQ applies the EQ predicate on the "downloads" field.
@@ -792,6 +1327,29 @@ func HasEvents() predicate.GameDownloadResource {
 func HasEventsWith(preds ...predicate.GameDownloadResourceEvent) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(func(s *sql.Selector) {
 		step := newEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTranslatorCredits applies the HasEdge predicate on the "translator_credits" edge.
+func HasTranslatorCredits() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TranslatorCreditsTable, TranslatorCreditsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTranslatorCreditsWith applies the HasEdge predicate on the "translator_credits" edge with a given conditions (other predicates).
+func HasTranslatorCreditsWith(preds ...predicate.GameDownloadResourceTranslator) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := newTranslatorCreditsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

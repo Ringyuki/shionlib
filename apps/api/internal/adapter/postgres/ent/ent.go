@@ -43,6 +43,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
@@ -61,6 +62,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
@@ -160,6 +163,7 @@ func checkColumn(t, c string) error {
 			gamedownloadresourcefile.Table:        gamedownloadresourcefile.ValidColumn,
 			gamedownloadresourcefilehistory.Table: gamedownloadresourcefilehistory.ValidColumn,
 			gamedownloadresourcereport.Table:      gamedownloadresourcereport.ValidColumn,
+			gamedownloadresourcetranslator.Table:  gamedownloadresourcetranslator.ValidColumn,
 			gameimage.Table:                       gameimage.ValidColumn,
 			gamelink.Table:                        gamelink.ValidColumn,
 			gamerelation.Table:                    gamerelation.ValidColumn,
@@ -178,6 +182,8 @@ func checkColumn(t, c string) error {
 			sitedailystat.Table:                   sitedailystat.ValidColumn,
 			sponsororder.Table:                    sponsororder.ValidColumn,
 			tag.Table:                             tag.ValidColumn,
+			translator.Table:                      translator.ValidColumn,
+			translatordistinction.Table:           translatordistinction.ValidColumn,
 			user.Table:                            user.ValidColumn,
 			userbannedrecord.Table:                userbannedrecord.ValidColumn,
 			userfieldpermission.Table:             userfieldpermission.ValidColumn,

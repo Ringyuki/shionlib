@@ -26,6 +26,13 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.Enum("simulator").Values("KRKR", "ONS", "ARTEMIS", "OTHER").SchemaType(pgEnum("game_download_resource_simulator")).Optional().Nillable(),
 		field.Other("language", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.String("note").MaxRuneLen(255).SchemaType(varchar(255)).Optional().Nillable(),
+		field.String("translation").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
+		field.String("patch_version").MaxRuneLen(32).SchemaType(varchar(32)).Optional().Nillable(),
+		field.String("release_url").MaxRuneLen(512).SchemaType(varchar(512)).Optional().Nillable(),
+		field.String("edition").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
+		field.String("edition_name").MaxRuneLen(64).SchemaType(varchar(64)).Optional().Nillable(),
+		field.String("form").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
+		field.Other("extras", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
 		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("check_retry_at").SchemaType(timestamp3).Optional().Nillable(),
@@ -45,6 +52,7 @@ func (GameDownloadResource) Edges() []ent.Edge {
 		edge.To("comments", Comment.Type).StorageKey(edge.Symbol("comments_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("inspections", Inspection.Type).StorageKey(edge.Symbol("file_inspections_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("events", GameDownloadResourceEvent.Type).StorageKey(edge.Symbol("game_download_resource_events_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("translator_credits", GameDownloadResourceTranslator.Type).StorageKey(edge.Symbol("game_download_resource_translators_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

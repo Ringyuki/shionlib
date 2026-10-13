@@ -10,20 +10,21 @@ import (
 )
 
 type listGamesInput struct {
-	Page        int      `query:"page" default:"1" minimum:"1" doc:"1-based page number"`
-	PageSize    int      `query:"pageSize" default:"10" minimum:"1" maximum:"100" doc:"Items per page"`
-	DeveloperID int      `query:"developer_id" doc:"Only games credited to this developer; the resource setting is ignored"`
-	CharacterID int      `query:"character_id" doc:"Only games featuring this character; the resource setting is ignored"`
-	Tags        []string `query:"filter[tags][],explode" doc:"Games carrying any of these tags"`
-	ExcludeTags []string `query:"filter[exclude_tags][],explode" doc:"Games carrying none of these tags"`
-	Years       []int    `query:"filter[years][],explode" doc:"Release years (1900-2100)"`
-	Months      []int    `query:"filter[months][],explode" doc:"Release months (1-12); combined with years or the current year"`
-	Platforms   []string `query:"filter[platforms][],explode" doc:"Games available on any of these platforms"`
-	SortBy      string   `query:"filter[sort_by]" enum:"release_date,views,downloads,hot_score,resource_updated" doc:"Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one"`
-	SortOrder   string   `query:"filter[sort_order]" enum:"asc,desc" doc:"Sort direction, desc by default"`
-	StartDate   string   `query:"filter[start_date]" doc:"Released on or after this date (ISO 8601)"`
-	EndDate     string   `query:"filter[end_date]" doc:"Released on or before this date (ISO 8601)"`
-	Resources   string   `query:"resources" enum:"any,required" doc:"Which games are listed by their resources, whatever the viewer's setting: any also lists games without resources, as when picking a game to upload to, and required lists only games that have one; the viewer's setting decides when omitted"`
+	Page         int      `query:"page" default:"1" minimum:"1" doc:"1-based page number"`
+	PageSize     int      `query:"pageSize" default:"10" minimum:"1" maximum:"100" doc:"Items per page"`
+	DeveloperID  int      `query:"developer_id" doc:"Only games credited to this developer; the resource setting is ignored"`
+	CharacterID  int      `query:"character_id" doc:"Only games featuring this character; the resource setting is ignored"`
+	TranslatorID int      `query:"translator_id" doc:"Only games with a published resource credited to this translator; the resource setting is ignored"`
+	Tags         []string `query:"filter[tags][],explode" doc:"Games carrying any of these tags"`
+	ExcludeTags  []string `query:"filter[exclude_tags][],explode" doc:"Games carrying none of these tags"`
+	Years        []int    `query:"filter[years][],explode" doc:"Release years (1900-2100)"`
+	Months       []int    `query:"filter[months][],explode" doc:"Release months (1-12); combined with years or the current year"`
+	Platforms    []string `query:"filter[platforms][],explode" doc:"Games available on any of these platforms"`
+	SortBy       string   `query:"filter[sort_by]" enum:"release_date,views,downloads,hot_score,resource_updated" doc:"Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one"`
+	SortOrder    string   `query:"filter[sort_order]" enum:"asc,desc" doc:"Sort direction, desc by default"`
+	StartDate    string   `query:"filter[start_date]" doc:"Released on or after this date (ISO 8601)"`
+	EndDate      string   `query:"filter[end_date]" doc:"Released on or before this date (ISO 8601)"`
+	Resources    string   `query:"resources" enum:"any,required" doc:"Which games are listed by their resources, whatever the viewer's setting: any also lists games without resources, as when picking a game to upload to, and required lists only games that have one; the viewer's setting decides when omitted"`
 
 	startDate *time.Time
 	endDate   *time.Time
@@ -95,6 +96,9 @@ func (in *listGamesInput) query() game.ListQuery {
 	}
 	if in.CharacterID != 0 {
 		query.CharacterID = &in.CharacterID
+	}
+	if in.TranslatorID != 0 {
+		query.TranslatorID = &in.TranslatorID
 	}
 	return query
 }

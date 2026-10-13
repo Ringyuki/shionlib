@@ -32,6 +32,20 @@ type GameDownloadResource struct {
 	Language pgvalue.Strings `json:"language,omitempty"`
 	// Note holds the value of the "note" field.
 	Note *string `json:"note,omitempty"`
+	// Translation holds the value of the "translation" field.
+	Translation *string `json:"translation,omitempty"`
+	// PatchVersion holds the value of the "patch_version" field.
+	PatchVersion *string `json:"patch_version,omitempty"`
+	// ReleaseURL holds the value of the "release_url" field.
+	ReleaseURL *string `json:"release_url,omitempty"`
+	// Edition holds the value of the "edition" field.
+	Edition *string `json:"edition,omitempty"`
+	// EditionName holds the value of the "edition_name" field.
+	EditionName *string `json:"edition_name,omitempty"`
+	// Form holds the value of the "form" field.
+	Form *string `json:"form,omitempty"`
+	// Extras holds the value of the "extras" field.
+	Extras pgvalue.Strings `json:"extras,omitempty"`
 	// Downloads holds the value of the "downloads" field.
 	Downloads int `json:"downloads,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
@@ -68,9 +82,11 @@ type GameDownloadResourceEdges struct {
 	Inspections []*Inspection `json:"inspections,omitempty"`
 	// Events holds the value of the events edge.
 	Events []*GameDownloadResourceEvent `json:"events,omitempty"`
+	// TranslatorCredits holds the value of the translator_credits edge.
+	TranslatorCredits []*GameDownloadResourceTranslator `json:"translator_credits,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // GameOrErr returns the Game value or an error if the edge
@@ -149,16 +165,25 @@ func (e GameDownloadResourceEdges) EventsOrErr() ([]*GameDownloadResourceEvent, 
 	return nil, &NotLoadedError{edge: "events"}
 }
 
+// TranslatorCreditsOrErr returns the TranslatorCredits value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameDownloadResourceEdges) TranslatorCreditsOrErr() ([]*GameDownloadResourceTranslator, error) {
+	if e.loadedTypes[8] {
+		return e.TranslatorCredits, nil
+	}
+	return nil, &NotLoadedError{edge: "translator_credits"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage:
+		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage, gamedownloadresource.FieldExtras:
 			values[i] = new(pgvalue.Strings)
 		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote:
+		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote, gamedownloadresource.FieldTranslation, gamedownloadresource.FieldPatchVersion, gamedownloadresource.FieldReleaseURL, gamedownloadresource.FieldEdition, gamedownloadresource.FieldEditionName, gamedownloadresource.FieldForm:
 			values[i] = new(sql.NullString)
 		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCheckRetryAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -220,6 +245,54 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.Note = new(string)
 				*_m.Note = value.String
+			}
+		case gamedownloadresource.FieldTranslation:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field translation", values[i])
+			} else if value.Valid {
+				_m.Translation = new(string)
+				*_m.Translation = value.String
+			}
+		case gamedownloadresource.FieldPatchVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field patch_version", values[i])
+			} else if value.Valid {
+				_m.PatchVersion = new(string)
+				*_m.PatchVersion = value.String
+			}
+		case gamedownloadresource.FieldReleaseURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field release_url", values[i])
+			} else if value.Valid {
+				_m.ReleaseURL = new(string)
+				*_m.ReleaseURL = value.String
+			}
+		case gamedownloadresource.FieldEdition:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field edition", values[i])
+			} else if value.Valid {
+				_m.Edition = new(string)
+				*_m.Edition = value.String
+			}
+		case gamedownloadresource.FieldEditionName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field edition_name", values[i])
+			} else if value.Valid {
+				_m.EditionName = new(string)
+				*_m.EditionName = value.String
+			}
+		case gamedownloadresource.FieldForm:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field form", values[i])
+			} else if value.Valid {
+				_m.Form = new(string)
+				*_m.Form = value.String
+			}
+		case gamedownloadresource.FieldExtras:
+			if value, ok := values[i].(*pgvalue.Strings); !ok {
+				return fmt.Errorf("unexpected type %T for field extras", values[i])
+			} else if value != nil {
+				_m.Extras = *value
 			}
 		case gamedownloadresource.FieldDownloads:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -312,6 +385,11 @@ func (_m *GameDownloadResource) QueryEvents() *GameDownloadResourceEventQuery {
 	return NewGameDownloadResourceClient(_m.config).QueryEvents(_m)
 }
 
+// QueryTranslatorCredits queries the "translator_credits" edge of the GameDownloadResource entity.
+func (_m *GameDownloadResource) QueryTranslatorCredits() *GameDownloadResourceTranslatorQuery {
+	return NewGameDownloadResourceClient(_m.config).QueryTranslatorCredits(_m)
+}
+
 // Update returns a builder for updating this GameDownloadResource.
 // Note that you need to call GameDownloadResource.Unwrap() before calling this method if this GameDownloadResource
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -356,6 +434,39 @@ func (_m *GameDownloadResource) String() string {
 		builder.WriteString("note=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	if v := _m.Translation; v != nil {
+		builder.WriteString("translation=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.PatchVersion; v != nil {
+		builder.WriteString("patch_version=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.ReleaseURL; v != nil {
+		builder.WriteString("release_url=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.Edition; v != nil {
+		builder.WriteString("edition=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.EditionName; v != nil {
+		builder.WriteString("edition_name=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.Form; v != nil {
+		builder.WriteString("form=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("extras=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Extras))
 	builder.WriteString(", ")
 	builder.WriteString("downloads=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Downloads))

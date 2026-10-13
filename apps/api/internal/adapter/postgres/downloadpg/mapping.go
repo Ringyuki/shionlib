@@ -7,6 +7,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -18,6 +19,7 @@ func toResource(row *ent.GameDownloadResource) download.Resource {
 		Platforms:   nonNilStrings(row.Platform),
 		Languages:   nonNilStrings(row.Language),
 		Note:        row.Note,
+		Info:        toInfo(row),
 		Downloads:   row.Downloads,
 		PublishedAt: row.PublishedAt,
 		CreatorID:   row.CreatorID,
@@ -29,6 +31,34 @@ func toResource(row *ent.GameDownloadResource) download.Resource {
 		resource.Simulator = &simulator
 	}
 	return resource
+}
+
+func toInfo(row *ent.GameDownloadResource) download.Info {
+	info := download.Info{
+		Translators:  make([]translator.Ref, 0, len(row.Edges.TranslatorCredits)),
+		PatchVersion: row.PatchVersion,
+		ReleaseURL:   row.ReleaseURL,
+		EditionName:  row.EditionName,
+		Extras:       nonNilStrings(row.Extras),
+	}
+	if row.Translation != nil {
+		translation := download.Translation(*row.Translation)
+		info.Translation = &translation
+	}
+	if row.Edition != nil {
+		edition := download.Edition(*row.Edition)
+		info.Edition = &edition
+	}
+	if row.Form != nil {
+		form := download.Form(*row.Form)
+		info.Form = &form
+	}
+	for _, credit := range row.Edges.TranslatorCredits {
+		if credit.Edges.Translator != nil {
+			info.Translators = append(info.Translators, translator.Ref{ID: credit.Edges.Translator.ID, Name: credit.Edges.Translator.Name})
+		}
+	}
+	return info
 }
 
 func toFiles(rows []*ent.GameDownloadResourceFile) []download.File {

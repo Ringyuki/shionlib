@@ -11,6 +11,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/developerpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/translatorpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/walkthroughpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
@@ -21,11 +22,13 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/adminhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/characterhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/commenthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/developerhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/translatorhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/walkthroughhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 )
@@ -68,6 +71,7 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 		gamehttp.NewAdminHandler(games, shared.Builder),
 		characterhttp.NewAdminHandler(character.NewAdminService(characterpg.NewRepository(infra.Ent)), shared.Builder),
 		developerhttp.NewAdminHandler(developer.NewAdminService(developerpg.NewRepository(infra.Ent)), shared.Builder),
+		translatorhttp.NewAdminHandler(translator.NewAdminService(translatorpg.NewRepository(infra.Ent), translatorpg.NewAdminStore(infra.Ent), shared.Transactor), shared.Builder),
 		adminhttp.NewStatsHandler(admin.NewStatsService(admin.StatsDeps{
 			Store:    adminpg.NewStatsStore(infra.Ent),
 			Cache:    shared.Cache,

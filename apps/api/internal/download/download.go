@@ -65,6 +65,7 @@ type Resource struct {
 	Languages   []string
 	Simulator   *string
 	Note        *string
+	Info        Info
 	Downloads   int
 	CreatorID   int
 	PublishedAt *time.Time
@@ -203,6 +204,7 @@ type NewResource struct {
 	Languages []string
 	Simulator *string
 	Note      *string
+	Info      Info
 	CreatorID int
 }
 
@@ -246,6 +248,15 @@ type ResourceChanges struct {
 	Languages []string
 	Simulator *string
 	Note      *string
+	Info      Info
+}
+
+type EditInput struct {
+	Platforms []string
+	Languages []string
+	Simulator *string
+	Note      *string
+	Info      InfoInput
 }
 
 type FileUpload struct {
@@ -258,6 +269,7 @@ type CreateInput struct {
 	Languages []string
 	Simulator *string
 	Note      *string
+	Info      InfoInput
 	Files     []FileUpload
 }
 

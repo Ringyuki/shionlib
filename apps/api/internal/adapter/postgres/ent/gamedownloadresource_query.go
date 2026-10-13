@@ -19,6 +19,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -28,19 +29,20 @@ import (
 // GameDownloadResourceQuery is the builder for querying GameDownloadResource entities.
 type GameDownloadResourceQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []gamedownloadresource.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.GameDownloadResource
-	withGame             *GameQuery
-	withFiles            *GameDownloadResourceFileQuery
-	withReports          *GameDownloadResourceReportQuery
-	withMalwareScanCases *MalwareScanCaseQuery
-	withCreator          *UserQuery
-	withComments         *CommentQuery
-	withInspections      *InspectionQuery
-	withEvents           *GameDownloadResourceEventQuery
-	modifiers            []func(*sql.Selector)
+	ctx                   *QueryContext
+	order                 []gamedownloadresource.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.GameDownloadResource
+	withGame              *GameQuery
+	withFiles             *GameDownloadResourceFileQuery
+	withReports           *GameDownloadResourceReportQuery
+	withMalwareScanCases  *MalwareScanCaseQuery
+	withCreator           *UserQuery
+	withComments          *CommentQuery
+	withInspections       *InspectionQuery
+	withEvents            *GameDownloadResourceEventQuery
+	withTranslatorCredits *GameDownloadResourceTranslatorQuery
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -253,6 +255,28 @@ func (_q *GameDownloadResourceQuery) QueryEvents() *GameDownloadResourceEventQue
 	return query
 }
 
+// QueryTranslatorCredits chains the current query on the "translator_credits" edge.
+func (_q *GameDownloadResourceQuery) QueryTranslatorCredits() *GameDownloadResourceTranslatorQuery {
+	query := (&GameDownloadResourceTranslatorClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
+			sqlgraph.To(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.TranslatorCreditsTable, gamedownloadresource.TranslatorCreditsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first GameDownloadResource entity from the query.
 // Returns a *NotFoundError when no GameDownloadResource was found.
 func (_q *GameDownloadResourceQuery) First(ctx context.Context) (*GameDownloadResource, error) {
@@ -440,19 +464,20 @@ func (_q *GameDownloadResourceQuery) Clone() *GameDownloadResourceQuery {
 		return nil
 	}
 	return &GameDownloadResourceQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]gamedownloadresource.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.GameDownloadResource{}, _q.predicates...),
-		withGame:             _q.withGame.Clone(),
-		withFiles:            _q.withFiles.Clone(),
-		withReports:          _q.withReports.Clone(),
-		withMalwareScanCases: _q.withMalwareScanCases.Clone(),
-		withCreator:          _q.withCreator.Clone(),
-		withComments:         _q.withComments.Clone(),
-		withInspections:      _q.withInspections.Clone(),
-		withEvents:           _q.withEvents.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]gamedownloadresource.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.GameDownloadResource{}, _q.predicates...),
+		withGame:              _q.withGame.Clone(),
+		withFiles:             _q.withFiles.Clone(),
+		withReports:           _q.withReports.Clone(),
+		withMalwareScanCases:  _q.withMalwareScanCases.Clone(),
+		withCreator:           _q.withCreator.Clone(),
+		withComments:          _q.withComments.Clone(),
+		withInspections:       _q.withInspections.Clone(),
+		withEvents:            _q.withEvents.Clone(),
+		withTranslatorCredits: _q.withTranslatorCredits.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -548,6 +573,17 @@ func (_q *GameDownloadResourceQuery) WithEvents(opts ...func(*GameDownloadResour
 	return _q
 }
 
+// WithTranslatorCredits tells the query-builder to eager-load the nodes that are connected to
+// the "translator_credits" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GameDownloadResourceQuery) WithTranslatorCredits(opts ...func(*GameDownloadResourceTranslatorQuery)) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceTranslatorClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTranslatorCredits = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -626,7 +662,7 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 	var (
 		nodes       = []*GameDownloadResource{}
 		_spec       = _q.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			_q.withGame != nil,
 			_q.withFiles != nil,
 			_q.withReports != nil,
@@ -635,6 +671,7 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 			_q.withComments != nil,
 			_q.withInspections != nil,
 			_q.withEvents != nil,
+			_q.withTranslatorCredits != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -714,6 +751,15 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 			func(n *GameDownloadResource) { n.Edges.Events = []*GameDownloadResourceEvent{} },
 			func(n *GameDownloadResource, e *GameDownloadResourceEvent) {
 				n.Edges.Events = append(n.Edges.Events, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTranslatorCredits; query != nil {
+		if err := _q.loadTranslatorCredits(ctx, query, nodes,
+			func(n *GameDownloadResource) { n.Edges.TranslatorCredits = []*GameDownloadResourceTranslator{} },
+			func(n *GameDownloadResource, e *GameDownloadResourceTranslator) {
+				n.Edges.TranslatorCredits = append(n.Edges.TranslatorCredits, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -950,6 +996,36 @@ func (_q *GameDownloadResourceQuery) loadEvents(ctx context.Context, query *Game
 	}
 	query.Where(predicate.GameDownloadResourceEvent(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(gamedownloadresource.EventsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ResourceID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *GameDownloadResourceQuery) loadTranslatorCredits(ctx context.Context, query *GameDownloadResourceTranslatorQuery, nodes []*GameDownloadResource, init func(*GameDownloadResource), assign func(*GameDownloadResource, *GameDownloadResourceTranslator)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GameDownloadResource)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(gamedownloadresourcetranslator.FieldResourceID)
+	}
+	query.Where(predicate.GameDownloadResourceTranslator(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(gamedownloadresource.TranslatorCreditsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

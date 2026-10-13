@@ -20,6 +20,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/inspectionpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/reportpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/translatorpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/uploadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/uploadredis"
@@ -31,6 +32,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/downloadhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/inspectionhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/reporthttp"
@@ -82,19 +84,22 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, uploadredis.NewHolds(infra.Redis), shared.Transactor, shared.Settings, shared.Now)
 
 	downloadRepo := downloadpg.NewRepository(infra.Ent)
+	translators := translator.NewService(translatorpg.NewRepository(infra.Ent))
+	modules.Legacy = download.NewLegacyService(downloadpg.NewLegacyStore(infra.Ent), translators, shared.Transactor)
 	downloads := download.NewService(download.Deps{
-		Repo:       downloadRepo,
-		Games:      shared.GameCards,
-		Comments:   commentpg.NewRepository(infra.Ent),
-		Sessions:   uploads,
-		Activities: shared.Activities,
-		Messages:   shared.Messages,
-		Tx:         shared.Transactor,
-		Queue:      jobQueue,
-		Store:      store,
-		Local:      spool,
-		Settings:   shared.Settings,
-		Now:        shared.Now,
+		Repo:        downloadRepo,
+		Games:       shared.GameCards,
+		Comments:    commentpg.NewRepository(infra.Ent),
+		Translators: translators,
+		Sessions:    uploads,
+		Activities:  shared.Activities,
+		Messages:    shared.Messages,
+		Tx:          shared.Transactor,
+		Queue:       jobQueue,
+		Store:       store,
+		Local:       spool,
+		Settings:    shared.Settings,
+		Now:         shared.Now,
 	})
 	resourceDetails := download.NewDetailService(downloadRepo, shared.GameCards, commentpg.NewRepository(infra.Ent), shared.Settings)
 	shared.Resources = resourceDetails

@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -88,6 +89,96 @@ func (_c *GameDownloadResourceCreate) SetNillableNote(v *string) *GameDownloadRe
 	if v != nil {
 		_c.SetNote(*v)
 	}
+	return _c
+}
+
+// SetTranslation sets the "translation" field.
+func (_c *GameDownloadResourceCreate) SetTranslation(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetTranslation(v)
+	return _c
+}
+
+// SetNillableTranslation sets the "translation" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableTranslation(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetTranslation(*v)
+	}
+	return _c
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (_c *GameDownloadResourceCreate) SetPatchVersion(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetPatchVersion(v)
+	return _c
+}
+
+// SetNillablePatchVersion sets the "patch_version" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillablePatchVersion(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetPatchVersion(*v)
+	}
+	return _c
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (_c *GameDownloadResourceCreate) SetReleaseURL(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetReleaseURL(v)
+	return _c
+}
+
+// SetNillableReleaseURL sets the "release_url" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableReleaseURL(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetReleaseURL(*v)
+	}
+	return _c
+}
+
+// SetEdition sets the "edition" field.
+func (_c *GameDownloadResourceCreate) SetEdition(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetEdition(v)
+	return _c
+}
+
+// SetNillableEdition sets the "edition" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableEdition(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetEdition(*v)
+	}
+	return _c
+}
+
+// SetEditionName sets the "edition_name" field.
+func (_c *GameDownloadResourceCreate) SetEditionName(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetEditionName(v)
+	return _c
+}
+
+// SetNillableEditionName sets the "edition_name" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableEditionName(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetEditionName(*v)
+	}
+	return _c
+}
+
+// SetForm sets the "form" field.
+func (_c *GameDownloadResourceCreate) SetForm(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetForm(v)
+	return _c
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableForm(v *string) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetForm(*v)
+	}
+	return _c
+}
+
+// SetExtras sets the "extras" field.
+func (_c *GameDownloadResourceCreate) SetExtras(v pgvalue.Strings) *GameDownloadResourceCreate {
+	_c.mutation.SetExtras(v)
 	return _c
 }
 
@@ -273,6 +364,21 @@ func (_c *GameDownloadResourceCreate) AddEvents(v ...*GameDownloadResourceEvent)
 	return _c.AddEventIDs(ids...)
 }
 
+// AddTranslatorCreditIDs adds the "translator_credits" edge to the GameDownloadResourceTranslator entity by IDs.
+func (_c *GameDownloadResourceCreate) AddTranslatorCreditIDs(ids ...int) *GameDownloadResourceCreate {
+	_c.mutation.AddTranslatorCreditIDs(ids...)
+	return _c
+}
+
+// AddTranslatorCredits adds the "translator_credits" edges to the GameDownloadResourceTranslator entity.
+func (_c *GameDownloadResourceCreate) AddTranslatorCredits(v ...*GameDownloadResourceTranslator) *GameDownloadResourceCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTranslatorCreditIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_c *GameDownloadResourceCreate) Mutation() *GameDownloadResourceMutation {
 	return _c.mutation
@@ -344,6 +450,36 @@ func (_c *GameDownloadResourceCreate) check() error {
 			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.Translation(); ok {
+		if err := gamedownloadresource.TranslationValidator(v); err != nil {
+			return &ValidationError{Name: "translation", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.translation": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.PatchVersion(); ok {
+		if err := gamedownloadresource.PatchVersionValidator(v); err != nil {
+			return &ValidationError{Name: "patch_version", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.patch_version": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.ReleaseURL(); ok {
+		if err := gamedownloadresource.ReleaseURLValidator(v); err != nil {
+			return &ValidationError{Name: "release_url", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.release_url": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Edition(); ok {
+		if err := gamedownloadresource.EditionValidator(v); err != nil {
+			return &ValidationError{Name: "edition", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.EditionName(); ok {
+		if err := gamedownloadresource.EditionNameValidator(v); err != nil {
+			return &ValidationError{Name: "edition_name", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition_name": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Form(); ok {
+		if err := gamedownloadresource.FormValidator(v); err != nil {
+			return &ValidationError{Name: "form", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.form": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Downloads(); !ok {
 		return &ValidationError{Name: "downloads", err: errors.New(`ent: missing required field "GameDownloadResource.downloads"`)}
 	}
@@ -411,6 +547,34 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 	if value, ok := _c.mutation.Note(); ok {
 		_spec.SetField(gamedownloadresource.FieldNote, field.TypeString, value)
 		_node.Note = &value
+	}
+	if value, ok := _c.mutation.Translation(); ok {
+		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)
+		_node.Translation = &value
+	}
+	if value, ok := _c.mutation.PatchVersion(); ok {
+		_spec.SetField(gamedownloadresource.FieldPatchVersion, field.TypeString, value)
+		_node.PatchVersion = &value
+	}
+	if value, ok := _c.mutation.ReleaseURL(); ok {
+		_spec.SetField(gamedownloadresource.FieldReleaseURL, field.TypeString, value)
+		_node.ReleaseURL = &value
+	}
+	if value, ok := _c.mutation.Edition(); ok {
+		_spec.SetField(gamedownloadresource.FieldEdition, field.TypeString, value)
+		_node.Edition = &value
+	}
+	if value, ok := _c.mutation.EditionName(); ok {
+		_spec.SetField(gamedownloadresource.FieldEditionName, field.TypeString, value)
+		_node.EditionName = &value
+	}
+	if value, ok := _c.mutation.Form(); ok {
+		_spec.SetField(gamedownloadresource.FieldForm, field.TypeString, value)
+		_node.Form = &value
+	}
+	if value, ok := _c.mutation.Extras(); ok {
+		_spec.SetField(gamedownloadresource.FieldExtras, field.TypeOther, value)
+		_node.Extras = value
 	}
 	if value, ok := _c.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
@@ -555,6 +719,22 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TranslatorCreditsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -713,6 +893,132 @@ func (u *GameDownloadResourceUpsert) UpdateNote() *GameDownloadResourceUpsert {
 // ClearNote clears the value of the "note" field.
 func (u *GameDownloadResourceUpsert) ClearNote() *GameDownloadResourceUpsert {
 	u.SetNull(gamedownloadresource.FieldNote)
+	return u
+}
+
+// SetTranslation sets the "translation" field.
+func (u *GameDownloadResourceUpsert) SetTranslation(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldTranslation, v)
+	return u
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateTranslation() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldTranslation)
+	return u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *GameDownloadResourceUpsert) ClearTranslation() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldTranslation)
+	return u
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (u *GameDownloadResourceUpsert) SetPatchVersion(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldPatchVersion, v)
+	return u
+}
+
+// UpdatePatchVersion sets the "patch_version" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdatePatchVersion() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldPatchVersion)
+	return u
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (u *GameDownloadResourceUpsert) ClearPatchVersion() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldPatchVersion)
+	return u
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (u *GameDownloadResourceUpsert) SetReleaseURL(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldReleaseURL, v)
+	return u
+}
+
+// UpdateReleaseURL sets the "release_url" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateReleaseURL() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldReleaseURL)
+	return u
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (u *GameDownloadResourceUpsert) ClearReleaseURL() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldReleaseURL)
+	return u
+}
+
+// SetEdition sets the "edition" field.
+func (u *GameDownloadResourceUpsert) SetEdition(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldEdition, v)
+	return u
+}
+
+// UpdateEdition sets the "edition" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateEdition() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldEdition)
+	return u
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (u *GameDownloadResourceUpsert) ClearEdition() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldEdition)
+	return u
+}
+
+// SetEditionName sets the "edition_name" field.
+func (u *GameDownloadResourceUpsert) SetEditionName(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldEditionName, v)
+	return u
+}
+
+// UpdateEditionName sets the "edition_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateEditionName() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldEditionName)
+	return u
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (u *GameDownloadResourceUpsert) ClearEditionName() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldEditionName)
+	return u
+}
+
+// SetForm sets the "form" field.
+func (u *GameDownloadResourceUpsert) SetForm(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldForm, v)
+	return u
+}
+
+// UpdateForm sets the "form" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateForm() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldForm)
+	return u
+}
+
+// ClearForm clears the value of the "form" field.
+func (u *GameDownloadResourceUpsert) ClearForm() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldForm)
+	return u
+}
+
+// SetExtras sets the "extras" field.
+func (u *GameDownloadResourceUpsert) SetExtras(v pgvalue.Strings) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldExtras, v)
+	return u
+}
+
+// UpdateExtras sets the "extras" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateExtras() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldExtras)
+	return u
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (u *GameDownloadResourceUpsert) ClearExtras() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldExtras)
 	return u
 }
 
@@ -961,6 +1267,153 @@ func (u *GameDownloadResourceUpsertOne) UpdateNote() *GameDownloadResourceUpsert
 func (u *GameDownloadResourceUpsertOne) ClearNote() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearNote()
+	})
+}
+
+// SetTranslation sets the "translation" field.
+func (u *GameDownloadResourceUpsertOne) SetTranslation(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetTranslation(v)
+	})
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateTranslation() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateTranslation()
+	})
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *GameDownloadResourceUpsertOne) ClearTranslation() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearTranslation()
+	})
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (u *GameDownloadResourceUpsertOne) SetPatchVersion(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetPatchVersion(v)
+	})
+}
+
+// UpdatePatchVersion sets the "patch_version" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdatePatchVersion() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdatePatchVersion()
+	})
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (u *GameDownloadResourceUpsertOne) ClearPatchVersion() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearPatchVersion()
+	})
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (u *GameDownloadResourceUpsertOne) SetReleaseURL(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetReleaseURL(v)
+	})
+}
+
+// UpdateReleaseURL sets the "release_url" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateReleaseURL() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateReleaseURL()
+	})
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (u *GameDownloadResourceUpsertOne) ClearReleaseURL() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearReleaseURL()
+	})
+}
+
+// SetEdition sets the "edition" field.
+func (u *GameDownloadResourceUpsertOne) SetEdition(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetEdition(v)
+	})
+}
+
+// UpdateEdition sets the "edition" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateEdition() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateEdition()
+	})
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (u *GameDownloadResourceUpsertOne) ClearEdition() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearEdition()
+	})
+}
+
+// SetEditionName sets the "edition_name" field.
+func (u *GameDownloadResourceUpsertOne) SetEditionName(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetEditionName(v)
+	})
+}
+
+// UpdateEditionName sets the "edition_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateEditionName() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateEditionName()
+	})
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (u *GameDownloadResourceUpsertOne) ClearEditionName() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearEditionName()
+	})
+}
+
+// SetForm sets the "form" field.
+func (u *GameDownloadResourceUpsertOne) SetForm(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetForm(v)
+	})
+}
+
+// UpdateForm sets the "form" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateForm() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateForm()
+	})
+}
+
+// ClearForm clears the value of the "form" field.
+func (u *GameDownloadResourceUpsertOne) ClearForm() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearForm()
+	})
+}
+
+// SetExtras sets the "extras" field.
+func (u *GameDownloadResourceUpsertOne) SetExtras(v pgvalue.Strings) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetExtras(v)
+	})
+}
+
+// UpdateExtras sets the "extras" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateExtras() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateExtras()
+	})
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (u *GameDownloadResourceUpsertOne) ClearExtras() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearExtras()
 	})
 }
 
@@ -1388,6 +1841,153 @@ func (u *GameDownloadResourceUpsertBulk) UpdateNote() *GameDownloadResourceUpser
 func (u *GameDownloadResourceUpsertBulk) ClearNote() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearNote()
+	})
+}
+
+// SetTranslation sets the "translation" field.
+func (u *GameDownloadResourceUpsertBulk) SetTranslation(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetTranslation(v)
+	})
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateTranslation() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateTranslation()
+	})
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *GameDownloadResourceUpsertBulk) ClearTranslation() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearTranslation()
+	})
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (u *GameDownloadResourceUpsertBulk) SetPatchVersion(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetPatchVersion(v)
+	})
+}
+
+// UpdatePatchVersion sets the "patch_version" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdatePatchVersion() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdatePatchVersion()
+	})
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (u *GameDownloadResourceUpsertBulk) ClearPatchVersion() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearPatchVersion()
+	})
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (u *GameDownloadResourceUpsertBulk) SetReleaseURL(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetReleaseURL(v)
+	})
+}
+
+// UpdateReleaseURL sets the "release_url" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateReleaseURL() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateReleaseURL()
+	})
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (u *GameDownloadResourceUpsertBulk) ClearReleaseURL() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearReleaseURL()
+	})
+}
+
+// SetEdition sets the "edition" field.
+func (u *GameDownloadResourceUpsertBulk) SetEdition(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetEdition(v)
+	})
+}
+
+// UpdateEdition sets the "edition" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateEdition() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateEdition()
+	})
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (u *GameDownloadResourceUpsertBulk) ClearEdition() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearEdition()
+	})
+}
+
+// SetEditionName sets the "edition_name" field.
+func (u *GameDownloadResourceUpsertBulk) SetEditionName(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetEditionName(v)
+	})
+}
+
+// UpdateEditionName sets the "edition_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateEditionName() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateEditionName()
+	})
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (u *GameDownloadResourceUpsertBulk) ClearEditionName() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearEditionName()
+	})
+}
+
+// SetForm sets the "form" field.
+func (u *GameDownloadResourceUpsertBulk) SetForm(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetForm(v)
+	})
+}
+
+// UpdateForm sets the "form" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateForm() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateForm()
+	})
+}
+
+// ClearForm clears the value of the "form" field.
+func (u *GameDownloadResourceUpsertBulk) ClearForm() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearForm()
+	})
+}
+
+// SetExtras sets the "extras" field.
+func (u *GameDownloadResourceUpsertBulk) SetExtras(v pgvalue.Strings) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetExtras(v)
+	})
+}
+
+// UpdateExtras sets the "extras" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateExtras() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateExtras()
+	})
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (u *GameDownloadResourceUpsertBulk) ClearExtras() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearExtras()
 	})
 }
 

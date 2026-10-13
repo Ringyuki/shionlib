@@ -53,11 +53,27 @@ func fileUploads(in []downloadFileUploadInput) []download.FileUpload {
 }
 
 type downloadSourceBodyInput struct {
-	Platform  []string                  `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
-	Language  []string                  `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
-	Simulator *string                   `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-	Note      *string                   `json:"note,omitempty" maxLength:"255"`
-	Files     []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000" doc:"Completed upload sessions to attach, one per file"`
+	Platform     []string                  `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
+	Language     []string                  `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
+	Simulator    *string                   `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
+	Note         *string                   `json:"note,omitempty" maxLength:"255"`
+	Translation  *string                   `json:"translation,omitempty" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; required when the languages include one"`
+	Translators  []string                  `json:"translators,omitempty" maxItems:"6" doc:"Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator"`
+	PatchVersion *string                   `json:"patch_version,omitempty" minLength:"0" maxLength:"32"`
+	ReleaseURL   *string                   `json:"release_url,omitempty" minLength:"0" maxLength:"512" doc:"The page the translation was released on"`
+	Edition      *string                   `json:"edition,omitempty" enum:"download,package,steam"`
+	EditionName  *string                   `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
+	Form         string                    `json:"form" enum:"disc,installer,portable" doc:"How the game is packed: a disc image, an installer, or a folder that runs as it is"`
+	Extras       []string                  `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
+	Files        []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000" doc:"Completed upload sessions to attach, one per file"`
+}
+
+func (b *downloadSourceBodyInput) info() download.InfoInput {
+	form := download.Form(b.Form)
+	return download.InfoInput{
+		Translation: (*download.Translation)(b.Translation), Translators: b.Translators, PatchVersion: b.PatchVersion, ReleaseURL: b.ReleaseURL,
+		Edition: (*download.Edition)(b.Edition), EditionName: b.EditionName, Form: &form, Extras: b.Extras,
+	}
 }
 
 type createDownloadSourceInput struct {
@@ -84,10 +100,25 @@ type renameDownloadFileInput struct {
 }
 
 type editDownloadSourceBodyInput struct {
-	Platform  []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
-	Language  []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
-	Simulator *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-	Note      *string  `json:"note,omitempty" maxLength:"255"`
+	Platform     []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
+	Language     []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
+	Simulator    *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
+	Note         *string  `json:"note,omitempty" maxLength:"255"`
+	Translation  *string  `json:"translation,omitempty" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; required when the languages include one"`
+	Translators  []string `json:"translators,omitempty" maxItems:"6" doc:"Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator"`
+	PatchVersion *string  `json:"patch_version,omitempty" minLength:"0" maxLength:"32"`
+	ReleaseURL   *string  `json:"release_url,omitempty" minLength:"0" maxLength:"512" doc:"The page the translation was released on"`
+	Edition      *string  `json:"edition,omitempty" enum:"download,package,steam"`
+	EditionName  *string  `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
+	Form         *string  `json:"form,omitempty" enum:"disc,installer,portable" doc:"Left out for a resource whose form is not known"`
+	Extras       []string `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
+}
+
+func (b *editDownloadSourceBodyInput) info() download.InfoInput {
+	return download.InfoInput{
+		Translation: (*download.Translation)(b.Translation), Translators: b.Translators, PatchVersion: b.PatchVersion, ReleaseURL: b.ReleaseURL,
+		Edition: (*download.Edition)(b.Edition), EditionName: b.EditionName, Form: (*download.Form)(b.Form), Extras: b.Extras,
+	}
 }
 
 type editDownloadSourceInput struct {

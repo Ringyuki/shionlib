@@ -1299,6 +1299,13 @@ var (
 		{Name: "simulator", Type: field.TypeEnum, Nullable: true, Enums: []string{"KRKR", "ONS", "ARTEMIS", "OTHER"}, SchemaType: map[string]string{"postgres": "game_download_resource_simulator"}},
 		{Name: "language", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
 		{Name: "note", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
+		{Name: "translation", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "patch_version", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "release_url", Type: field.TypeString, Nullable: true, Size: 512, SchemaType: map[string]string{"postgres": "character varying(512)"}},
+		{Name: "edition", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "edition_name", Type: field.TypeString, Nullable: true, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "form", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "extras", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
 		{Name: "downloads", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "check_retry_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -1315,13 +1322,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resources_game_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[11]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[18]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resources_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[12]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1330,7 +1337,7 @@ var (
 			{
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourcesColumns[11], GameDownloadResourcesColumns[1]},
+				Columns: []*schema.Column{GameDownloadResourcesColumns[18], GameDownloadResourcesColumns[1]},
 			},
 		},
 	}
@@ -1564,6 +1571,46 @@ var (
 				Name:    "game_download_resource_reports_status_created_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameDownloadResourceReportsColumns[3], GameDownloadResourceReportsColumns[9]},
+			},
+		},
+	}
+	// GameDownloadResourceTranslatorsColumns holds the columns for the "game_download_resource_translators" table.
+	GameDownloadResourceTranslatorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "position", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "resource_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "translator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// GameDownloadResourceTranslatorsTable holds the schema information for the "game_download_resource_translators" table.
+	GameDownloadResourceTranslatorsTable = &schema.Table{
+		Name:       "game_download_resource_translators",
+		Columns:    GameDownloadResourceTranslatorsColumns,
+		PrimaryKey: []*schema.Column{GameDownloadResourceTranslatorsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "game_download_resource_translators_resource_id_fkey",
+				Columns:    []*schema.Column{GameDownloadResourceTranslatorsColumns[3]},
+				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "game_download_resource_translators_translator_id_fkey",
+				Columns:    []*schema.Column{GameDownloadResourceTranslatorsColumns[4]},
+				RefColumns: []*schema.Column{TranslatorsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "game_download_resource_translators_pair_key",
+				Unique:  true,
+				Columns: []*schema.Column{GameDownloadResourceTranslatorsColumns[3], GameDownloadResourceTranslatorsColumns[4]},
+			},
+			{
+				Name:    "game_download_resource_translators_translator_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDownloadResourceTranslatorsColumns[4]},
 			},
 		},
 	}
@@ -2303,6 +2350,59 @@ var (
 			},
 		},
 	}
+	// TranslatorsColumns holds the columns for the "translators" table.
+	TranslatorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "name_key", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "aliases", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "alias_keys", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "homepage", Type: field.TypeString, Nullable: true, Size: 512, SchemaType: map[string]string{"postgres": "character varying(512)"}},
+		{Name: "creator_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// TranslatorsTable holds the schema information for the "translators" table.
+	TranslatorsTable = &schema.Table{
+		Name:       "translators",
+		Columns:    TranslatorsColumns,
+		PrimaryKey: []*schema.Column{TranslatorsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "translators_name_key_key",
+				Unique:  true,
+				Columns: []*schema.Column{TranslatorsColumns[2]},
+			},
+			{
+				Name:    "translators_alias_keys_idx",
+				Unique:  false,
+				Columns: []*schema.Column{TranslatorsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Type: "GIN",
+				},
+			},
+		},
+	}
+	// TranslatorDistinctionsColumns holds the columns for the "translator_distinctions" table.
+	TranslatorDistinctionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "low_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "high_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// TranslatorDistinctionsTable holds the schema information for the "translator_distinctions" table.
+	TranslatorDistinctionsTable = &schema.Table{
+		Name:       "translator_distinctions",
+		Columns:    TranslatorDistinctionsColumns,
+		PrimaryKey: []*schema.Column{TranslatorDistinctionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "translator_distinctions_low_id_high_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{TranslatorDistinctionsColumns[1], TranslatorDistinctionsColumns[2]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2712,6 +2812,7 @@ var (
 		GameDownloadResourceFilesTable,
 		GameDownloadResourceFileHistoriesTable,
 		GameDownloadResourceReportsTable,
+		GameDownloadResourceTranslatorsTable,
 		GameImagesTable,
 		GameLinksTable,
 		GameRelationsTable,
@@ -2730,6 +2831,8 @@ var (
 		SiteDailyStatsTable,
 		SponsorOrdersTable,
 		TagsTable,
+		TranslatorsTable,
+		TranslatorDistinctionsTable,
 		UsersTable,
 		UserBannedRecordsTable,
 		UserFieldPermissionsTable,
@@ -2888,6 +2991,11 @@ func init() {
 	GameDownloadResourceReportsTable.Annotation = &entsql.Annotation{
 		Table: "game_download_resource_reports",
 	}
+	GameDownloadResourceTranslatorsTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
+	GameDownloadResourceTranslatorsTable.ForeignKeys[1].RefTable = TranslatorsTable
+	GameDownloadResourceTranslatorsTable.Annotation = &entsql.Annotation{
+		Table: "game_download_resource_translators",
+	}
 	GameImagesTable.ForeignKeys[0].RefTable = GamesTable
 	GameImagesTable.Annotation = &entsql.Annotation{
 		Table: "game_images",
@@ -2965,6 +3073,12 @@ func init() {
 	}
 	TagsTable.Annotation = &entsql.Annotation{
 		Table: "tags",
+	}
+	TranslatorsTable.Annotation = &entsql.Annotation{
+		Table: "translators",
+	}
+	TranslatorDistinctionsTable.Annotation = &entsql.Annotation{
+		Table: "translator_distinctions",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",

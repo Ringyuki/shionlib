@@ -8,6 +8,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -24,6 +25,7 @@ type Repository interface {
 	GetResource(ctx context.Context, id int) (Resource, error)
 	LockResource(ctx context.Context, id int) (Resource, error)
 	UpdateResource(ctx context.Context, id int, changes ResourceChanges) error
+	SetForm(ctx context.Context, id int, form Form) error
 	SetResourceStatus(ctx context.Context, id, status int, updated time.Time) error
 	TouchResource(ctx context.Context, id int, updated time.Time) error
 	PublishIfReady(ctx context.Context, id int, at time.Time) (bool, error)
@@ -55,9 +57,18 @@ type Repository interface {
 	ResetMalwareStrikes(ctx context.Context, userID int) error
 }
 
+type LegacyStore interface {
+	ListLegacy(ctx context.Context, afterID, limit int) ([]LegacyResource, error)
+	Describe(ctx context.Context, id int, description LegacyDescription) error
+}
+
 type GameCards interface {
 	Exists(ctx context.Context, id int) (bool, error)
 	ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]game.Card, error)
+}
+
+type Translators interface {
+	Resolve(ctx context.Context, names []string, creatorID int) ([]translator.Ref, error)
 }
 
 type Discussions interface {

@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcetranslator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -134,6 +135,138 @@ func (_u *GameDownloadResourceUpdate) SetNillableNote(v *string) *GameDownloadRe
 // ClearNote clears the value of the "note" field.
 func (_u *GameDownloadResourceUpdate) ClearNote() *GameDownloadResourceUpdate {
 	_u.mutation.ClearNote()
+	return _u
+}
+
+// SetTranslation sets the "translation" field.
+func (_u *GameDownloadResourceUpdate) SetTranslation(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetTranslation(v)
+	return _u
+}
+
+// SetNillableTranslation sets the "translation" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableTranslation(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetTranslation(*v)
+	}
+	return _u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (_u *GameDownloadResourceUpdate) ClearTranslation() *GameDownloadResourceUpdate {
+	_u.mutation.ClearTranslation()
+	return _u
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (_u *GameDownloadResourceUpdate) SetPatchVersion(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetPatchVersion(v)
+	return _u
+}
+
+// SetNillablePatchVersion sets the "patch_version" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillablePatchVersion(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetPatchVersion(*v)
+	}
+	return _u
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (_u *GameDownloadResourceUpdate) ClearPatchVersion() *GameDownloadResourceUpdate {
+	_u.mutation.ClearPatchVersion()
+	return _u
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (_u *GameDownloadResourceUpdate) SetReleaseURL(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetReleaseURL(v)
+	return _u
+}
+
+// SetNillableReleaseURL sets the "release_url" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableReleaseURL(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetReleaseURL(*v)
+	}
+	return _u
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (_u *GameDownloadResourceUpdate) ClearReleaseURL() *GameDownloadResourceUpdate {
+	_u.mutation.ClearReleaseURL()
+	return _u
+}
+
+// SetEdition sets the "edition" field.
+func (_u *GameDownloadResourceUpdate) SetEdition(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetEdition(v)
+	return _u
+}
+
+// SetNillableEdition sets the "edition" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableEdition(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetEdition(*v)
+	}
+	return _u
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (_u *GameDownloadResourceUpdate) ClearEdition() *GameDownloadResourceUpdate {
+	_u.mutation.ClearEdition()
+	return _u
+}
+
+// SetEditionName sets the "edition_name" field.
+func (_u *GameDownloadResourceUpdate) SetEditionName(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetEditionName(v)
+	return _u
+}
+
+// SetNillableEditionName sets the "edition_name" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableEditionName(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetEditionName(*v)
+	}
+	return _u
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (_u *GameDownloadResourceUpdate) ClearEditionName() *GameDownloadResourceUpdate {
+	_u.mutation.ClearEditionName()
+	return _u
+}
+
+// SetForm sets the "form" field.
+func (_u *GameDownloadResourceUpdate) SetForm(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetForm(v)
+	return _u
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableForm(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetForm(*v)
+	}
+	return _u
+}
+
+// ClearForm clears the value of the "form" field.
+func (_u *GameDownloadResourceUpdate) ClearForm() *GameDownloadResourceUpdate {
+	_u.mutation.ClearForm()
+	return _u
+}
+
+// SetExtras sets the "extras" field.
+func (_u *GameDownloadResourceUpdate) SetExtras(v pgvalue.Strings) *GameDownloadResourceUpdate {
+	_u.mutation.SetExtras(v)
+	return _u
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (_u *GameDownloadResourceUpdate) ClearExtras() *GameDownloadResourceUpdate {
+	_u.mutation.ClearExtras()
 	return _u
 }
 
@@ -318,6 +451,21 @@ func (_u *GameDownloadResourceUpdate) AddEvents(v ...*GameDownloadResourceEvent)
 	return _u.AddEventIDs(ids...)
 }
 
+// AddTranslatorCreditIDs adds the "translator_credits" edge to the GameDownloadResourceTranslator entity by IDs.
+func (_u *GameDownloadResourceUpdate) AddTranslatorCreditIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.AddTranslatorCreditIDs(ids...)
+	return _u
+}
+
+// AddTranslatorCredits adds the "translator_credits" edges to the GameDownloadResourceTranslator entity.
+func (_u *GameDownloadResourceUpdate) AddTranslatorCredits(v ...*GameDownloadResourceTranslator) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTranslatorCreditIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdate) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -461,6 +609,27 @@ func (_u *GameDownloadResourceUpdate) RemoveEvents(v ...*GameDownloadResourceEve
 	return _u.RemoveEventIDs(ids...)
 }
 
+// ClearTranslatorCredits clears all "translator_credits" edges to the GameDownloadResourceTranslator entity.
+func (_u *GameDownloadResourceUpdate) ClearTranslatorCredits() *GameDownloadResourceUpdate {
+	_u.mutation.ClearTranslatorCredits()
+	return _u
+}
+
+// RemoveTranslatorCreditIDs removes the "translator_credits" edge to GameDownloadResourceTranslator entities by IDs.
+func (_u *GameDownloadResourceUpdate) RemoveTranslatorCreditIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.RemoveTranslatorCreditIDs(ids...)
+	return _u
+}
+
+// RemoveTranslatorCredits removes "translator_credits" edges to GameDownloadResourceTranslator entities.
+func (_u *GameDownloadResourceUpdate) RemoveTranslatorCredits(v ...*GameDownloadResourceTranslator) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTranslatorCreditIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GameDownloadResourceUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -507,6 +676,36 @@ func (_u *GameDownloadResourceUpdate) check() error {
 	if v, ok := _u.mutation.Note(); ok {
 		if err := gamedownloadresource.NoteValidator(v); err != nil {
 			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Translation(); ok {
+		if err := gamedownloadresource.TranslationValidator(v); err != nil {
+			return &ValidationError{Name: "translation", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.translation": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PatchVersion(); ok {
+		if err := gamedownloadresource.PatchVersionValidator(v); err != nil {
+			return &ValidationError{Name: "patch_version", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.patch_version": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReleaseURL(); ok {
+		if err := gamedownloadresource.ReleaseURLValidator(v); err != nil {
+			return &ValidationError{Name: "release_url", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.release_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Edition(); ok {
+		if err := gamedownloadresource.EditionValidator(v); err != nil {
+			return &ValidationError{Name: "edition", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EditionName(); ok {
+		if err := gamedownloadresource.EditionNameValidator(v); err != nil {
+			return &ValidationError{Name: "edition_name", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Form(); ok {
+		if err := gamedownloadresource.FormValidator(v); err != nil {
+			return &ValidationError{Name: "form", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.form": %w`, err)}
 		}
 	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
@@ -565,6 +764,48 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if _u.mutation.NoteCleared() {
 		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeString)
+	}
+	if value, ok := _u.mutation.Translation(); ok {
+		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)
+	}
+	if _u.mutation.TranslationCleared() {
+		_spec.ClearField(gamedownloadresource.FieldTranslation, field.TypeString)
+	}
+	if value, ok := _u.mutation.PatchVersion(); ok {
+		_spec.SetField(gamedownloadresource.FieldPatchVersion, field.TypeString, value)
+	}
+	if _u.mutation.PatchVersionCleared() {
+		_spec.ClearField(gamedownloadresource.FieldPatchVersion, field.TypeString)
+	}
+	if value, ok := _u.mutation.ReleaseURL(); ok {
+		_spec.SetField(gamedownloadresource.FieldReleaseURL, field.TypeString, value)
+	}
+	if _u.mutation.ReleaseURLCleared() {
+		_spec.ClearField(gamedownloadresource.FieldReleaseURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.Edition(); ok {
+		_spec.SetField(gamedownloadresource.FieldEdition, field.TypeString, value)
+	}
+	if _u.mutation.EditionCleared() {
+		_spec.ClearField(gamedownloadresource.FieldEdition, field.TypeString)
+	}
+	if value, ok := _u.mutation.EditionName(); ok {
+		_spec.SetField(gamedownloadresource.FieldEditionName, field.TypeString, value)
+	}
+	if _u.mutation.EditionNameCleared() {
+		_spec.ClearField(gamedownloadresource.FieldEditionName, field.TypeString)
+	}
+	if value, ok := _u.mutation.Form(); ok {
+		_spec.SetField(gamedownloadresource.FieldForm, field.TypeString, value)
+	}
+	if _u.mutation.FormCleared() {
+		_spec.ClearField(gamedownloadresource.FieldForm, field.TypeString)
+	}
+	if value, ok := _u.mutation.Extras(); ok {
+		_spec.SetField(gamedownloadresource.FieldExtras, field.TypeOther, value)
+	}
+	if _u.mutation.ExtrasCleared() {
+		_spec.ClearField(gamedownloadresource.FieldExtras, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
@@ -915,6 +1156,51 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.TranslatorCreditsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTranslatorCreditsIDs(); len(nodes) > 0 && !_u.mutation.TranslatorCreditsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TranslatorCreditsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1033,6 +1319,138 @@ func (_u *GameDownloadResourceUpdateOne) SetNillableNote(v *string) *GameDownloa
 // ClearNote clears the value of the "note" field.
 func (_u *GameDownloadResourceUpdateOne) ClearNote() *GameDownloadResourceUpdateOne {
 	_u.mutation.ClearNote()
+	return _u
+}
+
+// SetTranslation sets the "translation" field.
+func (_u *GameDownloadResourceUpdateOne) SetTranslation(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetTranslation(v)
+	return _u
+}
+
+// SetNillableTranslation sets the "translation" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableTranslation(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetTranslation(*v)
+	}
+	return _u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (_u *GameDownloadResourceUpdateOne) ClearTranslation() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearTranslation()
+	return _u
+}
+
+// SetPatchVersion sets the "patch_version" field.
+func (_u *GameDownloadResourceUpdateOne) SetPatchVersion(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetPatchVersion(v)
+	return _u
+}
+
+// SetNillablePatchVersion sets the "patch_version" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillablePatchVersion(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetPatchVersion(*v)
+	}
+	return _u
+}
+
+// ClearPatchVersion clears the value of the "patch_version" field.
+func (_u *GameDownloadResourceUpdateOne) ClearPatchVersion() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearPatchVersion()
+	return _u
+}
+
+// SetReleaseURL sets the "release_url" field.
+func (_u *GameDownloadResourceUpdateOne) SetReleaseURL(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetReleaseURL(v)
+	return _u
+}
+
+// SetNillableReleaseURL sets the "release_url" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableReleaseURL(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetReleaseURL(*v)
+	}
+	return _u
+}
+
+// ClearReleaseURL clears the value of the "release_url" field.
+func (_u *GameDownloadResourceUpdateOne) ClearReleaseURL() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearReleaseURL()
+	return _u
+}
+
+// SetEdition sets the "edition" field.
+func (_u *GameDownloadResourceUpdateOne) SetEdition(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetEdition(v)
+	return _u
+}
+
+// SetNillableEdition sets the "edition" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableEdition(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetEdition(*v)
+	}
+	return _u
+}
+
+// ClearEdition clears the value of the "edition" field.
+func (_u *GameDownloadResourceUpdateOne) ClearEdition() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearEdition()
+	return _u
+}
+
+// SetEditionName sets the "edition_name" field.
+func (_u *GameDownloadResourceUpdateOne) SetEditionName(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetEditionName(v)
+	return _u
+}
+
+// SetNillableEditionName sets the "edition_name" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableEditionName(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetEditionName(*v)
+	}
+	return _u
+}
+
+// ClearEditionName clears the value of the "edition_name" field.
+func (_u *GameDownloadResourceUpdateOne) ClearEditionName() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearEditionName()
+	return _u
+}
+
+// SetForm sets the "form" field.
+func (_u *GameDownloadResourceUpdateOne) SetForm(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetForm(v)
+	return _u
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableForm(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetForm(*v)
+	}
+	return _u
+}
+
+// ClearForm clears the value of the "form" field.
+func (_u *GameDownloadResourceUpdateOne) ClearForm() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearForm()
+	return _u
+}
+
+// SetExtras sets the "extras" field.
+func (_u *GameDownloadResourceUpdateOne) SetExtras(v pgvalue.Strings) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetExtras(v)
+	return _u
+}
+
+// ClearExtras clears the value of the "extras" field.
+func (_u *GameDownloadResourceUpdateOne) ClearExtras() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearExtras()
 	return _u
 }
 
@@ -1217,6 +1635,21 @@ func (_u *GameDownloadResourceUpdateOne) AddEvents(v ...*GameDownloadResourceEve
 	return _u.AddEventIDs(ids...)
 }
 
+// AddTranslatorCreditIDs adds the "translator_credits" edge to the GameDownloadResourceTranslator entity by IDs.
+func (_u *GameDownloadResourceUpdateOne) AddTranslatorCreditIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.AddTranslatorCreditIDs(ids...)
+	return _u
+}
+
+// AddTranslatorCredits adds the "translator_credits" edges to the GameDownloadResourceTranslator entity.
+func (_u *GameDownloadResourceUpdateOne) AddTranslatorCredits(v ...*GameDownloadResourceTranslator) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTranslatorCreditIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdateOne) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -1360,6 +1793,27 @@ func (_u *GameDownloadResourceUpdateOne) RemoveEvents(v ...*GameDownloadResource
 	return _u.RemoveEventIDs(ids...)
 }
 
+// ClearTranslatorCredits clears all "translator_credits" edges to the GameDownloadResourceTranslator entity.
+func (_u *GameDownloadResourceUpdateOne) ClearTranslatorCredits() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearTranslatorCredits()
+	return _u
+}
+
+// RemoveTranslatorCreditIDs removes the "translator_credits" edge to GameDownloadResourceTranslator entities by IDs.
+func (_u *GameDownloadResourceUpdateOne) RemoveTranslatorCreditIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.RemoveTranslatorCreditIDs(ids...)
+	return _u
+}
+
+// RemoveTranslatorCredits removes "translator_credits" edges to GameDownloadResourceTranslator entities.
+func (_u *GameDownloadResourceUpdateOne) RemoveTranslatorCredits(v ...*GameDownloadResourceTranslator) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTranslatorCreditIDs(ids...)
+}
+
 // Where appends a list predicates to the GameDownloadResourceUpdate builder.
 func (_u *GameDownloadResourceUpdateOne) Where(ps ...predicate.GameDownloadResource) *GameDownloadResourceUpdateOne {
 	_u.mutation.Where(ps...)
@@ -1419,6 +1873,36 @@ func (_u *GameDownloadResourceUpdateOne) check() error {
 	if v, ok := _u.mutation.Note(); ok {
 		if err := gamedownloadresource.NoteValidator(v); err != nil {
 			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Translation(); ok {
+		if err := gamedownloadresource.TranslationValidator(v); err != nil {
+			return &ValidationError{Name: "translation", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.translation": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PatchVersion(); ok {
+		if err := gamedownloadresource.PatchVersionValidator(v); err != nil {
+			return &ValidationError{Name: "patch_version", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.patch_version": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReleaseURL(); ok {
+		if err := gamedownloadresource.ReleaseURLValidator(v); err != nil {
+			return &ValidationError{Name: "release_url", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.release_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Edition(); ok {
+		if err := gamedownloadresource.EditionValidator(v); err != nil {
+			return &ValidationError{Name: "edition", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EditionName(); ok {
+		if err := gamedownloadresource.EditionNameValidator(v); err != nil {
+			return &ValidationError{Name: "edition_name", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.edition_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Form(); ok {
+		if err := gamedownloadresource.FormValidator(v); err != nil {
+			return &ValidationError{Name: "form", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.form": %w`, err)}
 		}
 	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
@@ -1494,6 +1978,48 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 	}
 	if _u.mutation.NoteCleared() {
 		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeString)
+	}
+	if value, ok := _u.mutation.Translation(); ok {
+		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)
+	}
+	if _u.mutation.TranslationCleared() {
+		_spec.ClearField(gamedownloadresource.FieldTranslation, field.TypeString)
+	}
+	if value, ok := _u.mutation.PatchVersion(); ok {
+		_spec.SetField(gamedownloadresource.FieldPatchVersion, field.TypeString, value)
+	}
+	if _u.mutation.PatchVersionCleared() {
+		_spec.ClearField(gamedownloadresource.FieldPatchVersion, field.TypeString)
+	}
+	if value, ok := _u.mutation.ReleaseURL(); ok {
+		_spec.SetField(gamedownloadresource.FieldReleaseURL, field.TypeString, value)
+	}
+	if _u.mutation.ReleaseURLCleared() {
+		_spec.ClearField(gamedownloadresource.FieldReleaseURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.Edition(); ok {
+		_spec.SetField(gamedownloadresource.FieldEdition, field.TypeString, value)
+	}
+	if _u.mutation.EditionCleared() {
+		_spec.ClearField(gamedownloadresource.FieldEdition, field.TypeString)
+	}
+	if value, ok := _u.mutation.EditionName(); ok {
+		_spec.SetField(gamedownloadresource.FieldEditionName, field.TypeString, value)
+	}
+	if _u.mutation.EditionNameCleared() {
+		_spec.ClearField(gamedownloadresource.FieldEditionName, field.TypeString)
+	}
+	if value, ok := _u.mutation.Form(); ok {
+		_spec.SetField(gamedownloadresource.FieldForm, field.TypeString, value)
+	}
+	if _u.mutation.FormCleared() {
+		_spec.ClearField(gamedownloadresource.FieldForm, field.TypeString)
+	}
+	if value, ok := _u.mutation.Extras(); ok {
+		_spec.SetField(gamedownloadresource.FieldExtras, field.TypeOther, value)
+	}
+	if _u.mutation.ExtrasCleared() {
+		_spec.ClearField(gamedownloadresource.FieldExtras, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
@@ -1837,6 +2363,51 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TranslatorCreditsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTranslatorCreditsIDs(); len(nodes) > 0 && !_u.mutation.TranslatorCreditsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TranslatorCreditsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.TranslatorCreditsTable,
+			Columns: []string{gamedownloadresource.TranslatorCreditsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

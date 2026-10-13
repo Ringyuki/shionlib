@@ -87,6 +87,16 @@ func TestListFiltersAndOrders(t *testing.T) {
 	if got := filtered(func(l *game.ListFilter) { l.DeveloperID = &dev }); !slices.Equal(got, []int{recent}) {
 		t.Fatalf("developer filter matches any role: %v", got)
 	}
+	tea, idle := f.translator("绿茶汉化组"), f.translator("闲置汉化组")
+	f.translated(f.resource(old, download.ResourceActive), tea)
+	f.translated(f.resource(rated, download.ResourceActive, unpublished), tea)
+	f.translated(f.resource(nsfw, download.ResourceRemoved), tea)
+	if got := filtered(func(l *game.ListFilter) { l.TranslatorID = &tea }); !slices.Equal(got, []int{old}) {
+		t.Fatalf("translator filter needs a published resource that credits them: %v", got)
+	}
+	if got := filtered(func(l *game.ListFilter) { l.TranslatorID = &idle }); len(got) != 0 {
+		t.Fatalf("a translator without credits: %v", got)
+	}
 
 	listable, err := repo.Listable(f.ctx, []int{hidden, rated, old, 999999}, game.Visibility{ExcludeRated: true})
 	if err != nil || !slices.Equal(listable, []int{old}) {

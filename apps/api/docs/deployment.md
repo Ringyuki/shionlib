@@ -13,7 +13,7 @@ The API and the web client each ship as one container image and run together as 
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
 
-Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before), `recheck [file id ...]` (see Checks that keep failing).
+Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before), `recheck [file id ...]` (see Checks that keep failing), `describe [apply]` (see Describing resources published before).
 
 `apps/web/Dockerfile` builds the web client into a `node:24` image that serves on port 3000 (see `apps/web/README.md`).
 
@@ -93,6 +93,21 @@ docker exec <worker container> shionlib-api inspect 50     # at most 50 resource
 - It can be stopped at any time (`Ctrl-C`, `docker stop`) and run again: what has an inspection is done. Each run goes through a resource once; one that failed (logged as `inspection failed` with its id) is tried again by the next run.
 - Every line it logs names the resource, its files and the outcome: `inspected`, `unreadable` (the archive can no longer be opened; recorded, the file stays published), `held` (the scan detected something: the file is put under review like an upload and the resource is hidden until an admin decides; unlike an upload, a published file is never removed when the review deadline passes) or `missing` (the bucket does not hold the object; nothing is recorded).
 - It downloads every file once: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it.
+
+## Describing resources published before
+
+Resources published before they carried structured information (translation, translators, edition, form) said those things in their note and file names. One command reads them:
+
+```bash
+docker exec <api or worker container> shionlib-api describe         # report what would be written
+docker exec <api or worker container> shionlib-api describe apply   # write it
+```
+
+- It needs only the database. Without `apply` nothing is written: it logs every translator name it read with the number of resources (`translator read`) and one summary line (`description finished`). Read the names before applying; a name that is not a translator points at a note the rules misread.
+- A resource in Japanese only gets the translation `none`. For the others the note is read first: an official translation (`官方中文`, `Official English Version`), a machine translation (`机翻`) or the names of translators (`绿茶汉化组×熊喵守护协会`); when the note says nothing, a trailing bracket of the file name (`[官方中文]`, `[守夜人汉化组]`) is. A note that mixes them, or that cannot be told from a remark, is left alone and the translation stays unset for the uploader to fill in.
+- A note that was only the translation is cleared, and a single address in it becomes the release page; a note that says more is kept as it is.
+- The edition comes from the file name (`DL版`, `パッケージ版`, `Steam版`), and the form becomes `disc` when the file name names a disc image format (`(iso+mds+rr3)`) or an inspection found one. A resource marked `(files)` keeps no form: it may be an installer or run as it is.
+- Only what a resource does not say yet is written, its update time is kept and no history event is recorded, so the command can be run again at any time. Names that are new create translators; the ones that differ only in writing show up under 疑似重复 in the admin panel.
 
 ## Checks that keep failing
 

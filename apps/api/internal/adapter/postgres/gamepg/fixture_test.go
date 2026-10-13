@@ -102,6 +102,22 @@ func (f fixtures) credit(gameID, developerID int, role string) {
 	}
 }
 
+func (f fixtures) translator(name string) int {
+	f.t.Helper()
+	row, err := f.db.Ent.Translator.Create().SetName(name).SetNameKey(name).Save(f.ctx)
+	if err != nil {
+		f.t.Fatal(err)
+	}
+	return row.ID
+}
+
+func (f fixtures) translated(resourceID, translatorID int) {
+	f.t.Helper()
+	if err := f.db.Ent.GameDownloadResourceTranslator.Create().SetResourceID(resourceID).SetTranslatorID(translatorID).Exec(f.ctx); err != nil {
+		f.t.Fatal(err)
+	}
+}
+
 func ids(t *testing.T, got []int, err error) []int {
 	t.Helper()
 	if err != nil {

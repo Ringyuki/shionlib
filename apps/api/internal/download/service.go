@@ -16,49 +16,52 @@ import (
 )
 
 type Deps struct {
-	Repo       Repository
-	Games      GameCards
-	Comments   Discussions
-	Sessions   Sessions
-	Activities Activities
-	Messages   Messenger
-	Tx         Transactor
-	Queue      Queue
-	Store      ObjectStore
-	Local      LocalFiles
-	Settings   setting.Source
-	Now        func() time.Time
+	Repo        Repository
+	Games       GameCards
+	Comments    Discussions
+	Translators Translators
+	Sessions    Sessions
+	Activities  Activities
+	Messages    Messenger
+	Tx          Transactor
+	Queue       Queue
+	Store       ObjectStore
+	Local       LocalFiles
+	Settings    setting.Source
+	Now         func() time.Time
 }
 
 type Service struct {
-	repo       Repository
-	games      GameCards
-	comments   Discussions
-	sessions   Sessions
-	activities Activities
-	messages   Messenger
-	tx         Transactor
-	queue      Queue
-	store      ObjectStore
-	local      LocalFiles
-	settings   setting.Source
-	now        func() time.Time
+	repo        Repository
+	games       GameCards
+	comments    Discussions
+	translators Translators
+	sessions    Sessions
+	activities  Activities
+	messages    Messenger
+	tx          Transactor
+	queue       Queue
+	store       ObjectStore
+	local       LocalFiles
+	settings    setting.Source
+	now         func() time.Time
 }
 
 func NewService(deps Deps) *Service {
 	return &Service{
-		repo:       deps.Repo,
-		games:      deps.Games,
-		comments:   deps.Comments,
-		sessions:   deps.Sessions,
-		activities: deps.Activities,
-		messages:   deps.Messages,
-		tx:         deps.Tx,
-		queue:      deps.Queue,
-		store:      deps.Store,
-		local:      deps.Local,
-		settings:   deps.Settings,
-		now:        deps.Now,
+		repo:        deps.Repo,
+		games:       deps.Games,
+		comments:    deps.Comments,
+		translators: deps.Translators,
+		sessions:    deps.Sessions,
+		activities:  deps.Activities,
+		messages:    deps.Messages,
+		tx:          deps.Tx,
+		queue:       deps.Queue,
+		store:       deps.Store,
+		local:       deps.Local,
+		settings:    deps.Settings,
+		now:         deps.Now,
 	}
 }
 
@@ -176,14 +179,23 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 	if !exists {
 		return Resource{}, game.ErrNotFound
 	}
+	info, err := in.Info.settled(in.Languages, true)
+	if err != nil {
+		return Resource{}, err
+	}
 	var created Resource
 	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		credited, err := s.translators.Resolve(ctx, info.Translators, who.UserID)
+		if err != nil {
+			return err
+		}
 		resource, err := s.repo.CreateResource(ctx, NewResource{
 			GameID:    gameID,
 			Platforms: in.Platforms,
 			Languages: in.Languages,
 			Simulator: in.Simulator,
 			Note:      in.Note,
+			Info:      info.with(credited),
 			CreatorID: who.UserID,
 		})
 		if err != nil {
@@ -347,12 +359,21 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 	return s.PurgeLater(ctx, storageKeys([]File{removed}))
 }
 
-func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, changes ResourceChanges) error {
+func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, in EditInput) error {
+	info, err := in.Info.settled(in.Languages, false)
+	if err != nil {
+		return err
+	}
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		resource, err := s.ownedResource(ctx, who, id)
 		if err != nil {
 			return err
 		}
+		credited, err := s.translators.Resolve(ctx, info.Translators, who.UserID)
+		if err != nil {
+			return err
+		}
+		changes := ResourceChanges{Platforms: in.Platforms, Languages: in.Languages, Simulator: in.Simulator, Note: in.Note, Info: info.with(credited)}
 		if err := s.repo.UpdateResource(ctx, id, changes); err != nil {
 			return err
 		}
@@ -361,6 +382,26 @@ func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, changes Res
 			return nil
 		}
 		return recordEvent(ctx, s.repo, who, id, EventEdited, EventData{Changes: changed})
+	})
+}
+
+func (s *Service) DiscFound(ctx context.Context, resourceID int) error {
+	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		resource, err := s.repo.LockResource(ctx, resourceID)
+		if err != nil {
+			return err
+		}
+		if resource.Info.Form != nil && *resource.Info.Form == FormDisc {
+			return nil
+		}
+		if err := s.repo.SetForm(ctx, resourceID, FormDisc); err != nil {
+			return err
+		}
+		if !resource.Published() {
+			return nil
+		}
+		change := FieldChange{Field: FieldForm, Old: optional((*string)(resource.Info.Form)), New: []string{string(FormDisc)}}
+		return s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: EventDiscFound, Data: EventData{Changes: []FieldChange{change}}})
 	})
 }
 

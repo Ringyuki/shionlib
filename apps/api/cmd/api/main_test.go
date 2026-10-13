@@ -21,6 +21,9 @@ func TestUnknownCommandsFail(t *testing.T) {
 			t.Fatalf("recheck %s: %v", id, err)
 		}
 	}
+	if err := run(t.Context(), []string{"describe", "everything"}); err == nil || !strings.Contains(err.Error(), "apply to write it") {
+		t.Fatalf("describe everything: %v", err)
+	}
 	for _, limit := range []string{"all", "0", "-3"} {
 		if err := run(t.Context(), []string{"inspect", limit}); err == nil || !strings.Contains(err.Error(), "number of resources") {
 			t.Fatalf("inspect %s: %v", limit, err)
