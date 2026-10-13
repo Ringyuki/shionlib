@@ -1374,6 +1374,8 @@ var (
 		{Name: "downloads", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "check_retry_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "inspect_retry_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "undescribed", Type: field.TypeBool, Default: false},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
@@ -1387,13 +1389,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resources_game_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[19]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[21]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resources_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[20]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[22]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1402,7 +1404,7 @@ var (
 			{
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourcesColumns[19], GameDownloadResourcesColumns[1]},
+				Columns: []*schema.Column{GameDownloadResourcesColumns[21], GameDownloadResourcesColumns[1]},
 			},
 		},
 	}

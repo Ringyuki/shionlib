@@ -871,18 +871,18 @@ func TestEditRecordsInformationChanges(t *testing.T) {
 	}
 }
 
-func TestDiscFoundCorrectsTheFormAndTellsThePublishedHistory(t *testing.T) {
+func TestFormReadCorrectsADiscAndTellsThePublishedHistory(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
 	fresh := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Info: download.Info{Form: ptr(download.FormPortable)}})
-	if err := f.service.DiscFound(ctx, fresh.ID); err != nil {
+	if err := f.service.FormRead(ctx, fresh.ID, download.FormDisc); err != nil {
 		t.Fatal(err)
 	}
 	if stored, _ := f.repo.GetResource(ctx, fresh.ID); *stored.Info.Form != download.FormDisc || len(f.repo.Events(fresh.ID)) != 0 {
 		t.Fatalf("an unpublished resource is corrected without an entry: %+v %+v", stored.Info, f.repo.Events(fresh.ID))
 	}
 	published := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
-	if err := f.service.DiscFound(ctx, published.ID); err != nil {
+	if err := f.service.FormRead(ctx, published.ID, download.FormDisc); err != nil {
 		t.Fatal(err)
 	}
 	recorded := f.repo.Events(published.ID)
@@ -892,8 +892,32 @@ func TestDiscFoundCorrectsTheFormAndTellsThePublishedHistory(t *testing.T) {
 	if change := recorded[0].Data.Changes[0]; change.Field != download.FieldForm || len(change.Old) != 0 || !slices.Equal(change.New, []string{"disc"}) {
 		t.Fatalf("change %+v", change)
 	}
-	if err := f.service.DiscFound(ctx, published.ID); err != nil || len(f.repo.Events(published.ID)) != 1 {
+	if err := f.service.FormRead(ctx, published.ID, download.FormDisc); err != nil || len(f.repo.Events(published.ID)) != 1 {
 		t.Fatalf("a resource already known as a disc image is left alone: %v %+v", err, f.repo.Events(published.ID))
 	}
-	expectCode(t, f.service.DiscFound(ctx, 999), download.ErrResourceNotFound)
+	expectCode(t, f.service.FormRead(ctx, 999, download.FormDisc), download.ErrResourceNotFound)
+}
+
+func TestFormReadFillsOnlyAFormNobodyGave(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	unknown := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	if err := f.service.FormRead(ctx, unknown.ID, download.FormPortable); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := f.repo.GetResource(ctx, unknown.ID)
+	recorded := f.repo.Events(unknown.ID)
+	if *stored.Info.Form != download.FormPortable || len(recorded) != 1 || recorded[0].Kind != download.EventFormRead || recorded[0].Actor != nil {
+		t.Fatalf("a resource without a form takes the one its contents show: %+v %+v", stored.Info, recorded)
+	}
+	if change := recorded[0].Data.Changes[0]; change.Field != download.FieldForm || len(change.Old) != 0 || !slices.Equal(change.New, []string{"portable"}) {
+		t.Fatalf("change %+v", change)
+	}
+	given := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now), Info: download.Info{Form: ptr(download.FormInstaller)}})
+	if err := f.service.FormRead(ctx, given.ID, download.FormPortable); err != nil {
+		t.Fatal(err)
+	}
+	if stored, _ := f.repo.GetResource(ctx, given.ID); *stored.Info.Form != download.FormInstaller || len(f.repo.Events(given.ID)) != 0 {
+		t.Fatalf("the form an uploader gave is kept: %+v %+v", stored.Info, f.repo.Events(given.ID))
+	}
 }

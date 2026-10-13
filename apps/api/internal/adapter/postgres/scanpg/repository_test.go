@@ -475,16 +475,28 @@ func TestNextUninspectedTakesPublishedFilesByDownloads(t *testing.T) {
 	})
 	f.file(t, removed.ID, creator, stored("removed.7z"))
 
-	first, found, err := f.repo.NextUninspected(ctx, nil)
+	first, found, err := f.repo.NextUninspected(ctx, nil, time.Now())
 	if err != nil || !found || first != popular.ID {
 		t.Fatalf("the most downloaded resource comes first: %d %v %v", first, found, err)
 	}
-	second, found, err := f.repo.NextUninspected(ctx, []int{popular.ID})
+	second, found, err := f.repo.NextUninspected(ctx, []int{popular.ID}, time.Now())
 	if err != nil || !found || second != quiet.ID {
 		t.Fatalf("a skipped resource is left out: %d %v %v", second, found, err)
 	}
-	if _, found, err := f.repo.NextUninspected(ctx, []int{popular.ID, quiet.ID}); err != nil || found {
+	if _, found, err := f.repo.NextUninspected(ctx, []int{popular.ID, quiet.ID}, time.Now()); err != nil || found {
 		t.Fatalf("inspected, unpublished, held and removed files are not taken: %v %v", found, err)
+	}
+	if err := f.repo.DelayInspection(ctx, popular.ID, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if next, found, err := f.repo.NextUninspected(ctx, nil, time.Now()); err != nil || !found || next != quiet.ID {
+		t.Fatalf("a delayed resource waits: %d %v %v", next, found, err)
+	}
+	if next, _, _ := f.repo.NextUninspected(ctx, nil, time.Now().Add(2*time.Hour)); next != popular.ID {
+		t.Fatalf("a delayed resource comes back once its time has come: %d", next)
+	}
+	if err := f.repo.DelayInspection(ctx, 987654, time.Now()); err == nil {
+		t.Fatal("delaying a missing resource fails")
 	}
 	files, err := f.repo.ResourceFiles(ctx, popular.ID)
 	if err != nil || len(files) != 1 || files[0].ID != kept.ID || files[0].StorageKey != "games/popular.7z" {

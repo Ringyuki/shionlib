@@ -53,6 +53,8 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Translator | Who made a fan translation: a group or a single person (汉化组 in the web client), `translator.Translator`. A resource credits its translators in order; names are matched by `translator.Key` (width, case and spacing ignored), so one translator is stored once however its name is typed. |
 | Resource information | What a download resource says about itself besides platform and language: translation, translators, patch version, release page, edition, form and extras (`download.Info`). |
 | Composition | Making a new resource from a stored one and an uploaded patch on the server (`composition.Composition`, ADR 0016): a draft, then queued, running, done or failed. The resource it was made from is never changed. |
+| Form reading | Telling from an inspection whether a resource is a disc image, an installer or a folder that runs as it is (`scan.ReadForm`, ADR 0017). It fills a form nobody gave and records `form_read` in the history. |
+| Undescribed | A resource published before structured information whose note and file names the worker has not read yet (`game_download_resources.undescribed`, ADR 0017). |
 | Base | The stored resource a composition reads (`composition.Base`, 原版 in the web client): a published, checked, portable resource of the same game whose contents are known from its inspection. |
 | Plan | What a patch does to a base, drawn from their listings before anything is unpacked (`composition.Plan`): the game folder, the patch folder, the files added and replaced and the conflicts. |
 | AI provider | An upstream AI account configured in the admin panel: kind, base URL, API key, price multiplier (`ai.Provider`). |

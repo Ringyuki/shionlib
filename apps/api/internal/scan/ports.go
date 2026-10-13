@@ -13,7 +13,8 @@ import (
 
 type Repository interface {
 	PendingResources(ctx context.Context, now time.Time) ([]int, error)
-	NextUninspected(ctx context.Context, skip []int) (int, bool, error)
+	NextUninspected(ctx context.Context, skip []int, now time.Time) (int, bool, error)
+	DelayInspection(ctx context.Context, resourceID int, until time.Time) error
 	DelayCheck(ctx context.Context, resourceID int, until time.Time) error
 	RecordCheckFailure(ctx context.Context, fileID int, failure CheckFailure) error
 	ResumeCheck(ctx context.Context, fileID int) error
@@ -83,7 +84,7 @@ type Files interface {
 	TakeDown(ctx context.Context, resourceID int) ([]string, error)
 	PurgeLater(ctx context.Context, keys []string) error
 	ReviewCleared(ctx context.Context, resourceID int, fileName string, reviewerID *int) error
-	DiscFound(ctx context.Context, resourceID int) error
+	FormRead(ctx context.Context, resourceID int, form download.Form) error
 }
 
 type Activities interface {

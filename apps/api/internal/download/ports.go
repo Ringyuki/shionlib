@@ -61,7 +61,7 @@ type Repository interface {
 }
 
 type LegacyStore interface {
-	ListLegacy(ctx context.Context, afterID, limit int) ([]LegacyResource, error)
+	ListUndescribed(ctx context.Context, afterID, limit int) ([]LegacyResource, error)
 	Describe(ctx context.Context, id int, description LegacyDescription) error
 }
 

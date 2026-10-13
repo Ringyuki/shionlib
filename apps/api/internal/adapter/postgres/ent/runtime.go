@@ -905,12 +905,16 @@ func init() {
 	gamedownloadresourceDescDownloads := gamedownloadresourceFields[15].Descriptor()
 	// gamedownloadresource.DefaultDownloads holds the default value on creation for the downloads field.
 	gamedownloadresource.DefaultDownloads = gamedownloadresourceDescDownloads.Default.(int)
+	// gamedownloadresourceDescUndescribed is the schema descriptor for undescribed field.
+	gamedownloadresourceDescUndescribed := gamedownloadresourceFields[19].Descriptor()
+	// gamedownloadresource.DefaultUndescribed holds the default value on creation for the undescribed field.
+	gamedownloadresource.DefaultUndescribed = gamedownloadresourceDescUndescribed.Default.(bool)
 	// gamedownloadresourceDescCreated is the schema descriptor for created field.
-	gamedownloadresourceDescCreated := gamedownloadresourceFields[19].Descriptor()
+	gamedownloadresourceDescCreated := gamedownloadresourceFields[21].Descriptor()
 	// gamedownloadresource.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresource.DefaultCreated = gamedownloadresourceDescCreated.Default.(func() time.Time)
 	// gamedownloadresourceDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourceDescUpdated := gamedownloadresourceFields[20].Descriptor()
+	gamedownloadresourceDescUpdated := gamedownloadresourceFields[22].Descriptor()
 	// gamedownloadresource.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.

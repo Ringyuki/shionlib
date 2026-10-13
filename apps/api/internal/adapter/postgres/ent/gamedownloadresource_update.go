@@ -346,6 +346,40 @@ func (_u *GameDownloadResourceUpdate) ClearCheckRetryAt() *GameDownloadResourceU
 	return _u
 }
 
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (_u *GameDownloadResourceUpdate) SetInspectRetryAt(v time.Time) *GameDownloadResourceUpdate {
+	_u.mutation.SetInspectRetryAt(v)
+	return _u
+}
+
+// SetNillableInspectRetryAt sets the "inspect_retry_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableInspectRetryAt(v *time.Time) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetInspectRetryAt(*v)
+	}
+	return _u
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (_u *GameDownloadResourceUpdate) ClearInspectRetryAt() *GameDownloadResourceUpdate {
+	_u.mutation.ClearInspectRetryAt()
+	return _u
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (_u *GameDownloadResourceUpdate) SetUndescribed(v bool) *GameDownloadResourceUpdate {
+	_u.mutation.SetUndescribed(v)
+	return _u
+}
+
+// SetNillableUndescribed sets the "undescribed" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableUndescribed(v *bool) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetUndescribed(*v)
+	}
+	return _u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_u *GameDownloadResourceUpdate) SetCreatorID(v int) *GameDownloadResourceUpdate {
 	_u.mutation.SetCreatorID(v)
@@ -878,6 +912,15 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if _u.mutation.CheckRetryAtCleared() {
 		_spec.ClearField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.InspectRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldInspectRetryAt, field.TypeTime, value)
+	}
+	if _u.mutation.InspectRetryAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldInspectRetryAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Undescribed(); ok {
+		_spec.SetField(gamedownloadresource.FieldUndescribed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)
@@ -1628,6 +1671,40 @@ func (_u *GameDownloadResourceUpdateOne) ClearCheckRetryAt() *GameDownloadResour
 	return _u
 }
 
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (_u *GameDownloadResourceUpdateOne) SetInspectRetryAt(v time.Time) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetInspectRetryAt(v)
+	return _u
+}
+
+// SetNillableInspectRetryAt sets the "inspect_retry_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableInspectRetryAt(v *time.Time) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetInspectRetryAt(*v)
+	}
+	return _u
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (_u *GameDownloadResourceUpdateOne) ClearInspectRetryAt() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearInspectRetryAt()
+	return _u
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (_u *GameDownloadResourceUpdateOne) SetUndescribed(v bool) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetUndescribed(v)
+	return _u
+}
+
+// SetNillableUndescribed sets the "undescribed" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableUndescribed(v *bool) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetUndescribed(*v)
+	}
+	return _u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_u *GameDownloadResourceUpdateOne) SetCreatorID(v int) *GameDownloadResourceUpdateOne {
 	_u.mutation.SetCreatorID(v)
@@ -2190,6 +2267,15 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 	}
 	if _u.mutation.CheckRetryAtCleared() {
 		_spec.ClearField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.InspectRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldInspectRetryAt, field.TypeTime, value)
+	}
+	if _u.mutation.InspectRetryAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldInspectRetryAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Undescribed(); ok {
+		_spec.SetField(gamedownloadresource.FieldUndescribed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)

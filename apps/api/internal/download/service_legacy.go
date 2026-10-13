@@ -2,9 +2,10 @@ package download
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
-	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
 type LegacyService struct {
@@ -19,16 +20,13 @@ func NewLegacyService(store LegacyStore, games GameCards, translators Translator
 	return &LegacyService{store: store, games: games, translators: translators, names: names, tx: tx}
 }
 
-func (s *LegacyService) Describe(ctx context.Context, apply bool) (LegacyTally, error) {
-	tally := LegacyTally{Translations: map[Translation]int{}, Editions: map[Edition]int{}, Translators: map[string]int{}}
+func (s *LegacyService) Describe(ctx context.Context) error {
+	var errs []error
 	after := 0
 	for {
-		resources, err := s.store.ListLegacy(ctx, after, legacyBatch)
-		if err != nil {
-			return tally, err
-		}
-		if len(resources) == 0 {
-			return tally, nil
+		resources, err := s.store.ListUndescribed(ctx, after, legacyBatch)
+		if err != nil || len(resources) == 0 {
+			return errors.Join(append(errs, err)...)
 		}
 		gameIDs := make([]int, len(resources))
 		for i, resource := range resources {
@@ -36,22 +34,16 @@ func (s *LegacyService) Describe(ctx context.Context, apply bool) (LegacyTally, 
 		}
 		cards, err := s.games.ByIDs(ctx, gameIDs, actor.Actor{})
 		if err != nil {
-			return tally, err
+			return errors.Join(append(errs, err)...)
 		}
 		for _, resource := range resources {
 			after = resource.ID
-			card := cards[resource.GameID]
-			reading := ReadLegacy(resource, LegacyEntryOf(card))
-			if reading.Empty() {
-				continue
+			if err := ctx.Err(); err != nil {
+				return errors.Join(append(errs, err)...)
 			}
-			if apply {
-				if err := s.describe(ctx, resource, reading); err != nil {
-					return tally, err
-				}
+			if err := s.describe(ctx, resource, ReadLegacy(resource, LegacyEntryOf(cards[resource.GameID]))); err != nil {
+				errs = append(errs, fmt.Errorf("describe resource %d: %w", resource.ID, err))
 			}
-			tally.count(reading)
-			tally.sample(resource, reading, card)
 		}
 	}
 }
@@ -82,19 +74,4 @@ func (s *LegacyService) describe(ctx context.Context, resource LegacyResource, r
 		}
 		return s.names.Apply(ctx, resource.ID)
 	})
-}
-
-func (t *LegacyTally) sample(resource LegacyResource, reading LegacyReading, card game.Card) {
-	if len(reading.Canonical) == 0 || len(t.Renames) >= legacyRenameSample {
-		return
-	}
-	for _, file := range resource.Files {
-		if file.ID != reading.Canonical[0] {
-			continue
-		}
-		name := CanonicalName(NameInput{Source: SourceOf(card), Languages: resource.Languages, Info: reading.over(resource.Info), Medium: NamedMedium(file.Name), Uploaded: file.Name})
-		if !name.Pending && name.String() != file.Name {
-			t.Renames = append(t.Renames, LegacyRename{From: file.Name, To: name.String()})
-		}
-	}
 }

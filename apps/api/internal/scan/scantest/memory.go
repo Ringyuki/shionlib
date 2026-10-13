@@ -31,13 +31,19 @@ type MemoryRepository struct {
 	Titles    map[int]scan.GameTitles
 	Keys      map[int][]string
 	TakenDown []int
-	Discs     []int
+	Forms     []ReadForm
+	InspectAt map[int]time.Time
 	Purged    []string
 	Cleared   []ClearedReview
 	Digests   map[int]string
 	Downloads map[int]int
 
 	FailureErr error
+}
+
+type ReadForm struct {
+	ResourceID int
+	Form       download.Form
 }
 
 type ClearedReview struct {
@@ -58,6 +64,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		Names:     map[int]string{},
 		Titles:    map[int]scan.GameTitles{},
 		Keys:      map[int][]string{},
+		InspectAt: map[int]time.Time{},
 		Digests:   map[int]string{},
 		Downloads: map[int]int{},
 	}
@@ -68,6 +75,12 @@ func (r *MemoryRepository) SeedFile(file scan.PendingFile) {
 	defer r.mu.Unlock()
 	r.files[file.ID] = file
 	r.resources[file.ResourceID] = true
+}
+
+func (r *MemoryRepository) SeedResource(id int) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.resources[id] = true
 }
 
 func (r *MemoryRepository) SeedCase(c scan.Case) scan.Case {
@@ -121,13 +134,14 @@ func (r *MemoryRepository) PendingResources(_ context.Context, now time.Time) ([
 	return out, nil
 }
 
-func (r *MemoryRepository) NextUninspected(_ context.Context, skip []int) (int, bool, error) {
+func (r *MemoryRepository) NextUninspected(_ context.Context, skip []int, now time.Time) (int, bool, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	var waiting []int
 	for _, file := range r.files {
 		stored := file.Type == download.FileTypeObjectStore && file.Status == download.FileInObjectStore && file.CheckStatus == download.CheckOK
-		if r.resources[file.ResourceID] && stored && file.StorageKey != "" && file.InspectionID == nil && !slices.Contains(skip, file.ResourceID) && !slices.Contains(waiting, file.ResourceID) {
+		due := !r.InspectAt[file.ResourceID].After(now)
+		if r.resources[file.ResourceID] && stored && due && file.StorageKey != "" && file.InspectionID == nil && !slices.Contains(skip, file.ResourceID) && !slices.Contains(waiting, file.ResourceID) {
 			waiting = append(waiting, file.ResourceID)
 		}
 	}
@@ -138,6 +152,16 @@ func (r *MemoryRepository) NextUninspected(_ context.Context, skip []int) (int, 
 		return cmp.Or(cmp.Compare(r.Downloads[b], r.Downloads[a]), cmp.Compare(a, b))
 	})
 	return waiting[0], true, nil
+}
+
+func (r *MemoryRepository) DelayInspection(_ context.Context, resourceID int, until time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if !r.resources[resourceID] {
+		return download.ErrResourceNotFound
+	}
+	r.InspectAt[resourceID] = until
+	return nil
 }
 
 func (r *MemoryRepository) DelayCheck(_ context.Context, resourceID int, until time.Time) error {
@@ -412,13 +436,13 @@ func (r *MemoryRepository) TakeDown(_ context.Context, resourceID int) ([]string
 	return r.Keys[resourceID], nil
 }
 
-func (r *MemoryRepository) DiscFound(_ context.Context, resourceID int) error {
+func (r *MemoryRepository) FormRead(_ context.Context, resourceID int, form download.Form) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if !r.resources[resourceID] {
 		return download.ErrResourceNotFound
 	}
-	r.Discs = append(r.Discs, resourceID)
+	r.Forms = append(r.Forms, ReadForm{ResourceID: resourceID, Form: form})
 	return nil
 }
 

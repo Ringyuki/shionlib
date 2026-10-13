@@ -46,6 +46,7 @@ type fixture struct {
 	objects     *scantest.Objects
 	service     *scan.Service
 	backfill    *scan.BackfillService
+	settings    settingtest.Source
 	stalled     *scan.StalledService
 	clock       *time.Time
 }
@@ -67,6 +68,7 @@ func newFixture(enabled bool) fixture {
 		banner:      &scantest.Banner{Applied: true},
 		mailer:      &scantest.Mailer{},
 		objects:     &scantest.Objects{Missing: map[string]bool{}},
+		settings:    settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
 	}
 	f.service = scan.NewService(scan.Deps{
 		Repo:        f.repo,
@@ -82,7 +84,7 @@ func newFixture(enabled bool) fixture {
 		Mailer:      f.mailer,
 		Queue:       f.events,
 		Tx:          &txtest.Immediate{},
-		Settings:    settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
+		Settings:    f.settings,
 		Options:     scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
 		Now:         func() time.Time { return clock },
 	})
@@ -541,8 +543,8 @@ func TestAnApprovedFileGetsTheRecordOfWhatTheCheckFound(t *testing.T) {
 		t.Fatalf("recorded %d inspections", len(f.inspections.Drafts))
 	}
 	draft := f.inspections.Drafts[0]
-	if len(f.repo.Discs) != 0 {
-		t.Fatalf("an archive without a disc image reports none: %v", f.repo.Discs)
+	if !slices.Equal(f.repo.Forms, []scantest.ReadForm{{ResourceID: 10, Form: download.FormPortable}}) {
+		t.Fatalf("an archive holding a game program reports a game that runs as it is: %v", f.repo.Forms)
 	}
 	if draft.ResourceID != 10 || draft.Status != inspection.StatusReady || !draft.Verified {
 		t.Fatalf("unexpected draft %+v", draft)
@@ -620,8 +622,8 @@ func TestAnArchiveSevenZipCannotUnpackPassesWithWhatCouldNotBeScanned(t *testing
 	if !entryNamed(draft, "disc.iso").Unreadable || !entryNamed(draft, "bonus.zip").Unreadable || len(f.inspections.Previews) != 0 {
 		t.Fatalf("what could not be taken out is not read: %v %v", tree(draft), f.inspections.Previews)
 	}
-	if !slices.Equal(f.repo.Discs, []int{10}) {
-		t.Fatalf("a disc image in the archive is reported for its resource: %v", f.repo.Discs)
+	if !slices.Equal(f.repo.Forms, []scantest.ReadForm{{ResourceID: 10, Form: download.FormDisc}}) {
+		t.Fatalf("a disc image in the archive is reported for its resource: %v", f.repo.Forms)
 	}
 }
 

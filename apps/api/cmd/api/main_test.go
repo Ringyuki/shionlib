@@ -21,16 +21,10 @@ func TestUnknownCommandsFail(t *testing.T) {
 			t.Fatalf("recheck %s: %v", id, err)
 		}
 	}
-	if err := run(t.Context(), []string{"describe", "everything"}); err == nil || !strings.Contains(err.Error(), "apply to write it") {
-		t.Fatalf("describe everything: %v", err)
-	}
-	for _, limit := range []string{"all", "0", "-3"} {
-		if err := run(t.Context(), []string{"inspect", limit}); err == nil || !strings.Contains(err.Error(), "number of resources") {
-			t.Fatalf("inspect %s: %v", limit, err)
+	for _, gone := range []string{"inspect", "describe"} {
+		if err := run(t.Context(), []string{gone}); err == nil || !strings.Contains(err.Error(), "unknown command") {
+			t.Fatalf("%s runs by itself in the worker now: %v", gone, err)
 		}
-	}
-	if err := run(t.Context(), []string{"inspect", "-workers", "0", "10"}); err == nil || !strings.Contains(err.Error(), "at least one worker") {
-		t.Fatalf("inspect without workers: %v", err)
 	}
 }
 

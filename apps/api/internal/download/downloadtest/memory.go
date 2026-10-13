@@ -32,6 +32,7 @@ type MemoryRepository struct {
 	gameTitles    map[int]string
 	Strikes       map[int]int
 	Discs         map[int]bool
+	Undescribed   map[int]bool
 	GameDownloads map[int]int
 }
 
@@ -47,6 +48,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		gameTitles:    map[int]string{},
 		Strikes:       map[int]int{},
 		Discs:         map[int]bool{},
+		Undescribed:   map[int]bool{},
 		GameDownloads: map[int]int{},
 	}
 }
@@ -476,12 +478,12 @@ func (r *MemoryRepository) ListCreditedResources(_ context.Context, translatorID
 	return ids, nil
 }
 
-func (r *MemoryRepository) ListLegacy(_ context.Context, afterID, limit int) ([]download.LegacyResource, error) {
+func (r *MemoryRepository) ListUndescribed(_ context.Context, afterID, limit int) ([]download.LegacyResource, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	var out []download.LegacyResource
 	for _, resource := range r.sortedResources() {
-		if resource.ID <= afterID || len(out) == limit {
+		if resource.ID <= afterID || len(out) == limit || !r.Undescribed[resource.ID] {
 			continue
 		}
 		legacy := download.LegacyResource{
@@ -515,6 +517,9 @@ func (r *MemoryRepository) Describe(_ context.Context, id int, description downl
 			return err
 		}
 	}
+	r.mu.Lock()
+	delete(r.Undescribed, id)
+	r.mu.Unlock()
 	return r.mutateResource(id, func(res *download.Resource) {
 		if len(description.Canonical) > 0 {
 			res.Canonical = true

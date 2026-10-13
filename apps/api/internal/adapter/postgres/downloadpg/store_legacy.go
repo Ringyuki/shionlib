@@ -24,9 +24,9 @@ func (s *LegacyStore) db(ctx context.Context) *ent.Client {
 	return postgres.Client(ctx, s.client)
 }
 
-func (s *LegacyStore) ListLegacy(ctx context.Context, afterID, limit int) ([]download.LegacyResource, error) {
+func (s *LegacyStore) ListUndescribed(ctx context.Context, afterID, limit int) ([]download.LegacyResource, error) {
 	rows, err := s.db(ctx).GameDownloadResource.Query().
-		Where(gamedownloadresource.IDGT(afterID)).
+		Where(gamedownloadresource.Undescribed(true), gamedownloadresource.IDGT(afterID)).
 		Order(ent.Asc(gamedownloadresource.FieldID)).
 		Limit(limit).
 		WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
@@ -37,7 +37,7 @@ func (s *LegacyStore) ListLegacy(ctx context.Context, afterID, limit int) ([]dow
 		}).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("list download resources after %d: %w", afterID, err)
+		return nil, fmt.Errorf("list undescribed download resources after %d: %w", afterID, err)
 	}
 	resources := make([]download.LegacyResource, len(rows))
 	for i, row := range rows {
@@ -72,7 +72,7 @@ func (s *LegacyStore) Describe(ctx context.Context, id int, description download
 	if err != nil {
 		return fmt.Errorf("read download resource %d: %w", id, err)
 	}
-	update := s.db(ctx).GameDownloadResource.UpdateOneID(id).SetUpdated(current.Updated)
+	update := s.db(ctx).GameDownloadResource.UpdateOneID(id).SetUndescribed(false).SetUpdated(current.Updated)
 	if description.Translation != nil {
 		update.SetTranslation(string(*description.Translation))
 	}

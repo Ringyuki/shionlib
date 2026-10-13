@@ -66,10 +66,11 @@ func (r *Repository) PendingResources(ctx context.Context, now time.Time) ([]int
 	return ids, nil
 }
 
-func (r *Repository) NextUninspected(ctx context.Context, skip []int) (int, bool, error) {
+func (r *Repository) NextUninspected(ctx context.Context, skip []int, now time.Time) (int, bool, error) {
 	query := r.db(ctx).GameDownloadResource.Query().
 		Where(
 			gamedownloadresource.Status(download.ResourceActive),
+			gamedownloadresource.Or(gamedownloadresource.InspectRetryAtIsNil(), gamedownloadresource.InspectRetryAtLTE(now.UTC())),
 			gamedownloadresource.HasFilesWith(
 				gamedownloadresourcefile.Type(download.FileTypeObjectStore),
 				gamedownloadresourcefile.FileStatus(download.FileInObjectStore),
@@ -92,6 +93,13 @@ func (r *Repository) NextUninspected(ctx context.Context, skip []int) (int, bool
 		return 0, false, nil
 	}
 	return ids[0], true, nil
+}
+
+func (r *Repository) DelayInspection(ctx context.Context, resourceID int, until time.Time) error {
+	if err := r.db(ctx).GameDownloadResource.UpdateOneID(resourceID).SetInspectRetryAt(until.UTC()).Exec(ctx); err != nil {
+		return fmt.Errorf("delay inspection of resource %d: %w", resourceID, err)
+	}
+	return nil
 }
 
 func (r *Repository) DelayCheck(ctx context.Context, resourceID int, until time.Time) error {

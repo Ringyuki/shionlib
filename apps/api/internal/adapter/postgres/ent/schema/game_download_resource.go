@@ -37,6 +37,8 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
 		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("check_retry_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("inspect_retry_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Bool("undescribed").Default(false),
 		field.Int("creator_id").SchemaType(pg("integer")),
 		created(),
 		updated(),

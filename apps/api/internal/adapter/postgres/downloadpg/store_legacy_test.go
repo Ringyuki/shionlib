@@ -22,18 +22,19 @@ func TestLegacyStoreListsResourcesWithTheirNamesAndDiscs(t *testing.T) {
 	store := downloadpg.NewLegacyStore(f.db.Ent)
 	creator, gameID := f.db.User(t), f.db.Game(t)
 	first := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) {
-		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组")
+		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组").SetUndescribed(true)
 	})
+	f.resource(t, gameID, creator)
 	f.file(t, first.ID, creator, "game.part1.rar")
 	f.file(t, first.ID, creator, "game.part2.rar")
 	f.db.Ent.Inspection.Create().SetResourceID(first.ID).SetStatus("ready").SetDiscCount(2).SaveX(ctx)
 	second := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) {
-		c.SetTranslation(string(download.TranslationNone)).SetForm(string(download.FormPortable))
+		c.SetTranslation(string(download.TranslationNone)).SetForm(string(download.FormPortable)).SetUndescribed(true)
 	})
 	f.db.Ent.Inspection.Create().SetResourceID(second.ID).SetStatus("ready").SaveX(ctx)
-	third := f.resource(t, gameID, creator)
+	third := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) { c.SetUndescribed(true) })
 
-	listed, err := store.ListLegacy(ctx, 0, 2)
+	listed, err := store.ListUndescribed(ctx, 0, 2)
 	if err != nil || len(listed) != 2 || listed[0].ID != first.ID || listed[1].ID != second.ID {
 		t.Fatalf("listed %+v %v", listed, err)
 	}
@@ -47,11 +48,11 @@ func TestLegacyStoreListsResourcesWithTheirNamesAndDiscs(t *testing.T) {
 	if got := listed[1]; got.Discs || got.Note != nil || len(got.FileNames) != 0 || *got.Info.Translation != download.TranslationNone || *got.Info.Form != download.FormPortable {
 		t.Fatalf("second %+v", got)
 	}
-	rest, err := store.ListLegacy(ctx, second.ID, 2)
+	rest, err := store.ListUndescribed(ctx, second.ID, 2)
 	if err != nil || len(rest) != 1 || rest[0].ID != third.ID {
 		t.Fatalf("rest %+v %v", rest, err)
 	}
-	if none, err := store.ListLegacy(ctx, third.ID, 2); err != nil || len(none) != 0 {
+	if none, err := store.ListUndescribed(ctx, third.ID, 2); err != nil || len(none) != 0 {
 		t.Fatalf("nothing after the last: %+v %v", none, err)
 	}
 }
@@ -63,7 +64,7 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 	creator, gameID := f.db.User(t), f.db.Game(t)
 	tea := f.db.Ent.Translator.Create().SetName("绿茶汉化组").SetNameKey(translator.Key("绿茶汉化组")).SaveX(ctx)
 	resource := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) {
-		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组")
+		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组").SetUndescribed(true)
 	})
 	before, err := f.repo.GetResource(ctx, resource.ID)
 	if err != nil {
@@ -88,6 +89,9 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 	}
 	if !got.Updated.Equal(before.Updated) {
 		t.Fatalf("the update time is kept: %v %v", got.Updated, before.Updated)
+	}
+	if left, err := store.ListUndescribed(ctx, resource.ID-1, 1); err != nil || len(left) != 0 {
+		t.Fatalf("a described resource is not listed again: %+v %v", left, err)
 	}
 
 	if err := store.Describe(ctx, resource.ID, download.LegacyDescription{Edition: ptr(download.EditionSteam)}); err != nil {
@@ -117,7 +121,8 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 	if other, _ := f.repo.GetFile(ctx, second.ID); other.OriginalName != nil {
 		t.Fatalf("another file is left alone: %+v", other)
 	}
-	listed, _ := store.ListLegacy(ctx, resource.ID-1, 1)
+	f.db.Ent.GameDownloadResource.UpdateOneID(resource.ID).SetUndescribed(true).ExecX(ctx)
+	listed, _ := store.ListUndescribed(ctx, resource.ID-1, 1)
 	if len(listed) != 1 || !listed[0].Published || !listed[0].Canonical || listed[0].Files[0].OriginalName == nil {
 		t.Fatalf("listed again %+v", listed)
 	}

@@ -55,6 +55,7 @@ const (
 	everyTenMinutes     = "*/10 * * * *"
 	shortTaskTimeout    = 10 * time.Minute
 	scanTaskTimeout     = time.Hour
+	backfillTaskTimeout = 2 * time.Hour
 	transferQueueBudget = download.TransferConcurrency
 )
 
@@ -92,7 +93,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	inspectionRepo := inspectionpg.NewRepository(infra.Ent)
 	translators := translator.NewService(translatorpg.NewRepository(infra.Ent))
 	names := download.NewNameService(downloadRepo, shared.GameCards, inspection.NewMediumService(inspectionRepo), shared.Transactor)
-	modules.Legacy = download.NewLegacyService(downloadpg.NewLegacyStore(infra.Ent), shared.GameCards, translators, names, shared.Transactor)
+	legacy := download.NewLegacyService(downloadpg.NewLegacyStore(infra.Ent), shared.GameCards, translators, names, shared.Transactor)
 	downloads := download.NewService(download.Deps{
 		Repo:        downloadRepo,
 		Games:       shared.GameCards,
@@ -164,7 +165,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 
 	stalled := scan.NewStalledService(scans)
 	modules.Stalled = stalled
-	modules.Backfill = scan.NewBackfillService(scans, newGameObjectStore(cfg, objectFetchTimeout), uploads)
+	backfill := scan.NewBackfillService(scans, newGameObjectStore(cfg, objectFetchTimeout), uploads)
 
 	shared.Files = &fileServices{
 		Uploads:     uploads,
@@ -207,6 +208,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		jobs.Task{Name: "malware_case_timeout", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: scans.ExpireOverdue},
 		jobs.Task{Name: "file_check_abandon", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: stalled.Abandon},
 		jobs.Task{Name: "inspection_sweep", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: inspectionRecords.Sweep},
+		jobs.Task{Name: "stored_file_inspection", Schedule: everyMinute, Timeout: backfillTaskTimeout, Run: backfill.Run},
+		jobs.Task{Name: "resource_description", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: legacy.Describe},
 		jobs.Task{Name: "upload_session_cleanup", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: func(ctx context.Context) error {
 			if err := uploads.CleanStaleSessions(ctx); err != nil {
 				return err

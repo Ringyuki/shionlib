@@ -38,6 +38,12 @@ var (
 		Description: "检查暂停后，管理员需要在该时长内让文件重新检查；超时仍未处理的文件将被判为未通过并移除。",
 		Default:     7 * day, Min: time.Hour, Max: 90 * day,
 	})
+	BackfillWorkers = setting.Int(setting.Spec[int]{
+		Name:        "scan.backfill_workers",
+		Label:       "同时读取内容的已存储资源数",
+		Description: "检查记录上线前存储的文件没有内容记录，后台会从存储桶逐个下载这些文件，按上传检查的步骤读取内容并扫描。该项为同时处理的资源数，设为 0 时暂停。处理中的文件占用暂存盘空间，并与上传检查共用病毒扫描。",
+		Default:     2, Min: 0, Max: BackfillWorkerLimit,
+	})
 	AutoDeleteNote = setting.Text(setting.Spec[string]{
 		Name:        "scan.auto_delete_note",
 		Label:       "超时删除说明",

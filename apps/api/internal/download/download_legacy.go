@@ -62,25 +62,8 @@ type LegacyEntry struct {
 	Brands   []string
 }
 
-type LegacyRename struct {
-	From string
-	To   string
-}
-
-type LegacyTally struct {
-	Resources    int
-	Translations map[Translation]int
-	Editions     map[Edition]int
-	Translators  map[string]int
-	Discs        int
-	NotesCleared int
-	Canonical    int
-	Renames      []LegacyRename
-}
-
 const (
 	legacyBatch          = 200
-	legacyRenameSample   = 300
 	legacyTranslated     = "汉化硬盘版"
 	legacyOfficialPhrase = `(?:官方[简繁簡中日英]+文?版?|official\s+en\w+\s+version\.?)`
 	legacyGroupSuffix    = `(?:汉化组|漢化組|汉化小组|个人汉化|個人漢化|中文化小组|中文化委员会|中文化委員會|汉化委员会|汉化联合会|汉化工作室|汉化小番队)`
@@ -125,50 +108,8 @@ var legacyDescriptors = []string{"部分汉化", "测试汉化", "不完全汉�
 
 var legacyDiscFormats = []string{"iso", "mds", "mdf", "bin", "cue", "ccd", "cdi", "img", "nrg", "mdx", "isz", "bwt", "b5t", "b6t"}
 
-func (r LegacyReading) over(info Info) Info {
-	if r.Translation != nil {
-		info.Translation = r.Translation
-		info.Translators = make([]translator.Ref, len(r.Translators))
-		for i, name := range r.Translators {
-			info.Translators[i] = translator.Ref{Name: name}
-		}
-	}
-	if r.Edition != nil {
-		info.Edition = r.Edition
-	}
-	if r.EditionName != nil {
-		info.EditionName = r.EditionName
-	}
-	if r.Form != nil {
-		info.Form = r.Form
-	}
-	return info
-}
-
 func (r LegacyReading) Empty() bool {
 	return r.Translation == nil && r.Edition == nil && r.EditionName == nil && r.Form == nil && !r.ClearNote && len(r.Canonical) == 0
-}
-
-func (t *LegacyTally) count(reading LegacyReading) {
-	t.Resources++
-	if reading.Translation != nil {
-		t.Translations[*reading.Translation]++
-	}
-	if reading.Edition != nil {
-		t.Editions[*reading.Edition]++
-	}
-	for _, name := range reading.Translators {
-		t.Translators[name]++
-	}
-	if reading.Form != nil {
-		t.Discs++
-	}
-	if reading.ClearNote {
-		t.NotesCleared++
-	}
-	if len(reading.Canonical) > 0 {
-		t.Canonical++
-	}
 }
 
 func LegacyEntryOf(card game.Card) LegacyEntry {

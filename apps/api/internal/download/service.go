@@ -405,23 +405,24 @@ func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, in EditInpu
 	})
 }
 
-func (s *Service) DiscFound(ctx context.Context, resourceID int) error {
+func (s *Service) FormRead(ctx context.Context, resourceID int, form Form) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		resource, err := s.repo.LockResource(ctx, resourceID)
 		if err != nil {
 			return err
 		}
-		if resource.Info.Form != nil && *resource.Info.Form == FormDisc {
+		kind, changed := resource.Info.reads(form)
+		if !changed {
 			return s.names.Apply(ctx, resourceID)
 		}
-		if err := s.repo.SetForm(ctx, resourceID, FormDisc); err != nil {
+		if err := s.repo.SetForm(ctx, resourceID, form); err != nil {
 			return err
 		}
 		if !resource.Published() {
 			return nil
 		}
-		change := FieldChange{Field: FieldForm, Old: optional((*string)(resource.Info.Form)), New: []string{string(FormDisc)}}
-		if err := s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: EventDiscFound, Data: EventData{Changes: []FieldChange{change}}}); err != nil {
+		change := FieldChange{Field: FieldForm, Old: optional((*string)(resource.Info.Form)), New: []string{string(form)}}
+		if err := s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: kind, Data: EventData{Changes: []FieldChange{change}}}); err != nil {
 			return err
 		}
 		return s.names.Apply(ctx, resourceID)

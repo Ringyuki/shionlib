@@ -1,0 +1,24 @@
+# ADR 0017: The catalogue published before is completed by the worker
+
+## Context
+The rewrite records more about a resource than the legacy site did: its translation, translators, edition and form (ADR 0016's bases need `portable`), and an inspection of every file (ADR 0014). Resources published before carry none of it. Two commands filled it in, `shionlib-api describe [apply]` (notes and file names) and `shionlib-api inspect [-workers N] [limit]` (fetch and check every stored file), and someone had to run them after the switch, watch them and run them again after a failure. Inspecting the production catalogue (about 7,300 resources, 14 TiB) takes a day of downloads and checks.
+
+`describe` also could not tell the form of the 3,473 resources that are not disc images: `(files)` in a legacy name only says that there is no disc image, and such a resource may be an installer or a folder that runs as it is. Those resources could not be composed on until an uploader set the form by hand.
+
+## Decision
+- **Both are worker tasks, not commands.** `resource_description` (every ten minutes) and `stored_file_inspection` (every minute) run with the other scheduled tasks, start on their own after a deployment and stop with the worker. The commands are gone; there is one way to complete the catalogue.
+- **Describing happens once per resource.** `game_download_resources.undescribed` marks what waits to be read. A migration sets it on every resource that exists when the rewrite is deployed, and new resources never carry it, so a note an uploader writes later is never rewritten. Reading clears the mark even when nothing could be told.
+- **Inspecting runs as many resources at once as the setting says.** `scan.backfill_workers` (0 to 8, 2 by default) is read before every resource, so it applies at once and 0 pauses. A run takes resources until none is left or it nears its two-hour limit, and the next starts a minute later. A resource whose object is missing waits a day (`inspect_retry_at`), one that failed otherwise an hour; the run names both in its error, so they reach the log once per run and never stall the rest.
+- **The form is read from the inspection.** After a check (of an upload or of a stored file) `scan.ReadForm` decides from the entries of the archive: a disc image means `disc`; an uninstaller means an installed folder, `portable`; an installer program holding most of the bytes itself or in its data (Inno Setup slices beside it, `.cab`, `.msi`, `.hdr`) means `installer`; another program that is not an installer, updater, configuration tool or runtime means `portable`; an installer alone means `installer`. Folders of runtimes (`DirectX`, `Redist`, `Runtime`, `Support`, …) are left out, and archives mostly made of nested archives that could not be opened, or without any program, stay undecided. `download.Service.FormRead` writes it only when the resource has no form, except `disc`, which still corrects any form, and records `form_read` (or `disc_found`) in a published resource's history.
+- **The rules come from the catalogue.** They were drawn up and checked against the listings of all 2,238 zip and 7z archives of production resources without a form (read with ranged requests, 2.2 GiB in all): 2,041 `portable`, 7 `installer`, 114 `disc`, 21 undecided (Switch images, PC-98 disk images, KiriKiri data without a program), 46 left to their nested archives. A `setup.exe` is not a sign of an installer by itself: half of the installed folders keep one (AdvHD, Gisgame) next to their uninstaller.
+
+## Consequences
+- The switch needs no manual step for the catalogue: it is described within minutes and inspected over about a day, most downloaded first, with uploads checked alongside.
+- Resources that run as they are become bases for composition as soon as they are inspected.
+- The worker downloads the whole bucket once. The spool must hold one file and its extraction per worker beside the uploads.
+- A wrong `portable` shows on the resource page until someone corrects it; composition still refuses a base where the patch meets nothing.
+
+## Alternatives considered
+- **Keeping the commands and running them once at the switch**: fewer moving parts, but a person has to watch a day-long run, restart it after a failure and remember it on every environment.
+- **One River job per resource**: retries and concurrency for free, but River's queue width is fixed when the worker starts, so the setting could not change it at once, and 7,000 jobs would be queued at the switch.
+- **Treating `setup.exe` as an installer**: simple, and wrong for most installed folders.

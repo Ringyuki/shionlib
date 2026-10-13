@@ -229,7 +229,7 @@ func TestPreviewNamesTheFirstFileOfAResource(t *testing.T) {
 	}
 }
 
-func TestDiscFoundWritesTheNameOnceTheFormatIsKnown(t *testing.T) {
+func TestFormReadWritesTheNameOnceTheDiscFormatIsKnown(t *testing.T) {
 	f := newFixture()
 	ctx := context.Background()
 	f.media.Formats[9] = "iso+mds"
@@ -238,14 +238,14 @@ func TestDiscFoundWritesTheNameOnceTheFormatIsKnown(t *testing.T) {
 		r.Info = download.Info{Translation: ptr(download.TranslationNone), Form: ptr(download.FormPortable), Extras: []string{}}
 	})
 	file := f.uploaded(resource.ID, "disc.7z", func(file *download.File) { file.InspectionID = ptr(9) })
-	if err := f.service.DiscFound(ctx, resource.ID); err != nil {
+	if err := f.service.FormRead(ctx, resource.ID, download.FormDisc); err != nil {
 		t.Fatal(err)
 	}
 	if got := f.nameOf(t, file.ID); got != "[250926][ブランド] ゲーム (iso+mds).7z" {
 		t.Fatalf("name after the disc was found: %q", got)
 	}
 	f.media.Formats[9] = "iso+mds+rr3"
-	if err := f.service.DiscFound(ctx, resource.ID); err != nil || f.nameOf(t, file.ID) != "[250926][ブランド] ゲーム (iso+mds+rr3).7z" {
+	if err := f.service.FormRead(ctx, resource.ID, download.FormDisc); err != nil || f.nameOf(t, file.ID) != "[250926][ブランド] ゲーム (iso+mds+rr3).7z" {
 		t.Fatalf("a resource that already is a disc image still gets its name: %q %v", f.nameOf(t, file.ID), err)
 	}
 }

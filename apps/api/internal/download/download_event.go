@@ -20,6 +20,7 @@ const (
 	EventEdited        EventKind = "edited"
 	EventReviewCleared EventKind = "review_cleared"
 	EventDiscFound     EventKind = "disc_found"
+	EventFormRead      EventKind = "form_read"
 	EventComposed      EventKind = "composed"
 	EventRecomposed    EventKind = "recomposed"
 )

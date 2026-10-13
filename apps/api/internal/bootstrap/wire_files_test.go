@@ -551,8 +551,8 @@ func TestDiscImagesInsideAnUploadAreReadLikeFolders(t *testing.T) {
 	if found.Totals.Files != 5 || found.Totals.Folders != 1 || found.Totals.Discs != 2 || found.Totals.DiscFiles != 5 || found.Scan.Scanned != 1 {
 		t.Fatalf("unexpected totals %+v scan %+v", found.Totals, found.Scan)
 	}
-	if !slices.Equal(line.files.Discs, []int{resourceID}) {
-		t.Fatalf("the resource is told that it holds disc images: %v", line.files.Discs)
+	if !slices.Equal(line.files.Forms, []scantest.ReadForm{{ResourceID: resourceID, Form: download.FormDisc}}) {
+		t.Fatalf("the resource is told that it holds disc images: %v", line.files.Forms)
 	}
 	if len(found.Discs) != 2 {
 		t.Fatalf("unexpected disc images %+v", found.Discs)
@@ -621,6 +621,7 @@ func (l checkLine) publish(t *testing.T, path string, downloads int) (int, int) 
 		SetCreatorID(creator).
 		SaveX(ctx)
 	l.objects[key] = path
+	l.files.SeedResource(resource.ID)
 	return resource.ID, stored.ID
 }
 
@@ -642,12 +643,16 @@ func TestFilesPublishedBeforeAreInspectedFromTheBucket(t *testing.T) {
 	var order []int
 	var seen []int
 	for {
-		done, found, err := line.backfill.Next(ctx, seen)
+		picked, found, err := line.backfill.Pick(ctx, seen)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !found {
 			break
+		}
+		done, err := line.backfill.Inspect(ctx, picked)
+		if err != nil {
+			t.Fatal(err)
 		}
 		seen = append(seen, done.ResourceID)
 		order = append(order, done.ResourceID)
@@ -690,5 +695,8 @@ func TestFilesPublishedBeforeAreInspectedFromTheBucket(t *testing.T) {
 
 	if gone := line.db.Ent.GameDownloadResourceFile.GetX(ctx, goneFile); gone.InspectionID != nil || gone.FileSha256 != nil {
 		t.Fatalf("a file the bucket does not hold is left as it was: %+v", gone)
+	}
+	if !slices.Equal(line.files.Forms, []scantest.ReadForm{{ResourceID: quietID, Form: download.FormPortable}}) {
+		t.Fatalf("a clean folder with its game program is read as one that runs as it is: %v", line.files.Forms)
 	}
 }

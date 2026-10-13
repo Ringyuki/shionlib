@@ -255,8 +255,12 @@ func (l composeLine) original(t *testing.T, gameID int, path string) (int, int) 
 		SetCreatorID(creator).
 		SaveX(ctx)
 	l.shelf.objects[key] = path
-	if _, found, err := l.backfill.Next(ctx, nil); err != nil || !found {
-		t.Fatalf("read the original: %v %v", found, err)
+	picked, found, err := l.backfill.Pick(ctx, nil)
+	if err != nil || !found {
+		t.Fatalf("pick the original: %v %v", found, err)
+	}
+	if _, err := l.backfill.Inspect(ctx, picked); err != nil {
+		t.Fatalf("read the original: %v", err)
 	}
 	return resource.ID, stored.ID
 }

@@ -54,6 +54,10 @@ type GameDownloadResource struct {
 	PublishedAt *time.Time `json:"published_at,omitempty"`
 	// CheckRetryAt holds the value of the "check_retry_at" field.
 	CheckRetryAt *time.Time `json:"check_retry_at,omitempty"`
+	// InspectRetryAt holds the value of the "inspect_retry_at" field.
+	InspectRetryAt *time.Time `json:"inspect_retry_at,omitempty"`
+	// Undescribed holds the value of the "undescribed" field.
+	Undescribed bool `json:"undescribed,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID int `json:"creator_id,omitempty"`
 	// Created holds the value of the "created" field.
@@ -194,13 +198,13 @@ func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage, gamedownloadresource.FieldExtras:
 			values[i] = new(pgvalue.Strings)
-		case gamedownloadresource.FieldCanonicalName:
+		case gamedownloadresource.FieldCanonicalName, gamedownloadresource.FieldUndescribed:
 			values[i] = new(sql.NullBool)
 		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
 		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote, gamedownloadresource.FieldTranslation, gamedownloadresource.FieldPatchVersion, gamedownloadresource.FieldReleaseURL, gamedownloadresource.FieldEdition, gamedownloadresource.FieldEditionName, gamedownloadresource.FieldForm:
 			values[i] = new(sql.NullString)
-		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCheckRetryAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
+		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCheckRetryAt, gamedownloadresource.FieldInspectRetryAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -334,6 +338,19 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.CheckRetryAt = new(time.Time)
 				*_m.CheckRetryAt = value.Time
+			}
+		case gamedownloadresource.FieldInspectRetryAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field inspect_retry_at", values[i])
+			} else if value.Valid {
+				_m.InspectRetryAt = new(time.Time)
+				*_m.InspectRetryAt = value.Time
+			}
+		case gamedownloadresource.FieldUndescribed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field undescribed", values[i])
+			} else if value.Valid {
+				_m.Undescribed = value.Bool
 			}
 		case gamedownloadresource.FieldCreatorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -509,6 +526,14 @@ func (_m *GameDownloadResource) String() string {
 		builder.WriteString("check_retry_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	if v := _m.InspectRetryAt; v != nil {
+		builder.WriteString("inspect_retry_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("undescribed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Undescribed))
 	builder.WriteString(", ")
 	builder.WriteString("creator_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatorID))

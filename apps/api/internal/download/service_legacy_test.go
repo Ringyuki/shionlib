@@ -2,7 +2,6 @@ package download_test
 
 import (
 	"context"
-	"slices"
 	"testing"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
-func TestLegacyDescribeReportsWithoutWritingThenWrites(t *testing.T) {
+func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	ctx := context.Background()
 	repo := downloadtest.NewMemoryRepository(func() time.Time { return now })
 	translators := translatortest.NewMemoryRepository()
@@ -37,25 +36,13 @@ func TestLegacyDescribeReportsWithoutWritingThenWrites(t *testing.T) {
 	repo.Discs[inspected.ID] = true
 	unknown := repo.SeedResource(download.Resource{GameID: 4, CreatorID: 8, Languages: []string{"zh"}, Note: ptr("吉里吉里模拟器")})
 
-	report, err := service.Describe(ctx, false)
-	if err != nil || report.Resources != 3 || report.Translations[download.TranslationGroup] != 1 || report.Translations[download.TranslationNone] != 2 ||
-		report.Editions[download.EditionDownload] != 1 || report.Discs != 1 || report.NotesCleared != 1 || report.Translators["熊喵守护协会"] != 1 || report.Canonical != 2 {
-		t.Fatalf("report %+v %v", report, err)
-	}
-	wanted := []download.LegacyRename{
-		{From: "[BABEL] 妹嫁 妹妹新娘.zip", To: "[バベル] 妹嫁 妹妹新娘 [绿茶汉化组×熊喵守护协会].zip"},
-		{From: "[あざらしそふと] アマカノ DL版 初回版 (files).7z", To: "[141219][あざらしそふと] アマカノ DL版 初回版 (files).7z"},
-	}
-	if !slices.Equal(report.Renames, wanted) {
-		t.Fatalf("the report shows the names that would change: %+v", report.Renames)
-	}
-	if got, _ := repo.GetResource(ctx, credited.ID); got.Info.Translation != nil || got.Note == nil || got.Canonical {
-		t.Fatalf("a report writes nothing: %+v", got)
+	uploaded := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 9, Languages: []string{"zh"}, Note: ptr("绿茶汉化组"), PublishedAt: ptr(now)})
+	for _, resource := range []download.Resource{credited, original, inspected, unknown} {
+		repo.Undescribed[resource.ID] = true
 	}
 
-	applied, err := service.Describe(ctx, true)
-	if err != nil || applied.Resources != 3 {
-		t.Fatalf("applied %+v %v", applied, err)
+	if err := service.Describe(ctx); err != nil {
+		t.Fatal(err)
 	}
 	got, _ := repo.GetResource(ctx, credited.ID)
 	if got.Note != nil || *got.Info.Translation != download.TranslationGroup || len(got.Info.Translators) != 2 || got.Info.Translators[0].ID != tea.ID || got.Info.Translators[1].Name != "熊喵守护协会" {
@@ -81,8 +68,19 @@ func TestLegacyDescribeReportsWithoutWritingThenWrites(t *testing.T) {
 		t.Fatalf("what cannot be told stays as it was: %+v", got)
 	}
 
-	again, err := service.Describe(ctx, true)
-	if err != nil || again.Resources != 0 || len(again.Translators) != 0 {
-		t.Fatalf("a second run finds nothing left to read: %+v %v", again, err)
+	if got, _ := repo.GetResource(ctx, uploaded.ID); got.Info.Translation != nil || got.Note == nil {
+		t.Fatalf("a resource its uploader described is left alone: %+v", got)
+	}
+	if len(repo.Undescribed) != 0 {
+		t.Fatalf("every resource that was read is marked as described, even when nothing could be told: %v", repo.Undescribed)
+	}
+	if err := repo.UpdateResource(ctx, unknown.ID, download.ResourceChanges{Languages: []string{"zh"}, Note: ptr("绿茶汉化组")}); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.Describe(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := repo.GetResource(ctx, unknown.ID); got.Info.Translation != nil {
+		t.Fatalf("a resource is read once: %+v", got)
 	}
 }

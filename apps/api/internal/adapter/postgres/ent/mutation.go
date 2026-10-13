@@ -36087,6 +36087,8 @@ type GameDownloadResourceMutation struct {
 	adddownloads              *int
 	published_at              *time.Time
 	check_retry_at            *time.Time
+	inspect_retry_at          *time.Time
+	undescribed               *bool
 	created                   *time.Time
 	updated                   *time.Time
 	clearedFields             map[string]struct{}
@@ -37048,6 +37050,91 @@ func (m *GameDownloadResourceMutation) ResetCheckRetryAt() {
 	delete(m.clearedFields, gamedownloadresource.FieldCheckRetryAt)
 }
 
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (m *GameDownloadResourceMutation) SetInspectRetryAt(t time.Time) {
+	m.inspect_retry_at = &t
+}
+
+// InspectRetryAt returns the value of the "inspect_retry_at" field in the mutation.
+func (m *GameDownloadResourceMutation) InspectRetryAt() (r time.Time, exists bool) {
+	v := m.inspect_retry_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInspectRetryAt returns the old "inspect_retry_at" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldInspectRetryAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInspectRetryAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInspectRetryAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInspectRetryAt: %w", err)
+	}
+	return oldValue.InspectRetryAt, nil
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (m *GameDownloadResourceMutation) ClearInspectRetryAt() {
+	m.inspect_retry_at = nil
+	m.clearedFields[gamedownloadresource.FieldInspectRetryAt] = struct{}{}
+}
+
+// InspectRetryAtCleared returns if the "inspect_retry_at" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) InspectRetryAtCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldInspectRetryAt]
+	return ok
+}
+
+// ResetInspectRetryAt resets all changes to the "inspect_retry_at" field.
+func (m *GameDownloadResourceMutation) ResetInspectRetryAt() {
+	m.inspect_retry_at = nil
+	delete(m.clearedFields, gamedownloadresource.FieldInspectRetryAt)
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (m *GameDownloadResourceMutation) SetUndescribed(b bool) {
+	m.undescribed = &b
+}
+
+// Undescribed returns the value of the "undescribed" field in the mutation.
+func (m *GameDownloadResourceMutation) Undescribed() (r bool, exists bool) {
+	v := m.undescribed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUndescribed returns the old "undescribed" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldUndescribed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUndescribed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUndescribed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUndescribed: %w", err)
+	}
+	return oldValue.Undescribed, nil
+}
+
+// ResetUndescribed resets all changes to the "undescribed" field.
+func (m *GameDownloadResourceMutation) ResetUndescribed() {
+	m.undescribed = nil
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (m *GameDownloadResourceMutation) SetCreatorID(i int) {
 	m.creator = &i
@@ -37676,7 +37763,7 @@ func (m *GameDownloadResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 22)
 	if m.status != nil {
 		fields = append(fields, gamedownloadresource.FieldStatus)
 	}
@@ -37727,6 +37814,12 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	}
 	if m.check_retry_at != nil {
 		fields = append(fields, gamedownloadresource.FieldCheckRetryAt)
+	}
+	if m.inspect_retry_at != nil {
+		fields = append(fields, gamedownloadresource.FieldInspectRetryAt)
+	}
+	if m.undescribed != nil {
+		fields = append(fields, gamedownloadresource.FieldUndescribed)
 	}
 	if m.creator != nil {
 		fields = append(fields, gamedownloadresource.FieldCreatorID)
@@ -37779,6 +37872,10 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.PublishedAt()
 	case gamedownloadresource.FieldCheckRetryAt:
 		return m.CheckRetryAt()
+	case gamedownloadresource.FieldInspectRetryAt:
+		return m.InspectRetryAt()
+	case gamedownloadresource.FieldUndescribed:
+		return m.Undescribed()
 	case gamedownloadresource.FieldCreatorID:
 		return m.CreatorID()
 	case gamedownloadresource.FieldCreated:
@@ -37828,6 +37925,10 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldPublishedAt(ctx)
 	case gamedownloadresource.FieldCheckRetryAt:
 		return m.OldCheckRetryAt(ctx)
+	case gamedownloadresource.FieldInspectRetryAt:
+		return m.OldInspectRetryAt(ctx)
+	case gamedownloadresource.FieldUndescribed:
+		return m.OldUndescribed(ctx)
 	case gamedownloadresource.FieldCreatorID:
 		return m.OldCreatorID(ctx)
 	case gamedownloadresource.FieldCreated:
@@ -37962,6 +38063,20 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 		}
 		m.SetCheckRetryAt(v)
 		return nil
+	case gamedownloadresource.FieldInspectRetryAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInspectRetryAt(v)
+		return nil
+	case gamedownloadresource.FieldUndescribed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUndescribed(v)
+		return nil
 	case gamedownloadresource.FieldCreatorID:
 		v, ok := value.(int)
 		if !ok {
@@ -38079,6 +38194,9 @@ func (m *GameDownloadResourceMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedownloadresource.FieldCheckRetryAt) {
 		fields = append(fields, gamedownloadresource.FieldCheckRetryAt)
 	}
+	if m.FieldCleared(gamedownloadresource.FieldInspectRetryAt) {
+		fields = append(fields, gamedownloadresource.FieldInspectRetryAt)
+	}
 	return fields
 }
 
@@ -38131,6 +38249,9 @@ func (m *GameDownloadResourceMutation) ClearField(name string) error {
 		return nil
 	case gamedownloadresource.FieldCheckRetryAt:
 		m.ClearCheckRetryAt()
+		return nil
+	case gamedownloadresource.FieldInspectRetryAt:
+		m.ClearInspectRetryAt()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource nullable field %s", name)
@@ -38190,6 +38311,12 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresource.FieldCheckRetryAt:
 		m.ResetCheckRetryAt()
+		return nil
+	case gamedownloadresource.FieldInspectRetryAt:
+		m.ResetInspectRetryAt()
+		return nil
+	case gamedownloadresource.FieldUndescribed:
+		m.ResetUndescribed()
 		return nil
 	case gamedownloadresource.FieldCreatorID:
 		m.ResetCreatorID()

@@ -13,7 +13,7 @@ The API and the web client each ship as one container image and run together as 
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
 
-Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before), `recheck [file id ...]` (see Checks that keep failing), `describe [apply]` (see Describing resources published before).
+Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `recheck [file id ...]` (see Checks that keep failing).
 
 `apps/web/Dockerfile` builds the web client into a `node:24` image that serves on port 3000 (see `apps/web/README.md`).
 
@@ -79,37 +79,29 @@ Cap is one layer, not the whole defence: it keeps plain scripts out and makes ev
 - **Downloads.** Staging issues worker links (`FILE_DOWNLOAD_MODE=worker`) to its own download worker, `shionlib-download-worker-staging` at `https://dl-staging.hikarifallback.uk` (`env.staging` in `apps/download-worker/wrangler.jsonc`). The worker's `TICKET_SECRET` and the API's `FILE_DOWNLOAD_TICKET_SECRET` hold the same value; files live in the B2 bucket `shionlib-test`. `.github/workflows/staging-download-worker.yml` deploys it on a push to `dev` that changes `apps/download-worker`; by hand it is `npx wrangler deploy --env staging` in that directory, and the secret is set with `npx wrangler secret put TICKET_SECRET --env staging`.
 - **Verification.** The Cap site key was created with `docker/scripts/cap-site-key.sh https://staging.shionlib.com/cap <admin key>`, so it refuses automated browsers like production will.
 
-## Inspecting files published before
+## Resources published before
 
-A file gets its inspection (what it holds, its checks, its previews, its SHA-256; ADR 0014) when it is checked after its upload. Files stored before that have none, and the resource page says 「尚未读取这个文件的内容」 for them. One command gives them theirs:
+Resources published before the rewrite said their translation, translators, edition and form in their note and file names, and their files have no inspection (ADR 0014). The worker completes them by itself (ADR 0017); nothing is run by hand, and both tasks can run on a live site.
 
-```bash
-docker exec <worker container> shionlib-api inspect        # until nothing is left
-docker exec <worker container> shionlib-api inspect 50     # at most 50 resources
-docker exec <worker container> shionlib-api inspect -workers 3   # three resources at once
-```
+### Description (`resource_description`, every ten minutes)
 
-- Run it in the worker container: it needs `7zz`, clamd, the spool volume and the bucket credentials, all of which the worker already has.
-- It takes the resources with uninspected files, most downloaded first, one at a time per worker (`-workers`, 1 by default; the workers share the list of what they took, so no resource is inspected twice): it fetches the file (or every volume of a set) from the bucket into the scan workspace on the spool, runs the steps of a check (test, listing, nested archives and disc images, scan, previews) and attaches the result. Nothing changes for a clean file besides that.
-- It can be stopped at any time (`Ctrl-C`, `docker stop`) and run again: what has an inspection is done. Each run goes through a resource once; one that failed (logged as `inspection failed` with its id) is tried again by the next run.
-- Every line it logs names the resource, its files and the outcome: `inspected`, `unreadable` (the archive can no longer be opened; recorded, the file stays published), `held` (the scan detected something: the file is put under review like an upload and the resource is hidden until an admin decides; unlike an upload, a published file is never removed when the review deadline passes) or `missing` (the bucket does not hold the object; nothing is recorded).
-- It downloads every file once, in 64 MiB ranges sixteen at a time: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it, once per worker. A check takes about as long as the download of the same file (a 9 GB archive on staging: 20 seconds to download, a minute and a half to test, list and scan), and each worker runs a 7-Zip test that uses every core, so more workers than cores gain nothing; on the 4-core staging host three run well together.
+The migration `20261013165200_backfill_undescribed_resources` marks every resource that exists when it runs as `undescribed`; a resource created later is described by its uploader and never carries the mark. The task reads each marked resource once, writes what it can tell and clears the mark, so it finishes in its first run (seconds for the whole catalogue) and finds nothing afterwards.
 
-## Describing resources published before
-
-Resources published before they carried structured information (translation, translators, edition, form) said those things in their note and file names. One command reads them:
-
-```bash
-docker exec <api or worker container> shionlib-api describe         # report what would be written
-docker exec <api or worker container> shionlib-api describe apply   # write it
-```
-
-- It needs only the database. Without `apply` nothing is written: it logs every translator name it read with the number of resources (`translator read`) and one summary line (`description finished`). Read the names before applying; a name that is not a translator points at a note the rules misread.
 - A resource in Japanese only gets the translation `none`. For the others the note is read first: an official translation (`官方中文`, `Official English Version`), a machine translation (`机翻`) or the names of translators (`绿茶汉化组×熊喵守护协会`); when the note says nothing, a trailing bracket of the file name (`[官方中文]`, `[守夜人汉化组]`) is. A note that mixes them, or that cannot be told from a remark, is left alone and the translation stays unset for the uploader to fill in.
 - A note that was only the translation is cleared, and a single address in it becomes the release page; a note that says more is kept as it is.
-- The edition comes from the file name (`DL版`, `パッケージ版`, `Steam版`), and the form becomes `disc` when the file name names a disc image format (`(iso+mds+rr3)`) or an inspection found one. A resource marked `(files)` keeps no form: it may be an installer or run as it is.
-- A file name is read segment by segment: an optional release date that equals the game's, a brand that is the game's first developer or one of its aliases, the game's titles, an edition (`DL版`, `初回版`, any other `…版` becomes the edition name), a bracket naming the translation or a patch version, and a medium in brackets (`files`, disc formats, a recovery record). When every segment is read the resource takes canonical names: the old name is kept as `original_name` and the file is renamed. Any other name stays as it is with canonical names off. Without `apply` the first 300 changes are logged as `file name read` with `from` and `to`.
-- Only what a resource does not say yet is written, its update time is kept and no history event is recorded, so the command can be run again at any time. Names that are new create translators; the ones that differ only in writing show up under 疑似重复 in the admin panel.
+- The edition comes from the file name (`DL版`, `パッケージ版`, `Steam版`), and the form becomes `disc` when the file name names a disc image format (`(iso+mds+rr3)`) or an inspection found one. `(files)` only says that there is no disc image, so the form of such a resource is read from its inspection (below).
+- A file name is read segment by segment: an optional release date that equals the game's, a brand that is the game's first developer or one of its aliases, the game's titles, an edition (`DL版`, `初回版`, any other `…版` becomes the edition name), a bracket naming the translation or a patch version, and a medium in brackets (`files`, disc formats, a recovery record). When every segment is read the resource takes canonical names: the old name is kept as `original_name` and the file is renamed. Any other name stays as it is with canonical names off.
+- Only what a resource does not say yet is written, its update time is kept and no history event is recorded. Names that are new create translators; the ones that differ only in writing show up under 疑似重复 in the admin panel. A resource that fails is named in the task's error and tried again by the next run.
+
+### Inspection (`stored_file_inspection`, every minute)
+
+The task takes the resources with stored files that have no inspection, most downloaded first, fetches each file (or every volume of a set) from the bucket into the scan workspace, runs the steps of a check (test, listing, nested archives and disc images, scan, previews) and attaches the result. It needs what a check needs (`FILE_SCAN_ENABLED=true`, `7zz`, clamd, the spool, the bucket credentials) and does nothing without checks.
+
+- **How many at once** is the setting `scan.backfill_workers` (admin panel, group 「检查」: 2 by default, at most 8, 0 pauses). It is read again before every resource and every 30 seconds while all workers are busy, so a change applies at once; a pause lets the running ones finish. Each worker needs room on the spool for its file and what is extracted from it, and runs a 7-Zip test that uses every core, so more workers than cores gain nothing (three run well on the 4-core staging host). Uploads are checked by their own task at the same time and share clamd.
+- **Downloads** go in 64 MiB ranges sixteen at a time; a 9 GB archive on staging took 20 seconds to fetch and a minute and a half to test, list and scan. The whole catalogue is the size of the bucket.
+- **A run** lasts until nothing is left or for two hours, and takes no resource in its last 15 minutes; the next run starts within a minute. A stop or a deploy interrupts the running ones, which are taken again later.
+- **Outcomes.** A clean file gains its inspection and nothing else changes. An archive that can no longer be opened gets an inspection that says so and stays published. A detection puts the file under review like an upload and hides the resource until an admin decides; unlike an upload, a published file is never removed when the review deadline passes. A resource whose file the bucket does not hold gets nothing and is looked for again a day later; every run names those resources in its error (`the bucket holds no object for files of N resources`). Any other failure is retried an hour later and named in the error.
+- **Form.** After the inspection the form of a resource that has none is read from what the archive holds: a disc image makes it `disc`; an uninstaller (`unins000.exe`, `uninst.exe`, `Uninstall.exe`, `Unwise.exe`) means a folder copied after installing, `portable`; an installer program with most of the bytes in itself or in its data (`setup-1.bin` beside `setup.exe`, `.cab`, `.msi`, `.hdr`) is `installer`; any other program that is not an installer, an updater, a configuration tool or a runtime makes it `portable`; an installer program alone is `installer`. Programs under `DirectX`, `Redist`, `Runtime`, `Support` and similar folders are left out, and an archive whose bytes are mostly in nested archives that could not be opened, or one without programs (data for an emulator, disk images of old computers), keeps no form. A published resource records the change in its history (`form_read`). A form an uploader chose is never changed, except to `disc` when a disc image is found. On the 2,238 zip and 7z archives without a form in production (2026-10) this gives 2,041 `portable`, 7 `installer`, 114 `disc` and 21 without a form; 46 more are mostly nested archives and are decided once these are opened.
 
 ## Composing translated editions
 
@@ -117,7 +109,7 @@ Composition (ADR 0016) runs in the worker, on the queue `composition`, with 7-Zi
 
 - **Disk.** Everything happens on the upload spool, under `<spool>/.compose/<id>/`. One composition needs about the base twice (fetched and unpacked), the patch and saved games unpacked and the result; the run refuses to start (`no_room`) when the spool has less free space than that. Saved games stay there for as long as their resource exists, so a later patch is composed without them being uploaded again. `composition_clean` (every ten minutes) removes drafts nobody touched for `composition.draft_ttl` and directories that belong to no composition.
 - **Settings** (admin panel, group 「合成」, applied at once): `composition.max_unpacked_size` (a larger base cannot be used, 40 GiB), `composition.concurrency` (how many run at once, 1; at most 4), `composition.queue_limit` (how many may wait, 20), `composition.pack_threads` (7-Zip threads for unpacking and packing, 4) and `composition.draft_ttl` (24 hours). Raise the concurrency only with room on the spool for that many at once.
-- **Bases.** A resource can be a base only when its file has an inspection; files stored before inspections existed get one from `shionlib-api inspect` (above).
+- **Bases.** A resource can be a base only when its file has an inspection and its form is `portable`; resources published before get both from the worker (Resources published before, above).
 - A composition that fails for a reason that will not go away by itself (the base is gone, an archive cannot be unpacked, a harmful result, no room) is marked failed with its reason and the uploader is told; one that fails otherwise is tried again by River up to five times and then marked failed as `internal` with the error in `failure_detail`.
 
 ## Checks that keep failing

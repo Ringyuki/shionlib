@@ -239,6 +239,34 @@ func (_c *GameDownloadResourceCreate) SetNillableCheckRetryAt(v *time.Time) *Gam
 	return _c
 }
 
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (_c *GameDownloadResourceCreate) SetInspectRetryAt(v time.Time) *GameDownloadResourceCreate {
+	_c.mutation.SetInspectRetryAt(v)
+	return _c
+}
+
+// SetNillableInspectRetryAt sets the "inspect_retry_at" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableInspectRetryAt(v *time.Time) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetInspectRetryAt(*v)
+	}
+	return _c
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (_c *GameDownloadResourceCreate) SetUndescribed(v bool) *GameDownloadResourceCreate {
+	_c.mutation.SetUndescribed(v)
+	return _c
+}
+
+// SetNillableUndescribed sets the "undescribed" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableUndescribed(v *bool) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetUndescribed(*v)
+	}
+	return _c
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_c *GameDownloadResourceCreate) SetCreatorID(v int) *GameDownloadResourceCreate {
 	_c.mutation.SetCreatorID(v)
@@ -456,6 +484,10 @@ func (_c *GameDownloadResourceCreate) defaults() {
 		v := gamedownloadresource.DefaultDownloads
 		_c.mutation.SetDownloads(v)
 	}
+	if _, ok := _c.mutation.Undescribed(); !ok {
+		v := gamedownloadresource.DefaultUndescribed
+		_c.mutation.SetUndescribed(v)
+	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := gamedownloadresource.DefaultCreated()
 		_c.mutation.SetCreated(v)
@@ -519,6 +551,9 @@ func (_c *GameDownloadResourceCreate) check() error {
 	}
 	if _, ok := _c.mutation.Downloads(); !ok {
 		return &ValidationError{Name: "downloads", err: errors.New(`ent: missing required field "GameDownloadResource.downloads"`)}
+	}
+	if _, ok := _c.mutation.Undescribed(); !ok {
+		return &ValidationError{Name: "undescribed", err: errors.New(`ent: missing required field "GameDownloadResource.undescribed"`)}
 	}
 	if _, ok := _c.mutation.CreatorID(); !ok {
 		return &ValidationError{Name: "creator_id", err: errors.New(`ent: missing required field "GameDownloadResource.creator_id"`)}
@@ -628,6 +663,14 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 	if value, ok := _c.mutation.CheckRetryAt(); ok {
 		_spec.SetField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime, value)
 		_node.CheckRetryAt = &value
+	}
+	if value, ok := _c.mutation.InspectRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldInspectRetryAt, field.TypeTime, value)
+		_node.InspectRetryAt = &value
+	}
+	if value, ok := _c.mutation.Undescribed(); ok {
+		_spec.SetField(gamedownloadresource.FieldUndescribed, field.TypeBool, value)
+		_node.Undescribed = value
 	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gamedownloadresource.FieldCreated, field.TypeTime, value)
@@ -1145,6 +1188,36 @@ func (u *GameDownloadResourceUpsert) ClearCheckRetryAt() *GameDownloadResourceUp
 	return u
 }
 
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsert) SetInspectRetryAt(v time.Time) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldInspectRetryAt, v)
+	return u
+}
+
+// UpdateInspectRetryAt sets the "inspect_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateInspectRetryAt() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldInspectRetryAt)
+	return u
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsert) ClearInspectRetryAt() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldInspectRetryAt)
+	return u
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (u *GameDownloadResourceUpsert) SetUndescribed(v bool) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldUndescribed, v)
+	return u
+}
+
+// UpdateUndescribed sets the "undescribed" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateUndescribed() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldUndescribed)
+	return u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (u *GameDownloadResourceUpsert) SetCreatorID(v int) *GameDownloadResourceUpsert {
 	u.Set(gamedownloadresource.FieldCreatorID, v)
@@ -1560,6 +1633,41 @@ func (u *GameDownloadResourceUpsertOne) UpdateCheckRetryAt() *GameDownloadResour
 func (u *GameDownloadResourceUpsertOne) ClearCheckRetryAt() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearCheckRetryAt()
+	})
+}
+
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsertOne) SetInspectRetryAt(v time.Time) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetInspectRetryAt(v)
+	})
+}
+
+// UpdateInspectRetryAt sets the "inspect_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateInspectRetryAt() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateInspectRetryAt()
+	})
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsertOne) ClearInspectRetryAt() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearInspectRetryAt()
+	})
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (u *GameDownloadResourceUpsertOne) SetUndescribed(v bool) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetUndescribed(v)
+	})
+}
+
+// UpdateUndescribed sets the "undescribed" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateUndescribed() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateUndescribed()
 	})
 }
 
@@ -2148,6 +2256,41 @@ func (u *GameDownloadResourceUpsertBulk) UpdateCheckRetryAt() *GameDownloadResou
 func (u *GameDownloadResourceUpsertBulk) ClearCheckRetryAt() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearCheckRetryAt()
+	})
+}
+
+// SetInspectRetryAt sets the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsertBulk) SetInspectRetryAt(v time.Time) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetInspectRetryAt(v)
+	})
+}
+
+// UpdateInspectRetryAt sets the "inspect_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateInspectRetryAt() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateInspectRetryAt()
+	})
+}
+
+// ClearInspectRetryAt clears the value of the "inspect_retry_at" field.
+func (u *GameDownloadResourceUpsertBulk) ClearInspectRetryAt() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearInspectRetryAt()
+	})
+}
+
+// SetUndescribed sets the "undescribed" field.
+func (u *GameDownloadResourceUpsertBulk) SetUndescribed(v bool) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetUndescribed(v)
+	})
+}
+
+// UpdateUndescribed sets the "undescribed" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateUndescribed() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateUndescribed()
 	})
 }
 

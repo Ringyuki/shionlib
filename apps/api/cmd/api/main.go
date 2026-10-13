@@ -4,22 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
-	"io"
-	"maps"
 	"net/http"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"slices"
 	"strconv"
-	"strings"
-	"sync"
-	"syscall"
 	"time"
-
-	"golang.org/x/sync/errgroup"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
@@ -59,14 +49,10 @@ func run(ctx context.Context, args []string) error {
 		return openapi(args[1:])
 	case "health":
 		return health(ctx)
-	case "inspect":
-		return inspect(ctx, args[1:])
 	case "recheck":
 		return recheck(ctx, args[1:])
-	case "describe":
-		return describe(ctx, args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [-workers N] [limit], recheck [file id ...], describe [apply])", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, recheck [file id ...])", command)
 	}
 }
 
@@ -108,88 +94,6 @@ func serve(ctx context.Context, withHTTP bool) error {
 	return app.Start(ctx)
 }
 
-func inspect(ctx context.Context, args []string) error {
-	flags := flag.NewFlagSet("inspect", flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	workers := flags.Int("workers", 1, "how many resources are inspected at once")
-	if err := flags.Parse(args); err != nil {
-		return fmt.Errorf("inspect takes -workers and the number of resources to go through: %w", err)
-	}
-	if *workers < 1 {
-		return fmt.Errorf("inspect takes at least one worker, got %d", *workers)
-	}
-	limit := 0
-	if rest := flags.Args(); len(rest) > 0 {
-		parsed, err := strconv.Atoi(rest[0])
-		if err != nil || parsed < 1 {
-			return fmt.Errorf("inspect takes the number of resources to go through, got %q", rest[0])
-		}
-		limit = parsed
-	}
-	cfg, err := config.Load()
-	if err != nil {
-		return err
-	}
-	logger := bootstrap.NewLogger(cfg)
-	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = infra.Close(context.WithoutCancel(ctx)) }()
-	modules := bootstrap.BuildModules(infra)
-	if err := modules.Settings.Reload(ctx); err != nil {
-		return err
-	}
-	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
-	defer stop()
-	var mu sync.Mutex
-	var seen []int
-	failed := 0
-	pick := func() (int, bool, error) {
-		mu.Lock()
-		defer mu.Unlock()
-		if limit > 0 && len(seen) >= limit {
-			return 0, false, nil
-		}
-		resourceID, found, err := modules.Backfill.Pick(ctx, seen)
-		if err != nil || !found {
-			return 0, false, err
-		}
-		seen = append(seen, resourceID)
-		return resourceID, true, nil
-	}
-	group, groupCtx := errgroup.WithContext(ctx)
-	group.SetLimit(*workers)
-	for range *workers {
-		group.Go(func() error {
-			for groupCtx.Err() == nil {
-				resourceID, found, err := pick()
-				if err != nil || !found {
-					return err
-				}
-				result, err := modules.Backfill.Inspect(groupCtx, resourceID)
-				switch {
-				case groupCtx.Err() != nil:
-					continue
-				case err != nil:
-					mu.Lock()
-					failed++
-					mu.Unlock()
-					logger.Error("inspection failed", "resource_id", resourceID, "error", err)
-					continue
-				}
-				for _, unit := range result.Units {
-					logger.Info("inspected", "resource_id", resourceID, "files", unit.Files, "outcome", string(unit.Outcome))
-				}
-			}
-			return nil
-		})
-	}
-	err = group.Wait()
-	logger.Info("inspection finished", "resources", len(seen), "failed", failed, "workers", *workers, "stopped", ctx.Err() != nil)
-	return err
-}
-
 func recheck(ctx context.Context, args []string) error {
 	ids := make([]int, len(args))
 	for i, arg := range args {
@@ -218,37 +122,6 @@ func recheck(ctx context.Context, args []string) error {
 		logger.Info("check resumed", "resource_id", unit.ResourceID, "files", unit.Files)
 	}
 	logger.Info("recheck finished", "resumed", len(resumed))
-	return err
-}
-
-func describe(ctx context.Context, args []string) error {
-	apply := slices.Equal(args, []string{"apply"})
-	if len(args) > 0 && !apply {
-		return fmt.Errorf("describe takes nothing to report what it reads, or apply to write it, got %q", strings.Join(args, " "))
-	}
-	cfg, err := config.Load()
-	if err != nil {
-		return err
-	}
-	logger := bootstrap.NewLogger(cfg)
-	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = infra.Close(context.WithoutCancel(ctx)) }()
-	modules := bootstrap.BuildModules(infra)
-	if err := modules.Settings.Reload(ctx); err != nil {
-		return err
-	}
-	tally, err := modules.Legacy.Describe(ctx, apply)
-	for _, name := range slices.Sorted(maps.Keys(tally.Translators)) {
-		logger.Info("translator read", "name", name, "resources", tally.Translators[name])
-	}
-	for _, renamed := range tally.Renames {
-		logger.Info("file name read", "from", renamed.From, "to", renamed.To)
-	}
-	logger.Info("description finished", "applied", apply, "resources", tally.Resources, "translations", tally.Translations,
-		"translators", len(tally.Translators), "editions", tally.Editions, "discs", tally.Discs, "notes_cleared", tally.NotesCleared, "canonical_names", tally.Canonical)
 	return err
 }
 

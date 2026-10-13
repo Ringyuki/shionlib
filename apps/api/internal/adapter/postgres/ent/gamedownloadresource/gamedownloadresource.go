@@ -49,6 +49,10 @@ const (
 	FieldPublishedAt = "published_at"
 	// FieldCheckRetryAt holds the string denoting the check_retry_at field in the database.
 	FieldCheckRetryAt = "check_retry_at"
+	// FieldInspectRetryAt holds the string denoting the inspect_retry_at field in the database.
+	FieldInspectRetryAt = "inspect_retry_at"
+	// FieldUndescribed holds the string denoting the undescribed field in the database.
+	FieldUndescribed = "undescribed"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -169,6 +173,8 @@ var Columns = []string{
 	FieldDownloads,
 	FieldPublishedAt,
 	FieldCheckRetryAt,
+	FieldInspectRetryAt,
+	FieldUndescribed,
 	FieldCreatorID,
 	FieldCreated,
 	FieldUpdated,
@@ -205,6 +211,8 @@ var (
 	DefaultCanonicalName bool
 	// DefaultDownloads holds the default value on creation for the "downloads" field.
 	DefaultDownloads int
+	// DefaultUndescribed holds the default value on creation for the "undescribed" field.
+	DefaultUndescribed bool
 	// DefaultCreated holds the default value on creation for the "created" field.
 	DefaultCreated func() time.Time
 	// DefaultUpdated holds the default value on creation for the "updated" field.
@@ -329,6 +337,16 @@ func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByCheckRetryAt orders the results by the check_retry_at field.
 func ByCheckRetryAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCheckRetryAt, opts...).ToFunc()
+}
+
+// ByInspectRetryAt orders the results by the inspect_retry_at field.
+func ByInspectRetryAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInspectRetryAt, opts...).ToFunc()
+}
+
+// ByUndescribed orders the results by the undescribed field.
+func ByUndescribed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUndescribed, opts...).ToFunc()
 }
 
 // ByCreatorID orders the results by the creator_id field.

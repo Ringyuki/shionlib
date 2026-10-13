@@ -135,6 +135,18 @@ func (in InfoInput) with(translators []translator.Ref) Info {
 	}
 }
 
+func (i Info) reads(form Form) (EventKind, bool) {
+	switch {
+	case i.Form != nil && *i.Form == form:
+		return "", false
+	case form == FormDisc:
+		return EventDiscFound, true
+	case i.Form == nil:
+		return EventFormRead, true
+	}
+	return "", false
+}
+
 func invalid(field, message string) error {
 	return apperror.ErrValidationFailed.WithField(field, message)
 }

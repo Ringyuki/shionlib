@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"slices"
 	"strconv"
+	"sync/atomic"
+	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
@@ -22,20 +26,90 @@ func NewBackfillService(checks *Service, objects Objects, spool Spool) *Backfill
 	return &BackfillService{checks: checks, objects: objects, spool: spool}
 }
 
-func (s *BackfillService) Next(ctx context.Context, skip []int) (Backfilled, bool, error) {
-	resourceID, found, err := s.Pick(ctx, skip)
-	if err != nil || !found {
-		return Backfilled{}, false, err
+func (s *BackfillService) Run(ctx context.Context) error {
+	if !s.checks.options.Enabled {
+		return nil
 	}
-	done, err := s.Inspect(ctx, resourceID)
-	return done, true, err
+	var round backfillRound
+	var running atomic.Int32
+	var taken []int
+	finished := make(chan struct{}, BackfillWorkerLimit)
+	var group errgroup.Group
+	group.SetLimit(BackfillWorkerLimit)
+	for s.picking(ctx) {
+		workers := min(BackfillWorkers.Read(s.checks.settings), BackfillWorkerLimit)
+		active := int(running.Load())
+		if workers == 0 && active == 0 {
+			break
+		}
+		if active >= workers {
+			select {
+			case <-finished:
+			case <-time.After(backfillSettingRecheck):
+			case <-ctx.Done():
+			}
+			continue
+		}
+		resourceID, found, err := s.Pick(ctx, taken)
+		if err != nil {
+			round.failed(err)
+			break
+		}
+		if !found {
+			break
+		}
+		taken = append(taken, resourceID)
+		running.Add(1)
+		group.Go(func() error {
+			defer func() {
+				running.Add(-1)
+				select {
+				case finished <- struct{}{}:
+				default:
+				}
+			}()
+			done, err := s.Inspect(ctx, resourceID)
+			switch {
+			case ctx.Err() != nil:
+			case err != nil:
+				round.failed(err)
+			case done.Missing():
+				round.lacking(resourceID)
+			}
+			return nil
+		})
+	}
+	_ = group.Wait()
+	return errors.Join(round.result()...)
+}
+
+func (s *BackfillService) picking(ctx context.Context) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+	deadline, bounded := ctx.Deadline()
+	return !bounded || deadline.Sub(s.checks.now()) > backfillStopBeforeLimit
 }
 
 func (s *BackfillService) Pick(ctx context.Context, skip []int) (int, bool, error) {
-	return s.checks.repo.NextUninspected(ctx, skip)
+	return s.checks.repo.NextUninspected(ctx, skip, s.checks.now())
 }
 
 func (s *BackfillService) Inspect(ctx context.Context, resourceID int) (Backfilled, error) {
+	done, err := s.inspectAll(ctx, resourceID)
+	settled := context.WithoutCancel(ctx)
+	switch {
+	case err != nil && ctx.Err() == nil:
+		return done, errors.Join(err, s.checks.repo.DelayInspection(settled, resourceID, s.checks.now().Add(backfillRetryDelay)))
+	case err != nil:
+		return done, err
+	case done.Missing():
+		return done, s.checks.repo.DelayInspection(settled, resourceID, s.checks.now().Add(backfillMissingDelay))
+	}
+	return done, nil
+}
+
+func (s *BackfillService) inspectAll(ctx context.Context, resourceID int) (Backfilled, error) {
 	done := Backfilled{ResourceID: resourceID}
 	files, err := s.checks.repo.ResourceFiles(ctx, resourceID)
 	if err != nil {
@@ -107,8 +181,8 @@ func (s *BackfillService) inspect(ctx context.Context, unit Unit) (BackfillOutco
 	if err != nil {
 		return "", err
 	}
-	if outcome == BackfillInspected && holdsDisc(found.contents.Draft) {
-		if err := checks.files.DiscFound(ctx, unit.Entry().ResourceID); err != nil {
+	if form, read := ReadForm(found.contents.Draft); read && outcome == BackfillInspected {
+		if err := checks.files.FormRead(ctx, unit.Entry().ResourceID, form); err != nil {
 			return "", err
 		}
 	}

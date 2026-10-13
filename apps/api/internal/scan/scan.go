@@ -105,6 +105,10 @@ type Backfilled struct {
 	Units      []BackfilledUnit
 }
 
+func (b Backfilled) Missing() bool {
+	return slices.ContainsFunc(b.Units, func(unit BackfilledUnit) bool { return unit.Outcome == BackfillMissing })
+}
+
 type Report struct {
 	Infected   bool
 	Viruses    []string
