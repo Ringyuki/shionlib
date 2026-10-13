@@ -6280,10 +6280,10 @@ export type components = {
             /** Format: int64 */
             id: number;
             /**
-             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, the check found a disc image and set the form to disc, the resource was composed from a base and a patch and published, or it was composed again with a new patch
+             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, the check found a disc image and set the form to disc, the check read the form of a resource that had none from what the archive holds, the resource was composed from a base and a patch and published, or it was composed again with a new patch
              * @enum {string}
              */
-            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared" | "disc_found" | "composed" | "recomposed";
+            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared" | "disc_found" | "form_read" | "composed" | "recomposed";
             /** @description The file replaced or cleared, or the new name of a renamed file */
             name: string | null;
             /**

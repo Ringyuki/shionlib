@@ -246,6 +246,7 @@
         "edited": "<actor></actor> 修改了资源信息",
         "review_cleared": "<actor></actor> 复核后放行了文件",
         "disc_found": "检查发现压缩包内有光盘映像",
+        "form_read": "根据检查到的压缩包内容填写了形态",
         "composed": "<actor></actor> 合成并发布了资源",
         "recomposed": "<actor></actor> 更新了补丁，资源已重新合成"
       },

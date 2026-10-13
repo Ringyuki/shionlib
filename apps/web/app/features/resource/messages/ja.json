@@ -246,6 +246,7 @@
         "edited": "<actor></actor> がリソース情報を編集しました",
         "review_cleared": "<actor></actor> が審査のうえファイルを公開しました",
         "disc_found": "チェックでアーカイブ内にディスクイメージが見つかりました",
+        "form_read": "チェックで確認したアーカイブの内容から形態を設定しました",
         "composed": "<actor></actor> がリソースを合成して公開しました",
         "recomposed": "<actor></actor> がパッチを更新し、リソースを再合成しました"
       },

@@ -246,6 +246,7 @@
         "edited": "<actor></actor> edited the resource",
         "review_cleared": "<actor></actor> cleared a file after review",
         "disc_found": "The check found a disc image in the archive",
+        "form_read": "The form was filled in from what the check found in the archive",
         "composed": "<actor></actor> composed and published the resource",
         "recomposed": "<actor></actor> updated the patch and the resource was composed again"
       },
