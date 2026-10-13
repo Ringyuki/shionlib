@@ -33,6 +33,7 @@ type MemoryRepository struct {
 	Strikes       map[int]int
 	Discs         map[int]bool
 	Undescribed   map[int]bool
+	Uncataloged   map[int]bool
 	GameDownloads map[int]int
 }
 
@@ -49,6 +50,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		Strikes:       map[int]int{},
 		Discs:         map[int]bool{},
 		Undescribed:   map[int]bool{},
+		Uncataloged:   map[int]bool{},
 		GameDownloads: map[int]int{},
 	}
 }
@@ -497,6 +499,7 @@ func (r *MemoryRepository) ListUndescribed(_ context.Context, afterID, limit int
 			Published: resource.Published() && resource.Status == download.ResourceActive,
 			Canonical: resource.Canonical,
 			Info:      cloneInfo(resource.Info),
+			Awaiting:  r.Uncataloged[resource.GameID],
 		}
 		for _, file := range r.filesOf(resource.ID) {
 			legacy.Files = append(legacy.Files, download.LegacyFile{ID: file.ID, Name: file.Name, OriginalName: file.OriginalName})

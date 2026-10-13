@@ -23,7 +23,7 @@ func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	cards := gametest.NewCards(
 		game.Card{ID: 1, TitleJP: "妹嫁", TitleZH: "妹妹新娘", Developers: []game.Credit{{Developer: game.DeveloperRef{Name: "バベル", Aliases: []string{"BABEL"}}}}},
 		game.Card{ID: 2, TitleJP: "アマカノ", ReleaseDate: &released, Developers: []game.Credit{{Developer: game.DeveloperRef{Name: "あざらしそふと"}}}},
-		game.Card{ID: 3, TitleJP: "ゲーム"}, game.Card{ID: 4, TitleJP: "ゲーム"},
+		game.Card{ID: 3, TitleJP: "ゲーム"}, game.Card{ID: 4, TitleJP: "ゲーム"}, game.Card{ID: 5},
 	)
 	service := download.NewLegacyService(repo, cards, translator.NewService(translators), downloadtest.Names(repo, cards, downloadtest.Media{}), &txtest.Immediate{})
 
@@ -35,9 +35,11 @@ func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	repo.SeedFile(download.File{ResourceID: inspected.ID, Name: "game.7z"})
 	repo.Discs[inspected.ID] = true
 	unknown := repo.SeedResource(download.Resource{GameID: 4, CreatorID: 8, Languages: []string{"zh"}, Note: ptr("吉里吉里模拟器")})
+	waiting := repo.SeedResource(download.Resource{GameID: 5, CreatorID: 8, Languages: []string{"zh"}, Note: ptr("绿茶汉化组"), PublishedAt: ptr(now)})
+	repo.Uncataloged[5] = true
 
 	uploaded := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 9, Languages: []string{"zh"}, Note: ptr("绿茶汉化组"), PublishedAt: ptr(now)})
-	for _, resource := range []download.Resource{credited, original, inspected, unknown} {
+	for _, resource := range []download.Resource{credited, original, inspected, unknown, waiting} {
 		repo.Undescribed[resource.ID] = true
 	}
 
@@ -71,8 +73,15 @@ func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	if got, _ := repo.GetResource(ctx, uploaded.ID); got.Info.Translation != nil || got.Note == nil {
 		t.Fatalf("a resource its uploader described is left alone: %+v", got)
 	}
-	if len(repo.Undescribed) != 0 {
-		t.Fatalf("every resource that was read is marked as described, even when nothing could be told: %v", repo.Undescribed)
+	if got, _ := repo.GetResource(ctx, waiting.ID); got.Info.Translation != nil || got.Note == nil || len(repo.Undescribed) != 1 || !repo.Undescribed[waiting.ID] {
+		t.Fatalf("a resource whose game was not fetched from the catalog waits for it, and every other one is marked as described: %+v %v", got, repo.Undescribed)
+	}
+	repo.Uncataloged[5] = false
+	if err := service.Describe(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := repo.GetResource(ctx, waiting.ID); got.Info.Translation == nil || *got.Info.Translation != download.TranslationGroup || len(repo.Undescribed) != 0 {
+		t.Fatalf("it is read once its game has been fetched: %+v %v", got.Info, repo.Undescribed)
 	}
 	if err := repo.UpdateResource(ctx, unknown.ID, download.ResourceChanges{Languages: []string{"zh"}, Note: ptr("绿茶汉化组")}); err != nil {
 		t.Fatal(err)

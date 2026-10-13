@@ -6,9 +6,11 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
 
@@ -39,6 +41,10 @@ func (s *LegacyStore) ListUndescribed(ctx context.Context, afterID, limit int) (
 	if err != nil {
 		return nil, fmt.Errorf("list undescribed download resources after %d: %w", afterID, err)
 	}
+	awaiting, err := s.awaitingCatalog(ctx, rows)
+	if err != nil {
+		return nil, err
+	}
 	resources := make([]download.LegacyResource, len(rows))
 	for i, row := range rows {
 		names := make([]string, len(row.Edges.Files))
@@ -59,9 +65,34 @@ func (s *LegacyStore) ListUndescribed(ctx context.Context, afterID, limit int) (
 			Published: row.PublishedAt != nil && row.Status == download.ResourceActive,
 			Canonical: row.CanonicalName,
 			Info:      toInfo(row),
+			Awaiting:  awaiting[row.GameID],
 		}
 	}
 	return resources, nil
+}
+
+func (s *LegacyStore) awaitingCatalog(ctx context.Context, rows []*ent.GameDownloadResource) (map[int]bool, error) {
+	gameIDs := make([]int, len(rows))
+	for i, row := range rows {
+		gameIDs[i] = row.GameID
+	}
+	links, err := s.db(ctx).CatalogSourceLink.Query().
+		Where(
+			catalogsourcelink.Entity(string(catalog.EntityGame)),
+			catalogsourcelink.LocalIDIn(gameIDs...),
+			catalogsourcelink.SyncedAtIsNil(),
+			catalogsourcelink.MissingAtIsNil(),
+			catalogsourcelink.ExcludedAtIsNil(),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("find games whose catalog entry was not fetched yet: %w", err)
+	}
+	awaiting := make(map[int]bool, len(links))
+	for _, link := range links {
+		awaiting[link.LocalID] = true
+	}
+	return awaiting, nil
 }
 
 func (s *LegacyStore) Describe(ctx context.Context, id int, description download.LegacyDescription) error {
