@@ -24,7 +24,7 @@ func newOrder(userID *int, cents int64, private bool) sponsor.NewOrder {
 	name, message := "Alice", "Thanks!"
 	return sponsor.NewOrder{
 		ProviderOrderID: fmt.Sprintf("contract-%d", providerSequence.Add(1)),
-		Provider:        "idatariver",
+		Provider:        ProviderName,
 		AmountCents:     cents,
 		SponsorName:     &name,
 		Message:         &message,
@@ -51,7 +51,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.User == nil || got.User.ID != owner || got.SponsorName == nil || *got.SponsorName != "Alice" || got.Provider != "idatariver" {
+		if got.User == nil || got.User.ID != owner || got.SponsorName == nil || *got.SponsorName != "Alice" || got.Provider != ProviderName {
 			t.Fatalf("unexpected order %+v", got)
 		}
 		byProvider, err := env.Repo.FindByProviderOrderID(ctx, created.ProviderOrderID)

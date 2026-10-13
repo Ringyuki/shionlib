@@ -10,28 +10,53 @@ import (
 )
 
 type Service struct {
-	repo     Repository
-	provider Provider
-	tx       Transactor
-	signer   Signer
-	settings setting.Source
-	options  Options
-	now      func() time.Time
+	repo      Repository
+	providers map[string]Provider
+	tx        Transactor
+	signer    Signer
+	settings  setting.Source
+	options   Options
+	now       func() time.Time
 }
 
-func NewService(repo Repository, provider Provider, tx Transactor, signer Signer, settings setting.Source, options Options, now func() time.Time) *Service {
-	return &Service{repo: repo, provider: provider, tx: tx, signer: signer, settings: settings, options: options, now: now}
+func NewService(repo Repository, providers map[string]Provider, tx Transactor, signer Signer, settings setting.Source, options Options, now func() time.Time) *Service {
+	return &Service{repo: repo, providers: providers, tx: tx, signer: signer, settings: settings, options: options, now: now}
+}
+
+func (s *Service) accepting() (Provider, bool) {
+	provider, ok := s.providers[s.options.Provider]
+	return provider, ok && provider.Ready() && Enabled.Read(s.settings)
+}
+
+func (s *Service) providerOf(order Order) (Provider, error) {
+	provider, ok := s.providers[order.Provider]
+	if !ok {
+		return nil, ErrProviderRequestFailed.WithArgs(map[string]any{"message": "provider unavailable"})
+	}
+	return provider, nil
+}
+
+func (s *Service) MethodOf(order Order) *PaymentMethod {
+	if order.PaymentMethod == nil {
+		return nil
+	}
+	method := PaymentMethod{ID: *order.PaymentMethod, Name: *order.PaymentMethod}
+	if provider, ok := s.providers[order.Provider]; ok {
+		method = provider.Method(*order.PaymentMethod)
+	}
+	return &method
 }
 
 func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrderInput) (CreatedOrder, error) {
-	if !Enabled.Read(s.settings) {
+	provider, ok := s.accepting()
+	if !ok {
 		return CreatedOrder{}, ErrDisabled
 	}
-	providerOrderID, err := s.provider.CreateOrder(ctx, ProviderOrderRequest(in))
+	providerOrderID, err := provider.CreateOrder(ctx, ProviderOrderRequest(in))
 	if err != nil {
 		return CreatedOrder{}, err
 	}
-	info, err := s.provider.OrderInfo(ctx, providerOrderID)
+	info, err := provider.OrderInfo(ctx, providerOrderID)
 	if err != nil {
 		return CreatedOrder{}, err
 	}
@@ -80,11 +105,15 @@ func (s *Service) PayOrder(ctx context.Context, id int, in PayInput) (Payment, e
 	case StatusExpired:
 		return Payment{}, ErrOrderExpired
 	}
-	payment, err := s.provider.PayOrder(ctx, PaymentRequest{
+	provider, err := s.providerOf(order)
+	if err != nil {
+		return Payment{}, err
+	}
+	payment, err := provider.PayOrder(ctx, PaymentRequest{
 		ProviderOrderID: order.ProviderOrderID,
 		Method:          in.Method,
 		RedirectURL:     in.RedirectURL,
-		CallbackURL:     s.options.CallbackURL,
+		CallbackURL:     s.options.CallbackURL(order.Provider),
 	})
 	if err != nil {
 		return Payment{}, err
@@ -119,15 +148,26 @@ func (s *Service) AdminOrder(ctx context.Context, id int) (Order, error) {
 	return synced, err
 }
 
-func (s *Service) HandleCallback(ctx context.Context, providerOrderID string) error {
+func (s *Service) HandleCallback(ctx context.Context, name string, callback Callback) error {
+	provider, ok := s.providers[name]
+	if !ok {
+		return ErrOrderNotFound
+	}
+	providerOrderID := provider.CallbackOrderID(callback)
+	if providerOrderID == "" {
+		return nil
+	}
 	order, err := s.repo.FindByProviderOrderID(ctx, providerOrderID)
 	if err != nil {
 		return err
 	}
+	if order.Provider != name {
+		return ErrOrderNotFound
+	}
 	if order.Status == StatusDone {
 		return nil
 	}
-	info, err := s.provider.OrderInfo(ctx, providerOrderID)
+	info, err := provider.OrderInfo(ctx, providerOrderID)
 	if err != nil {
 		return err
 	}
@@ -168,7 +208,8 @@ func (s *Service) Wall(ctx context.Context, page Page) (WallPage, error) {
 }
 
 func (s *Service) State() State {
-	return State{Enabled: Enabled.Read(s.settings), BadgeDaysPerDollar: DaysPerDollar}
+	_, accepting := s.accepting()
+	return State{Enabled: accepting, BadgeDaysPerDollar: DaysPerDollar}
 }
 
 func (s *Service) Stats(ctx context.Context) (Stats, error) {
@@ -184,7 +225,13 @@ func (s *Service) Overview(ctx context.Context) (Overview, error) {
 	if err != nil {
 		return Overview{}, err
 	}
-	return Overview{Totals: totals, MonthAmountCents: month, Enabled: Enabled.Read(s.settings)}, nil
+	provider, ok := s.providers[s.options.Provider]
+	return Overview{
+		Totals:           totals,
+		MonthAmountCents: month,
+		Enabled:          Enabled.Read(s.settings),
+		ProviderReady:    ok && provider.Ready(),
+	}, nil
 }
 
 func (s *Service) ExpireStaleOrders(ctx context.Context) error {
@@ -227,7 +274,7 @@ func (s *Service) syncPending(ctx context.Context, order Order) (Order, []Paymen
 	if order.Status != StatusNew {
 		return order, nil, nil
 	}
-	info, ok := s.providerOrder(ctx, order.ProviderOrderID)
+	info, ok := s.providerOrder(ctx, order)
 	if !ok {
 		return order, nil, nil
 	}
@@ -245,8 +292,12 @@ func (s *Service) syncPending(ctx context.Context, order Order) (Order, []Paymen
 	return synced, nil, err
 }
 
-func (s *Service) providerOrder(ctx context.Context, providerOrderID string) (ProviderOrder, bool) {
-	info, err := s.provider.OrderInfo(ctx, providerOrderID)
+func (s *Service) providerOrder(ctx context.Context, order Order) (ProviderOrder, bool) {
+	provider, ok := s.providers[order.Provider]
+	if !ok {
+		return ProviderOrder{}, false
+	}
+	info, err := provider.OrderInfo(ctx, order.ProviderOrderID)
 	return info, err == nil
 }
 
@@ -272,6 +323,6 @@ func sponsorshipFor(amountCents int64) time.Duration {
 
 type Options struct {
 	Provider    string
-	CallbackURL string
+	CallbackURL func(provider string) string
 	ClockOffset time.Duration
 }

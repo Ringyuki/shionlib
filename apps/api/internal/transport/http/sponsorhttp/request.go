@@ -20,7 +20,7 @@ type createSponsorOrderInput struct {
 type paySponsorOrderInput struct {
 	ID   int `path:"id" minimum:"1"`
 	Body struct {
-		Method      string  `json:"method" minLength:"1" maxLength:"50"`
+		Method      string  `json:"method" minLength:"1" maxLength:"50" doc:"id of one of the order's payment methods"`
 		RedirectURL *string `json:"redirectUrl,omitempty"`
 	}
 }
@@ -47,6 +47,7 @@ type updateSponsorOrderStatusInput struct {
 }
 
 type sponsorWebhookInput struct {
+	Provider    string `path:"provider" minLength:"1" maxLength:"50" pattern:"^[a-z0-9][a-z0-9_-]*$" doc:"Name of the payment provider that calls back"`
 	ContentType string `header:"Content-Type"`
 	RawBody     []byte
 }

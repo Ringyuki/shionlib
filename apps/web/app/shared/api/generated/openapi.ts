@@ -3098,7 +3098,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/sponsor/webhook/idatariver": {
+    "/sponsor/webhook/{provider}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3107,8 +3107,8 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** iDataRiver payment callback */
-        post: operations["sponsor.webhook.idatariver"];
+        /** Callback of a payment provider */
+        post: operations["sponsor.webhook"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4116,13 +4116,15 @@ export type components = {
             walkthroughs: number;
         };
         AdminSponsorStatsDTO: {
-            /** @description Whether new sponsor orders are accepted */
+            /** @description Whether the setting that opens sponsorship is on */
             enabled: boolean;
             /**
              * Format: double
              * @description Paid since the month began on the site's clock
              */
             monthAmount: number;
+            /** @description Whether the payment provider has what it needs to take payments */
+            providerReady: boolean;
             /** Format: double */
             totalAmount: number;
             /**
@@ -8566,6 +8568,7 @@ export type components = {
             password: string;
         };
         PaySponsorOrderInputBody: {
+            /** @description id of one of the order's payment methods */
             method: string;
             redirectUrl?: string;
         };
@@ -8970,7 +8973,8 @@ export type components = {
             message: string | null;
             /** Format: date-time */
             paidAt: string | null;
-            paymentMethod: string | null;
+            /** @description What the order was last paid or tried with */
+            paymentMethod: components["schemas"]["SponsorPaymentMethodDTO"] | null;
             providerOrderId: string;
             sponsorName: string | null;
             /** @enum {string} */
@@ -8994,12 +8998,19 @@ export type components = {
             payUrl: string;
         };
         SponsorPaymentMethodDTO: {
-            desc?: string;
-            enabled: boolean;
-            fixedFeeRange?: string;
-            method: string;
+            /**
+             * @description The payment brand behind the method when the provider's adapter knows it
+             * @enum {string|null}
+             */
+            brand: "alipay" | "wechat_pay" | "paypal" | "google_pay" | "apple_pay" | "usdt" | null;
+            /** @description The fixed part of the provider's fee as the provider words it; null when there is none */
+            fee_fixed: string | null;
+            /** @description The share of the amount the provider charges for paying this way, as the provider words it (for example 3.0%); null when it charges none or the method is only named, as on a paid order */
+            fee_rate: string | null;
+            /** @description What the payment provider calls the method; sent back to pay with it */
+            id: string;
+            /** @description The provider's own name for the method */
             name: string;
-            ratioRange?: string;
         };
         SponsorStateDTO: {
             /**
@@ -16792,13 +16803,16 @@ export interface operations {
             };
         };
     };
-    "sponsor.webhook.idatariver": {
+    "sponsor.webhook": {
         parameters: {
             query?: never;
             header?: {
                 "Content-Type"?: string;
             };
-            path?: never;
+            path: {
+                /** @description Name of the payment provider that calls back */
+                provider: string;
+            };
             cookie?: never;
         };
         requestBody: {

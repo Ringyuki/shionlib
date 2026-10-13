@@ -37,11 +37,15 @@ func setup(t *testing.T, enabled bool) env {
 	provider := sponsortest.NewProvider()
 	expires := time.Date(2026, 10, 3, 2, 2, 3, 0, time.UTC)
 	provider.ExpiresAt = &expires
-	ratio := "11.0%"
-	provider.Methods = []sponsor.PaymentMethod{{Method: "alipay", Name: "Alipay", Enabled: true, RatioRange: &ratio}}
-	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	provider.Methods = []sponsor.PaymentMethod{
+		{ID: "alipay", Name: "Alipay", Brand: sponsor.BrandAlipay, Fee: sponsor.MethodFee{Rate: "3.0%", Fixed: "0.30"}},
+		{ID: "bank", Name: "Bank transfer"},
+	}
+	provider.Brands = map[string]sponsor.MethodBrand{"alipay": sponsor.BrandAlipay}
+	options := sponsor.Options{Provider: sponsortest.ProviderName, CallbackURL: func(name string) string { return "https://shionlib.test/api/sponsor/webhook/" + name }}
 	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
-	service := sponsor.NewService(repo, provider, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return apitest.Now })
+	providers := map[string]sponsor.Provider{sponsortest.ProviderName: provider}
+	service := sponsor.NewService(repo, providers, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return apitest.Now })
 	sponsorhttp.NewHandler(service, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, provider: provider}
 }
@@ -54,7 +58,7 @@ func TestCreateOrderShape(t *testing.T) {
 	e := setup(t, true)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order", As: &owner, Body: map[string]any{"amount": 10.5, "name": "Alice", "isPrivate": false}})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	want := `{"orderId":1,"providerOrderId":"idr-1","paymentMethods":[{"method":"alipay","name":"Alipay","enabled":true,"ratioRange":"11.0%"}],"expiresAt":"2026-10-03T02:02:03.000Z","accessToken":"signed:sponsor-order:1:idr-1"}`
+	want := `{"orderId":1,"providerOrderId":"pay-1","paymentMethods":[{"id":"alipay","name":"Alipay","brand":"alipay","fee_rate":"3.0%","fee_fixed":"0.30"},{"id":"bank","name":"Bank transfer","brand":null,"fee_rate":null,"fee_fixed":null}],"expiresAt":"2026-10-03T02:02:03.000Z","accessToken":"signed:sponsor-order:1:pay-1"}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected body\n got %s\nwant %s", resp.Data, want)
 	}
@@ -77,18 +81,18 @@ func TestCreateOrderValidationAndDisabled(t *testing.T) {
 
 func TestPayOrder(t *testing.T) {
 	e := setup(t, true)
-	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-9", AmountCents: 500})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-9", Status: sponsor.StatusNew, AmountCents: 500})
+	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-9", AmountCents: 500})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-9", Status: sponsor.StatusNew, AmountCents: 500})
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/" + strconv.Itoa(order.ID) + "/pay", Body: map[string]any{"method": "alipay"}})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	if string(resp.Data) != `{"payUrl":"https://pay.example/idr-9","payCurrency":"CNY","amount":5}` {
+	if string(resp.Data) != `{"payUrl":"https://pay.example/pay-9","payCurrency":"CNY","amount":5}` {
 		t.Fatalf("unexpected payment %s", resp.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/" + strconv.Itoa(order.ID) + "/pay", Body: map[string]any{"method": ""}}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/999/pay", Body: map[string]any{"method": "alipay"}}), http.StatusNotFound, 570101)
-	paid := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-10", AmountCents: 500, Status: sponsor.StatusDone})
+	paid := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-10", AmountCents: 500, Status: sponsor.StatusDone})
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/" + strconv.Itoa(paid.ID) + "/pay", Body: map[string]any{"method": "alipay"}}), http.StatusConflict, 570102)
-	expired := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-11", AmountCents: 500, Status: sponsor.StatusExpired})
+	expired := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-11", AmountCents: 500, Status: sponsor.StatusExpired})
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/" + strconv.Itoa(expired.ID) + "/pay", Body: map[string]any{"method": "alipay"}}), http.StatusGone, 570103)
 	e.provider.Fail = sponsor.ErrProviderRequestFailed.WithArgs(map[string]any{"message": "parameter error"})
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order/" + strconv.Itoa(order.ID) + "/pay", Body: map[string]any{"method": "alipay"}}), http.StatusBadGateway, 570104)
@@ -96,8 +100,8 @@ func TestPayOrder(t *testing.T) {
 
 func TestOrderStatusAccess(t *testing.T) {
 	e := setup(t, true)
-	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-5", AmountCents: 1000, UserID: ptr(owner.UserID), SponsorName: ptr("Alice"), Message: ptr("hi"), IsPrivate: true})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-5", Status: sponsor.StatusDone, AmountCents: 1000})
+	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-5", AmountCents: 1000, UserID: ptr(owner.UserID), SponsorName: ptr("Alice"), Message: ptr("hi"), IsPrivate: true, PaymentMethod: ptr("alipay")})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-5", Status: sponsor.StatusDone, AmountCents: 1000})
 	path := "/sponsor/order/" + strconv.Itoa(order.ID)
 
 	redacted := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &stranger})
@@ -107,19 +111,19 @@ func TestOrderStatusAccess(t *testing.T) {
 	}
 	full := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &owner})
 	e.server.Expect(full, http.StatusOK, 0)
-	if string(full.Data) != `{"order":{"id":1,"providerOrderId":"idr-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":null,"paidAt":"2026-10-03T01:02:03.000Z","expiresAt":null,"created":"2026-10-03T01:02:03.000Z"},"badge_until":"2026-12-02T01:02:03.000Z","payment_methods":[]}` {
+	if string(full.Data) != `{"order":{"id":1,"providerOrderId":"pay-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":{"id":"alipay","name":"ALIPAY","brand":"alipay","fee_rate":null,"fee_fixed":null},"paidAt":"2026-10-03T01:02:03.000Z","expiresAt":null,"created":"2026-10-03T01:02:03.000Z"},"badge_until":"2026-12-02T01:02:03.000Z","payment_methods":[]}` {
 		t.Fatalf("owner syncs and sees the full order: %s", full.Data)
 	}
 
-	anonymous := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-6", AmountCents: 100})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-6", Status: sponsor.StatusDone, AmountCents: 100})
-	withToken := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/order/" + strconv.Itoa(anonymous.ID) + "?token=signed:sponsor-order:2:idr-6"})
+	anonymous := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-6", AmountCents: 100})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-6", Status: sponsor.StatusDone, AmountCents: 100})
+	withToken := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/order/" + strconv.Itoa(anonymous.ID) + "?token=signed:sponsor-order:2:pay-6"})
 	e.server.Expect(withToken, http.StatusOK, 0)
 	var view struct {
 		Order map[string]any `json:"order"`
 	}
 	withToken.Decode(t, &view)
-	if view.Order["status"] != "DONE" || view.Order["providerOrderId"] != "idr-6" {
+	if view.Order["status"] != "DONE" || view.Order["providerOrderId"] != "pay-6" {
 		t.Fatalf("token holder syncs the anonymous order: %s", withToken.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/order/999"}), http.StatusNotFound, 570101)
@@ -152,10 +156,11 @@ func TestWallAndStats(t *testing.T) {
 
 func TestWebhook(t *testing.T) {
 	e := setup(t, true)
-	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-hook", AmountCents: 500})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-hook", Status: sponsor.StatusDone, AmountCents: 500})
+	plain := map[string]string{"Content-Type": "text/plain"}
+	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-hook", AmountCents: 500})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-hook", Status: sponsor.StatusDone, AmountCents: 500})
 
-	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Body: map[string]any{"orderId": "idr-hook", "status": "DONE"}})
+	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/testpay", Body: "pay-hook", Header: plain})
 	e.server.Expect(resp, http.StatusOK, 0)
 	if string(resp.Data) != `{"received":true}` {
 		t.Fatalf("unexpected webhook body %s", resp.Data)
@@ -164,19 +169,22 @@ func TestWebhook(t *testing.T) {
 		t.Fatalf("webhook must verify and complete the order: %+v", stored)
 	}
 
-	form := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-form", AmountCents: 500})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-form", Status: sponsor.StatusRefund, AmountCents: 500})
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Body: "orderId=idr-form", Header: map[string]string{"Content-Type": "application/x-www-form-urlencoded"}}), http.StatusOK, 0)
+	form := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-form", AmountCents: 500})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-form", Status: sponsor.StatusRefund, AmountCents: 500})
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/testpay", Body: "pay-form", Header: plain}), http.StatusOK, 0)
 	if stored, _ := e.repo.Get(t.Context(), form.ID); stored.Status != sponsor.StatusRefund {
-		t.Fatalf("form-encoded callbacks are accepted: %+v", stored)
+		t.Fatalf("a callback can refund an order: %+v", stored)
 	}
 
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Body: map[string]any{"other": 1}}), http.StatusOK, 0)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Body: map[string]any{"orderId": "forged"}}), http.StatusNotFound, 570101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/testpay", Body: " ", Header: plain}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/testpay", Body: "forged", Header: plain}), http.StatusNotFound, 570101)
 
-	mismatch := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-cheap", AmountCents: 500})
-	e.provider.Put(sponsor.ProviderOrder{ID: "idr-cheap", Status: sponsor.StatusDone, AmountCents: 100})
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Body: map[string]any{"orderId": "idr-cheap"}}), http.StatusBadGateway, 570105)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/nobody", Body: "pay-hook", Header: plain}), http.StatusNotFound, 570101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/No%20Body", Body: "pay-hook", Header: plain}), http.StatusUnprocessableEntity, 100101)
+
+	mismatch := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-cheap", AmountCents: 500})
+	e.provider.Put(sponsor.ProviderOrder{ID: "pay-cheap", Status: sponsor.StatusDone, AmountCents: 100})
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/webhook/testpay", Body: "pay-cheap", Header: plain}), http.StatusBadGateway, 570105)
 	if stored, _ := e.repo.Get(t.Context(), mismatch.ID); stored.Status != sponsor.StatusNew {
 		t.Fatalf("mismatched callbacks must not change the order: %+v", stored)
 	}
@@ -184,8 +192,8 @@ func TestWebhook(t *testing.T) {
 
 func TestAdminRoutes(t *testing.T) {
 	e := setup(t, true)
-	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-adm", AmountCents: 200, UserID: ptr(owner.UserID)})
-	e.repo.Seed(sponsor.Order{ProviderOrderID: "idr-adm-2", AmountCents: 200, Status: sponsor.StatusExpired})
+	order := e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-adm", AmountCents: 200, UserID: ptr(owner.UserID)})
+	e.repo.Seed(sponsor.Order{ProviderOrderID: "pay-adm-2", AmountCents: 200, Status: sponsor.StatusExpired})
 	path := "/admin/sponsor/orders/" + strconv.Itoa(order.ID)
 
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/sponsor/orders"}), http.StatusUnauthorized, 200101)
@@ -198,7 +206,7 @@ func TestAdminRoutes(t *testing.T) {
 		Meta  map[string]int   `json:"meta"`
 	}
 	list.Decode(t, &page)
-	if len(page.Items) != 1 || page.Items[0]["providerOrderId"] != "idr-adm-2" || page.Meta["totalItems"] != 1 {
+	if len(page.Items) != 1 || page.Items[0]["providerOrderId"] != "pay-adm-2" || page.Meta["totalItems"] != 1 {
 		t.Fatalf("unexpected admin list %s", list.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/sponsor/orders?status=PAID", As: &admin}), http.StatusUnprocessableEntity, 100101)
@@ -219,7 +227,7 @@ func TestAdminRoutes(t *testing.T) {
 
 	stats := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/sponsor/stats", As: &admin})
 	e.server.Expect(stats, http.StatusOK, 0)
-	if string(stats.Data) != `{"totalSponsors":1,"totalAmount":2,"monthAmount":2,"enabled":true}` {
+	if string(stats.Data) != `{"totalSponsors":1,"totalAmount":2,"monthAmount":2,"enabled":true,"providerReady":true}` {
 		t.Fatalf("unexpected admin stats %s", stats.Data)
 	}
 

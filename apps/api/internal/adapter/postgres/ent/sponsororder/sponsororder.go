@@ -91,8 +91,6 @@ func ValidColumn(column string) bool {
 var (
 	// ProviderOrderIDValidator is a validator for the "provider_order_id" field. It is called by the builders before save.
 	ProviderOrderIDValidator func(string) error
-	// DefaultProvider holds the default value on creation for the "provider" field.
-	DefaultProvider string
 	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	ProviderValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.

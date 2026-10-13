@@ -35,14 +35,6 @@ func (_c *SponsorOrderCreate) SetProvider(v string) *SponsorOrderCreate {
 	return _c
 }
 
-// SetNillableProvider sets the "provider" field if the given value is not nil.
-func (_c *SponsorOrderCreate) SetNillableProvider(v *string) *SponsorOrderCreate {
-	if v != nil {
-		_c.SetProvider(*v)
-	}
-	return _c
-}
-
 // SetAmount sets the "amount" field.
 func (_c *SponsorOrderCreate) SetAmount(v string) *SponsorOrderCreate {
 	_c.mutation.SetAmount(v)
@@ -263,10 +255,6 @@ func (_c *SponsorOrderCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SponsorOrderCreate) defaults() {
-	if _, ok := _c.mutation.Provider(); !ok {
-		v := sponsororder.DefaultProvider
-		_c.mutation.SetProvider(v)
-	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := sponsororder.DefaultStatus
 		_c.mutation.SetStatus(v)

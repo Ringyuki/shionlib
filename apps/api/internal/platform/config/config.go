@@ -26,7 +26,6 @@ type Config struct {
 	AI         AI
 	NextMoe    NextMoe
 	PotatoVN   PotatoVN
-	Sponsor    Sponsor
 	Tasks      Tasks
 }
 
@@ -206,13 +205,6 @@ type NextMoe struct {
 
 type PotatoVN struct {
 	BaseURL string `env:"POTATOVN_BASE_URL" envDefault:"https://api.potatovn.net"`
-}
-
-type Sponsor struct {
-	Provider            string `env:"SPONSOR_PROVIDER" envDefault:"idatariver"`
-	IdatariverBaseURL   string `env:"IDATARIVER_BASE_URL" envDefault:"https://open.idatariver.com"`
-	IdatariverSecret    string `env:"IDATARIVER_DEVELOPER_SECRET"`
-	IdatariverProjectID string `env:"IDATARIVER_PROJECT_ID"`
 }
 
 type Tasks struct {

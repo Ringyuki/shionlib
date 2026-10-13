@@ -22,9 +22,12 @@ type Repository interface {
 }
 
 type Provider interface {
+	Ready() bool
 	CreateOrder(ctx context.Context, in ProviderOrderRequest) (string, error)
 	OrderInfo(ctx context.Context, providerOrderID string) (ProviderOrder, error)
 	PayOrder(ctx context.Context, in PaymentRequest) (Payment, error)
+	CallbackOrderID(callback Callback) string
+	Method(id string) PaymentMethod
 }
 
 type Transactor interface {

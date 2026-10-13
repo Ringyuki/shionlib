@@ -13,31 +13,64 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 )
 
-const maxResponseBytes = 1 << 20
+const (
+	Name             = "idatariver"
+	DefaultBaseURL   = "https://open.idatariver.com"
+	maxResponseBytes = 1 << 20
+)
 
-type Options struct {
-	BaseURL   string
-	Secret    string
-	ProjectID string
+const nonZeroDigits = "123456789"
+
+var brands = map[string]sponsor.MethodBrand{
+	"alipay":        sponsor.BrandAlipay,
+	"wxpay":         sponsor.BrandWeChatPay,
+	"crypto":        sponsor.BrandUSDT,
+	"onramp-paypal": sponsor.BrandPayPal,
+	"onramp-google": sponsor.BrandGooglePay,
+	"onramp-apple":  sponsor.BrandApplePay,
 }
 
 type Client struct {
-	http      *http.Client
+	http     *http.Client
+	settings setting.Source
+}
+
+func NewClient(httpClient *http.Client, settings setting.Source) *Client {
+	return &Client{http: httpClient, settings: settings}
+}
+
+type account struct {
 	baseURL   string
 	secret    string
 	projectID string
 }
 
-func NewClient(httpClient *http.Client, opts Options) *Client {
-	return &Client{
-		http:      httpClient,
-		baseURL:   strings.TrimSuffix(opts.BaseURL, "/"),
-		secret:    opts.Secret,
-		projectID: opts.ProjectID,
+func (c *Client) account() account {
+	baseURL := strings.TrimSpace(BaseURL.Read(c.settings))
+	if baseURL == "" {
+		baseURL = DefaultBaseURL
 	}
+	return account{
+		baseURL:   strings.TrimSuffix(baseURL, "/"),
+		secret:    strings.TrimSpace(Secret.Read(c.settings)),
+		projectID: strings.TrimSpace(ProjectID.Read(c.settings)),
+	}
+}
+
+func (a account) ready() bool {
+	return a.secret != "" && a.projectID != ""
+}
+
+func (c *Client) Ready() bool {
+	return c.account().ready()
+}
+
+func (c *Client) Method(id string) sponsor.PaymentMethod {
+	return sponsor.PaymentMethod{ID: id, Name: id, Brand: brands[id]}
 }
 
 type envelope struct {
@@ -76,12 +109,15 @@ type payOrderResult struct {
 }
 
 type paymentMethod struct {
-	Method        string  `json:"method"`
-	Name          string  `json:"name"`
-	Enabled       bool    `json:"enabled"`
-	RatioRange    *string `json:"ratioRange"`
-	FixedFeeRange *string `json:"fixedFeeRange"`
-	Desc          *string `json:"desc"`
+	Method        string `json:"method"`
+	Name          string `json:"name"`
+	Enabled       bool   `json:"enabled"`
+	RatioRange    string `json:"ratioRange"`
+	FixedFeeRange string `json:"fixedFeeRange"`
+}
+
+func (m paymentMethod) fee() sponsor.MethodFee {
+	return sponsor.MethodFee{Rate: charged(m.RatioRange), Fixed: charged(m.FixedFeeRange)}
 }
 
 type orderInfo struct {
@@ -93,9 +129,16 @@ type orderInfo struct {
 	CreatedTS       float64         `json:"createdTS"`
 }
 
+func charged(text string) string {
+	if !strings.ContainsAny(text, nonZeroDigits) {
+		return ""
+	}
+	return strings.TrimSpace(text)
+}
+
 func (c *Client) CreateOrder(ctx context.Context, in sponsor.ProviderOrderRequest) (string, error) {
 	body := createOrderBody{
-		ProjectID: c.projectID,
+		ProjectID: c.account().projectID,
 		OrderInfo: createOrderDraft{Amount: sponsor.Amount(in.AmountCents), Private: in.IsPrivate, Name: in.Name, Message: in.Message},
 	}
 	var result createOrderResult
@@ -134,12 +177,10 @@ func (c *Client) OrderInfo(ctx context.Context, providerOrderID string) (sponsor
 			continue
 		}
 		order.PaymentMethods = append(order.PaymentMethods, sponsor.PaymentMethod{
-			Method:        method.Method,
-			Name:          method.Name,
-			Enabled:       method.Enabled,
-			RatioRange:    method.RatioRange,
-			FixedFeeRange: method.FixedFeeRange,
-			Description:   method.Desc,
+			ID:    method.Method,
+			Name:  method.Name,
+			Brand: brands[method.Method],
+			Fee:   method.fee(),
 		})
 	}
 	if result.CreatedTS > 0 && result.ExpiredInterval > 0 {
@@ -150,6 +191,10 @@ func (c *Client) OrderInfo(ctx context.Context, providerOrderID string) (sponsor
 }
 
 func (c *Client) do(ctx context.Context, method, path string, body, out any) error {
+	account := c.account()
+	if !account.ready() {
+		return sponsor.ErrProviderRequestFailed.WithArgs(map[string]any{"message": "provider not configured"})
+	}
 	var reader io.Reader
 	if body != nil {
 		raw, err := json.Marshal(body)
@@ -158,11 +203,11 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 		}
 		reader = bytes.NewReader(raw)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, reader)
+	req, err := http.NewRequestWithContext(ctx, method, account.baseURL+path, reader)
 	if err != nil {
 		return fmt.Errorf("build idatariver request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+c.secret)
+	req.Header.Set("Authorization", "Bearer "+account.secret)
 	req.Header.Set("Accept", "application/json")
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")

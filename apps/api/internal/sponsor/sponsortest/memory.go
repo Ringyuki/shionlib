@@ -74,6 +74,9 @@ func (r *MemoryRepository) Seed(order sponsor.Order) sponsor.Order {
 	if order.Status == "" {
 		order.Status = sponsor.StatusNew
 	}
+	if order.Provider == "" {
+		order.Provider = ProviderName
+	}
 	if order.Created.IsZero() {
 		order.Created = r.now()
 	}

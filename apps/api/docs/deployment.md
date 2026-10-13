@@ -119,5 +119,6 @@ docker exec <worker container> shionlib-api recheck 8817 8819  # the checks of t
 5. Copy Redis state that changed keys (see "Redis" in `migration.md`): the recent-update sorted set and the Bangumi tokens.
 6. Let `worker` follow the change feed from the carried cursor and refresh linked entries (`catalog_refresh` queues the never-synced links first). Watch `catalog_source_links.failures`.
 7. Switch traffic to `api` and smoke-test login, game pages, downloads (they need Cap, see above), uploads and search.
+8. To take sponsor payments, a super admin enters the iDataRiver project id and developer secret under 「第三方服务」 in the admin settings (they are no longer environment variables, ADR 0015) and then switches 「开放赞助」 on.
 
 Rollback before step 7: stop the compose and start the legacy backend; the forward migrations are additive except for the enum/column renames, the `hikarinagi_sync_state` replacement and the conversion of editor content (its down migration puts the kept `content` and `html` back), which have down migrations (`shionlib-api migrate` has no `down` subcommand; run golang-migrate manually if needed).

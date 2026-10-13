@@ -136,13 +136,32 @@ type StatusChange struct {
 	CallbackVerified bool
 }
 
+type MethodBrand string
+
+const (
+	BrandAlipay    MethodBrand = "alipay"
+	BrandWeChatPay MethodBrand = "wechat_pay"
+	BrandPayPal    MethodBrand = "paypal"
+	BrandGooglePay MethodBrand = "google_pay"
+	BrandApplePay  MethodBrand = "apple_pay"
+	BrandUSDT      MethodBrand = "usdt"
+)
+
 type PaymentMethod struct {
-	Method        string
-	Name          string
-	Enabled       bool
-	RatioRange    *string
-	FixedFeeRange *string
-	Description   *string
+	ID    string
+	Name  string
+	Brand MethodBrand
+	Fee   MethodFee
+}
+
+type MethodFee struct {
+	Rate  string
+	Fixed string
+}
+
+type Callback struct {
+	ContentType string
+	Body        []byte
 }
 
 type ProviderOrder struct {
@@ -225,6 +244,7 @@ type Overview struct {
 	Totals           Stats
 	MonthAmountCents int64
 	Enabled          bool
+	ProviderReady    bool
 }
 
 func monthStart(now time.Time, clockOffset time.Duration) time.Time {

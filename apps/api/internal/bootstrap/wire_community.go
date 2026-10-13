@@ -39,19 +39,18 @@ const sponsorOrderAccessPurpose = "shionlib:sponsor-order-access"
 func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
 
+	paymentCallbacks := strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/"
 	sponsorService := sponsor.NewService(
 		sponsorpg.NewRepository(shared.Ent),
-		idatariver.NewClient(httpclient.New(httpclient.Options{Timeout: 15 * time.Second}), idatariver.Options{
-			BaseURL:   cfg.Sponsor.IdatariverBaseURL,
-			Secret:    cfg.Sponsor.IdatariverSecret,
-			ProjectID: cfg.Sponsor.IdatariverProjectID,
-		}),
+		map[string]sponsor.Provider{
+			idatariver.Name: idatariver.NewClient(httpclient.New(httpclient.Options{Timeout: 15 * time.Second}), shared.Settings),
+		},
 		shared.Transactor,
 		hmacsign.New(cfg.Token.Secret, sponsorOrderAccessPurpose),
 		shared.Settings,
 		sponsor.Options{
-			Provider:    cfg.Sponsor.Provider,
-			CallbackURL: strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/idatariver",
+			Provider:    idatariver.Name,
+			CallbackURL: func(provider string) string { return paymentCallbacks + provider },
 			ClockOffset: admin.StatsDayOffset,
 		},
 		shared.Now,

@@ -3,11 +3,14 @@ package sponsortest
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 )
+
+const ProviderName = "testpay"
 
 type Provider struct {
 	mu        sync.Mutex
@@ -19,6 +22,20 @@ type Provider struct {
 	Fail      error
 	Methods   []sponsor.PaymentMethod
 	ExpiresAt *time.Time
+	Unready   bool
+	Brands    map[string]sponsor.MethodBrand
+}
+
+func (p *Provider) Ready() bool {
+	return !p.Unready
+}
+
+func (p *Provider) CallbackOrderID(callback sponsor.Callback) string {
+	return strings.TrimSpace(string(callback.Body))
+}
+
+func (p *Provider) Method(id string) sponsor.PaymentMethod {
+	return sponsor.PaymentMethod{ID: id, Name: strings.ToUpper(id), Brand: p.Brands[id]}
 }
 
 func NewProvider() *Provider {
@@ -47,7 +64,7 @@ func (p *Provider) CreateOrder(_ context.Context, in sponsor.ProviderOrderReques
 		return "", p.Fail
 	}
 	p.next++
-	id := fmt.Sprintf("idr-%d", p.next)
+	id := fmt.Sprintf("pay-%d", p.next)
 	p.Created = append(p.Created, in)
 	p.orders[id] = sponsor.ProviderOrder{ID: id, Status: sponsor.StatusNew, AmountCents: in.AmountCents, PaymentMethods: p.Methods, ExpiresAt: p.ExpiresAt}
 	return id, nil

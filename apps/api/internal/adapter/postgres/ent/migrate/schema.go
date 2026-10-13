@@ -2221,7 +2221,7 @@ var (
 	SponsorOrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "provider_order_id", Type: field.TypeString, Unique: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
-		{Name: "provider", Type: field.TypeString, Size: 50, Default: "idatariver", SchemaType: map[string]string{"postgres": "character varying(50)"}},
+		{Name: "provider", Type: field.TypeString, Size: 50, SchemaType: map[string]string{"postgres": "character varying(50)"}},
 		{Name: "amount", Type: field.TypeString, SchemaType: map[string]string{"postgres": "numeric(10,2)"}},
 		{Name: "currency", Type: field.TypeString, Nullable: true, Size: 10, SchemaType: map[string]string{"postgres": "character varying(10)"}},
 		{Name: "payment_method", Type: field.TypeString, Nullable: true, Size: 50, SchemaType: map[string]string{"postgres": "character varying(50)"}},

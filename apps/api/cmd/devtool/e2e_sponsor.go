@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/idatariver"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 )
 
 const (
-	e2eSponsorProvider = "idatariver"
+	e2eSponsorProvider = idatariver.Name
 	e2eSponsorMessage  = "Seeded sponsor message."
 	e2eSponsorGuest    = "Seeded Guest"
 	e2eSponsorPasserby = "Seeded Passerby"

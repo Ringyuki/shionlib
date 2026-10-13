@@ -1,12 +1,8 @@
 package sponsorhttp
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"mime"
 	"net/http"
-	"net/url"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
@@ -34,7 +30,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.wall", Method: http.MethodGet, Path: "/sponsor/wall", Summary: "List the sponsors who chose to be shown, each once, the latest first", Tags: tags}, h.wall)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.state", Method: http.MethodGet, Path: "/sponsor/state", Summary: "Whether sponsor orders are accepted and what a dollar gives", Tags: tags}, h.state)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.stats", Method: http.MethodGet, Path: "/sponsor/stats", Summary: "Sponsorship totals", Tags: tags}, h.stats)
-	httpapi.Register(api, httpapi.Route{ID: "sponsor.webhook.idatariver", Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Summary: "iDataRiver payment callback", Tags: tags, Status: http.StatusOK}, h.webhook)
+	httpapi.Register(api, httpapi.Route{ID: "sponsor.webhook", Method: http.MethodPost, Path: "/sponsor/webhook/{provider}", Summary: "Callback of a payment provider", Tags: tags, Status: http.StatusOK}, h.webhook)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.orders", Method: http.MethodGet, Path: "/admin/sponsor/orders", Summary: "List sponsor orders", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminList)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.order", Method: http.MethodGet, Path: "/admin/sponsor/orders/{id}", Summary: "Get a sponsor order", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminOrder)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.updateStatus", Method: http.MethodPatch, Path: "/admin/sponsor/orders/{id}/status", Summary: "Override a sponsor order status", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminUpdateStatus)
@@ -74,7 +70,7 @@ func (h *Handler) order(ctx context.Context, in *getSponsorOrderInput) (*respons
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, toOrderViewDTO(view, h.resp.Now())), nil
+	return response.OK(ctx, h.resp, toOrderViewDTO(view, h.service.MethodOf(view.Order), h.resp.Now())), nil
 }
 
 func (h *Handler) wall(ctx context.Context, in *sponsorWallInput) (*response.Output[response.Page[sponsorWallEntryDTO]], error) {
@@ -102,10 +98,8 @@ func (h *Handler) stats(ctx context.Context, _ *struct{}) (*response.Output[spon
 }
 
 func (h *Handler) webhook(ctx context.Context, in *sponsorWebhookInput) (*response.Output[sponsorWebhookDTO], error) {
-	if orderID := callbackOrderID(in.ContentType, in.RawBody); orderID != "" {
-		if err := h.service.HandleCallback(ctx, orderID); err != nil {
-			return nil, err
-		}
+	if err := h.service.HandleCallback(ctx, in.Provider, sponsor.Callback{ContentType: in.ContentType, Body: in.RawBody}); err != nil {
+		return nil, err
 	}
 	return response.OK(ctx, h.resp, sponsorWebhookDTO{Received: true}), nil
 }
@@ -130,7 +124,7 @@ func (h *Handler) adminList(ctx context.Context, in *listSponsorOrdersInput) (*r
 	}
 	now := h.resp.Now()
 	return response.OK(ctx, h.resp, response.MapPage(orders, total, in.PageSize, in.Page, func(order sponsor.Order) sponsorOrderDTO {
-		return toOrderDTO(order, now)
+		return toOrderDTO(order, h.service.MethodOf(order), now)
 	})), nil
 }
 
@@ -139,7 +133,7 @@ func (h *Handler) adminOrder(ctx context.Context, in *sponsorOrderPathInput) (*r
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, toOrderDTO(order, h.resp.Now())), nil
+	return response.OK(ctx, h.resp, toOrderDTO(order, h.service.MethodOf(order), h.resp.Now())), nil
 }
 
 func (h *Handler) adminUpdateStatus(ctx context.Context, in *updateSponsorOrderStatusInput) (*response.EmptyOutput, error) {
@@ -154,34 +148,6 @@ func (h *Handler) adminDelete(ctx context.Context, in *sponsorOrderPathInput) (*
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
-}
-
-func callbackOrderID(contentType string, raw []byte) string {
-	mediaType, _, _ := mime.ParseMediaType(contentType)
-	if mediaType == "application/x-www-form-urlencoded" {
-		values, err := url.ParseQuery(string(raw))
-		if err != nil {
-			return ""
-		}
-		return values.Get("orderId")
-	}
-	var body struct {
-		OrderID json.RawMessage `json:"orderId"`
-	}
-	if err := json.Unmarshal(raw, &body); err != nil {
-		return ""
-	}
-	var text string
-	if err := json.Unmarshal(body.OrderID, &text); err == nil {
-		return text
-	}
-	var number json.Number
-	decoder := json.NewDecoder(bytes.NewReader(body.OrderID))
-	decoder.UseNumber()
-	if err := decoder.Decode(&number); err == nil {
-		return number.String()
-	}
-	return ""
 }
 
 func deref[T any](value *T) T {

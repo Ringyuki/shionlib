@@ -1285,8 +1285,6 @@ func init() {
 	sponsororder.ProviderOrderIDValidator = sponsororderDescProviderOrderID.Validators[0].(func(string) error)
 	// sponsororderDescProvider is the schema descriptor for provider field.
 	sponsororderDescProvider := sponsororderFields[2].Descriptor()
-	// sponsororder.DefaultProvider holds the default value on creation for the provider field.
-	sponsororder.DefaultProvider = sponsororderDescProvider.Default.(string)
 	// sponsororder.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	sponsororder.ProviderValidator = sponsororderDescProvider.Validators[0].(func(string) error)
 	// sponsororderDescCurrency is the schema descriptor for currency field.

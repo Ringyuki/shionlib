@@ -8,12 +8,11 @@ import (
 )
 
 type sponsorPaymentMethodDTO struct {
-	Method        string  `json:"method"`
-	Name          string  `json:"name"`
-	Enabled       bool    `json:"enabled"`
-	RatioRange    *string `json:"ratioRange,omitempty"`
-	FixedFeeRange *string `json:"fixedFeeRange,omitempty"`
-	Desc          *string `json:"desc,omitempty"`
+	ID       string  `json:"id" doc:"What the payment provider calls the method; sent back to pay with it"`
+	Name     string  `json:"name" doc:"The provider's own name for the method"`
+	Brand    *string `json:"brand" enum:"alipay,wechat_pay,paypal,google_pay,apple_pay,usdt" doc:"The payment brand behind the method when the provider's adapter knows it"`
+	FeeRate  *string `json:"fee_rate" doc:"The share of the amount the provider charges for paying this way, as the provider words it (for example 3.0%); null when it charges none or the method is only named, as on a paid order"`
+	FeeFixed *string `json:"fee_fixed" doc:"The fixed part of the provider's fee as the provider words it; null when there is none"`
 }
 
 type sponsorOrderCreatedDTO struct {
@@ -39,7 +38,7 @@ type sponsorOrderDTO struct {
 	User            *userhttp.UserSummaryDTO `json:"user"`
 	Message         *string                  `json:"message"`
 	IsPrivate       bool                     `json:"isPrivate"`
-	PaymentMethod   *string                  `json:"paymentMethod"`
+	PaymentMethod   *sponsorPaymentMethodDTO `json:"paymentMethod" doc:"What the order was last paid or tried with"`
 	PaidAt          *time.Time               `json:"paidAt"`
 	ExpiresAt       *time.Time               `json:"expiresAt" doc:"Until when the order can be paid"`
 	Created         time.Time                `json:"created"`
@@ -82,7 +81,8 @@ type adminSponsorStatsDTO struct {
 	TotalSponsors int     `json:"totalSponsors" doc:"Completed orders"`
 	TotalAmount   float64 `json:"totalAmount"`
 	MonthAmount   float64 `json:"monthAmount" doc:"Paid since the month began on the site's clock"`
-	Enabled       bool    `json:"enabled" doc:"Whether new sponsor orders are accepted"`
+	Enabled       bool    `json:"enabled" doc:"Whether the setting that opens sponsorship is on"`
+	ProviderReady bool    `json:"providerReady" doc:"Whether the payment provider has what it needs to take payments"`
 }
 
 func toAdminStatsDTO(overview sponsor.Overview) adminSponsorStatsDTO {
@@ -91,6 +91,7 @@ func toAdminStatsDTO(overview sponsor.Overview) adminSponsorStatsDTO {
 		TotalAmount:   sponsor.Amount(overview.Totals.TotalAmountCents),
 		MonthAmount:   sponsor.Amount(overview.MonthAmountCents),
 		Enabled:       overview.Enabled,
+		ProviderReady: overview.ProviderReady,
 	}
 }
 
@@ -101,19 +102,26 @@ type sponsorWebhookDTO struct {
 func toPaymentMethods(methods []sponsor.PaymentMethod) []sponsorPaymentMethodDTO {
 	out := make([]sponsorPaymentMethodDTO, len(methods))
 	for i, method := range methods {
-		out[i] = sponsorPaymentMethodDTO{
-			Method:        method.Method,
-			Name:          method.Name,
-			Enabled:       method.Enabled,
-			RatioRange:    method.RatioRange,
-			FixedFeeRange: method.FixedFeeRange,
-			Desc:          method.Description,
-		}
+		out[i] = toPaymentMethod(method)
 	}
 	return out
 }
 
-func toOrderDTO(order sponsor.Order, now time.Time) sponsorOrderDTO {
+func toPaymentMethod(method sponsor.PaymentMethod) sponsorPaymentMethodDTO {
+	dto := sponsorPaymentMethodDTO{ID: method.ID, Name: method.Name, FeeRate: present(method.Fee.Rate), FeeFixed: present(method.Fee.Fixed)}
+	if method.Brand != "" {
+		brand := string(method.Brand)
+		dto.Brand = &brand
+	}
+	return dto
+}
+
+func toOrderDTO(order sponsor.Order, method *sponsor.PaymentMethod, now time.Time) sponsorOrderDTO {
+	var paidWith *sponsorPaymentMethodDTO
+	if method != nil {
+		dto := toPaymentMethod(*method)
+		paidWith = &dto
+	}
 	return sponsorOrderDTO{
 		ID:              order.ID,
 		ProviderOrderID: order.ProviderOrderID,
@@ -123,16 +131,16 @@ func toOrderDTO(order sponsor.Order, now time.Time) sponsorOrderDTO {
 		User:            userhttp.ToUserSummaryPtr(order.User, now),
 		Message:         order.Message,
 		IsPrivate:       order.IsPrivate,
-		PaymentMethod:   order.PaymentMethod,
+		PaymentMethod:   paidWith,
 		PaidAt:          order.PaidAt,
 		ExpiresAt:       order.ExpiresAt,
 		Created:         order.Created,
 	}
 }
 
-func toOrderViewDTO(view sponsor.OrderView, now time.Time) sponsorOrderViewDTO {
+func toOrderViewDTO(view sponsor.OrderView, method *sponsor.PaymentMethod, now time.Time) sponsorOrderViewDTO {
 	return sponsorOrderViewDTO{
-		Order:          toOrderDTO(view.Order, now),
+		Order:          toOrderDTO(view.Order, method, now),
 		BadgeUntil:     view.Order.BadgeUntil(now),
 		PaymentMethods: toPaymentMethods(view.PaymentMethods),
 	}
@@ -148,4 +156,11 @@ func toWallEntryDTO(entry sponsor.WallEntry, now time.Time) sponsorWallEntryDTO 
 
 func toStatsDTO(stats sponsor.Stats) sponsorStatsDTO {
 	return sponsorStatsDTO{TotalSponsors: stats.TotalSponsors, TotalAmount: sponsor.Amount(stats.TotalAmountCents)}
+}
+
+func present(text string) *string {
+	if text == "" {
+		return nil
+	}
+	return &text
 }

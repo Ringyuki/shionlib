@@ -7,11 +7,13 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/idatariver"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 )
 
@@ -36,8 +38,13 @@ func serve(t *testing.T, status int, response string) (*idatariver.Client, *[]re
 		_, _ = w.Write([]byte(response))
 	}))
 	t.Cleanup(server.Close)
-	client := idatariver.NewClient(server.Client(), idatariver.Options{BaseURL: server.URL + "/", Secret: "test-secret", ProjectID: "test-project"})
-	return client, &calls
+	return idatariver.NewClient(server.Client(), account(server.URL+"/")), &calls
+}
+
+func account(baseURL string) settingtest.Source {
+	source := settingtest.Set(settingtest.Source{}, idatariver.BaseURL, baseURL)
+	settingtest.Set(source, idatariver.Secret, "test-secret")
+	return settingtest.Set(source, idatariver.ProjectID, "test-project")
 }
 
 func TestCreateOrder(t *testing.T) {
@@ -61,7 +68,8 @@ func TestCreateOrder(t *testing.T) {
 
 func TestOrderInfoNormalizesTheProviderOrder(t *testing.T) {
 	client, calls := serve(t, http.StatusOK, `{"code":0,"msg":"","result":{"id":"a&b","status":"DONE","price":10,"createdTS":1700000000,"expiredInterval":3600,
-		"mPayments":[{"method":"alipay","name":"Alipay","enabled":true,"ratioRange":"11.0%"},{"method":"usdt","name":"USDT","enabled":false}]}}`)
+		"mPayments":[{"method":"alipay","name":"Alipay","enabled":true,"ratioRange":" 11.0% ","fixedFeeRange":"0.00"},{"method":"bank","name":"Bank","enabled":true,"ratioRange":"0%","fixedFeeRange":"0.30"},
+			{"method":"onramp-paypal","name":"PayPal","enabled":true,"ratioRange":"4.4%","fixedFeeRange":"0.30"},{"method":"wxpay","name":"WeChat","enabled":true},{"method":"crypto","name":"USDT","enabled":false}]}}`)
 	order, err := client.OrderInfo(context.Background(), "a&b")
 	if err != nil {
 		t.Fatal(err)
@@ -72,8 +80,14 @@ func TestOrderInfoNormalizesTheProviderOrder(t *testing.T) {
 	if order.ID != "a&b" || order.Status != sponsor.StatusDone || order.AmountCents != 1000 {
 		t.Fatalf("unexpected order %+v", order)
 	}
-	if len(order.PaymentMethods) != 1 || order.PaymentMethods[0].Method != "alipay" || order.PaymentMethods[0].RatioRange == nil || order.PaymentMethods[0].FixedFeeRange != nil {
-		t.Fatalf("only enabled methods are returned: %+v", order.PaymentMethods)
+	want := []sponsor.PaymentMethod{
+		{ID: "alipay", Name: "Alipay", Brand: sponsor.BrandAlipay, Fee: sponsor.MethodFee{Rate: "11.0%"}},
+		{ID: "bank", Name: "Bank", Fee: sponsor.MethodFee{Fixed: "0.30"}},
+		{ID: "onramp-paypal", Name: "PayPal", Brand: sponsor.BrandPayPal, Fee: sponsor.MethodFee{Rate: "4.4%", Fixed: "0.30"}},
+		{ID: "wxpay", Name: "WeChat", Brand: sponsor.BrandWeChatPay},
+	}
+	if !slices.Equal(order.PaymentMethods, want) {
+		t.Fatalf("only enabled methods are returned, with the brand of those that are known and the fee each one charges: %+v", order.PaymentMethods)
 	}
 	if order.ExpiresAt == nil || !order.ExpiresAt.Equal(time.Unix(1700003600, 0)) {
 		t.Fatalf("unexpected expiry %v", order.ExpiresAt)
@@ -134,8 +148,58 @@ func TestFailuresBecomeProviderErrors(t *testing.T) {
 func TestNetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	server.Close()
-	client := idatariver.NewClient(server.Client(), idatariver.Options{BaseURL: server.URL})
+	client := idatariver.NewClient(server.Client(), account(server.URL))
 	if _, err := client.OrderInfo(context.Background(), "x"); !errors.Is(err, sponsor.ErrProviderRequestFailed) {
 		t.Fatalf("expected provider failure, got %v", err)
+	}
+}
+
+func TestNothingIsSentUntilTheAccountIsFilledIn(t *testing.T) {
+	var calls int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		_, _ = w.Write([]byte(`{"code":0,"result":{"orderId":"idr-1"},"msg":""}`))
+	}))
+	t.Cleanup(server.Close)
+	source := settingtest.Set(settingtest.Source{}, idatariver.BaseURL, server.URL)
+	client := idatariver.NewClient(server.Client(), source)
+
+	if client.Ready() {
+		t.Fatal("a client without a secret and a project is not ready")
+	}
+	_, err := client.CreateOrder(context.Background(), sponsor.ProviderOrderRequest{AmountCents: 100})
+	appErr, _ := apperror.From(err)
+	if !errors.Is(err, sponsor.ErrProviderRequestFailed) || appErr.Args()["message"] != "provider not configured" || calls != 0 {
+		t.Fatalf("expected a refusal without a request, got %v after %d calls", err, calls)
+	}
+
+	settingtest.Set(source, idatariver.Secret, " test-secret ")
+	if client.Ready() {
+		t.Fatal("a secret alone is not enough")
+	}
+	settingtest.Set(source, idatariver.ProjectID, "test-project")
+	if !client.Ready() {
+		t.Fatal("the settings are read on every call, so a filled account is ready at once")
+	}
+	if id, err := client.CreateOrder(context.Background(), sponsor.ProviderOrderRequest{AmountCents: 100}); err != nil || id != "idr-1" || calls != 1 {
+		t.Fatalf("unexpected order %q %v after %d calls", id, err, calls)
+	}
+}
+
+func TestMethodNamesTheBrandOfTheMethodsItKnows(t *testing.T) {
+	client := idatariver.NewClient(&http.Client{}, settingtest.Source{})
+	brands := map[string]sponsor.MethodBrand{
+		"alipay":        sponsor.BrandAlipay,
+		"wxpay":         sponsor.BrandWeChatPay,
+		"crypto":        sponsor.BrandUSDT,
+		"onramp-paypal": sponsor.BrandPayPal,
+		"onramp-google": sponsor.BrandGooglePay,
+		"onramp-apple":  sponsor.BrandApplePay,
+		"bank":          "",
+	}
+	for id, brand := range brands {
+		if got := client.Method(id); got.ID != id || got.Name != id || got.Brand != brand {
+			t.Errorf("Method(%q) = %+v, want brand %q", id, got, brand)
+		}
 	}
 }

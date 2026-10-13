@@ -1342,13 +1342,17 @@
         "additionalProperties": false,
         "properties": {
           "enabled": {
-            "description": "Whether new sponsor orders are accepted",
+            "description": "Whether the setting that opens sponsorship is on",
             "type": "boolean"
           },
           "monthAmount": {
             "description": "Paid since the month began on the site's clock",
             "format": "double",
             "type": "number"
+          },
+          "providerReady": {
+            "description": "Whether the payment provider has what it needs to take payments",
+            "type": "boolean"
           },
           "totalAmount": {
             "format": "double",
@@ -1364,7 +1368,8 @@
           "totalSponsors",
           "totalAmount",
           "monthAmount",
-          "enabled"
+          "enabled",
+          "providerReady"
         ],
         "type": "object"
       },
@@ -17825,6 +17830,7 @@
         "additionalProperties": false,
         "properties": {
           "method": {
+            "description": "id of one of the order's payment methods",
             "maxLength": 50,
             "minLength": 1,
             "type": "string"
@@ -19234,9 +19240,14 @@
             ]
           },
           "paymentMethod": {
-            "type": [
-              "string",
-              "null"
+            "description": "What the order was last paid or tried with",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SponsorPaymentMethodDTO"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "providerOrderId": {
@@ -19346,29 +19357,50 @@
       "SponsorPaymentMethodDTO": {
         "additionalProperties": false,
         "properties": {
-          "desc": {
-            "type": "string"
+          "brand": {
+            "description": "The payment brand behind the method when the provider's adapter knows it",
+            "enum": [
+              "alipay",
+              "wechat_pay",
+              "paypal",
+              "google_pay",
+              "apple_pay",
+              "usdt"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "enabled": {
-            "type": "boolean"
+          "fee_fixed": {
+            "description": "The fixed part of the provider's fee as the provider words it; null when there is none",
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "fixedFeeRange": {
-            "type": "string"
+          "fee_rate": {
+            "description": "The share of the amount the provider charges for paying this way, as the provider words it (for example 3.0%); null when it charges none or the method is only named, as on a paid order",
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "method": {
+          "id": {
+            "description": "What the payment provider calls the method; sent back to pay with it",
             "type": "string"
           },
           "name": {
-            "type": "string"
-          },
-          "ratioRange": {
+            "description": "The provider's own name for the method",
             "type": "string"
           }
         },
         "required": [
-          "method",
+          "id",
           "name",
-          "enabled"
+          "brand",
+          "fee_rate",
+          "fee_fixed"
         ],
         "type": "object"
       },
@@ -35077,10 +35109,23 @@
         ]
       }
     },
-    "/sponsor/webhook/idatariver": {
+    "/sponsor/webhook/{provider}": {
       "post": {
-        "operationId": "sponsor.webhook.idatariver",
+        "operationId": "sponsor.webhook",
         "parameters": [
+          {
+            "description": "Name of the payment provider that calls back",
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "description": "Name of the payment provider that calls back",
+              "maxLength": 50,
+              "minLength": 1,
+              "pattern": "^[a-z0-9][a-z0-9_-]*$",
+              "type": "string"
+            }
+          },
           {
             "in": "header",
             "name": "Content-Type",
@@ -35130,7 +35175,7 @@
             "description": "Error"
           }
         },
-        "summary": "iDataRiver payment callback",
+        "summary": "Callback of a payment provider",
         "tags": [
           "sponsor"
         ]
