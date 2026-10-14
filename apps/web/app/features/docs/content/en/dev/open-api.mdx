@@ -79,7 +79,6 @@ Give one of four kinds of ID:
             "edition_name": null,
             "form": "portable",
             "extras": [],
-            "note": null,
             "downloads": 237,
             "creator": { "id": 1, "name": "ringyuki" },
             "published_at": "2026-01-04T16:36:08.028Z",
@@ -122,25 +121,25 @@ Give one of four kinds of ID:
 
 ### Resource
 
-| Field                    | Description                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `id`                     | Resource ID                                                                                      |
-| `url`                    | The page of the resource, where it is downloaded                                                 |
-| `platform`               | Platforms: `win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                     |
-| `language`               | Languages: `jp` `zh` `zh-hant` `en`                                                              |
-| `translation`            | Translation: `none`, `official`, `group` (a translation group) or `machine`; null when not given |
-| `translators`            | Translation groups with their `id` and `name`, in the order credited                             |
-| `patch_version`          | Version of the patch                                                                             |
-| `release_url`            | The page the translation was released on                                                         |
-| `edition`                | Edition: `download`, `package` or `steam`                                                        |
-| `edition_name`           | Name of the edition                                                                              |
-| `form`                   | Form: `disc` (disc image), `installer` or `portable`                                             |
-| `extras`                 | Extras: `save` (complete save) and `bonus`                                                       |
-| `note`                   | Note                                                                                             |
-| `downloads`              | Number of downloads                                                                              |
-| `creator`                | Uploader, with `id` and `name`                                                                   |
-| `published_at` `updated` | When it was published and last updated                                                           |
-| `files`                  | Files that can be downloaded, the volumes of a set together and in their order                   |
+| Field                    | Description                                                                                                                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                     | Resource ID                                                                                                                                                                                                                                             |
+| `url`                    | The page of the resource, where it is downloaded                                                                                                                                                                                                        |
+| `platform`               | Platforms: `win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                                                                                                                                                                            |
+| `language`               | Languages: `jp` `zh` `zh-hant` `en`                                                                                                                                                                                                                     |
+| `translation`            | Translation: `none`, `official`, `group` (a translation group) or `machine`; null when not given                                                                                                                                                        |
+| `translators`            | Translation groups with their `id` and `name`, in the order credited                                                                                                                                                                                    |
+| `patch_version`          | Version of the patch                                                                                                                                                                                                                                    |
+| `release_url`            | The page the translation was released on                                                                                                                                                                                                                |
+| `edition`                | Edition: `download`, `package` or `steam`                                                                                                                                                                                                               |
+| `edition_name`           | Name of the edition                                                                                                                                                                                                                                     |
+| `form`                   | Form: `disc` (disc image), `installer` or `portable`                                                                                                                                                                                                    |
+| `extras`                 | Extras: `save` (complete save) and `bonus`                                                                                                                                                                                                              |
+| `note`                   | The note, as a rich text document: paragraphs (`paragraph`) of text (`text`) and line breaks (`hard_break`); text may carry the marks bold (`bold`), link (`link`, the address in `attrs.href`) and spoiler (`spoiler`); left out when there is no note |
+| `downloads`              | Number of downloads                                                                                                                                                                                                                                     |
+| `creator`                | Uploader, with `id` and `name`                                                                                                                                                                                                                          |
+| `published_at` `updated` | When it was published and last updated                                                                                                                                                                                                                  |
+| `files`                  | Files that can be downloaded, the volumes of a set together and in their order                                                                                                                                                                          |
 
 ### File
 

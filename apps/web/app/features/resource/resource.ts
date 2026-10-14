@@ -1,6 +1,7 @@
 import { constraints } from '~/shared/api/generated/constraints'
 import type { ResourceDraft } from '~/features/upload'
 import type { Schema } from '~/shared/api/types'
+import { isBlank, type RichDocument } from '~/shared/richtext/rich-text'
 import { resourceInfo, type InfoValues } from './resource-info'
 
 export type Resource = Schema<'DownloadResourceDTO'>
@@ -145,11 +146,15 @@ export type ResourceFieldValues = InfoValues & {
   platform: Platform[]
   language: Language[]
   simulator: Simulator | ''
-  note: string
+  note: RichDocument
+}
+
+export function writtenNote(note: RichDocument): RichDocument | undefined {
+  return isBlank(note) ? undefined : note
 }
 
 export function resourceDraft(values: ResourceFieldValues): ResourceDraft | undefined {
-  const note = values.note.trim()
+  const note = writtenNote(values.note)
   const { form, ...info } = resourceInfo(values, values.language)
   if (form === undefined) {
     return undefined
@@ -160,7 +165,7 @@ export function resourceDraft(values: ResourceFieldValues): ResourceDraft | unde
     ...(needsSimulator(values.platform) && values.simulator !== ''
       ? { simulator: values.simulator }
       : {}),
-    ...(note === '' ? {} : { note }),
+    ...(note === undefined ? {} : { note }),
     ...info,
     form,
   }

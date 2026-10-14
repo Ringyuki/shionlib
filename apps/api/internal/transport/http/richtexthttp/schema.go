@@ -7,11 +7,24 @@ import (
 )
 
 const (
-	schemaPrefix   = "#/components/schemas/"
-	documentSchema = "RichTextDocument"
-	nodeSchema     = "RichTextNode"
-	markSchema     = "RichTextMark"
+	schemaPrefix     = "#/components/schemas/"
+	documentSchema   = "RichTextDocument"
+	nodeSchema       = "RichTextNode"
+	markSchema       = "RichTextMark"
+	maxTextExtension = "x-max-text-length"
 )
+
+func LimitText(s *huma.Schema, field string, maxText int) *huma.Schema {
+	property := s.Properties[field]
+	if property == nil {
+		return s
+	}
+	if property.Extensions == nil {
+		property.Extensions = map[string]any{}
+	}
+	property.Extensions[maxTextExtension] = maxText
+	return s
+}
 
 func (Content) Schema(registry huma.Registry) *huma.Schema {
 	schemas := registry.Map()
@@ -28,7 +41,7 @@ func contentSchemas() map[string]*huma.Schema {
 	one, linkLength := 1, richtext.MaxLinkLength
 	return map[string]*huma.Schema{
 		documentSchema: object(
-			"A rich text document: what the editor stores for a comment and for the note of a walkthrough",
+			"A rich text document: what the editor stores for a comment, the note of a walkthrough and the note of a resource",
 			[]string{"type", "content"},
 			map[string]*huma.Schema{
 				"type":    {Type: huma.TypeString, Enum: []any{"doc"}},

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { documentOfText } from '~/shared/richtext/rich-text'
 import en from './messages/en.json'
 import ja from './messages/ja.json'
 import zh from './messages/zh.json'
@@ -28,7 +29,6 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
   platform,
   language: ['zh'],
   simulator: null,
-  note: null,
   downloads: 0,
   creator: { id: 7, name: 'mikan', avatar: null, is_sponsor: false },
   published_at: '2026-10-01T00:00:00Z',
@@ -149,7 +149,7 @@ describe('resourceDraft', () => {
     platform: ['and'],
     language: ['zh'],
     simulator: 'KRKR',
-    note: ' 模拟器选择 data.xp3 ',
+    note: documentOfText('模拟器选择 data.xp3'),
     ...blankInfo,
     translation: 'official',
     form: 'portable',
@@ -160,12 +160,16 @@ describe('resourceDraft', () => {
       platform: ['and'],
       language: ['zh'],
       simulator: 'KRKR',
-      note: '模拟器选择 data.xp3',
+      note: documentOfText('模拟器选择 data.xp3'),
       translation: 'official',
       form: 'portable',
       extras: [],
       canonical_name: true,
     })
+  })
+
+  it('leaves out a note that says nothing', () => {
+    expect(resourceDraft({ ...values, note: documentOfText(' ') })).not.toHaveProperty('note')
   })
 
   it('cannot be made before the form is chosen', () => {

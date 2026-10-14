@@ -58,7 +58,7 @@ func (s *LegacyStore) ListUndescribed(ctx context.Context, afterID, limit int) (
 			GameID:    row.GameID,
 			CreatorID: row.CreatorID,
 			Languages: nonNilStrings(row.Language),
-			Note:      row.Note,
+			Note:      noteText(row),
 			FileNames: names,
 			Files:     files,
 			Discs:     len(row.Edges.Inspections) > 0,
@@ -120,7 +120,7 @@ func (s *LegacyStore) Describe(ctx context.Context, id int, description download
 		update.SetForm(string(*description.Form))
 	}
 	if description.ClearNote {
-		update.ClearNote()
+		update.ClearNote().SetNoteText("")
 	}
 	if len(description.Canonical) > 0 {
 		update.SetCanonicalName(true)
@@ -150,4 +150,11 @@ func (s *LegacyStore) keepNames(ctx context.Context, resourceID int, fileIDs []i
 		}
 	}
 	return nil
+}
+
+func noteText(row *ent.GameDownloadResource) *string {
+	if row.NoteText == "" {
+		return nil
+	}
+	return &row.NoteText
 }

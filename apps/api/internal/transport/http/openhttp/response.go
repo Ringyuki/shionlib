@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/open"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -41,7 +42,7 @@ type openResourceDTO struct {
 	EditionName  *string               `json:"edition_name"`
 	Form         *download.Form        `json:"form" enum:"disc,installer,portable"`
 	Extras       []string              `json:"extras" enum:"save,bonus"`
-	Note         *string               `json:"note"`
+	Note         richtexthttp.Content  `json:"note,omitempty" doc:"The uploader's note: paragraphs with bold, links and spoilers; left out when there is none"`
 	Downloads    int                   `json:"downloads"`
 	Creator      openUserDTO           `json:"creator"`
 	PublishedAt  *time.Time            `json:"published_at"`
@@ -103,7 +104,7 @@ func (h *Handler) toResourceDTO(r download.GameResource) openResourceDTO {
 		EditionName:  r.Info.EditionName,
 		Form:         r.Info.Form,
 		Extras:       nonNil(r.Info.Extras),
-		Note:         r.Note,
+		Note:         noteContent(r.Note),
 		Downloads:    r.Downloads,
 		Creator:      openUserDTO{ID: r.Creator.ID, Name: r.Creator.Name},
 		PublishedAt:  r.PublishedAt,
@@ -124,4 +125,11 @@ func nonNil(values []string) []string {
 		return []string{}
 	}
 	return values
+}
+
+func noteContent(note *download.Note) richtexthttp.Content {
+	if note == nil {
+		return nil
+	}
+	return richtexthttp.Content(note.Content)
 }

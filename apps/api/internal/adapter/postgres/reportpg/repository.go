@@ -240,7 +240,7 @@ func withView(query *ent.GameDownloadResourceReportQuery) *ent.GameDownloadResou
 	}
 	return query.
 		WithResource(func(q *ent.GameDownloadResourceQuery) {
-			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID, gamedownloadresource.FieldNote).
+			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID, gamedownloadresource.FieldNoteText).
 				WithGame(func(q *ent.GameQuery) {
 					q.Select(entgame.FieldID, entgame.FieldTitleJp, entgame.FieldTitleZh, entgame.FieldTitleEn)
 				}).

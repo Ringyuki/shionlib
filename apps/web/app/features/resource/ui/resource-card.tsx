@@ -13,7 +13,7 @@ import {
 import { Clock, Download, MessageCircle } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
-import { BBCodeText } from '~/shared/ui/bbcode-text'
+import { RichText } from '~/shared/ui/rich-text'
 import { entryLink } from '~/shared/ui/entry-link'
 import {
   awaitedVolumes,
@@ -40,7 +40,6 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
   const format = useFormatter()
   const resolveImage = useImageResolver()
   const { creator } = resource
-  const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
   const files = resource.files ?? []
   return (
@@ -113,8 +112,11 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
             <ResourceMenu resource={resource} gameId={gameId} rights={rights} />
           </Stack>
         </Grid>
-        {note !== '' && (
-          <BBCodeText source={note} size="sm" className="pointer-events-auto col-span-full" />
+        {resource.note !== undefined && (
+          <RichText
+            document={resource.note}
+            className="pointer-events-auto col-span-full text-sm"
+          />
         )}
         <ResourceFiles
           resourceId={resource.id}

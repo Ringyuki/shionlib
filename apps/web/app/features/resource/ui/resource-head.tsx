@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
-import { BBCodeText } from '~/shared/ui/bbcode-text'
+import { RichText } from '~/shared/ui/rich-text'
 import { awaitedVolumes, rightsOver, type ResourceViewer } from '../resource'
 import { inspectionOf, noticeOf, type ResourcePage } from '../resource-page'
 import { ComposingFile } from './composing-file'
@@ -23,7 +23,6 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
   const locale = useLocale()
   const { resource, game } = page
   const files = resource.files ?? []
-  const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
   const notice = noticeOf(files, awaitedVolumes(resource))
   const { current, latest } = page.lineage
@@ -82,7 +81,7 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
       {current !== null && (
         <CompositionRun composition={current} previous={resource.patch_version} />
       )}
-      {note !== '' && <BBCodeText source={note} />}
+      {resource.note !== undefined && <RichText document={resource.note} />}
     </Stack>
   )
 }

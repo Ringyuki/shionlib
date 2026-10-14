@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   blankDocument,
+  documentOfText,
   hasMark,
   inlineRuns,
   isBlank,
@@ -8,6 +9,7 @@ import {
   plainText,
   publicText,
   sameDocument,
+  textLength,
   type RichNode,
   type RichDocument,
 } from './rich-text'
@@ -46,6 +48,26 @@ describe('text of a document', () => {
     expect(isBlank(blankDocument)).toBe(true)
     expect(isBlank({ type: 'doc', content: [paragraph(text(' 　')), paragraph()] })).toBe(true)
     expect(isBlank(impression)).toBe(false)
+  })
+})
+
+describe('length of a document', () => {
+  it('counts the characters of its text the way the API does, without breaks', () => {
+    expect(textLength(impression)).toBe('Pick Athen B  see the guideshe leaves書音😀'.length)
+    expect(textLength(blankDocument)).toBe(0)
+  })
+})
+
+describe('a document of plain text', () => {
+  it('keeps every line, with breaks between them, in one paragraph', () => {
+    expect(documentOfText('汉化组\n\nv1.2')).toEqual({
+      type: 'doc',
+      content: [
+        paragraph(text('汉化组'), { type: 'hard_break' }, { type: 'hard_break' }, text('v1.2')),
+      ],
+    })
+    expect(documentOfText('')).toEqual(blankDocument)
+    expect(plainText(documentOfText('a\nb'))).toBe('a\nb')
   })
 })
 

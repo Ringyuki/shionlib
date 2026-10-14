@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 import { constraints } from '~/shared/api/generated/constraints'
+import { textLength, type RichDocument } from '~/shared/richtext/rich-text'
+import { richDocument } from '~/shared/richtext/rich-text.schema'
 
 type Bodies = typeof constraints
 
@@ -14,6 +16,7 @@ export type FieldConstraint = {
   readonly format?: string
   readonly minLength?: number
   readonly maxLength?: number
+  readonly maxTextLength?: number
   readonly minimum?: number
   readonly maximum?: number
   readonly pattern?: string
@@ -35,6 +38,10 @@ export type FieldIssueMessage = (issue: FieldIssue) => string
 
 export type FormKit = {
   text: <Body extends BodyName>(body: Body, field: FieldName<Body>) => v.GenericSchema<string>
+  richText: <Body extends BodyName>(
+    body: Body,
+    field: FieldName<Body>,
+  ) => v.GenericSchema<RichDocument>
 }
 
 const formats: Readonly<Record<string, v.GenericSchema<string>>> = {
@@ -56,7 +63,10 @@ export function lengthOf<Body extends BodyName>(
   field: FieldName<Body>,
 ): { min: number; max: number } {
   const constraint = constraintOf(body, field)
-  return { min: constraint.minLength ?? 0, max: constraint.maxLength ?? Number.POSITIVE_INFINITY }
+  return {
+    min: constraint.minLength ?? 0,
+    max: constraint.maxLength ?? constraint.maxTextLength ?? Number.POSITIVE_INFINITY,
+  }
 }
 
 export function rangeOf<Body extends BodyName>(
@@ -105,6 +115,21 @@ export function createFormKit(message: FieldIssueMessage): FormKit {
           const issue = dataset.typed ? textIssue(constraint, dataset.value) : undefined
           if (issue !== undefined) {
             addIssue({ message: message(issue) })
+          }
+        }),
+      )
+    },
+    richText: (body, field) => {
+      const { maxTextLength } = constraintOf(body, field)
+      return v.pipe(
+        richDocument,
+        v.rawCheck(({ dataset, addIssue }) => {
+          if (
+            dataset.typed &&
+            maxTextLength !== undefined &&
+            textLength(dataset.value) > maxTextLength
+          ) {
+            addIssue({ message: message({ kind: 'maxLength', max: maxTextLength }) })
           }
         }),
       )

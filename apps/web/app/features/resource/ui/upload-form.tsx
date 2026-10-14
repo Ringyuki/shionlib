@@ -6,6 +6,7 @@ import type { GameHeader } from '~/features/game'
 import { GamePicker } from '~/features/search'
 import { admit, type Allowance } from '~/features/upload'
 import { useFormKit } from '~/shared/form/use-form-kit'
+import { blankDocument } from '~/shared/richtext/rich-text'
 import { Button } from '~/shared/ui/button'
 import { blankInfo } from '../resource-info'
 import { filledFrom } from '../resource-name'
@@ -21,7 +22,7 @@ const blank: UploadValues = {
   platform: [],
   language: [],
   simulator: '',
-  note: '',
+  note: blankDocument,
   files: [],
   ...blankInfo,
 }
@@ -48,40 +49,45 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
         }
       }}
     >
-      <FormField
-        name="game"
-        label={t('uploadGame')}
-        description={game === null ? t('uploadGameHint') : undefined}
-        required
-      >
-        {game === null ? (
-          <GamePicker onPick={id => setSearchParams({ game: String(id) })} />
-        ) : (
-          <UploadGame game={game} onChange={() => setSearchParams({})} />
-        )}
-      </FormField>
-      <UploadFilesField
-        allowance={allowance}
-        admission={admission}
-        multiple
-        files={values.files}
-        onFilesChange={files => setValues({ ...values, files })}
-      />
-      <ResourceFields
-        values={values}
-        complete
-        named={game === null ? undefined : { gameId: game.id, fileName: chosen ?? '' }}
-        onValuesChange={fields => setValues({ ...values, ...fields })}
-      />
-      <Inline justify="end">
-        <Button
-          type="submit"
-          loading={start.leaving}
-          disabled={game === null || admission !== undefined}
-        >
-          {t('uploadStart')}
-        </Button>
-      </Inline>
+      {({ errors }) => (
+        <>
+          <FormField
+            name="game"
+            label={t('uploadGame')}
+            description={game === null ? t('uploadGameHint') : undefined}
+            required
+          >
+            {game === null ? (
+              <GamePicker onPick={id => setSearchParams({ game: String(id) })} />
+            ) : (
+              <UploadGame game={game} onChange={() => setSearchParams({})} />
+            )}
+          </FormField>
+          <UploadFilesField
+            allowance={allowance}
+            admission={admission}
+            multiple
+            files={values.files}
+            onFilesChange={files => setValues({ ...values, files })}
+          />
+          <ResourceFields
+            values={values}
+            complete
+            named={game === null ? undefined : { gameId: game.id, fileName: chosen ?? '' }}
+            errors={errors}
+            onValuesChange={fields => setValues({ ...values, ...fields })}
+          />
+          <Inline justify="end">
+            <Button
+              type="submit"
+              loading={start.leaving}
+              disabled={game === null || admission !== undefined}
+            >
+              {t('uploadStart')}
+            </Button>
+          </Inline>
+        </>
+      )}
     </Form>
   )
 }

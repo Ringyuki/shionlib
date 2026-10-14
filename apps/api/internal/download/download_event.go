@@ -98,10 +98,8 @@ func (r Resource) ChangesTo(changes ResourceChanges) []FieldChange {
 	if before, after := optional(r.Simulator), optional(changes.Simulator); !slices.Equal(before, after) {
 		out = append(out, FieldChange{Field: FieldSimulator, Old: before, New: after})
 	}
-	if changes.Note != nil {
-		if before, after := optional(r.Note), optional(changes.Note); !slices.Equal(before, after) {
-			out = append(out, FieldChange{Field: FieldNote, Old: before, New: after})
-		}
+	if before, after := r.Note.said(), changes.Note.said(); !slices.Equal(before, after) {
+		out = append(out, FieldChange{Field: FieldNote, Old: before, New: after})
 	}
 	return append(out, r.Info.changesTo(changes.Info)...)
 }

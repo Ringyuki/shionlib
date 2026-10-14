@@ -1,3 +1,4 @@
+export { EditorField } from './ui/editor-field'
 export { fieldEdge, fieldFrame } from './ui/editor-frame'
 export { EditorOverlays } from './ui/editor-overlays'
 export { EditorSurface } from './ui/editor-surface'

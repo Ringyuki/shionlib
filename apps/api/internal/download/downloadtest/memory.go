@@ -452,9 +452,7 @@ func (r *MemoryRepository) UpdateResource(_ context.Context, id int, changes dow
 	resource.Platforms = slices.Clone(changes.Platforms)
 	resource.Languages = slices.Clone(changes.Languages)
 	resource.Simulator = changes.Simulator
-	if changes.Note != nil {
-		resource.Note = changes.Note
-	}
+	resource.Note = changes.Note
 	resource.Info = cloneInfo(changes.Info)
 	if changes.Canonical != nil {
 		resource.Canonical = *changes.Canonical
@@ -505,7 +503,7 @@ func (r *MemoryRepository) ListUndescribed(_ context.Context, afterID, limit int
 			GameID:    resource.GameID,
 			CreatorID: resource.CreatorID,
 			Languages: slices.Clone(resource.Languages),
-			Note:      resource.Note,
+			Note:      noteText(resource.Note),
 			FileNames: r.names(resource.ID),
 			Discs:     r.Discs[resource.ID],
 			Published: resource.Published() && resource.Status == download.ResourceActive,
@@ -900,4 +898,11 @@ func (r *MemoryRepository) mutateHistory(id int, fn func(*download.History)) err
 		}
 	}
 	return download.ErrFileNotFound
+}
+
+func noteText(note *download.Note) *string {
+	if note == nil || note.Text == "" {
+		return nil
+	}
+	return &note.Text
 }

@@ -123,7 +123,7 @@ function trimmed(nodes: readonly BBCodeNode[]): BBCodeNode[] {
   })
 }
 
-export function isWebAddress(value: string): boolean {
+function isWebAddress(value: string): boolean {
   return webAddress.test(value.trim())
 }
 

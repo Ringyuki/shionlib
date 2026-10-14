@@ -27,18 +27,18 @@ func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	)
 	service := download.NewLegacyService(repo, cards, translator.NewService(translators), downloadtest.Names(repo, cards, downloadtest.Media{}), &txtest.Immediate{})
 
-	credited := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 7, Languages: []string{"zh"}, Note: ptr("绿茶汉化组×熊喵守护协会"), PublishedAt: ptr(now)})
+	credited := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 7, Languages: []string{"zh"}, Note: noted(t, "绿茶汉化组×熊喵守护协会"), PublishedAt: ptr(now)})
 	translated := repo.SeedFile(download.File{ResourceID: credited.ID, Name: "[BABEL] 妹嫁 妹妹新娘.zip"})
-	original := repo.SeedResource(download.Resource{GameID: 2, CreatorID: 8, Languages: []string{"jp"}, Note: ptr("DL版，含特典"), PublishedAt: ptr(now)})
+	original := repo.SeedResource(download.Resource{GameID: 2, CreatorID: 8, Languages: []string{"jp"}, Note: noted(t, "DL版，含特典"), PublishedAt: ptr(now)})
 	packed := repo.SeedFile(download.File{ResourceID: original.ID, Name: "[あざらしそふと] アマカノ DL版 初回版 (files).7z"})
 	inspected := repo.SeedResource(download.Resource{GameID: 3, CreatorID: 8, Languages: []string{"jp"}})
 	repo.SeedFile(download.File{ResourceID: inspected.ID, Name: "game.7z"})
 	repo.Discs[inspected.ID] = true
-	unknown := repo.SeedResource(download.Resource{GameID: 4, CreatorID: 8, Languages: []string{"zh"}, Note: ptr("吉里吉里模拟器")})
-	waiting := repo.SeedResource(download.Resource{GameID: 5, CreatorID: 8, Languages: []string{"zh"}, Note: ptr("绿茶汉化组"), PublishedAt: ptr(now)})
+	unknown := repo.SeedResource(download.Resource{GameID: 4, CreatorID: 8, Languages: []string{"zh"}, Note: noted(t, "吉里吉里模拟器")})
+	waiting := repo.SeedResource(download.Resource{GameID: 5, CreatorID: 8, Languages: []string{"zh"}, Note: noted(t, "绿茶汉化组"), PublishedAt: ptr(now)})
 	repo.Uncataloged[5] = true
 
-	uploaded := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 9, Languages: []string{"zh"}, Note: ptr("绿茶汉化组"), PublishedAt: ptr(now)})
+	uploaded := repo.SeedResource(download.Resource{GameID: 1, CreatorID: 9, Languages: []string{"zh"}, Note: noted(t, "绿茶汉化组"), PublishedAt: ptr(now)})
 	for _, resource := range []download.Resource{credited, original, inspected, unknown, waiting} {
 		repo.Undescribed[resource.ID] = true
 	}
@@ -83,7 +83,7 @@ func TestLegacyDescribeReadsEachUndescribedResourceOnce(t *testing.T) {
 	if got, _ := repo.GetResource(ctx, waiting.ID); got.Info.Translation == nil || *got.Info.Translation != download.TranslationGroup || len(repo.Undescribed) != 0 {
 		t.Fatalf("it is read once its game has been fetched: %+v %v", got.Info, repo.Undescribed)
 	}
-	if err := repo.UpdateResource(ctx, unknown.ID, download.ResourceChanges{Languages: []string{"zh"}, Note: ptr("绿茶汉化组")}); err != nil {
+	if err := repo.UpdateResource(ctx, unknown.ID, download.ResourceChanges{Languages: []string{"zh"}, Note: noted(t, "绿茶汉化组")}); err != nil {
 		t.Fatal(err)
 	}
 	if err := service.Describe(ctx); err != nil {

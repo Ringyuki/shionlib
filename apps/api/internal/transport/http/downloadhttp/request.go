@@ -4,7 +4,9 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 )
 
 type downloadGamePathInput struct {
@@ -16,11 +18,41 @@ type downloadResourcePathInput struct {
 }
 
 func (b *downloadSourceBodyInput) Resolve(huma.Context) []error {
-	return requireSimulator(b.Platform, b.Simulator)
+	var errs []error
+	b.note, errs = parseNote(b.Note)
+	return append(errs, requireSimulator(b.Platform, b.Simulator)...)
 }
 
 func (b *editDownloadSourceBodyInput) Resolve(huma.Context) []error {
-	return requireSimulator(b.Platform, b.Simulator)
+	var errs []error
+	b.note, errs = parseNote(b.Note)
+	return append(errs, requireSimulator(b.Platform, b.Simulator)...)
+}
+
+func (b *downloadMigrateResourceBodyInput) Resolve(huma.Context) []error {
+	var errs []error
+	b.note, errs = parseNote(b.Note)
+	return errs
+}
+
+func (downloadSourceBodyInput) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	return limitNote(s)
+}
+
+func (editDownloadSourceBodyInput) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	return limitNote(s)
+}
+
+func (downloadMigrateResourceBodyInput) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	return limitNote(s)
+}
+
+func parseNote(raw richtexthttp.Content) (*richtext.Document, []error) {
+	return richtexthttp.ParseOptional(raw, "note", richtext.Comment, download.MaxNoteLength)
+}
+
+func limitNote(s *huma.Schema) *huma.Schema {
+	return richtexthttp.LimitText(s, "note", download.MaxNoteLength)
 }
 
 func requireSimulator(platforms []string, simulator *string) []error {
@@ -56,7 +88,7 @@ type downloadSourceBodyInput struct {
 	Platform     []string                  `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
 	Language     []string                  `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
 	Simulator    *string                   `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-	Note         *string                   `json:"note,omitempty" maxLength:"255"`
+	Note         richtexthttp.Content      `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out or blank for no note"`
 	Translation  *string                   `json:"translation,omitempty" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; required when the languages include one"`
 	Translators  []string                  `json:"translators,omitempty" maxItems:"6" doc:"Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator"`
 	PatchVersion *string                   `json:"patch_version,omitempty" minLength:"0" maxLength:"32"`
@@ -67,6 +99,7 @@ type downloadSourceBodyInput struct {
 	Extras       []string                  `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
 	Canonical    *bool                     `json:"canonical_name,omitempty" doc:"Whether the first file (every volume of its set) takes the canonical name once the resource is published; true when left out"`
 	Files        []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000" doc:"Completed upload sessions to attach, one per file"`
+	note         *richtext.Document
 }
 
 func (b *downloadSourceBodyInput) info() download.InfoInput {
@@ -101,19 +134,20 @@ type renameDownloadFileInput struct {
 }
 
 type editDownloadSourceBodyInput struct {
-	Platform     []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
-	Language     []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
-	Simulator    *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-	Note         *string  `json:"note,omitempty" maxLength:"255"`
-	Translation  *string  `json:"translation,omitempty" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; required when the languages include one"`
-	Translators  []string `json:"translators,omitempty" maxItems:"6" doc:"Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator"`
-	PatchVersion *string  `json:"patch_version,omitempty" minLength:"0" maxLength:"32"`
-	ReleaseURL   *string  `json:"release_url,omitempty" minLength:"0" maxLength:"512" doc:"The page the translation was released on"`
-	Edition      *string  `json:"edition,omitempty" enum:"download,package,steam"`
-	EditionName  *string  `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
-	Form         *string  `json:"form,omitempty" enum:"disc,installer,portable" doc:"Left out for a resource whose form is not known"`
-	Extras       []string `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
-	Canonical    *bool    `json:"canonical_name,omitempty" doc:"Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with"`
+	Platform     []string             `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
+	Language     []string             `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
+	Simulator    *string              `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
+	Note         richtexthttp.Content `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out or blank for no note"`
+	Translation  *string              `json:"translation,omitempty" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; required when the languages include one"`
+	Translators  []string             `json:"translators,omitempty" maxItems:"6" doc:"Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator"`
+	PatchVersion *string              `json:"patch_version,omitempty" minLength:"0" maxLength:"32"`
+	ReleaseURL   *string              `json:"release_url,omitempty" minLength:"0" maxLength:"512" doc:"The page the translation was released on"`
+	Edition      *string              `json:"edition,omitempty" enum:"download,package,steam"`
+	EditionName  *string              `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
+	Form         *string              `json:"form,omitempty" enum:"disc,installer,portable" doc:"Left out for a resource whose form is not known"`
+	Extras       []string             `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
+	Canonical    *bool                `json:"canonical_name,omitempty" doc:"Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with"`
+	note         *richtext.Document
 }
 
 func (b *editDownloadSourceBodyInput) info() download.InfoInput {
@@ -128,14 +162,17 @@ type editDownloadSourceInput struct {
 	Body editDownloadSourceBodyInput
 }
 
+type downloadMigrateResourceBodyInput struct {
+	Platform  []string             `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
+	Language  []string             `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
+	Simulator *string              `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
+	Note      richtexthttp.Content `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out or blank for no note"`
+	note      *richtext.Document
+}
+
 type downloadMigrateResourceInput struct {
 	GameID int `path:"gameId" minimum:"1"`
-	Body   struct {
-		Platform  []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
-		Language  []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
-		Simulator *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-		Note      *string  `json:"note,omitempty" maxLength:"255"`
-	}
+	Body   downloadMigrateResourceBodyInput
 }
 
 type downloadMigrateFileInput struct {

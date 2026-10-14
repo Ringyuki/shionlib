@@ -2,10 +2,11 @@ package downloadpg_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 
@@ -35,6 +36,28 @@ func newFixture(t *testing.T) fixture {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+func paragraph(text string, marks ...string) json.RawMessage {
+	leaf := map[string]any{"type": "text", "text": text}
+	if len(marks) > 0 {
+		kinds := make([]any, len(marks))
+		for i, mark := range marks {
+			kinds[i] = map[string]any{"type": mark}
+		}
+		leaf["marks"] = kinds
+	}
+	raw, _ := json.Marshal(map[string]any{"type": "doc", "content": []any{map[string]any{"type": "paragraph", "content": []any{leaf}}}})
+	return raw
+}
+
+func noted(text string, marks ...string) *download.Note {
+	return &download.Note{Content: paragraph(text, marks...), Text: text}
+}
+
+func sameJSON(a, b json.RawMessage) bool {
+	var left, right any
+	return json.Unmarshal(a, &left) == nil && json.Unmarshal(b, &right) == nil && reflect.DeepEqual(left, right)
 }
 
 func (f fixture) resource(t *testing.T, gameID, creator int, mutate ...func(*ent.GameDownloadResourceCreate)) *ent.GameDownloadResource {
@@ -122,7 +145,7 @@ func TestResourceLifecycle(t *testing.T) {
 		Platforms: []string{"and", "win"},
 		Languages: []string{"zh"},
 		Simulator: ptr("KRKR"),
-		Note:      ptr("note"),
+		Note:      noted("note"),
 		CreatorID: creator,
 	})
 	if err != nil {
@@ -185,27 +208,20 @@ func TestResourceLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !updated.Updated.Equal(pinned) || updated.Simulator != nil || updated.Note == nil || *updated.Note != "note" || !slices.Equal(updated.Languages, []string{"en", "jp"}) {
-		t.Fatalf("edit must preserve updated and note, clear simulator: %+v", updated)
+	if !updated.Updated.Equal(pinned) || updated.Simulator != nil || updated.Note != nil || !slices.Equal(updated.Languages, []string{"en", "jp"}) {
+		t.Fatalf("edit must preserve updated, clear simulator and note: %+v", updated)
 	}
 	files, err := f.repo.ListFiles(ctx, created.ID)
 	if err != nil || len(files) != 2 || files[0].ID != first.ID || files[1].ID != second.ID || files[0].Name != "本体.7z" || files[1].Name != "b.7z" {
 		t.Fatalf("each file keeps its own name: %+v %v", files, err)
 	}
-	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"ios"}, Languages: []string{"jp"}, Simulator: ptr("ONS"), Note: ptr("changed")}); err != nil {
+	changed := noted("changed", "bold", "spoiler")
+	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"ios"}, Languages: []string{"jp"}, Simulator: ptr("ONS"), Note: changed}); err != nil {
 		t.Fatal(err)
 	}
 	updated, _ = f.repo.GetResource(ctx, created.ID)
-	if updated.Simulator == nil || *updated.Simulator != "ONS" || *updated.Note != "changed" {
+	if updated.Simulator == nil || *updated.Simulator != "ONS" || updated.Note == nil || updated.Note.Text != "changed" || !sameJSON(updated.Note.Content, changed.Content) {
 		t.Fatalf("simulator and note update: %+v", updated)
-	}
-	longest := strings.Repeat("说", 255)
-	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"ios"}, Languages: []string{"jp"}, Simulator: ptr("ONS"), Note: &longest}); err != nil {
-		t.Fatalf("a note is limited in characters, as the column is, not in bytes: %v", err)
-	}
-	updated, _ = f.repo.GetResource(ctx, created.ID)
-	if updated.Note == nil || *updated.Note != longest {
-		t.Fatalf("the longest note is kept whole: %+v", updated.Note)
 	}
 
 	removedAt := time.Date(2026, 5, 6, 7, 8, 9, 0, time.UTC)
@@ -340,7 +356,7 @@ func TestListGameResources(t *testing.T) {
 	creator := f.db.User(t)
 	operator := f.db.User(t)
 	gameID := f.db.Game(t)
-	first := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) { c.SetNote("first") })
+	first := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) { c.SetNote(paragraph("first")).SetNoteText("first") })
 	second := f.resource(t, gameID, creator)
 	f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) { c.SetStatus(download.ResourceRemoved) })
 	f.resource(t, f.db.Game(t), creator)
@@ -379,7 +395,7 @@ func TestListGameResources(t *testing.T) {
 		t.Fatalf("only active resources of the game, ordered by id: %+v", resources)
 	}
 	got := resources[0]
-	if got.Creator.ID != creator || got.Creator.Name == "" || got.Note == nil || *got.Note != "first" || len(got.Files) != 2 {
+	if got.Creator.ID != creator || got.Creator.Name == "" || got.Note == nil || got.Note.Text != "first" || len(got.Files) != 2 {
 		t.Fatalf("unexpected resource %+v", got)
 	}
 	once, twice := got.Files[0], got.Files[1]

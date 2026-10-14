@@ -490,7 +490,7 @@ func withView(query *ent.MalwareScanCaseQuery) *ent.MalwareScanCaseQuery {
 	return query.
 		WithFile().
 		WithResource(func(q *ent.GameDownloadResourceQuery) {
-			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID, gamedownloadresource.FieldNote).
+			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID, gamedownloadresource.FieldNoteText).
 				WithGame(func(q *ent.GameQuery) {
 					q.Select(entgame.FieldID, entgame.FieldTitleJp, entgame.FieldTitleZh, entgame.FieldTitleEn)
 				})

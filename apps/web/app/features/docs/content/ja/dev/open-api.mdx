@@ -79,7 +79,6 @@ curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
             "edition_name": null,
             "form": "portable",
             "extras": [],
-            "note": null,
             "downloads": 237,
             "creator": { "id": 1, "name": "ringyuki" },
             "published_at": "2026-01-04T16:36:08.028Z",
@@ -122,25 +121,25 @@ curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
 
 ### リソース
 
-| フィールド               | 説明                                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `id`                     | リソース ID                                                                                     |
-| `url`                    | リソースのページ。ダウンロードはこのページで行います                                            |
-| `platform`               | プラットフォーム：`win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`             |
-| `language`               | 言語：`jp` `zh` `zh-hant` `en`                                                                  |
-| `translation`            | 翻訳：`none` なし、`official` 公式翻訳、`group` 翻訳グループ、`machine` 機械翻訳。未記入は null |
-| `translators`            | 翻訳グループ。`id` と `name` を含み、クレジットの順に並びます                                   |
-| `patch_version`          | パッチのバージョン                                                                              |
-| `release_url`            | 翻訳の公開ページ                                                                                |
-| `edition`                | エディション：`download` ダウンロード版、`package` パッケージ版、`steam` Steam 版               |
-| `edition_name`           | エディション名                                                                                  |
-| `form`                   | 形態：`disc` ディスクイメージ、`installer` インストーラー、`portable` インストール不要          |
-| `extras`                 | 付属物：`save` 全 CG セーブデータ、`bonus` 特典                                                 |
-| `note`                   | 説明                                                                                            |
-| `downloads`              | ダウンロード数                                                                                  |
-| `creator`                | アップロードした人。`id` と `name` を含みます                                                   |
-| `published_at` `updated` | 公開日時と最終更新日時                                                                          |
-| `files`                  | ダウンロードできるファイル。分割ファイルはまとめて順に並びます                                  |
+| フィールド               | 説明                                                                                                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                     | リソース ID                                                                                                                                                                                                                                                         |
+| `url`                    | リソースのページ。ダウンロードはこのページで行います                                                                                                                                                                                                                |
+| `platform`               | プラットフォーム：`win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                                                                                                                                                                                 |
+| `language`               | 言語：`jp` `zh` `zh-hant` `en`                                                                                                                                                                                                                                      |
+| `translation`            | 翻訳：`none` なし、`official` 公式翻訳、`group` 翻訳グループ、`machine` 機械翻訳。未記入は null                                                                                                                                                                     |
+| `translators`            | 翻訳グループ。`id` と `name` を含み、クレジットの順に並びます                                                                                                                                                                                                       |
+| `patch_version`          | パッチのバージョン                                                                                                                                                                                                                                                  |
+| `release_url`            | 翻訳の公開ページ                                                                                                                                                                                                                                                    |
+| `edition`                | エディション：`download` ダウンロード版、`package` パッケージ版、`steam` Steam 版                                                                                                                                                                                   |
+| `edition_name`           | エディション名                                                                                                                                                                                                                                                      |
+| `form`                   | 形態：`disc` ディスクイメージ、`installer` インストーラー、`portable` インストール不要                                                                                                                                                                              |
+| `extras`                 | 付属物：`save` 全 CG セーブデータ、`bonus` 特典                                                                                                                                                                                                                     |
+| `note`                   | 説明。リッチテキスト文書で、段落（`paragraph`）の中にテキスト（`text`）と改行（`hard_break`）があり、テキストには太字（`bold`）、リンク（`link`、アドレスは `attrs.href`）、ネタバレ（`spoiler`）のマークが付くことがある。説明がない場合はこのフィールドを含まない |
+| `downloads`              | ダウンロード数                                                                                                                                                                                                                                                      |
+| `creator`                | アップロードした人。`id` と `name` を含みます                                                                                                                                                                                                                       |
+| `published_at` `updated` | 公開日時と最終更新日時                                                                                                                                                                                                                                              |
+| `files`                  | ダウンロードできるファイル。分割ファイルはまとめて順に並びます                                                                                                                                                                                                      |
 
 ### ファイル
 

@@ -20,7 +20,9 @@ func toView(row *ent.GameDownloadResourceReport) report.View {
 		return view
 	}
 	view.Resource.GameID = resource.GameID
-	view.Resource.Note = resource.Note
+	if resource.NoteText != "" {
+		view.Resource.Note = &resource.NoteText
+	}
 	view.Resource.Game = report.GameTitles{ID: resource.GameID}
 	if gameRow := resource.Edges.Game; gameRow != nil {
 		view.Resource.Game = report.GameTitles{ID: gameRow.ID, TitleJP: gameRow.TitleJp, TitleZH: gameRow.TitleZh, TitleEN: gameRow.TitleEn}

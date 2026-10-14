@@ -73,8 +73,16 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
+const noteJSON = `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"note"}]}]}`
+
+func paragraph(text string) map[string]any {
+	return map[string]any{"type": "doc", "content": []any{
+		map[string]any{"type": "paragraph", "content": []any{map[string]any{"type": "text", "text": text}}},
+	}}
+}
+
 func (e env) seedStoredFile() (download.Resource, download.File) {
-	resource := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}, Note: ptr("note"), PublishedAt: ptr(apitest.Now)})
+	resource := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}, Note: &download.Note{Content: []byte(noteJSON), Text: "note"}, PublishedAt: ptr(apitest.Now)})
 	file := e.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Size: 2048, Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/game.7z"), Hash: "b3", CreatorID: creator.UserID})
 	return resource, file
 }
@@ -84,7 +92,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","translation":null,"translators":[],"patch_version":null,"release_url":null,"edition":null,"edition_name":null,"form":null,"extras":[],"canonical_name":false,"downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","original_name":null,"canonical_name":false,"file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":` + noteJSON + `,"translation":null,"translators":[],"patch_version":null,"release_url":null,"edition":null,"edition_name":null,"form":null,"extras":[],"canonical_name":false,"downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","original_name":null,"canonical_name":false,"file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -148,7 +156,7 @@ func TestCreateDownloadSource(t *testing.T) {
 		}
 		return out
 	}
-	body := map[string]any{"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": []map[string]any{{"upload_session_id": 5, "file_name": "本体.7z"}, {"upload_session_id": 6}}}
+	body := map[string]any{"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "note": paragraph("DL版"), "files": []map[string]any{{"upload_session_id": 5, "file_name": "本体.7z"}, {"upload_session_id": 6}}}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, Body: body}), http.StatusUnauthorized, 200101)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: body})
 	e.server.Expect(resp, http.StatusCreated, 0)
@@ -158,6 +166,9 @@ func TestCreateDownloadSource(t *testing.T) {
 	stored, _ := e.repo.ListFiles(context.Background(), 1)
 	if len(stored) != 2 || stored[0].Name != "本体.7z" || stored[1].Name != "s6.7z" {
 		t.Fatalf("files %+v", stored)
+	}
+	if created, _ := e.repo.GetResource(context.Background(), 1); created.Note == nil || created.Note.Text != "DL版" || !strings.Contains(string(created.Note.Content), `"text":"DL版"`) {
+		t.Fatalf("the note is kept as a document with its text: %+v", created.Note)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: body}), http.StatusConflict, 440103)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &visitor, Body: body}), http.StatusForbidden, 480113)
@@ -169,7 +180,9 @@ func TestCreateDownloadSource(t *testing.T) {
 		"mobile without simulator": {"platform": []string{"and"}, "language": []string{"jp"}, "form": "portable", "files": files(7)},
 		"unknown platform":         {"platform": []string{"nes"}, "language": []string{"jp"}, "form": "portable", "files": files(7)},
 		"no platform":              {"platform": []string{}, "language": []string{"jp"}, "form": "portable", "files": files(7)},
-		"long note":                {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": files(7), "note": strings.Repeat("n", 256)},
+		"long note":                {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": files(7), "note": paragraph(strings.Repeat("n", 256))},
+		"note as plain text":       {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": files(7), "note": "DL版"},
+		"note with a heading":      {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": files(7), "note": map[string]any{"type": "doc", "content": []any{map[string]any{"type": "heading"}}}},
 		"no files":                 {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": []map[string]any{}},
 		"long file name":           {"platform": []string{"win"}, "language": []string{"jp"}, "form": "portable", "files": []map[string]any{{"upload_session_id": 7, "file_name": strings.Repeat("n", 256)}}},
 		"no form":                  {"platform": []string{"win"}, "language": []string{"jp"}, "files": files(7)},
@@ -271,7 +284,7 @@ func TestOwnResources(t *testing.T) {
 
 	published := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=published", As: &creator})
 	e.server.Expect(published, http.StatusOK, 0)
-	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","translation":null,"translators":[],"patch_version":null,"release_url":null,"edition":null,"edition_name":null,"form":null,"extras":[],"canonical_name":false,"downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","original_name":null,"canonical_name":false,"file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null},"game":{"id":10,`
+	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":` + noteJSON + `,"translation":null,"translators":[],"patch_version":null,"release_url":null,"edition":null,"edition_name":null,"form":null,"extras":[],"canonical_name":false,"downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","original_name":null,"canonical_name":false,"file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null},"game":{"id":10,`
 	if !strings.HasPrefix(string(published.Data), want) || !strings.HasSuffix(string(published.Data), `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`) {
 		t.Fatalf("published resources of the caller\n got %s\nwant %s", published.Data, want)
 	}
@@ -390,7 +403,7 @@ func TestResourceDetailAndItsHistory(t *testing.T) {
 
 	rename := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/game/download-source/file/" + strconv.Itoa(file.ID), As: &creator, Body: `{"file_name":"本体.7z"}`})
 	e.server.Expect(rename, http.StatusOK, 0)
-	edit := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &creator, Body: `{"platform":["win"],"language":["jp","zh"],"note":"官方中文","translation":"official","form":"portable"}`})
+	edit := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &creator, Body: `{"platform":["win"],"language":["jp","zh"],"note":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"官方中文","marks":[{"type":"bold"}]}]}]},"translation":"official","form":"portable"}`})
 	e.server.Expect(edit, http.StatusOK, 0)
 
 	events := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "/events"})

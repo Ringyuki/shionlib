@@ -76,9 +76,9 @@ func Language(v pgvalue.Strings) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldLanguage, v))
 }
 
-// Note applies equality check predicate on the "note" field. It's identical to NoteEQ.
-func Note(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldEQ(FieldNote, v))
+// NoteText applies equality check predicate on the "note_text" field. It's identical to NoteTextEQ.
+func NoteText(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldNoteText, v))
 }
 
 // Translation applies equality check predicate on the "translation" field. It's identical to TranslationEQ.
@@ -351,61 +351,6 @@ func LanguageNotNil() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldNotNull(FieldLanguage))
 }
 
-// NoteEQ applies the EQ predicate on the "note" field.
-func NoteEQ(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldEQ(FieldNote, v))
-}
-
-// NoteNEQ applies the NEQ predicate on the "note" field.
-func NoteNEQ(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldNEQ(FieldNote, v))
-}
-
-// NoteIn applies the In predicate on the "note" field.
-func NoteIn(vs ...string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldIn(FieldNote, vs...))
-}
-
-// NoteNotIn applies the NotIn predicate on the "note" field.
-func NoteNotIn(vs ...string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldNotIn(FieldNote, vs...))
-}
-
-// NoteGT applies the GT predicate on the "note" field.
-func NoteGT(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldGT(FieldNote, v))
-}
-
-// NoteGTE applies the GTE predicate on the "note" field.
-func NoteGTE(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldGTE(FieldNote, v))
-}
-
-// NoteLT applies the LT predicate on the "note" field.
-func NoteLT(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldLT(FieldNote, v))
-}
-
-// NoteLTE applies the LTE predicate on the "note" field.
-func NoteLTE(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldLTE(FieldNote, v))
-}
-
-// NoteContains applies the Contains predicate on the "note" field.
-func NoteContains(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldContains(FieldNote, v))
-}
-
-// NoteHasPrefix applies the HasPrefix predicate on the "note" field.
-func NoteHasPrefix(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldNote, v))
-}
-
-// NoteHasSuffix applies the HasSuffix predicate on the "note" field.
-func NoteHasSuffix(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldNote, v))
-}
-
 // NoteIsNil applies the IsNil predicate on the "note" field.
 func NoteIsNil() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldIsNull(FieldNote))
@@ -416,14 +361,69 @@ func NoteNotNil() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldNotNull(FieldNote))
 }
 
-// NoteEqualFold applies the EqualFold predicate on the "note" field.
-func NoteEqualFold(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldNote, v))
+// NoteTextEQ applies the EQ predicate on the "note_text" field.
+func NoteTextEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldNoteText, v))
 }
 
-// NoteContainsFold applies the ContainsFold predicate on the "note" field.
-func NoteContainsFold(v string) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldNote, v))
+// NoteTextNEQ applies the NEQ predicate on the "note_text" field.
+func NoteTextNEQ(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldNoteText, v))
+}
+
+// NoteTextIn applies the In predicate on the "note_text" field.
+func NoteTextIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldNoteText, vs...))
+}
+
+// NoteTextNotIn applies the NotIn predicate on the "note_text" field.
+func NoteTextNotIn(vs ...string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldNoteText, vs...))
+}
+
+// NoteTextGT applies the GT predicate on the "note_text" field.
+func NoteTextGT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldNoteText, v))
+}
+
+// NoteTextGTE applies the GTE predicate on the "note_text" field.
+func NoteTextGTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldNoteText, v))
+}
+
+// NoteTextLT applies the LT predicate on the "note_text" field.
+func NoteTextLT(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldNoteText, v))
+}
+
+// NoteTextLTE applies the LTE predicate on the "note_text" field.
+func NoteTextLTE(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldNoteText, v))
+}
+
+// NoteTextContains applies the Contains predicate on the "note_text" field.
+func NoteTextContains(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContains(FieldNoteText, v))
+}
+
+// NoteTextHasPrefix applies the HasPrefix predicate on the "note_text" field.
+func NoteTextHasPrefix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasPrefix(FieldNoteText, v))
+}
+
+// NoteTextHasSuffix applies the HasSuffix predicate on the "note_text" field.
+func NoteTextHasSuffix(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldHasSuffix(FieldNoteText, v))
+}
+
+// NoteTextEqualFold applies the EqualFold predicate on the "note_text" field.
+func NoteTextEqualFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEqualFold(FieldNoteText, v))
+}
+
+// NoteTextContainsFold applies the ContainsFold predicate on the "note_text" field.
+func NoteTextContainsFold(v string) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldContainsFold(FieldNoteText, v))
 }
 
 // TranslationEQ applies the EQ predicate on the "translation" field.

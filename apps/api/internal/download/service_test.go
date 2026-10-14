@@ -359,7 +359,7 @@ func TestDeleteFileKeepsTheLastOne(t *testing.T) {
 func TestEditRules(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Note: ptr("old"), Simulator: ptr("ONS")})
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Note: noted(t, "old"), Simulator: ptr("ONS")})
 	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z"})
 	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved})
 	changes := download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}}
@@ -371,7 +371,7 @@ func TestEditRules(t *testing.T) {
 		t.Fatalf("admins may edit: %v", err)
 	}
 	got, _ := f.repo.GetResource(ctx, resource.ID)
-	if got.Simulator != nil || *got.Note != "old" || !slices.Equal(got.Platforms, []string{"win"}) {
+	if got.Simulator != nil || got.Note != nil || !slices.Equal(got.Platforms, []string{"win"}) {
 		t.Fatalf("edited %+v", got)
 	}
 }
@@ -726,7 +726,7 @@ func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
 	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Note: ptr("官方中文")}); err != nil {
+	if err := f.service.Edit(ctx, owner, resource.ID, download.EditInput{Platforms: []string{"win"}, Languages: []string{"zh"}, Note: document(t, "官方中文")}); err != nil {
 		t.Fatal(err)
 	}
 	f.sessions.byID[42] = upload.Session{ID: 42, Status: upload.StatusCompleted, CreatorID: owner.UserID, StoragePath: "/spool/42.part", TotalSize: 120, FileHash: "new", HashAlgorithm: upload.HashSHA256}

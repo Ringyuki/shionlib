@@ -47,6 +47,7 @@ func setup(t *testing.T) *apitest.Server {
 		Resource: download.Resource{
 			ID: 3443, GameID: 1947, Platforms: []string{"win"}, Languages: []string{"zh"}, Downloads: 237,
 			PublishedAt: ptr(apitest.Now), Updated: apitest.Now,
+			Note: &download.Note{Content: []byte(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"含全CG存档","marks":[{"type":"bold"}]}]}]}`), Text: "含全CG存档"},
 			Info: download.Info{Translation: &group, Form: &portable, Translators: []translator.Ref{{ID: 447, Name: "新米日文游戏中文化技术交流小组"}}},
 		},
 		Creator: user.Summary{ID: 1, Name: "ringyuki"},
@@ -72,6 +73,7 @@ func TestGamesAreFoundWithTheirResourcesByAnyID(t *testing.T) {
 		`"url":"https://shionlib.com/resource/3443"`,
 		`"translation":"group","translators":[{"id":447,"name":"新米日文游戏中文化技术交流小组"}]`,
 		`"creator":{"id":1,"name":"ringyuki"}`,
+		`"note":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"含全CG存档","marks":[{"type":"bold"}]}]}]}`,
 		`"files":[{"id":3434,"file_name":"a.7z","file_size":2468559932,"hash_algorithm":"blake3","file_hash":"11985d44","sha256":null}]`,
 		`"missing":["v404"]`,
 	} {
@@ -99,7 +101,7 @@ func TestTheOpenAPIDocumentHoldsOnlyTheOpenRoutes(t *testing.T) {
 		t.Fatalf("status %d", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, `"/open/v1/games"`) || !strings.Contains(body, `"OpenLookupDTO"`) || !strings.Contains(body, `"url":"https://shionlib.com/api"`) || strings.Contains(body, "accessCookie") {
+	if !strings.Contains(body, `"/open/v1/games"`) || !strings.Contains(body, `"OpenLookupDTO"`) || !strings.Contains(body, `"RichTextDocument":{`) || !strings.Contains(body, `"RichTextMark":{`) || !strings.Contains(body, `"url":"https://shionlib.com/api"`) || strings.Contains(body, "accessCookie") {
 		t.Fatalf("unexpected document %s", body[:min(len(body), 500)])
 	}
 }

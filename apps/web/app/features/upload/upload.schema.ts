@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 import { constraints } from '~/shared/api/generated/constraints'
+import { documentOfText } from '~/shared/richtext/rich-text'
+import { richDocument } from '~/shared/richtext/rich-text.schema'
 import { inputRoles } from './upload'
 
 const createBody = constraints.DownloadSourceBodyInput
@@ -12,7 +14,7 @@ const resourceDraft = v.object({
   platform: v.array(v.picklist(createBody.platform.itemEnum)),
   language: v.array(v.picklist(createBody.language.itemEnum)),
   simulator: v.optional(v.picklist(createBody.simulator.enum)),
-  note: v.optional(v.string()),
+  note: v.optional(v.union([richDocument, v.pipe(v.string(), v.transform(documentOfText))])),
   translation: v.optional(v.picklist(createBody.translation.enum)),
   translators: v.optional(v.array(v.string())),
   patch_version: v.optional(v.string()),

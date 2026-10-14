@@ -25,7 +25,7 @@ httpapi.Register(api, httpapi.Route{
 - Input structs are named `<action><Thing>Input` and live in `request*.go`.
 - Path, query, header and cookie params are fields with `path:`, `query:`, `header:`, `cookie:` tags. Body is a `Body` field.
 - Optional body fields are pointers with `json:",omitempty"`; required fields have no `omitempty`.
-- Validate shape with Huma tags: `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `pattern`, `format`. Unknown body properties are rejected. A text field that may be sent empty says so with `minLength:"0"` (the bio): the web client reads a required text field without it as one that needs content.
+- Validate shape with Huma tags: `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `pattern`, `format`. Unknown body properties are rejected. A text field that may be sent empty says so with `minLength:"0"` (the bio): the web client reads a required text field without it as one that needs content. A rich text field is a `richtexthttp.Content` checked in the input's `Resolve` with `richtexthttp.Parse` or `ParseOptional` against its schema and text limit; when the client must check that limit before sending (the note of a resource, sent after its files are uploaded), the body type also declares it in the contract with a `TransformSchema` that calls `richtexthttp.LimitText` (`x-max-text-length`).
 - Pagination: embed `httpapi.PageQuery` (`page` ≥ 1, `pageSize` 1..50, defaults 1/10). Endpoints with other limits declare their own fields.
 
 ## Outputs

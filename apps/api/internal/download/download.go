@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
@@ -64,7 +65,7 @@ type Resource struct {
 	Platforms   []string
 	Languages   []string
 	Simulator   *string
-	Note        *string
+	Note        *Note
 	Info        Info
 	Canonical   bool
 	Downloads   int
@@ -205,7 +206,7 @@ type NewResource struct {
 	Platforms []string
 	Languages []string
 	Simulator *string
-	Note      *string
+	Note      *Note
 	Info      Info
 	Canonical bool
 	CreatorID int
@@ -251,7 +252,7 @@ type ResourceChanges struct {
 	Platforms []string
 	Languages []string
 	Simulator *string
-	Note      *string
+	Note      *Note
 	Info      Info
 	Canonical *bool
 }
@@ -260,7 +261,7 @@ type EditInput struct {
 	Platforms []string
 	Languages []string
 	Simulator *string
-	Note      *string
+	Note      *richtext.Document
 	Info      InfoInput
 	Canonical *bool
 }
@@ -274,7 +275,7 @@ type CreateInput struct {
 	Platforms []string
 	Languages []string
 	Simulator *string
-	Note      *string
+	Note      *richtext.Document
 	Info      InfoInput
 	Canonical bool
 	Files     []FileUpload
@@ -284,7 +285,7 @@ type MigrateResourceInput struct {
 	Platforms []string
 	Languages []string
 	Simulator *string
-	Note      *string
+	Note      *richtext.Document
 }
 
 type MigrateFileInput struct {

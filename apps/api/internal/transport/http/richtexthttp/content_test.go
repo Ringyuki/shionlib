@@ -137,6 +137,27 @@ func TestTheContractDescribesTheDocument(t *testing.T) {
 	}
 }
 
+func TestAFieldDeclaresHowMuchTextItTakes(t *testing.T) {
+	type body struct {
+		Note  richtexthttp.Content `json:"note,omitempty"`
+		Title string               `json:"title"`
+	}
+	registry := huma.NewMapRegistry("#/components/schemas/", huma.DefaultSchemaNamer)
+	schema := registry.Schema(reflect.TypeFor[body](), false, "")
+	richtexthttp.LimitText(schema, "note", 255)
+	richtexthttp.LimitText(schema, "missing", 9)
+	if got := schema.Properties["note"].Extensions["x-max-text-length"]; got != 255 {
+		t.Fatalf("note extensions %v", schema.Properties["note"].Extensions)
+	}
+	if schema.Properties["note"].Ref != "#/components/schemas/RichTextDocument" || schema.Properties["title"].Extensions != nil || len(schema.Properties) != 2 {
+		t.Fatalf("only the named field changes: %+v", schema.Properties)
+	}
+	encoded, err := json.Marshal(schema.Properties["note"])
+	if err != nil || !strings.Contains(string(encoded), `"x-max-text-length":255`) {
+		t.Fatalf("the limit is written into the contract: %s %v", encoded, err)
+	}
+}
+
 func TestRequestsAreCheckedAgainstTheContract(t *testing.T) {
 	registry := huma.NewMapRegistry("#/components/schemas/", huma.DefaultSchemaNamer)
 	schema := registry.Schema(reflect.TypeFor[richtexthttp.Content](), true, "")

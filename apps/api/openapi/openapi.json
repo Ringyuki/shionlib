@@ -9289,7 +9289,7 @@
         ],
         "type": "object"
       },
-      "DownloadMigrateResourceInputBody": {
+      "DownloadMigrateResourceBodyInput": {
         "additionalProperties": false,
         "properties": {
           "language": {
@@ -9309,8 +9309,9 @@
             ]
           },
           "note": {
-            "maxLength": 255,
-            "type": "string"
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out or blank for no note",
+            "x-max-text-length": 255
           },
           "platform": {
             "items": {
@@ -9461,10 +9462,8 @@
             ]
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out when the resource has no note"
           },
           "platform": {
             "items": {
@@ -9487,7 +9486,6 @@
           "id",
           "platform",
           "language",
-          "note",
           "downloads",
           "game",
           "files",
@@ -9670,10 +9668,8 @@
             ]
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out when the resource has no note"
           },
           "patch_version": {
             "type": [
@@ -9752,7 +9748,6 @@
           "platform",
           "language",
           "simulator",
-          "note",
           "translation",
           "translators",
           "patch_version",
@@ -9892,8 +9887,9 @@
             ]
           },
           "note": {
-            "maxLength": 255,
-            "type": "string"
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out or blank for no note",
+            "x-max-text-length": 255
           },
           "patch_version": {
             "maxLength": 32,
@@ -10026,10 +10022,8 @@
             "type": "boolean"
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out when the resource has no note"
           },
           "platform": {
             "items": {
@@ -10056,7 +10050,6 @@
           "id",
           "platform",
           "language",
-          "note",
           "downloads",
           "file_name",
           "more_than_one_file",
@@ -10281,8 +10274,9 @@
             ]
           },
           "note": {
-            "maxLength": 255,
-            "type": "string"
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "Paragraphs with bold, links and spoilers; left out or blank for no note",
+            "x-max-text-length": 255
           },
           "patch_version": {
             "maxLength": 32,
@@ -20054,10 +20048,8 @@
             ]
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "The uploader's note: paragraphs with bold, links and spoilers; left out when there is none"
           },
           "patch_version": {
             "type": [
@@ -20132,7 +20124,6 @@
           "edition_name",
           "form",
           "extras",
-          "note",
           "downloads",
           "creator",
           "published_at",
@@ -22024,7 +22015,7 @@
       },
       "RichTextDocument": {
         "additionalProperties": false,
-        "description": "A rich text document: what the editor stores for a comment and for the note of a walkthrough",
+        "description": "A rich text document: what the editor stores for a comment, the note of a walkthrough and the note of a resource",
         "properties": {
           "content": {
             "items": {
@@ -36997,7 +36988,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DownloadMigrateResourceInputBody"
+                "$ref": "#/components/schemas/DownloadMigrateResourceBodyInput"
               }
             }
           },

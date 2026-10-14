@@ -41,6 +41,7 @@ describe('textIssue', () => {
       maxLength: 20,
     })
     expect(lengthOf('RegisterUserInputBody', 'password')).toEqual({ min: 8, max: 50 })
+    expect(lengthOf('DownloadSourceBodyInput', 'note')).toEqual({ min: 0, max: 255 })
   })
 
   it('reads the bounds of a number, in the unit the form shows', () => {
@@ -59,5 +60,16 @@ describe('createFormKit', () => {
     expect(firstIssueMessage(name, '')).toBe('required')
     expect(parseOptional(name, 'shion')).toBe('shion')
     expect(parseOptional(name, 7)).toBeUndefined()
+  })
+
+  it('counts the text of a rich text field against what the API takes', () => {
+    const note = kit.richText('DownloadSourceBodyInput', 'note')
+    const written = (text: string) => ({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+    })
+    expect(parseOptional(note, written('汐'.repeat(255)))).toEqual(written('汐'.repeat(255)))
+    expect(firstIssueMessage(note, written('汐'.repeat(256)))).toBe('maxLength')
+    expect(parseOptional(note, 'plain text')).toBeUndefined()
   })
 })
