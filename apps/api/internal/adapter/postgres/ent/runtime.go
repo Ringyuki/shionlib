@@ -7,6 +7,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
@@ -446,44 +447,62 @@ func init() {
 	adDescName := adFields[1].Descriptor()
 	// ad.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	ad.NameValidator = adDescName.Validators[0].(func(string) error)
-	// adDescImageZh is the schema descriptor for image_zh field.
-	adDescImageZh := adFields[3].Descriptor()
-	// ad.ImageZhValidator is a validator for the "image_zh" field. It is called by the builders before save.
-	ad.ImageZhValidator = adDescImageZh.Validators[0].(func(string) error)
-	// adDescImageJa is the schema descriptor for image_ja field.
-	adDescImageJa := adFields[4].Descriptor()
-	// ad.ImageJaValidator is a validator for the "image_ja" field. It is called by the builders before save.
-	ad.ImageJaValidator = adDescImageJa.Validators[0].(func(string) error)
-	// adDescImageEn is the schema descriptor for image_en field.
-	adDescImageEn := adFields[5].Descriptor()
-	// ad.ImageEnValidator is a validator for the "image_en" field. It is called by the builders before save.
-	ad.ImageEnValidator = adDescImageEn.Validators[0].(func(string) error)
-	// adDescAspect is the schema descriptor for aspect field.
-	adDescAspect := adFields[6].Descriptor()
-	// ad.AspectValidator is a validator for the "aspect" field. It is called by the builders before save.
-	ad.AspectValidator = adDescAspect.Validators[0].(func(string) error)
 	// adDescLink is the schema descriptor for link field.
-	adDescLink := adFields[7].Descriptor()
+	adDescLink := adFields[2].Descriptor()
 	// ad.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	ad.LinkValidator = adDescLink.Validators[0].(func(string) error)
+	// adDescBanner is the schema descriptor for banner field.
+	adDescBanner := adFields[3].Descriptor()
+	// ad.BannerValidator is a validator for the "banner" field. It is called by the builders before save.
+	ad.BannerValidator = adDescBanner.Validators[0].(func(string) error)
+	// adDescBannerAdult is the schema descriptor for banner_adult field.
+	adDescBannerAdult := adFields[4].Descriptor()
+	// ad.DefaultBannerAdult holds the default value on creation for the banner_adult field.
+	ad.DefaultBannerAdult = adDescBannerAdult.Default.(bool)
+	// adDescSideImage is the schema descriptor for side_image field.
+	adDescSideImage := adFields[5].Descriptor()
+	// ad.SideImageValidator is a validator for the "side_image" field. It is called by the builders before save.
+	ad.SideImageValidator = adDescSideImage.Validators[0].(func(string) error)
+	// adDescSideIcon is the schema descriptor for side_icon field.
+	adDescSideIcon := adFields[6].Descriptor()
+	// ad.SideIconValidator is a validator for the "side_icon" field. It is called by the builders before save.
+	ad.SideIconValidator = adDescSideIcon.Validators[0].(func(string) error)
+	// adDescSideAdult is the schema descriptor for side_adult field.
+	adDescSideAdult := adFields[7].Descriptor()
+	// ad.DefaultSideAdult holds the default value on creation for the side_adult field.
+	ad.DefaultSideAdult = adDescSideAdult.Default.(bool)
+	// adDescWeight is the schema descriptor for weight field.
+	adDescWeight := adFields[10].Descriptor()
+	// ad.DefaultWeight holds the default value on creation for the weight field.
+	ad.DefaultWeight = adDescWeight.Default.(int)
 	// adDescEnabled is the schema descriptor for enabled field.
-	adDescEnabled := adFields[9].Descriptor()
+	adDescEnabled := adFields[11].Descriptor()
 	// ad.DefaultEnabled holds the default value on creation for the enabled field.
 	ad.DefaultEnabled = adDescEnabled.Default.(bool)
-	// adDescSort is the schema descriptor for sort field.
-	adDescSort := adFields[10].Descriptor()
-	// ad.DefaultSort holds the default value on creation for the sort field.
-	ad.DefaultSort = adDescSort.Default.(int)
 	// adDescCreated is the schema descriptor for created field.
-	adDescCreated := adFields[13].Descriptor()
+	adDescCreated := adFields[14].Descriptor()
 	// ad.DefaultCreated holds the default value on creation for the created field.
 	ad.DefaultCreated = adDescCreated.Default.(func() time.Time)
 	// adDescUpdated is the schema descriptor for updated field.
-	adDescUpdated := adFields[14].Descriptor()
+	adDescUpdated := adFields[15].Descriptor()
 	// ad.DefaultUpdated holds the default value on creation for the updated field.
 	ad.DefaultUpdated = adDescUpdated.Default.(func() time.Time)
 	// ad.UpdateDefaultUpdated holds the default value on update for the updated field.
 	ad.UpdateDefaultUpdated = adDescUpdated.UpdateDefault.(func() time.Time)
+	addailystatFields := schema.AdDailyStat{}.Fields()
+	_ = addailystatFields
+	// addailystatDescSlot is the schema descriptor for slot field.
+	addailystatDescSlot := addailystatFields[2].Descriptor()
+	// addailystat.SlotValidator is a validator for the "slot" field. It is called by the builders before save.
+	addailystat.SlotValidator = addailystatDescSlot.Validators[0].(func(string) error)
+	// addailystatDescViews is the schema descriptor for views field.
+	addailystatDescViews := addailystatFields[4].Descriptor()
+	// addailystat.DefaultViews holds the default value on creation for the views field.
+	addailystat.DefaultViews = addailystatDescViews.Default.(int)
+	// addailystatDescClicks is the schema descriptor for clicks field.
+	addailystatDescClicks := addailystatFields[5].Descriptor()
+	// addailystat.DefaultClicks holds the default value on creation for the clicks field.
+	addailystat.DefaultClicks = addailystatDescClicks.Default.(int)
 	catalogsourcelinkFields := schema.CatalogSourceLink{}.Fields()
 	_ = catalogsourcelinkFields
 	// catalogsourcelinkDescSource is the schema descriptor for source field.

@@ -1,127 +1,122 @@
 package adhttp
 
 import (
-	"encoding/json"
 	"time"
 
-	"github.com/danielgtaylor/huma/v2"
-
 	"github.com/Ringyuki/shionlib/apps/api/internal/ad"
-	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 )
 
-type adPathInput struct {
+type pathInput struct {
 	ID int `path:"id" minimum:"1"`
 }
 
-func (f *adNullableTextInput) UnmarshalJSON(raw []byte) error {
-	f.Set = true
-	return json.Unmarshal(raw, &f.Value)
+type slotsInput struct {
+	Slots  []string `query:"slot,explode" required:"true" minItems:"1" maxItems:"5" enum:"home,game,resource,download,sidebar" doc:"The slots on the page, one parameter per slot"`
+	Locale string   `query:"locale" enum:"zh,en,ja" default:"zh" doc:"Language of the page"`
 }
 
-func (adNullableTextInput) Schema(huma.Registry) *huma.Schema {
-	maxLength := ad.MaxImageLength
-	return &huma.Schema{Type: huma.TypeString, Nullable: true, MaxLength: &maxLength}
+func (in *slotsInput) slots() []ad.Slot {
+	return toSlots(in.Slots)
 }
 
-func (f *adNullableTimeInput) UnmarshalJSON(raw []byte) error {
-	f.Set = true
-	return json.Unmarshal(raw, &f.Value)
+type adViewInput struct {
+	AdID int    `json:"ad_id" minimum:"1"`
+	Slot string `json:"slot" enum:"home,game,resource,download,sidebar"`
 }
 
-func (adNullableTimeInput) Schema(huma.Registry) *huma.Schema {
-	return &huma.Schema{Type: huma.TypeString, Format: "date-time", Nullable: true}
-}
-
-type adPlacementInput struct {
-	Placement string `path:"placement" minLength:"1" maxLength:"100"`
-}
-
-type listAdsInput struct {
-	httpapi.PageQuery
-	Placement string `query:"placement" maxLength:"100"`
-	Enabled   string `query:"enabled" enum:"true,false"`
-	SortBy    string `query:"sortBy" enum:"id,sort,created,updated" default:"id"`
-	SortOrder string `query:"sortOrder" enum:"asc,desc" default:"desc"`
-}
-
-func (in *listAdsInput) filter() ad.ListFilter {
-	filter := ad.ListFilter{SortBy: ad.SortField(in.SortBy), Descending: in.SortOrder != "asc"}
-	if in.Placement != "" {
-		filter.Placement = &in.Placement
+type adViewsInput struct {
+	Body struct {
+		Views []adViewInput `json:"views" maxItems:"50" doc:"Each ad seen, once per page view"`
 	}
-	if in.Enabled != "" {
-		enabled := in.Enabled == "true"
-		filter.Enabled = &enabled
+}
+
+func (in *adViewsInput) views() []ad.View {
+	views := make([]ad.View, len(in.Body.Views))
+	for i, view := range in.Body.Views {
+		views[i] = ad.View{AdID: view.AdID, Slot: ad.Slot(view.Slot)}
+	}
+	return views
+}
+
+type adClickInput struct {
+	ID   int `path:"id" minimum:"1"`
+	Body struct {
+		Slot string `json:"slot" enum:"home,game,resource,download,sidebar" doc:"The slot the ad was clicked in"`
+	}
+}
+
+type listInput struct {
+	httpapi.PageQuery
+	Status string `query:"status" enum:"running,scheduled,ended,disabled"`
+	Slot   string `query:"slot" enum:"home,game,resource,download,sidebar"`
+}
+
+func (in *listInput) filter() ad.ListFilter {
+	filter := ad.ListFilter{}
+	if in.Status != "" {
+		status := ad.Status(in.Status)
+		filter.Status = &status
+	}
+	if in.Slot != "" {
+		slot := ad.Slot(in.Slot)
+		filter.Slot = &slot
 	}
 	return filter
 }
 
-type createAdInput struct {
-	Body struct {
-		Name           string     `json:"name" maxLength:"100"`
-		Placement      []string   `json:"placement"`
-		ImageZH        string     `json:"image_zh" maxLength:"500"`
-		ImageJA        *string    `json:"image_ja,omitempty" maxLength:"500"`
-		ImageEN        *string    `json:"image_en,omitempty" maxLength:"500"`
-		Aspect         string     `json:"aspect" maxLength:"20"`
-		Link           string     `json:"link" maxLength:"500"`
-		ExcludeLocales []string   `json:"exclude_locales,omitempty"`
-		Enabled        *bool      `json:"enabled,omitempty"`
-		Sort           *int       `json:"sort,omitempty" minimum:"-2147483648" maximum:"2147483647"`
-		StartAt        *time.Time `json:"start_at,omitempty"`
-		EndAt          *time.Time `json:"end_at,omitempty"`
-	}
-}
-
-type updateAdInput struct {
+type reportInput struct {
 	ID   int `path:"id" minimum:"1"`
-	Body struct {
-		Name           *string             `json:"name,omitempty" maxLength:"100"`
-		Placement      []string            `json:"placement,omitempty"`
-		ImageZH        *string             `json:"image_zh,omitempty" maxLength:"500"`
-		ImageJA        adNullableTextInput `json:"image_ja,omitempty" doc:"null clears the image"`
-		ImageEN        adNullableTextInput `json:"image_en,omitempty" doc:"null clears the image"`
-		Aspect         *string             `json:"aspect,omitempty" maxLength:"20"`
-		Link           *string             `json:"link,omitempty" maxLength:"500"`
-		ExcludeLocales []string            `json:"exclude_locales,omitempty"`
-		Enabled        *bool               `json:"enabled,omitempty"`
-		Sort           *int                `json:"sort,omitempty" minimum:"-2147483648" maximum:"2147483647"`
-		StartAt        adNullableTimeInput `json:"start_at,omitempty" doc:"null clears the start"`
-		EndAt          adNullableTimeInput `json:"end_at,omitempty" doc:"null clears the end"`
+	Days int `query:"days" enum:"7,30" default:"30"`
+}
+
+type adDraftInput struct {
+	Name        string     `json:"name" minLength:"1" maxLength:"100"`
+	Link        string     `json:"link" minLength:"1" maxLength:"500" pattern:"^https?://" patternDescription:"an http or https address"`
+	Banner      *string    `json:"banner,omitempty" nullable:"true" minLength:"1" maxLength:"500" doc:"Key of the 6:1 banner in the image bucket"`
+	BannerAdult bool       `json:"banner_adult" doc:"The banner is shown only to viewers who see adult content"`
+	SideImage   *string    `json:"side_image,omitempty" nullable:"true" minLength:"1" maxLength:"500" doc:"Key of the sidebar image; set together with side_icon"`
+	SideIcon    *string    `json:"side_icon,omitempty" nullable:"true" minLength:"1" maxLength:"500" doc:"Key of the square icon the collapsed sidebar shows"`
+	SideAdult   bool       `json:"side_adult" doc:"The sidebar image is shown only to viewers who see adult content"`
+	Slots       []string   `json:"slots" maxItems:"5" enum:"home,game,resource,download,sidebar"`
+	Languages   []string   `json:"languages" minItems:"1" maxItems:"3" enum:"zh,en,ja"`
+	Weight      int        `json:"weight" minimum:"1" maximum:"10"`
+	Enabled     bool       `json:"enabled"`
+	StartAt     *time.Time `json:"start_at,omitempty" nullable:"true" doc:"Omitted or null starts at once"`
+	EndAt       *time.Time `json:"end_at,omitempty" nullable:"true" doc:"Omitted or null runs without end"`
+}
+
+func (in adDraftInput) draft() ad.Draft {
+	return ad.Draft{
+		Name:        in.Name,
+		Link:        in.Link,
+		Banner:      in.Banner,
+		BannerAdult: in.BannerAdult,
+		SideImage:   in.SideImage,
+		SideIcon:    in.SideIcon,
+		SideAdult:   in.SideAdult,
+		Slots:       toSlots(in.Slots),
+		Languages:   in.Languages,
+		Weight:      in.Weight,
+		Enabled:     in.Enabled,
+		StartAt:     in.StartAt,
+		EndAt:       in.EndAt,
 	}
 }
 
-func (in *updateAdInput) changes() ad.Changes {
-	body := in.Body
-	changes := ad.Changes{
-		Name:    body.Name,
-		ImageZH: body.ImageZH,
-		ImageJA: patch.Clearable[string](body.ImageJA),
-		ImageEN: patch.Clearable[string](body.ImageEN),
-		Aspect:  body.Aspect,
-		Link:    body.Link,
-		Enabled: body.Enabled,
-		Sort:    body.Sort,
-		StartAt: patch.Clearable[time.Time](body.StartAt),
-		EndAt:   patch.Clearable[time.Time](body.EndAt),
-	}
-	if body.Placement != nil {
-		changes.Placement = &body.Placement
-	}
-	if body.ExcludeLocales != nil {
-		changes.ExcludeLocales = &body.ExcludeLocales
-	}
-	return changes
+type createInput struct {
+	Body adDraftInput
 }
 
-type adNullableTextInput struct {
-	Set   bool
-	Value *string
+type replaceInput struct {
+	ID   int `path:"id" minimum:"1"`
+	Body adDraftInput
 }
 
-type adNullableTimeInput struct {
-	Set   bool
-	Value *time.Time
+func toSlots(values []string) []ad.Slot {
+	slots := make([]ad.Slot, len(values))
+	for i, value := range values {
+		slots[i] = ad.Slot(value)
+	}
+	return slots
 }

@@ -577,15 +577,16 @@ var (
 	AdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "name", Type: field.TypeString, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
-		{Name: "placement", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
-		{Name: "image_zh", Type: field.TypeString, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
-		{Name: "image_ja", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
-		{Name: "image_en", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
-		{Name: "aspect", Type: field.TypeString, Size: 20, SchemaType: map[string]string{"postgres": "character varying(20)"}},
 		{Name: "link", Type: field.TypeString, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
-		{Name: "exclude_locales", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "banner", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "banner_adult", Type: field.TypeBool, Default: false},
+		{Name: "side_image", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "side_icon", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "side_adult", Type: field.TypeBool, Default: false},
+		{Name: "placement", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "languages", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "weight", Type: field.TypeInt, Default: 5, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
-		{Name: "sort", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "start_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "end_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -600,7 +601,7 @@ var (
 			{
 				Name:    "ads_placement_idx",
 				Unique:  false,
-				Columns: []*schema.Column{AdsColumns[2]},
+				Columns: []*schema.Column{AdsColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					Type: "GIN",
 				},
@@ -608,7 +609,42 @@ var (
 			{
 				Name:    "ads_enabled_idx",
 				Unique:  false,
-				Columns: []*schema.Column{AdsColumns[9]},
+				Columns: []*schema.Column{AdsColumns[11]},
+			},
+		},
+	}
+	// AdDailyStatsColumns holds the columns for the "ad_daily_stats" table.
+	AdDailyStatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "slot", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "day", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "views", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "clicks", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "ad_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AdDailyStatsTable holds the schema information for the "ad_daily_stats" table.
+	AdDailyStatsTable = &schema.Table{
+		Name:       "ad_daily_stats",
+		Columns:    AdDailyStatsColumns,
+		PrimaryKey: []*schema.Column{AdDailyStatsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ad_daily_stats_ad_id_fkey",
+				Columns:    []*schema.Column{AdDailyStatsColumns[5]},
+				RefColumns: []*schema.Column{AdsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ad_daily_stats_ad_id_slot_day_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdDailyStatsColumns[5], AdDailyStatsColumns[1], AdDailyStatsColumns[2]},
+			},
+			{
+				Name:    "ad_daily_stats_day_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AdDailyStatsColumns[2]},
 			},
 		},
 	}
@@ -3048,6 +3084,7 @@ var (
 		APIKeyDailyUsagesTable,
 		ActivitiesTable,
 		AdsTable,
+		AdDailyStatsTable,
 		CatalogSourceLinksTable,
 		CatalogSyncCursorsTable,
 		CommentsTable,
@@ -3164,6 +3201,10 @@ func init() {
 	}
 	AdsTable.Annotation = &entsql.Annotation{
 		Table: "ads",
+	}
+	AdDailyStatsTable.ForeignKeys[0].RefTable = AdsTable
+	AdDailyStatsTable.Annotation = &entsql.Annotation{
+		Table: "ad_daily_stats",
 	}
 	CatalogSourceLinksTable.Annotation = &entsql.Annotation{
 		Table: "catalog_source_links",

@@ -17,23 +17,43 @@ func toAds(rows []*ent.Ad) []ad.Ad {
 }
 
 func toAd(row *ent.Ad) ad.Ad {
-	return ad.Ad{
-		ID:             row.ID,
-		Name:           row.Name,
-		Placement:      nonNil(row.Placement),
-		ImageZH:        row.ImageZh,
-		ImageJA:        row.ImageJa,
-		ImageEN:        row.ImageEn,
-		Aspect:         row.Aspect,
-		Link:           row.Link,
-		ExcludeLocales: nonNil(row.ExcludeLocales),
-		Enabled:        row.Enabled,
-		Sort:           row.Sort,
-		StartAt:        row.StartAt,
-		EndAt:          row.EndAt,
-		Created:        row.Created,
-		Updated:        row.Updated,
+	slots := make([]ad.Slot, len(row.Placement))
+	for i, slot := range row.Placement {
+		slots[i] = ad.Slot(slot)
 	}
+	return ad.Ad{
+		ID:          row.ID,
+		Name:        row.Name,
+		Link:        row.Link,
+		Banner:      row.Banner,
+		BannerAdult: row.BannerAdult,
+		SideImage:   row.SideImage,
+		SideIcon:    row.SideIcon,
+		SideAdult:   row.SideAdult,
+		Slots:       slots,
+		Languages:   nonNil(row.Languages),
+		Weight:      row.Weight,
+		Enabled:     row.Enabled,
+		StartAt:     row.StartAt,
+		EndAt:       row.EndAt,
+		Created:     row.Created,
+		Updated:     row.Updated,
+	}
+}
+
+func slotArray(slots []ad.Slot) pgvalue.Strings {
+	values := make(pgvalue.Strings, len(slots))
+	for i, slot := range slots {
+		values[i] = string(slot)
+	}
+	return values
+}
+
+func textArray(values []string) pgvalue.Strings {
+	if values == nil {
+		return pgvalue.Strings{}
+	}
+	return pgvalue.Strings(slices.Clone(values))
 }
 
 func nonNil(values pgvalue.Strings) []string {

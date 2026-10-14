@@ -45,6 +45,9 @@ type Activity func(*sql.Selector)
 // Ad is the predicate function for ad builders.
 type Ad func(*sql.Selector)
 
+// AdDailyStat is the predicate function for addailystat builders.
+type AdDailyStat func(*sql.Selector)
+
 // CatalogSourceLink is the predicate function for catalogsourcelink builders.
 type CatalogSourceLink func(*sql.Selector)
 

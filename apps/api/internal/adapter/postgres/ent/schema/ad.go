@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -20,15 +21,16 @@ func (Ad) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.String("name").MaxRuneLen(100).SchemaType(varchar(100)),
-		field.Other("placement", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
-		field.String("image_zh").MaxRuneLen(500).SchemaType(varchar(500)),
-		field.String("image_ja").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
-		field.String("image_en").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
-		field.String("aspect").MaxRuneLen(20).SchemaType(varchar(20)),
 		field.String("link").MaxRuneLen(500).SchemaType(varchar(500)),
-		field.Other("exclude_locales", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
+		field.String("banner").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.Bool("banner_adult").Default(false),
+		field.String("side_image").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("side_icon").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.Bool("side_adult").Default(false),
+		field.Other("placement", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
+		field.Other("languages", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
+		field.Int("weight").SchemaType(pg("integer")).Default(5),
 		field.Bool("enabled").Default(true),
-		field.Int("sort").SchemaType(pg("integer")).Default(0),
 		field.Time("start_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("end_at").SchemaType(timestamp3).Optional().Nillable(),
 		created(),
@@ -37,7 +39,9 @@ func (Ad) Fields() []ent.Field {
 }
 
 func (Ad) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.To("stats", AdDailyStat.Type).StorageKey(edge.Symbol("ad_daily_stats_ad_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+	}
 }
 
 func (Ad) Indexes() []ent.Index {

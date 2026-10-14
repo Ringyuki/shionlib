@@ -51,15 +51,29 @@ func NewHandler(service *media.Service, resp *response.Builder) *Handler {
 
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.friendLinkLogo", Method: http.MethodPut, Path: "/uploads/small/friend-link/logo", Summary: "Upload the logo of a friend link", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.FriendLinkLogoMaxBytes)}, h.friendLinkLogo)
-	httpapi.Register(api, httpapi.Route{ID: "upload.adImage", Method: http.MethodPut, Path: "/uploads/small/ad/image", Summary: "Upload an advertisement image", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adImage)
+	httpapi.Register(api, httpapi.Route{ID: "upload.adBanner", Method: http.MethodPut, Path: "/uploads/small/ad/banner", Summary: "Upload the 6:1 banner of an ad", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adBanner)
+	httpapi.Register(api, httpapi.Route{ID: "upload.adSideImage", Method: http.MethodPut, Path: "/uploads/small/ad/side-image", Summary: "Upload the sidebar image of an ad", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adSideImage)
+	httpapi.Register(api, httpapi.Route{ID: "upload.adSideIcon", Method: http.MethodPut, Path: "/uploads/small/ad/side-icon", Summary: "Upload the square icon an ad shows in the collapsed sidebar", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adSideIcon)
 }
 
-func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {
+func (h *Handler) adBanner(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {
+	return h.storeAdImage(ctx, in, h.service.StoreAdBanner)
+}
+
+func (h *Handler) adSideImage(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {
+	return h.storeAdImage(ctx, in, h.service.StoreAdSideImage)
+}
+
+func (h *Handler) adSideIcon(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {
+	return h.storeAdImage(ctx, in, h.service.StoreAdSideIcon)
+}
+
+func (h *Handler) storeAdImage(ctx context.Context, in *adImageInput, store func(context.Context, int, *media.Upload) (string, error)) (*response.Output[UploadedImageDTO], error) {
 	upload, err := ReadUpload(in.RawBody.Data().File, media.AdImageMaxBytes)
 	if err != nil {
 		return nil, err
 	}
-	key, err := h.service.StoreAdImage(ctx, actor.From(ctx).UserID, upload)
+	key, err := store(ctx, actor.From(ctx).UserID, upload)
 	if err != nil {
 		return nil, err
 	}

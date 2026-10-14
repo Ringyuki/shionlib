@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
@@ -151,6 +152,7 @@ func checkColumn(t, c string) error {
 			apikeydailyusage.Table:                apikeydailyusage.ValidColumn,
 			activity.Table:                        activity.ValidColumn,
 			ad.Table:                              ad.ValidColumn,
+			addailystat.Table:                     addailystat.ValidColumn,
 			catalogsourcelink.Table:               catalogsourcelink.ValidColumn,
 			catalogsynccursor.Table:               catalogsynccursor.ValidColumn,
 			comment.Table:                         comment.ValidColumn,

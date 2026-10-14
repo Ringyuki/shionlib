@@ -1,108 +1,104 @@
 package ad_test
 
 import (
-	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ad"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ad/adtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 )
 
-var (
-	now     = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
-	viewer  = actor.Actor{UserID: 1, Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow}
-	sponsor = actor.Actor{UserID: 2, Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow}
-)
-
-func newService() (*ad.Service, *adtest.MemoryRepository, *adtest.Cache) {
-	repo := adtest.NewMemoryRepository(func() time.Time { return now })
-	repo.SetSponsor(sponsor.UserID, now.Add(time.Hour))
-	cache := adtest.NewCache()
-	return ad.NewService(repo, repo, cache, func() time.Time { return now }), repo, cache
-}
-
-func ptr[T any](v T) *T {
-	return &v
-}
-
-func TestPlacementSkipsSponsorsAndCaches(t *testing.T) {
-	ctx := context.Background()
-	service, repo, cache := newService()
-	if _, err := service.Create(ctx, ad.NewAd{Name: "banner", Placement: []string{"home-after-hot"}, ImageZH: "zh.webp", Aspect: "16:9", Link: "https://x.test", Enabled: true}); err != nil {
+func TestSavingAnAdChecksItTidiesItAndDropsTheCachedSlots(t *testing.T) {
+	f := newFixture(t)
+	ctx := t.Context()
+	if _, err := f.service.Create(ctx, adtest.Banner("wrong", ad.SlotSidebar)); !errors.Is(err, ad.ErrSlotNeedsMaterial) {
+		t.Fatalf("a slot without its material: %v", err)
+	}
+	draft := adtest.Banner("tidy", ad.SlotDownload, ad.SlotHome, ad.SlotHome)
+	draft.Languages = []string{"ja", "zh", "ja"}
+	created := f.create(t, draft)
+	if !slices.Equal(created.Slots, []ad.Slot{ad.SlotHome, ad.SlotDownload}) || !slices.Equal(created.Languages, []string{"zh", "ja"}) {
+		t.Fatalf("slots and languages in their order: %v %v", created.Slots, created.Languages)
+	}
+	if _, err := f.placements.Place(ctx, actor.Actor{}, "zh", []ad.Slot{ad.SlotHome}); err != nil {
 		t.Fatal(err)
 	}
-	ads, err := service.Placement(ctx, sponsor, "home-after-hot")
-	if err != nil || ads == nil || len(ads) != 0 {
-		t.Fatalf("sponsors see no ads: %v %v", ads, err)
+	if !f.cache.Has(ad.SlotCachePrefix + "home") {
+		t.Fatal("the slot is cached after a page asks for it")
 	}
-	if cache.Has("ad:placement:home-after-hot") {
-		t.Fatal("sponsor requests must not touch the cache")
-	}
-	ads, err = service.Placement(ctx, viewer, "home-after-hot")
-	if err != nil || len(ads) != 1 {
-		t.Fatalf("viewer sees the ad: %v %v", ads, err)
-	}
-	if !cache.Has("ad:placement:home-after-hot") {
-		t.Fatal("placement result must be cached")
-	}
-	if err := repo.Delete(ctx, ads[0].ID); err != nil {
+	if _, err := f.service.Replace(ctx, created.ID, adtest.Banner("tidy", ad.SlotGame)); err != nil {
 		t.Fatal(err)
 	}
-	cached, _ := service.Placement(ctx, actor.Guest(), "home-after-hot")
-	if len(cached) != 1 {
-		t.Fatalf("second read comes from the cache: %v", cached)
+	if f.cache.Has(ad.SlotCachePrefix + "home") {
+		t.Fatal("a saved ad drops the cached slots")
 	}
-	empty, _ := service.Placement(ctx, actor.Guest(), "nowhere")
-	if empty == nil || len(empty) != 0 || !cache.Has("ad:placement:nowhere") {
-		t.Fatalf("empty placements are cached too: %v", empty)
+	if err := f.service.Delete(ctx, created.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Get(ctx, created.ID); !errors.Is(err, ad.ErrNotFound) {
+		t.Fatalf("deleted: %v", err)
 	}
 }
 
-func TestWritesInvalidateOnlyAdKeys(t *testing.T) {
-	ctx := context.Background()
-	service, _, cache := newService()
-	for _, key := range []string{"ad:placement:home", "message:unread:1", "s3-upload:5"} {
-		_ = cache.Set(ctx, key, []int{}, time.Minute)
+func TestTheListCarriesTheCountsOfTheLastSevenDays(t *testing.T) {
+	f := newFixture(t)
+	ctx := t.Context()
+	first := f.create(t, adtest.Banner("first", ad.SlotHome))
+	second := f.create(t, adtest.Banner("second", ad.SlotHome))
+	today := ad.DayOf(now, 8*time.Hour)
+	views := func(day time.Time, id, count int) {
+		if err := f.repo.AddViews(ctx, day, map[ad.View]int{{AdID: id, Slot: ad.SlotHome}: count}); err != nil {
+			t.Fatal(err)
+		}
 	}
-	created, err := service.Create(ctx, ad.NewAd{Name: "a", ImageZH: "zh", Aspect: "1:1", Link: "l"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if created.Placement == nil || created.ExcludeLocales == nil {
-		t.Fatalf("arrays default to empty: %+v", created)
-	}
-	if cache.Has("ad:placement:home") || !cache.Has("message:unread:1") || !cache.Has("s3-upload:5") {
-		t.Fatal("create must only drop ad placement keys")
-	}
-	_ = cache.Set(ctx, "ad:placement:home", []int{}, time.Minute)
-	if _, err := service.Update(ctx, created.ID, ad.Changes{Name: ptr("b")}); err != nil {
-		t.Fatal(err)
-	}
-	if cache.Has("ad:placement:home") {
-		t.Fatal("update must drop ad placement keys")
-	}
-	_ = cache.Set(ctx, "ad:placement:home", []int{}, time.Minute)
-	if err := service.Delete(ctx, created.ID); err != nil {
-		t.Fatal(err)
-	}
-	if cache.Has("ad:placement:home") || !cache.Has("message:unread:1") {
-		t.Fatal("delete must only drop ad placement keys")
+	views(today, first.ID, 5)
+	views(today.AddDate(0, 0, -6), first.ID, 2)
+	views(today.AddDate(0, 0, -7), first.ID, 100)
+	listed, total, err := f.service.List(ctx, ad.ListFilter{}, ad.Page{Number: 1, Size: 10})
+	if err != nil || total != 2 || listed[0].Ad.ID != second.ID || listed[1].Week.Views != 7 || listed[0].Week != (ad.Counts{}) {
+		t.Fatalf("listed %+v %d %v", listed, total, err)
 	}
 }
 
-func TestMissingAds(t *testing.T) {
-	ctx := context.Background()
-	service, _, _ := newService()
-	if _, err := service.Get(ctx, 9); !errors.Is(err, ad.ErrNotFound) {
-		t.Fatalf("get: %v", err)
+func TestTheReportOverviewAndSlotsSumTheCounts(t *testing.T) {
+	f := newFixture(t)
+	ctx := t.Context()
+	banner := f.create(t, adtest.Banner("banner", ad.SlotHome, ad.SlotDownload))
+	side := f.create(t, adtest.Side("side"))
+	paused := adtest.Banner("paused", ad.SlotHome)
+	paused.Enabled = false
+	f.create(t, paused)
+	today := ad.DayOf(now, 8*time.Hour)
+	if err := f.repo.AddViews(ctx, today, map[ad.View]int{{AdID: banner.ID, Slot: ad.SlotHome}: 10, {AdID: banner.ID, Slot: ad.SlotDownload}: 4, {AdID: side.ID, Slot: ad.SlotSidebar}: 3}); err != nil {
+		t.Fatal(err)
 	}
-	if _, err := service.Update(ctx, 9, ad.Changes{}); !errors.Is(err, ad.ErrNotFound) {
-		t.Fatalf("update: %v", err)
+	if err := f.repo.AddClick(ctx, today.AddDate(0, 0, -20), ad.View{AdID: banner.ID, Slot: ad.SlotHome}); err != nil {
+		t.Fatal(err)
 	}
-	if err := service.Delete(ctx, 9); !errors.Is(err, ad.ErrNotFound) {
-		t.Fatalf("delete: %v", err)
+	report, err := f.service.Report(ctx, banner.ID, ad.MonthDays)
+	if err != nil || len(report.Days) != 30 || report.Total != (ad.Counts{Views: 14, Clicks: 1}) || report.Days[29].Views != 14 || report.Days[9].Clicks != 1 || len(report.Slots) != 2 {
+		t.Fatalf("report %+v %v", report, err)
+	}
+	if _, err := f.service.Report(ctx, 999, ad.WeekDays); !errors.Is(err, ad.ErrNotFound) {
+		t.Fatalf("report of a missing ad: %v", err)
+	}
+	settingtest.Set(f.settings, ad.Enabled, false)
+	overview, err := f.service.Overview(ctx)
+	if err != nil || overview.Running != 2 || overview.Week != (ad.Counts{Views: 17}) || overview.Enabled {
+		t.Fatalf("overview %+v %v", overview, err)
+	}
+	slots, err := f.service.Slots(ctx)
+	if err != nil || len(slots) != 5 {
+		t.Fatalf("slots %+v %v", slots, err)
+	}
+	if home := slots[0]; home.Spec.Slot != ad.SlotHome || len(home.Running) != 1 || home.Running[0].Name != "banner" || home.Week.Views != 10 {
+		t.Fatalf("home %+v", home)
+	}
+	if sidebar := slots[4]; sidebar.Spec.Material != ad.MaterialSide || sidebar.Spec.Shown != 3 || len(sidebar.Running) != 1 || sidebar.Week.Views != 3 {
+		t.Fatalf("sidebar %+v", sidebar)
 	}
 }

@@ -12,6 +12,8 @@ import (
 
 type processor struct {
 	bounds media.Bounds
+	width  int
+	height int
 	fail   error
 }
 
@@ -20,7 +22,7 @@ func (p *processor) ToWebP(_ context.Context, data []byte, bounds media.Bounds) 
 	if p.fail != nil {
 		return media.Encoded{}, p.fail
 	}
-	return media.Encoded{Data: append([]byte("webp:"), data...), ContentType: "image/webp", Extension: ".webp"}, nil
+	return media.Encoded{Data: append([]byte("webp:"), data...), ContentType: "image/webp", Extension: ".webp", Width: p.width, Height: p.height}, nil
 }
 
 type object struct {
@@ -57,9 +59,10 @@ func TestStoreUsesLegacyKeysBoundsAndMetadata(t *testing.T) {
 	if err != nil || key != "user/7/background/uuid.webp" || p.bounds != (media.Bounds{MaxWidth: 2560}) {
 		t.Fatalf("background: %s %v %+v", key, err, p.bounds)
 	}
-	key, err = service.StoreAdImage(ctx, 2, upload)
-	if err != nil || key != "ad/image/uuid.webp" || p.bounds != (media.Bounds{}) {
-		t.Fatalf("ad: %s %v %+v", key, err, p.bounds)
+	p.width, p.height = 1920, 320
+	key, err = service.StoreAdBanner(ctx, 2, upload)
+	if err != nil || key != "spotlight/banner/uuid.webp" || p.bounds != (media.Bounds{}) {
+		t.Fatalf("ad banner: %s %v %+v", key, err, p.bounds)
 	}
 	key, err = service.StoreFriendLinkLogo(ctx, 3, upload)
 	if err != nil || key != "friend-link/logo/uuid.webp" || p.bounds != (media.Bounds{MaxWidth: 256, MaxHeight: 256}) {
@@ -87,11 +90,39 @@ func TestStoreValidatesUploads(t *testing.T) {
 			t.Fatalf("got %v want %v", err, tc.want)
 		}
 	}
-	if _, err := service.StoreAdImage(ctx, 1, &media.Upload{ContentType: "image/avif", Data: make([]byte, media.ProfileImageMaxBytes+1)}); err != nil {
+	sized := media.NewService(&processor{width: 1200, height: 200}, &store{}, nil)
+	if _, err := sized.StoreAdBanner(ctx, 1, &media.Upload{ContentType: "image/avif", Data: make([]byte, media.ProfileImageMaxBytes+1)}); err != nil {
 		t.Fatalf("ad images allow up to 15 MiB: %v", err)
 	}
 	failing := media.NewService(&processor{fail: upload.ErrSmallFileUnsupported}, &store{}, nil)
 	if _, err := failing.StoreCover(ctx, 1, &media.Upload{ContentType: "image/png", Data: []byte{1}}); !errors.Is(err, upload.ErrSmallFileUnsupported) {
 		t.Fatalf("processor errors propagate: %v", err)
+	}
+}
+
+func TestAdImagesKeepTheirShape(t *testing.T) {
+	ctx := context.Background()
+	file := &media.Upload{ContentType: "image/png", Data: []byte("raw")}
+	cases := []struct {
+		width, height int
+		store         func(*media.Service) (string, error)
+		bounds        media.Bounds
+		want          error
+	}{
+		{1200, 200, func(s *media.Service) (string, error) { return s.StoreAdBanner(ctx, 1, file) }, media.Bounds{}, nil},
+		{1260, 200, func(s *media.Service) (string, error) { return s.StoreAdBanner(ctx, 1, file) }, media.Bounds{}, nil},
+		{1500, 200, func(s *media.Service) (string, error) { return s.StoreAdBanner(ctx, 1, file) }, media.Bounds{}, upload.ErrAdBannerShape},
+		{1194, 199, func(s *media.Service) (string, error) { return s.StoreAdBanner(ctx, 1, file) }, media.Bounds{}, upload.ErrAdBannerShape},
+		{500, 193, func(s *media.Service) (string, error) { return s.StoreAdSideImage(ctx, 1, file) }, media.Bounds{}, nil},
+		{300, 79, func(s *media.Service) (string, error) { return s.StoreAdSideImage(ctx, 1, file) }, media.Bounds{}, upload.ErrAdSideImageShape},
+		{128, 128, func(s *media.Service) (string, error) { return s.StoreAdSideIcon(ctx, 1, file) }, media.Bounds{MaxWidth: 128, MaxHeight: 128}, nil},
+		{128, 110, func(s *media.Service) (string, error) { return s.StoreAdSideIcon(ctx, 1, file) }, media.Bounds{MaxWidth: 128, MaxHeight: 128}, upload.ErrAdSideIconShape},
+	}
+	for _, c := range cases {
+		p, s := &processor{width: c.width, height: c.height}, &store{}
+		_, err := c.store(media.NewService(p, s, func() string { return "uuid" }))
+		if !errors.Is(err, c.want) || p.bounds != c.bounds || (c.want == nil) != (len(s.objects) == 1) {
+			t.Fatalf("%dx%d: %v want %v, bounds %+v, stored %d", c.width, c.height, err, c.want, p.bounds, len(s.objects))
+		}
 	}
 }

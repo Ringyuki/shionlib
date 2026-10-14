@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
@@ -104,6 +105,7 @@ const (
 	TypeAPIKeyDailyUsage                = "APIKeyDailyUsage"
 	TypeActivity                        = "Activity"
 	TypeAd                              = "Ad"
+	TypeAdDailyStat                     = "AdDailyStat"
 	TypeCatalogSourceLink               = "CatalogSourceLink"
 	TypeCatalogSyncCursor               = "CatalogSyncCursor"
 	TypeComment                         = "Comment"
@@ -15187,28 +15189,32 @@ func (m *ActivityMutation) ResetEdge(name string) error {
 // AdMutation represents an operation that mutates the Ad nodes in the graph.
 type AdMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	name            *string
-	placement       *pgvalue.Strings
-	image_zh        *string
-	image_ja        *string
-	image_en        *string
-	aspect          *string
-	link            *string
-	exclude_locales *pgvalue.Strings
-	enabled         *bool
-	sort            *int
-	addsort         *int
-	start_at        *time.Time
-	end_at          *time.Time
-	created         *time.Time
-	updated         *time.Time
-	clearedFields   map[string]struct{}
-	done            bool
-	oldValue        func(context.Context) (*Ad, error)
-	predicates      []predicate.Ad
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	link          *string
+	banner        *string
+	banner_adult  *bool
+	side_image    *string
+	side_icon     *string
+	side_adult    *bool
+	placement     *pgvalue.Strings
+	languages     *pgvalue.Strings
+	weight        *int
+	addweight     *int
+	enabled       *bool
+	start_at      *time.Time
+	end_at        *time.Time
+	created       *time.Time
+	updated       *time.Time
+	clearedFields map[string]struct{}
+	stats         map[int]struct{}
+	removedstats  map[int]struct{}
+	clearedstats  bool
+	done          bool
+	oldValue      func(context.Context) (*Ad, error)
+	predicates    []predicate.Ad
 }
 
 var _ ent.Mutation = (*AdMutation)(nil)
@@ -15351,6 +15357,261 @@ func (m *AdMutation) ResetName() {
 	m.name = nil
 }
 
+// SetLink sets the "link" field.
+func (m *AdMutation) SetLink(s string) {
+	m.link = &s
+}
+
+// Link returns the value of the "link" field in the mutation.
+func (m *AdMutation) Link() (r string, exists bool) {
+	v := m.link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLink returns the old "link" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldLink(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLink is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLink: %w", err)
+	}
+	return oldValue.Link, nil
+}
+
+// ResetLink resets all changes to the "link" field.
+func (m *AdMutation) ResetLink() {
+	m.link = nil
+}
+
+// SetBanner sets the "banner" field.
+func (m *AdMutation) SetBanner(s string) {
+	m.banner = &s
+}
+
+// Banner returns the value of the "banner" field in the mutation.
+func (m *AdMutation) Banner() (r string, exists bool) {
+	v := m.banner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBanner returns the old "banner" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldBanner(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBanner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBanner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBanner: %w", err)
+	}
+	return oldValue.Banner, nil
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (m *AdMutation) ClearBanner() {
+	m.banner = nil
+	m.clearedFields[ad.FieldBanner] = struct{}{}
+}
+
+// BannerCleared returns if the "banner" field was cleared in this mutation.
+func (m *AdMutation) BannerCleared() bool {
+	_, ok := m.clearedFields[ad.FieldBanner]
+	return ok
+}
+
+// ResetBanner resets all changes to the "banner" field.
+func (m *AdMutation) ResetBanner() {
+	m.banner = nil
+	delete(m.clearedFields, ad.FieldBanner)
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (m *AdMutation) SetBannerAdult(b bool) {
+	m.banner_adult = &b
+}
+
+// BannerAdult returns the value of the "banner_adult" field in the mutation.
+func (m *AdMutation) BannerAdult() (r bool, exists bool) {
+	v := m.banner_adult
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBannerAdult returns the old "banner_adult" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldBannerAdult(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBannerAdult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBannerAdult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBannerAdult: %w", err)
+	}
+	return oldValue.BannerAdult, nil
+}
+
+// ResetBannerAdult resets all changes to the "banner_adult" field.
+func (m *AdMutation) ResetBannerAdult() {
+	m.banner_adult = nil
+}
+
+// SetSideImage sets the "side_image" field.
+func (m *AdMutation) SetSideImage(s string) {
+	m.side_image = &s
+}
+
+// SideImage returns the value of the "side_image" field in the mutation.
+func (m *AdMutation) SideImage() (r string, exists bool) {
+	v := m.side_image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSideImage returns the old "side_image" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldSideImage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSideImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSideImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSideImage: %w", err)
+	}
+	return oldValue.SideImage, nil
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (m *AdMutation) ClearSideImage() {
+	m.side_image = nil
+	m.clearedFields[ad.FieldSideImage] = struct{}{}
+}
+
+// SideImageCleared returns if the "side_image" field was cleared in this mutation.
+func (m *AdMutation) SideImageCleared() bool {
+	_, ok := m.clearedFields[ad.FieldSideImage]
+	return ok
+}
+
+// ResetSideImage resets all changes to the "side_image" field.
+func (m *AdMutation) ResetSideImage() {
+	m.side_image = nil
+	delete(m.clearedFields, ad.FieldSideImage)
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (m *AdMutation) SetSideIcon(s string) {
+	m.side_icon = &s
+}
+
+// SideIcon returns the value of the "side_icon" field in the mutation.
+func (m *AdMutation) SideIcon() (r string, exists bool) {
+	v := m.side_icon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSideIcon returns the old "side_icon" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldSideIcon(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSideIcon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSideIcon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSideIcon: %w", err)
+	}
+	return oldValue.SideIcon, nil
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (m *AdMutation) ClearSideIcon() {
+	m.side_icon = nil
+	m.clearedFields[ad.FieldSideIcon] = struct{}{}
+}
+
+// SideIconCleared returns if the "side_icon" field was cleared in this mutation.
+func (m *AdMutation) SideIconCleared() bool {
+	_, ok := m.clearedFields[ad.FieldSideIcon]
+	return ok
+}
+
+// ResetSideIcon resets all changes to the "side_icon" field.
+func (m *AdMutation) ResetSideIcon() {
+	m.side_icon = nil
+	delete(m.clearedFields, ad.FieldSideIcon)
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (m *AdMutation) SetSideAdult(b bool) {
+	m.side_adult = &b
+}
+
+// SideAdult returns the value of the "side_adult" field in the mutation.
+func (m *AdMutation) SideAdult() (r bool, exists bool) {
+	v := m.side_adult
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSideAdult returns the old "side_adult" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldSideAdult(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSideAdult is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSideAdult requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSideAdult: %w", err)
+	}
+	return oldValue.SideAdult, nil
+}
+
+// ResetSideAdult resets all changes to the "side_adult" field.
+func (m *AdMutation) ResetSideAdult() {
+	m.side_adult = nil
+}
+
 // SetPlacement sets the "placement" field.
 func (m *AdMutation) SetPlacement(pg pgvalue.Strings) {
 	m.placement = &pg
@@ -15400,259 +15661,109 @@ func (m *AdMutation) ResetPlacement() {
 	delete(m.clearedFields, ad.FieldPlacement)
 }
 
-// SetImageZh sets the "image_zh" field.
-func (m *AdMutation) SetImageZh(s string) {
-	m.image_zh = &s
+// SetLanguages sets the "languages" field.
+func (m *AdMutation) SetLanguages(pg pgvalue.Strings) {
+	m.languages = &pg
 }
 
-// ImageZh returns the value of the "image_zh" field in the mutation.
-func (m *AdMutation) ImageZh() (r string, exists bool) {
-	v := m.image_zh
+// Languages returns the value of the "languages" field in the mutation.
+func (m *AdMutation) Languages() (r pgvalue.Strings, exists bool) {
+	v := m.languages
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldImageZh returns the old "image_zh" field's value of the Ad entity.
+// OldLanguages returns the old "languages" field's value of the Ad entity.
 // If the Ad object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldImageZh(ctx context.Context) (v string, err error) {
+func (m *AdMutation) OldLanguages(ctx context.Context) (v pgvalue.Strings, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldImageZh is only allowed on UpdateOne operations")
+		return v, errors.New("OldLanguages is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldImageZh requires an ID field in the mutation")
+		return v, errors.New("OldLanguages requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImageZh: %w", err)
+		return v, fmt.Errorf("querying old value for OldLanguages: %w", err)
 	}
-	return oldValue.ImageZh, nil
+	return oldValue.Languages, nil
 }
 
-// ResetImageZh resets all changes to the "image_zh" field.
-func (m *AdMutation) ResetImageZh() {
-	m.image_zh = nil
+// ClearLanguages clears the value of the "languages" field.
+func (m *AdMutation) ClearLanguages() {
+	m.languages = nil
+	m.clearedFields[ad.FieldLanguages] = struct{}{}
 }
 
-// SetImageJa sets the "image_ja" field.
-func (m *AdMutation) SetImageJa(s string) {
-	m.image_ja = &s
-}
-
-// ImageJa returns the value of the "image_ja" field in the mutation.
-func (m *AdMutation) ImageJa() (r string, exists bool) {
-	v := m.image_ja
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldImageJa returns the old "image_ja" field's value of the Ad entity.
-// If the Ad object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldImageJa(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldImageJa is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldImageJa requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImageJa: %w", err)
-	}
-	return oldValue.ImageJa, nil
-}
-
-// ClearImageJa clears the value of the "image_ja" field.
-func (m *AdMutation) ClearImageJa() {
-	m.image_ja = nil
-	m.clearedFields[ad.FieldImageJa] = struct{}{}
-}
-
-// ImageJaCleared returns if the "image_ja" field was cleared in this mutation.
-func (m *AdMutation) ImageJaCleared() bool {
-	_, ok := m.clearedFields[ad.FieldImageJa]
+// LanguagesCleared returns if the "languages" field was cleared in this mutation.
+func (m *AdMutation) LanguagesCleared() bool {
+	_, ok := m.clearedFields[ad.FieldLanguages]
 	return ok
 }
 
-// ResetImageJa resets all changes to the "image_ja" field.
-func (m *AdMutation) ResetImageJa() {
-	m.image_ja = nil
-	delete(m.clearedFields, ad.FieldImageJa)
+// ResetLanguages resets all changes to the "languages" field.
+func (m *AdMutation) ResetLanguages() {
+	m.languages = nil
+	delete(m.clearedFields, ad.FieldLanguages)
 }
 
-// SetImageEn sets the "image_en" field.
-func (m *AdMutation) SetImageEn(s string) {
-	m.image_en = &s
+// SetWeight sets the "weight" field.
+func (m *AdMutation) SetWeight(i int) {
+	m.weight = &i
+	m.addweight = nil
 }
 
-// ImageEn returns the value of the "image_en" field in the mutation.
-func (m *AdMutation) ImageEn() (r string, exists bool) {
-	v := m.image_en
+// Weight returns the value of the "weight" field in the mutation.
+func (m *AdMutation) Weight() (r int, exists bool) {
+	v := m.weight
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldImageEn returns the old "image_en" field's value of the Ad entity.
+// OldWeight returns the old "weight" field's value of the Ad entity.
 // If the Ad object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldImageEn(ctx context.Context) (v *string, err error) {
+func (m *AdMutation) OldWeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldImageEn is only allowed on UpdateOne operations")
+		return v, errors.New("OldWeight is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldImageEn requires an ID field in the mutation")
+		return v, errors.New("OldWeight requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImageEn: %w", err)
+		return v, fmt.Errorf("querying old value for OldWeight: %w", err)
 	}
-	return oldValue.ImageEn, nil
+	return oldValue.Weight, nil
 }
 
-// ClearImageEn clears the value of the "image_en" field.
-func (m *AdMutation) ClearImageEn() {
-	m.image_en = nil
-	m.clearedFields[ad.FieldImageEn] = struct{}{}
+// AddWeight adds i to the "weight" field.
+func (m *AdMutation) AddWeight(i int) {
+	if m.addweight != nil {
+		*m.addweight += i
+	} else {
+		m.addweight = &i
+	}
 }
 
-// ImageEnCleared returns if the "image_en" field was cleared in this mutation.
-func (m *AdMutation) ImageEnCleared() bool {
-	_, ok := m.clearedFields[ad.FieldImageEn]
-	return ok
-}
-
-// ResetImageEn resets all changes to the "image_en" field.
-func (m *AdMutation) ResetImageEn() {
-	m.image_en = nil
-	delete(m.clearedFields, ad.FieldImageEn)
-}
-
-// SetAspect sets the "aspect" field.
-func (m *AdMutation) SetAspect(s string) {
-	m.aspect = &s
-}
-
-// Aspect returns the value of the "aspect" field in the mutation.
-func (m *AdMutation) Aspect() (r string, exists bool) {
-	v := m.aspect
+// AddedWeight returns the value that was added to the "weight" field in this mutation.
+func (m *AdMutation) AddedWeight() (r int, exists bool) {
+	v := m.addweight
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAspect returns the old "aspect" field's value of the Ad entity.
-// If the Ad object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldAspect(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAspect is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAspect requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAspect: %w", err)
-	}
-	return oldValue.Aspect, nil
-}
-
-// ResetAspect resets all changes to the "aspect" field.
-func (m *AdMutation) ResetAspect() {
-	m.aspect = nil
-}
-
-// SetLink sets the "link" field.
-func (m *AdMutation) SetLink(s string) {
-	m.link = &s
-}
-
-// Link returns the value of the "link" field in the mutation.
-func (m *AdMutation) Link() (r string, exists bool) {
-	v := m.link
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLink returns the old "link" field's value of the Ad entity.
-// If the Ad object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldLink(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLink is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLink requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLink: %w", err)
-	}
-	return oldValue.Link, nil
-}
-
-// ResetLink resets all changes to the "link" field.
-func (m *AdMutation) ResetLink() {
-	m.link = nil
-}
-
-// SetExcludeLocales sets the "exclude_locales" field.
-func (m *AdMutation) SetExcludeLocales(pg pgvalue.Strings) {
-	m.exclude_locales = &pg
-}
-
-// ExcludeLocales returns the value of the "exclude_locales" field in the mutation.
-func (m *AdMutation) ExcludeLocales() (r pgvalue.Strings, exists bool) {
-	v := m.exclude_locales
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldExcludeLocales returns the old "exclude_locales" field's value of the Ad entity.
-// If the Ad object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldExcludeLocales(ctx context.Context) (v pgvalue.Strings, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldExcludeLocales is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldExcludeLocales requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldExcludeLocales: %w", err)
-	}
-	return oldValue.ExcludeLocales, nil
-}
-
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (m *AdMutation) ClearExcludeLocales() {
-	m.exclude_locales = nil
-	m.clearedFields[ad.FieldExcludeLocales] = struct{}{}
-}
-
-// ExcludeLocalesCleared returns if the "exclude_locales" field was cleared in this mutation.
-func (m *AdMutation) ExcludeLocalesCleared() bool {
-	_, ok := m.clearedFields[ad.FieldExcludeLocales]
-	return ok
-}
-
-// ResetExcludeLocales resets all changes to the "exclude_locales" field.
-func (m *AdMutation) ResetExcludeLocales() {
-	m.exclude_locales = nil
-	delete(m.clearedFields, ad.FieldExcludeLocales)
+// ResetWeight resets all changes to the "weight" field.
+func (m *AdMutation) ResetWeight() {
+	m.weight = nil
+	m.addweight = nil
 }
 
 // SetEnabled sets the "enabled" field.
@@ -15689,62 +15800,6 @@ func (m *AdMutation) OldEnabled(ctx context.Context) (v bool, err error) {
 // ResetEnabled resets all changes to the "enabled" field.
 func (m *AdMutation) ResetEnabled() {
 	m.enabled = nil
-}
-
-// SetSort sets the "sort" field.
-func (m *AdMutation) SetSort(i int) {
-	m.sort = &i
-	m.addsort = nil
-}
-
-// Sort returns the value of the "sort" field in the mutation.
-func (m *AdMutation) Sort() (r int, exists bool) {
-	v := m.sort
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSort returns the old "sort" field's value of the Ad entity.
-// If the Ad object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMutation) OldSort(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSort is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSort requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSort: %w", err)
-	}
-	return oldValue.Sort, nil
-}
-
-// AddSort adds i to the "sort" field.
-func (m *AdMutation) AddSort(i int) {
-	if m.addsort != nil {
-		*m.addsort += i
-	} else {
-		m.addsort = &i
-	}
-}
-
-// AddedSort returns the value that was added to the "sort" field in this mutation.
-func (m *AdMutation) AddedSort() (r int, exists bool) {
-	v := m.addsort
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSort resets all changes to the "sort" field.
-func (m *AdMutation) ResetSort() {
-	m.sort = nil
-	m.addsort = nil
 }
 
 // SetStartAt sets the "start_at" field.
@@ -15917,6 +15972,60 @@ func (m *AdMutation) ResetUpdated() {
 	m.updated = nil
 }
 
+// AddStatIDs adds the "stats" edge to the AdDailyStat entity by ids.
+func (m *AdMutation) AddStatIDs(ids ...int) {
+	if m.stats == nil {
+		m.stats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.stats[ids[i]] = struct{}{}
+	}
+}
+
+// ClearStats clears the "stats" edge to the AdDailyStat entity.
+func (m *AdMutation) ClearStats() {
+	m.clearedstats = true
+}
+
+// StatsCleared reports if the "stats" edge to the AdDailyStat entity was cleared.
+func (m *AdMutation) StatsCleared() bool {
+	return m.clearedstats
+}
+
+// RemoveStatIDs removes the "stats" edge to the AdDailyStat entity by IDs.
+func (m *AdMutation) RemoveStatIDs(ids ...int) {
+	if m.removedstats == nil {
+		m.removedstats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.stats, ids[i])
+		m.removedstats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStats returns the removed IDs of the "stats" edge to the AdDailyStat entity.
+func (m *AdMutation) RemovedStatsIDs() (ids []int) {
+	for id := range m.removedstats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StatsIDs returns the "stats" edge IDs in the mutation.
+func (m *AdMutation) StatsIDs() (ids []int) {
+	for id := range m.stats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStats resets all changes to the "stats" edge.
+func (m *AdMutation) ResetStats() {
+	m.stats = nil
+	m.clearedstats = false
+	m.removedstats = nil
+}
+
 // Where appends a list predicates to the AdMutation builder.
 func (m *AdMutation) Where(ps ...predicate.Ad) {
 	m.predicates = append(m.predicates, ps...)
@@ -15951,36 +16060,39 @@ func (m *AdMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.name != nil {
 		fields = append(fields, ad.FieldName)
-	}
-	if m.placement != nil {
-		fields = append(fields, ad.FieldPlacement)
-	}
-	if m.image_zh != nil {
-		fields = append(fields, ad.FieldImageZh)
-	}
-	if m.image_ja != nil {
-		fields = append(fields, ad.FieldImageJa)
-	}
-	if m.image_en != nil {
-		fields = append(fields, ad.FieldImageEn)
-	}
-	if m.aspect != nil {
-		fields = append(fields, ad.FieldAspect)
 	}
 	if m.link != nil {
 		fields = append(fields, ad.FieldLink)
 	}
-	if m.exclude_locales != nil {
-		fields = append(fields, ad.FieldExcludeLocales)
+	if m.banner != nil {
+		fields = append(fields, ad.FieldBanner)
+	}
+	if m.banner_adult != nil {
+		fields = append(fields, ad.FieldBannerAdult)
+	}
+	if m.side_image != nil {
+		fields = append(fields, ad.FieldSideImage)
+	}
+	if m.side_icon != nil {
+		fields = append(fields, ad.FieldSideIcon)
+	}
+	if m.side_adult != nil {
+		fields = append(fields, ad.FieldSideAdult)
+	}
+	if m.placement != nil {
+		fields = append(fields, ad.FieldPlacement)
+	}
+	if m.languages != nil {
+		fields = append(fields, ad.FieldLanguages)
+	}
+	if m.weight != nil {
+		fields = append(fields, ad.FieldWeight)
 	}
 	if m.enabled != nil {
 		fields = append(fields, ad.FieldEnabled)
-	}
-	if m.sort != nil {
-		fields = append(fields, ad.FieldSort)
 	}
 	if m.start_at != nil {
 		fields = append(fields, ad.FieldStartAt)
@@ -16004,24 +16116,26 @@ func (m *AdMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case ad.FieldName:
 		return m.Name()
-	case ad.FieldPlacement:
-		return m.Placement()
-	case ad.FieldImageZh:
-		return m.ImageZh()
-	case ad.FieldImageJa:
-		return m.ImageJa()
-	case ad.FieldImageEn:
-		return m.ImageEn()
-	case ad.FieldAspect:
-		return m.Aspect()
 	case ad.FieldLink:
 		return m.Link()
-	case ad.FieldExcludeLocales:
-		return m.ExcludeLocales()
+	case ad.FieldBanner:
+		return m.Banner()
+	case ad.FieldBannerAdult:
+		return m.BannerAdult()
+	case ad.FieldSideImage:
+		return m.SideImage()
+	case ad.FieldSideIcon:
+		return m.SideIcon()
+	case ad.FieldSideAdult:
+		return m.SideAdult()
+	case ad.FieldPlacement:
+		return m.Placement()
+	case ad.FieldLanguages:
+		return m.Languages()
+	case ad.FieldWeight:
+		return m.Weight()
 	case ad.FieldEnabled:
 		return m.Enabled()
-	case ad.FieldSort:
-		return m.Sort()
 	case ad.FieldStartAt:
 		return m.StartAt()
 	case ad.FieldEndAt:
@@ -16041,24 +16155,26 @@ func (m *AdMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 	switch name {
 	case ad.FieldName:
 		return m.OldName(ctx)
-	case ad.FieldPlacement:
-		return m.OldPlacement(ctx)
-	case ad.FieldImageZh:
-		return m.OldImageZh(ctx)
-	case ad.FieldImageJa:
-		return m.OldImageJa(ctx)
-	case ad.FieldImageEn:
-		return m.OldImageEn(ctx)
-	case ad.FieldAspect:
-		return m.OldAspect(ctx)
 	case ad.FieldLink:
 		return m.OldLink(ctx)
-	case ad.FieldExcludeLocales:
-		return m.OldExcludeLocales(ctx)
+	case ad.FieldBanner:
+		return m.OldBanner(ctx)
+	case ad.FieldBannerAdult:
+		return m.OldBannerAdult(ctx)
+	case ad.FieldSideImage:
+		return m.OldSideImage(ctx)
+	case ad.FieldSideIcon:
+		return m.OldSideIcon(ctx)
+	case ad.FieldSideAdult:
+		return m.OldSideAdult(ctx)
+	case ad.FieldPlacement:
+		return m.OldPlacement(ctx)
+	case ad.FieldLanguages:
+		return m.OldLanguages(ctx)
+	case ad.FieldWeight:
+		return m.OldWeight(ctx)
 	case ad.FieldEnabled:
 		return m.OldEnabled(ctx)
-	case ad.FieldSort:
-		return m.OldSort(ctx)
 	case ad.FieldStartAt:
 		return m.OldStartAt(ctx)
 	case ad.FieldEndAt:
@@ -16083,41 +16199,6 @@ func (m *AdMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case ad.FieldPlacement:
-		v, ok := value.(pgvalue.Strings)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPlacement(v)
-		return nil
-	case ad.FieldImageZh:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetImageZh(v)
-		return nil
-	case ad.FieldImageJa:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetImageJa(v)
-		return nil
-	case ad.FieldImageEn:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetImageEn(v)
-		return nil
-	case ad.FieldAspect:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAspect(v)
-		return nil
 	case ad.FieldLink:
 		v, ok := value.(string)
 		if !ok {
@@ -16125,12 +16206,61 @@ func (m *AdMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLink(v)
 		return nil
-	case ad.FieldExcludeLocales:
+	case ad.FieldBanner:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBanner(v)
+		return nil
+	case ad.FieldBannerAdult:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBannerAdult(v)
+		return nil
+	case ad.FieldSideImage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSideImage(v)
+		return nil
+	case ad.FieldSideIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSideIcon(v)
+		return nil
+	case ad.FieldSideAdult:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSideAdult(v)
+		return nil
+	case ad.FieldPlacement:
 		v, ok := value.(pgvalue.Strings)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetExcludeLocales(v)
+		m.SetPlacement(v)
+		return nil
+	case ad.FieldLanguages:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguages(v)
+		return nil
+	case ad.FieldWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeight(v)
 		return nil
 	case ad.FieldEnabled:
 		v, ok := value.(bool)
@@ -16138,13 +16268,6 @@ func (m *AdMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEnabled(v)
-		return nil
-	case ad.FieldSort:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSort(v)
 		return nil
 	case ad.FieldStartAt:
 		v, ok := value.(time.Time)
@@ -16182,8 +16305,8 @@ func (m *AdMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *AdMutation) AddedFields() []string {
 	var fields []string
-	if m.addsort != nil {
-		fields = append(fields, ad.FieldSort)
+	if m.addweight != nil {
+		fields = append(fields, ad.FieldWeight)
 	}
 	return fields
 }
@@ -16193,8 +16316,8 @@ func (m *AdMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *AdMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case ad.FieldSort:
-		return m.AddedSort()
+	case ad.FieldWeight:
+		return m.AddedWeight()
 	}
 	return nil, false
 }
@@ -16204,12 +16327,12 @@ func (m *AdMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AdMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case ad.FieldSort:
+	case ad.FieldWeight:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddSort(v)
+		m.AddWeight(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Ad numeric field %s", name)
@@ -16219,17 +16342,20 @@ func (m *AdMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AdMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(ad.FieldBanner) {
+		fields = append(fields, ad.FieldBanner)
+	}
+	if m.FieldCleared(ad.FieldSideImage) {
+		fields = append(fields, ad.FieldSideImage)
+	}
+	if m.FieldCleared(ad.FieldSideIcon) {
+		fields = append(fields, ad.FieldSideIcon)
+	}
 	if m.FieldCleared(ad.FieldPlacement) {
 		fields = append(fields, ad.FieldPlacement)
 	}
-	if m.FieldCleared(ad.FieldImageJa) {
-		fields = append(fields, ad.FieldImageJa)
-	}
-	if m.FieldCleared(ad.FieldImageEn) {
-		fields = append(fields, ad.FieldImageEn)
-	}
-	if m.FieldCleared(ad.FieldExcludeLocales) {
-		fields = append(fields, ad.FieldExcludeLocales)
+	if m.FieldCleared(ad.FieldLanguages) {
+		fields = append(fields, ad.FieldLanguages)
 	}
 	if m.FieldCleared(ad.FieldStartAt) {
 		fields = append(fields, ad.FieldStartAt)
@@ -16251,17 +16377,20 @@ func (m *AdMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AdMutation) ClearField(name string) error {
 	switch name {
+	case ad.FieldBanner:
+		m.ClearBanner()
+		return nil
+	case ad.FieldSideImage:
+		m.ClearSideImage()
+		return nil
+	case ad.FieldSideIcon:
+		m.ClearSideIcon()
+		return nil
 	case ad.FieldPlacement:
 		m.ClearPlacement()
 		return nil
-	case ad.FieldImageJa:
-		m.ClearImageJa()
-		return nil
-	case ad.FieldImageEn:
-		m.ClearImageEn()
-		return nil
-	case ad.FieldExcludeLocales:
-		m.ClearExcludeLocales()
+	case ad.FieldLanguages:
+		m.ClearLanguages()
 		return nil
 	case ad.FieldStartAt:
 		m.ClearStartAt()
@@ -16280,32 +16409,35 @@ func (m *AdMutation) ResetField(name string) error {
 	case ad.FieldName:
 		m.ResetName()
 		return nil
-	case ad.FieldPlacement:
-		m.ResetPlacement()
-		return nil
-	case ad.FieldImageZh:
-		m.ResetImageZh()
-		return nil
-	case ad.FieldImageJa:
-		m.ResetImageJa()
-		return nil
-	case ad.FieldImageEn:
-		m.ResetImageEn()
-		return nil
-	case ad.FieldAspect:
-		m.ResetAspect()
-		return nil
 	case ad.FieldLink:
 		m.ResetLink()
 		return nil
-	case ad.FieldExcludeLocales:
-		m.ResetExcludeLocales()
+	case ad.FieldBanner:
+		m.ResetBanner()
+		return nil
+	case ad.FieldBannerAdult:
+		m.ResetBannerAdult()
+		return nil
+	case ad.FieldSideImage:
+		m.ResetSideImage()
+		return nil
+	case ad.FieldSideIcon:
+		m.ResetSideIcon()
+		return nil
+	case ad.FieldSideAdult:
+		m.ResetSideAdult()
+		return nil
+	case ad.FieldPlacement:
+		m.ResetPlacement()
+		return nil
+	case ad.FieldLanguages:
+		m.ResetLanguages()
+		return nil
+	case ad.FieldWeight:
+		m.ResetWeight()
 		return nil
 	case ad.FieldEnabled:
 		m.ResetEnabled()
-		return nil
-	case ad.FieldSort:
-		m.ResetSort()
 		return nil
 	case ad.FieldStartAt:
 		m.ResetStartAt()
@@ -16325,50 +16457,757 @@ func (m *AdMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AdMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.stats != nil {
+		edges = append(edges, ad.EdgeStats)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *AdMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case ad.EdgeStats:
+		ids := make([]ent.Value, 0, len(m.stats))
+		for id := range m.stats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AdMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedstats != nil {
+		edges = append(edges, ad.EdgeStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *AdMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case ad.EdgeStats:
+		ids := make([]ent.Value, 0, len(m.removedstats))
+		for id := range m.removedstats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AdMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedstats {
+		edges = append(edges, ad.EdgeStats)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *AdMutation) EdgeCleared(name string) bool {
+	switch name {
+	case ad.EdgeStats:
+		return m.clearedstats
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *AdMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Ad unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *AdMutation) ResetEdge(name string) error {
+	switch name {
+	case ad.EdgeStats:
+		m.ResetStats()
+		return nil
+	}
 	return fmt.Errorf("unknown Ad edge %s", name)
+}
+
+// AdDailyStatMutation represents an operation that mutates the AdDailyStat nodes in the graph.
+type AdDailyStatMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	slot          *string
+	day           *time.Time
+	views         *int
+	addviews      *int
+	clicks        *int
+	addclicks     *int
+	clearedFields map[string]struct{}
+	ad            *int
+	clearedad     bool
+	done          bool
+	oldValue      func(context.Context) (*AdDailyStat, error)
+	predicates    []predicate.AdDailyStat
+}
+
+var _ ent.Mutation = (*AdDailyStatMutation)(nil)
+
+// addailystatOption allows management of the mutation configuration using functional options.
+type addailystatOption func(*AdDailyStatMutation)
+
+// newAdDailyStatMutation creates new mutation for the AdDailyStat entity.
+func newAdDailyStatMutation(c config, op Op, opts ...addailystatOption) *AdDailyStatMutation {
+	m := &AdDailyStatMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdDailyStat,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdDailyStatID sets the ID field of the mutation.
+func withAdDailyStatID(id int) addailystatOption {
+	return func(m *AdDailyStatMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdDailyStat
+		)
+		m.oldValue = func(ctx context.Context) (*AdDailyStat, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdDailyStat.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdDailyStat sets the old AdDailyStat of the mutation.
+func withAdDailyStat(node *AdDailyStat) addailystatOption {
+	return func(m *AdDailyStatMutation) {
+		m.oldValue = func(context.Context) (*AdDailyStat, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdDailyStatMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdDailyStatMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdDailyStat entities.
+func (m *AdDailyStatMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdDailyStatMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdDailyStatMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdDailyStat.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAdID sets the "ad_id" field.
+func (m *AdDailyStatMutation) SetAdID(i int) {
+	m.ad = &i
+}
+
+// AdID returns the value of the "ad_id" field in the mutation.
+func (m *AdDailyStatMutation) AdID() (r int, exists bool) {
+	v := m.ad
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdID returns the old "ad_id" field's value of the AdDailyStat entity.
+// If the AdDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdDailyStatMutation) OldAdID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdID: %w", err)
+	}
+	return oldValue.AdID, nil
+}
+
+// ResetAdID resets all changes to the "ad_id" field.
+func (m *AdDailyStatMutation) ResetAdID() {
+	m.ad = nil
+}
+
+// SetSlot sets the "slot" field.
+func (m *AdDailyStatMutation) SetSlot(s string) {
+	m.slot = &s
+}
+
+// Slot returns the value of the "slot" field in the mutation.
+func (m *AdDailyStatMutation) Slot() (r string, exists bool) {
+	v := m.slot
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlot returns the old "slot" field's value of the AdDailyStat entity.
+// If the AdDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdDailyStatMutation) OldSlot(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlot is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlot requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlot: %w", err)
+	}
+	return oldValue.Slot, nil
+}
+
+// ResetSlot resets all changes to the "slot" field.
+func (m *AdDailyStatMutation) ResetSlot() {
+	m.slot = nil
+}
+
+// SetDay sets the "day" field.
+func (m *AdDailyStatMutation) SetDay(t time.Time) {
+	m.day = &t
+}
+
+// Day returns the value of the "day" field in the mutation.
+func (m *AdDailyStatMutation) Day() (r time.Time, exists bool) {
+	v := m.day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDay returns the old "day" field's value of the AdDailyStat entity.
+// If the AdDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdDailyStatMutation) OldDay(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDay: %w", err)
+	}
+	return oldValue.Day, nil
+}
+
+// ResetDay resets all changes to the "day" field.
+func (m *AdDailyStatMutation) ResetDay() {
+	m.day = nil
+}
+
+// SetViews sets the "views" field.
+func (m *AdDailyStatMutation) SetViews(i int) {
+	m.views = &i
+	m.addviews = nil
+}
+
+// Views returns the value of the "views" field in the mutation.
+func (m *AdDailyStatMutation) Views() (r int, exists bool) {
+	v := m.views
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldViews returns the old "views" field's value of the AdDailyStat entity.
+// If the AdDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdDailyStatMutation) OldViews(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldViews is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldViews requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldViews: %w", err)
+	}
+	return oldValue.Views, nil
+}
+
+// AddViews adds i to the "views" field.
+func (m *AdDailyStatMutation) AddViews(i int) {
+	if m.addviews != nil {
+		*m.addviews += i
+	} else {
+		m.addviews = &i
+	}
+}
+
+// AddedViews returns the value that was added to the "views" field in this mutation.
+func (m *AdDailyStatMutation) AddedViews() (r int, exists bool) {
+	v := m.addviews
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetViews resets all changes to the "views" field.
+func (m *AdDailyStatMutation) ResetViews() {
+	m.views = nil
+	m.addviews = nil
+}
+
+// SetClicks sets the "clicks" field.
+func (m *AdDailyStatMutation) SetClicks(i int) {
+	m.clicks = &i
+	m.addclicks = nil
+}
+
+// Clicks returns the value of the "clicks" field in the mutation.
+func (m *AdDailyStatMutation) Clicks() (r int, exists bool) {
+	v := m.clicks
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClicks returns the old "clicks" field's value of the AdDailyStat entity.
+// If the AdDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdDailyStatMutation) OldClicks(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClicks is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClicks requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClicks: %w", err)
+	}
+	return oldValue.Clicks, nil
+}
+
+// AddClicks adds i to the "clicks" field.
+func (m *AdDailyStatMutation) AddClicks(i int) {
+	if m.addclicks != nil {
+		*m.addclicks += i
+	} else {
+		m.addclicks = &i
+	}
+}
+
+// AddedClicks returns the value that was added to the "clicks" field in this mutation.
+func (m *AdDailyStatMutation) AddedClicks() (r int, exists bool) {
+	v := m.addclicks
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetClicks resets all changes to the "clicks" field.
+func (m *AdDailyStatMutation) ResetClicks() {
+	m.clicks = nil
+	m.addclicks = nil
+}
+
+// ClearAd clears the "ad" edge to the Ad entity.
+func (m *AdDailyStatMutation) ClearAd() {
+	m.clearedad = true
+	m.clearedFields[addailystat.FieldAdID] = struct{}{}
+}
+
+// AdCleared reports if the "ad" edge to the Ad entity was cleared.
+func (m *AdDailyStatMutation) AdCleared() bool {
+	return m.clearedad
+}
+
+// AdIDs returns the "ad" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AdID instead. It exists only for internal usage by the builders.
+func (m *AdDailyStatMutation) AdIDs() (ids []int) {
+	if id := m.ad; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAd resets all changes to the "ad" edge.
+func (m *AdDailyStatMutation) ResetAd() {
+	m.ad = nil
+	m.clearedad = false
+}
+
+// Where appends a list predicates to the AdDailyStatMutation builder.
+func (m *AdDailyStatMutation) Where(ps ...predicate.AdDailyStat) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdDailyStatMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdDailyStatMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdDailyStat, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdDailyStatMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdDailyStatMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdDailyStat).
+func (m *AdDailyStatMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdDailyStatMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.ad != nil {
+		fields = append(fields, addailystat.FieldAdID)
+	}
+	if m.slot != nil {
+		fields = append(fields, addailystat.FieldSlot)
+	}
+	if m.day != nil {
+		fields = append(fields, addailystat.FieldDay)
+	}
+	if m.views != nil {
+		fields = append(fields, addailystat.FieldViews)
+	}
+	if m.clicks != nil {
+		fields = append(fields, addailystat.FieldClicks)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdDailyStatMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case addailystat.FieldAdID:
+		return m.AdID()
+	case addailystat.FieldSlot:
+		return m.Slot()
+	case addailystat.FieldDay:
+		return m.Day()
+	case addailystat.FieldViews:
+		return m.Views()
+	case addailystat.FieldClicks:
+		return m.Clicks()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdDailyStatMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case addailystat.FieldAdID:
+		return m.OldAdID(ctx)
+	case addailystat.FieldSlot:
+		return m.OldSlot(ctx)
+	case addailystat.FieldDay:
+		return m.OldDay(ctx)
+	case addailystat.FieldViews:
+		return m.OldViews(ctx)
+	case addailystat.FieldClicks:
+		return m.OldClicks(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdDailyStat field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdDailyStatMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case addailystat.FieldAdID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdID(v)
+		return nil
+	case addailystat.FieldSlot:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlot(v)
+		return nil
+	case addailystat.FieldDay:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDay(v)
+		return nil
+	case addailystat.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetViews(v)
+		return nil
+	case addailystat.FieldClicks:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClicks(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdDailyStat field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdDailyStatMutation) AddedFields() []string {
+	var fields []string
+	if m.addviews != nil {
+		fields = append(fields, addailystat.FieldViews)
+	}
+	if m.addclicks != nil {
+		fields = append(fields, addailystat.FieldClicks)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdDailyStatMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case addailystat.FieldViews:
+		return m.AddedViews()
+	case addailystat.FieldClicks:
+		return m.AddedClicks()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdDailyStatMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case addailystat.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddViews(v)
+		return nil
+	case addailystat.FieldClicks:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClicks(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdDailyStat numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdDailyStatMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdDailyStatMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdDailyStatMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdDailyStat nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdDailyStatMutation) ResetField(name string) error {
+	switch name {
+	case addailystat.FieldAdID:
+		m.ResetAdID()
+		return nil
+	case addailystat.FieldSlot:
+		m.ResetSlot()
+		return nil
+	case addailystat.FieldDay:
+		m.ResetDay()
+		return nil
+	case addailystat.FieldViews:
+		m.ResetViews()
+		return nil
+	case addailystat.FieldClicks:
+		m.ResetClicks()
+		return nil
+	}
+	return fmt.Errorf("unknown AdDailyStat field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdDailyStatMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.ad != nil {
+		edges = append(edges, addailystat.EdgeAd)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdDailyStatMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case addailystat.EdgeAd:
+		if id := m.ad; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdDailyStatMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdDailyStatMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdDailyStatMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedad {
+		edges = append(edges, addailystat.EdgeAd)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdDailyStatMutation) EdgeCleared(name string) bool {
+	switch name {
+	case addailystat.EdgeAd:
+		return m.clearedad
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdDailyStatMutation) ClearEdge(name string) error {
+	switch name {
+	case addailystat.EdgeAd:
+		m.ClearAd()
+		return nil
+	}
+	return fmt.Errorf("unknown AdDailyStat unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdDailyStatMutation) ResetEdge(name string) error {
+	switch name {
+	case addailystat.EdgeAd:
+		m.ResetAd()
+		return nil
+	}
+	return fmt.Errorf("unknown AdDailyStat edge %s", name)
 }
 
 // CatalogSourceLinkMutation represents an operation that mutates the CatalogSourceLink nodes in the graph.

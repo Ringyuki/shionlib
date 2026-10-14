@@ -217,32 +217,307 @@
         ],
         "type": "object"
       },
-      "AdAdminDTO": {
+      "AdClickDTO": {
         "additionalProperties": false,
         "properties": {
-          "aspect": {
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "link"
+        ],
+        "type": "object"
+      },
+      "AdClickInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "description": "The slot the ad was clicked in",
+            "enum": [
+              "home",
+              "game",
+              "resource",
+              "download",
+              "sidebar"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot"
+        ],
+        "type": "object"
+      },
+      "AdCountsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "clicks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "views",
+          "clicks"
+        ],
+        "type": "object"
+      },
+      "AdDayDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "clicks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "day": {
+            "format": "date",
             "type": "string"
           },
-          "created": {
-            "format": "date-time",
-            "type": "string"
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "views",
+          "clicks"
+        ],
+        "type": "object"
+      },
+      "AdDraftInput": {
+        "additionalProperties": false,
+        "properties": {
+          "banner": {
+            "description": "Key of the 6:1 banner in the image bucket",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "banner_adult": {
+            "description": "The banner is shown only to viewers who see adult content",
+            "type": "boolean"
           },
           "enabled": {
             "type": "boolean"
           },
           "end_at": {
+            "description": "Omitted or null runs without end",
             "format": "date-time",
             "type": [
               "string",
               "null"
             ]
           },
-          "exclude_locales": {
+          "languages": {
             "items": {
+              "enum": [
+                "zh",
+                "en",
+                "ja"
+              ],
               "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "link": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "^https?://",
+            "patternDescription": "an http or https address",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "side_adult": {
+            "description": "The sidebar image is shown only to viewers who see adult content",
+            "type": "boolean"
+          },
+          "side_icon": {
+            "description": "Key of the square icon the collapsed sidebar shows",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "side_image": {
+            "description": "Key of the sidebar image; set together with side_icon",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slots": {
+            "items": {
+              "enum": [
+                "home",
+                "game",
+                "resource",
+                "download",
+                "sidebar"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "start_at": {
+            "description": "Omitted or null starts at once",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "weight": {
+            "format": "int64",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "link",
+          "banner_adult",
+          "side_adult",
+          "slots",
+          "languages",
+          "weight",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "AdNamedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "AdOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the ad.enabled setting is on",
+            "type": "boolean"
+          },
+          "running": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "week": {
+            "$ref": "#/components/schemas/AdCountsDTO"
+          }
+        },
+        "required": [
+          "running",
+          "week",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "AdPlacedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ads": {
+            "items": {
+              "$ref": "#/components/schemas/AdShownDTO"
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "slot": {
+            "enum": [
+              "home",
+              "game",
+              "resource",
+              "download",
+              "sidebar"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot",
+          "ads"
+        ],
+        "type": "object"
+      },
+      "AdReportDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AdDayDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/AdSlotCountsDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "$ref": "#/components/schemas/AdCountsDTO"
+          }
+        },
+        "required": [
+          "total",
+          "days",
+          "slots"
+        ],
+        "type": "object"
+      },
+      "AdShownDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "description": "Key of the square icon; only in the sidebar slot",
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -250,117 +525,140 @@
             "format": "int64",
             "type": "integer"
           },
-          "image_en": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_ja": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_zh": {
-            "type": "string"
-          },
-          "link": {
+          "image": {
+            "description": "Key of the banner, or of the sidebar image in the sidebar slot",
             "type": "string"
           },
           "name": {
-            "type": "string"
-          },
-          "placement": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "sort": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "start_at": {
-            "format": "date-time",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "updated": {
-            "format": "date-time",
             "type": "string"
           }
         },
         "required": [
           "id",
           "name",
-          "placement",
-          "image_zh",
-          "image_ja",
-          "image_en",
-          "aspect",
-          "link",
-          "exclude_locales",
-          "enabled",
-          "sort",
-          "start_at",
-          "end_at",
-          "created",
-          "updated"
+          "image",
+          "icon"
         ],
         "type": "object"
       },
-      "AdItemDTO": {
+      "AdSlotCountsDTO": {
         "additionalProperties": false,
         "properties": {
-          "aspect": {
+          "clicks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "slot": {
+            "enum": [
+              "home",
+              "game",
+              "resource",
+              "download",
+              "sidebar"
+            ],
             "type": "string"
           },
-          "exclude_locales": {
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slot",
+          "views",
+          "clicks"
+        ],
+        "type": "object"
+      },
+      "AdSlotSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "material": {
+            "enum": [
+              "banner",
+              "side"
+            ],
+            "type": "string"
+          },
+          "running": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/AdNamedDTO"
             },
             "type": [
               "array",
               "null"
             ]
           },
-          "id": {
+          "shown": {
+            "description": "At most this many ads at once",
             "format": "int64",
             "type": "integer"
           },
-          "image_en": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_ja": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_zh": {
+          "slot": {
+            "enum": [
+              "home",
+              "game",
+              "resource",
+              "download",
+              "sidebar"
+            ],
             "type": "string"
           },
-          "link": {
+          "week": {
+            "$ref": "#/components/schemas/AdCountsDTO"
+          }
+        },
+        "required": [
+          "slot",
+          "material",
+          "shown",
+          "running",
+          "week"
+        ],
+        "type": "object"
+      },
+      "AdViewInput": {
+        "additionalProperties": false,
+        "properties": {
+          "ad_id": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "slot": {
+            "enum": [
+              "home",
+              "game",
+              "resource",
+              "download",
+              "sidebar"
+            ],
             "type": "string"
           }
         },
         "required": [
-          "id",
-          "image_zh",
-          "image_ja",
-          "image_en",
-          "aspect",
-          "link",
-          "exclude_locales"
+          "ad_id",
+          "slot"
+        ],
+        "type": "object"
+      },
+      "AdViewsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "views": {
+            "description": "Each ad seen, once per page view",
+            "items": {
+              "$ref": "#/components/schemas/AdViewInput"
+            },
+            "maxItems": 50,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "views"
         ],
         "type": "object"
       },
@@ -399,6 +697,138 @@
         },
         "required": [
           "game_id"
+        ],
+        "type": "object"
+      },
+      "AdminAdDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "banner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "banner_adult": {
+            "type": "boolean"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "end_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "languages": {
+            "items": {
+              "enum": [
+                "zh",
+                "en",
+                "ja"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "link": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "side_adult": {
+            "type": "boolean"
+          },
+          "side_icon": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "side_image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slots": {
+            "items": {
+              "enum": [
+                "home",
+                "game",
+                "resource",
+                "download",
+                "sidebar"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "start_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "running",
+              "scheduled",
+              "ended",
+              "disabled"
+            ],
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "week": {
+            "$ref": "#/components/schemas/AdCountsDTO",
+            "description": "Counts of the last seven days; zero outside the list"
+          },
+          "weight": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "link",
+          "banner",
+          "banner_adult",
+          "side_image",
+          "side_icon",
+          "side_adult",
+          "slots",
+          "languages",
+          "weight",
+          "enabled",
+          "status",
+          "start_at",
+          "end_at",
+          "week",
+          "created",
+          "updated"
         ],
         "type": "object"
       },
@@ -5984,6 +6414,9 @@
           490101,
           490102,
           490103,
+          490104,
+          490105,
+          490106,
           500102,
           500105,
           500106,
@@ -6008,6 +6441,11 @@
           570105,
           570106,
           580101,
+          580102,
+          580103,
+          580104,
+          580105,
+          580106,
           590101,
           600101,
           600102,
@@ -6174,6 +6612,9 @@
           "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT",
           "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED",
           "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE",
+          "SMALL_FILE_UPLOAD_AD_BANNER_SHAPE",
+          "SMALL_FILE_UPLOAD_AD_SIDE_IMAGE_SHAPE",
+          "SMALL_FILE_UPLOAD_AD_SIDE_ICON_SHAPE",
           "USER_UPLOAD_QUOTA_EXCEEDED",
           "USER_UPLOAD_IN_FLIGHT_EXCEEDED",
           "UPLOAD_SPOOL_FULL",
@@ -6198,6 +6639,11 @@
           "SPONSOR_PROVIDER_VERIFICATION_FAILED",
           "SPONSOR_MODULE_DISABLED",
           "AD_NOT_FOUND",
+          "AD_NO_MATERIAL",
+          "AD_SIDE_INCOMPLETE",
+          "AD_SLOT_NEEDS_MATERIAL",
+          "AD_INVALID",
+          "AD_SCHEDULE_REVERSED",
           "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE",
           "TRANSLATOR_NOT_FOUND",
           "TRANSLATOR_NAME_TAKEN",
@@ -8255,78 +8701,6 @@
         "required": [
           "upload_session_id",
           "file_name"
-        ],
-        "type": "object"
-      },
-      "CreateAdInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "aspect": {
-            "maxLength": 20,
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "end_at": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "exclude_locales": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "image_en": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "image_ja": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "image_zh": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "link": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 100,
-            "type": "string"
-          },
-          "placement": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "sort": {
-            "format": "int64",
-            "maximum": 2147483647,
-            "minimum": -2147483648,
-            "type": "integer"
-          },
-          "start_at": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "placement",
-          "image_zh",
-          "aspect",
-          "link"
         ],
         "type": "object"
       },
@@ -10521,7 +10895,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeAdAdminDTO": {
+      "EnvelopeAdClickDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -10529,7 +10903,106 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/AdAdminDTO"
+            "$ref": "#/components/schemas/AdClickDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdOverviewDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdReportDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdReportDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminAdDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminAdDTO"
           },
           "message": {
             "type": "string"
@@ -13004,7 +13477,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeListAdItemDTO": {
+      "EnvelopeListAdPlacedDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -13013,7 +13486,46 @@
           },
           "data": {
             "items": {
-              "$ref": "#/components/schemas/AdItemDTO"
+              "$ref": "#/components/schemas/AdPlacedDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListAdSlotSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdSlotSummaryDTO"
             },
             "type": [
               "array",
@@ -14522,7 +15034,7 @@
         ],
         "type": "object"
       },
-      "EnvelopePageAdAdminDTO": {
+      "EnvelopePageAdminAdDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -14530,7 +15042,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/PageAdAdminDTO"
+            "$ref": "#/components/schemas/PageAdminAdDTO"
           },
           "message": {
             "type": "string"
@@ -20432,12 +20944,12 @@
         ],
         "type": "object"
       },
-      "PageAdAdminDTO": {
+      "PageAdminAdDTO": {
         "additionalProperties": false,
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/AdAdminDTO"
+              "$ref": "#/components/schemas/AdminAdDTO"
             },
             "type": [
               "array",
@@ -23471,87 +23983,6 @@
         ],
         "type": "object"
       },
-      "UpdateAdInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "aspect": {
-            "maxLength": 20,
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "end_at": {
-            "description": "null clears the end",
-            "format": "date-time",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "exclude_locales": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "image_en": {
-            "description": "null clears the image",
-            "maxLength": 500,
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_ja": {
-            "description": "null clears the image",
-            "maxLength": 500,
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "image_zh": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "link": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 100,
-            "type": "string"
-          },
-          "placement": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "sort": {
-            "format": "int64",
-            "maximum": 2147483647,
-            "minimum": -2147483648,
-            "type": "integer"
-          },
-          "start_at": {
-            "description": "null clears the start",
-            "format": "date-time",
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "type": "object"
-      },
       "UpdateBioInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -25070,17 +25501,49 @@
         ]
       }
     },
-    "/ad/placement/{placement}": {
+    "/ad/slots": {
       "get": {
-        "operationId": "ad.placement",
+        "operationId": "ad.slots",
         "parameters": [
           {
-            "in": "path",
-            "name": "placement",
+            "description": "The slots on the page, one parameter per slot",
+            "explode": true,
+            "in": "query",
+            "name": "slot",
             "required": true,
             "schema": {
-              "maxLength": 100,
-              "minLength": 1,
+              "description": "The slots on the page, one parameter per slot",
+              "items": {
+                "enum": [
+                  "home",
+                  "game",
+                  "resource",
+                  "download",
+                  "sidebar"
+                ],
+                "type": "string"
+              },
+              "maxItems": 5,
+              "minItems": 1,
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Language of the page",
+            "explode": false,
+            "in": "query",
+            "name": "locale",
+            "schema": {
+              "default": "zh",
+              "description": "Language of the page",
+              "enum": [
+                "zh",
+                "en",
+                "ja"
+              ],
               "type": "string"
             }
           }
@@ -25090,7 +25553,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeListAdItemDTO"
+                  "$ref": "#/components/schemas/EnvelopeListAdPlacedDTO"
                 }
               }
             },
@@ -25114,7 +25577,115 @@
             "description": "Error"
           }
         },
-        "summary": "Ads shown in a placement; empty for sponsors",
+        "summary": "The ads a page shows in its slots, chosen for the viewer; empty for sponsors and when ads are off",
+        "tags": [
+          "ad"
+        ]
+      }
+    },
+    "/ad/views": {
+      "post": {
+        "operationId": "ad.views",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdViewsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Count the ads a visitor saw",
+        "tags": [
+          "ad"
+        ]
+      }
+    },
+    "/ad/{id}/click": {
+      "post": {
+        "operationId": "ad.click",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdClickInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdClickDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Count a click on an ad and return where it leads",
         "tags": [
           "ad"
         ]
@@ -25154,20 +25725,13 @@
           {
             "explode": false,
             "in": "query",
-            "name": "placement",
-            "schema": {
-              "maxLength": 100,
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "enabled",
+            "name": "status",
             "schema": {
               "enum": [
-                "true",
-                "false"
+                "running",
+                "scheduled",
+                "ended",
+                "disabled"
               ],
               "type": "string"
             }
@@ -25175,27 +25739,14 @@
           {
             "explode": false,
             "in": "query",
-            "name": "sortBy",
+            "name": "slot",
             "schema": {
-              "default": "id",
               "enum": [
-                "id",
-                "sort",
-                "created",
-                "updated"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "sortOrder",
-            "schema": {
-              "default": "desc",
-              "enum": [
-                "asc",
-                "desc"
+                "home",
+                "game",
+                "resource",
+                "download",
+                "sidebar"
               ],
               "type": "string"
             }
@@ -25206,7 +25757,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopePageAdAdminDTO"
+                  "$ref": "#/components/schemas/EnvelopePageAdminAdDTO"
                 }
               }
             },
@@ -25238,7 +25789,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "List ads",
+        "summary": "List ads with their counts of the last seven days",
         "tags": [
           "ad",
           "admin"
@@ -25250,7 +25801,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAdInputBody"
+                "$ref": "#/components/schemas/AdDraftInput"
               }
             }
           },
@@ -25261,7 +25812,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                  "$ref": "#/components/schemas/EnvelopeAdminAdDTO"
                 }
               }
             },
@@ -25294,6 +25845,100 @@
           }
         ],
         "summary": "Create an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      }
+    },
+    "/admin/ad/overview": {
+      "get": {
+        "operationId": "ad.admin.overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdOverviewDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "How many ads run, their counts of the last seven days and whether ads are on",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      }
+    },
+    "/admin/ad/slots": {
+      "get": {
+        "operationId": "ad.admin.slots",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListAdSlotSummaryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Every slot with the ads running in it and its counts of the last seven days",
         "tags": [
           "ad",
           "admin"
@@ -25352,7 +25997,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Delete an ad",
+        "summary": "Delete an ad and its counts",
         "tags": [
           "ad",
           "admin"
@@ -25377,7 +26022,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                  "$ref": "#/components/schemas/EnvelopeAdminAdDTO"
                 }
               }
             },
@@ -25415,8 +26060,8 @@
           "admin"
         ]
       },
-      "patch": {
-        "operationId": "ad.admin.update",
+      "put": {
+        "operationId": "ad.admin.replace",
         "parameters": [
           {
             "in": "path",
@@ -25433,7 +26078,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAdInputBody"
+                "$ref": "#/components/schemas/AdDraftInput"
               }
             }
           },
@@ -25444,7 +26089,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                  "$ref": "#/components/schemas/EnvelopeAdminAdDTO"
                 }
               }
             },
@@ -25476,7 +26121,80 @@
             "accessCookie": []
           }
         ],
-        "summary": "Update an ad",
+        "summary": "Replace every field of an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      }
+    },
+    "/admin/ad/{id}/report": {
+      "get": {
+        "operationId": "ad.admin.report",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "days",
+            "schema": {
+              "default": 30,
+              "enum": [
+                7,
+                30
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdReportDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Daily and per-slot counts of an ad",
         "tags": [
           "ad",
           "admin"
@@ -42252,9 +42970,9 @@
         ]
       }
     },
-    "/uploads/small/ad/image": {
+    "/uploads/small/ad/banner": {
       "put": {
-        "operationId": "upload.adImage",
+        "operationId": "upload.adBanner",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -42314,7 +43032,143 @@
             "accessCookie": []
           }
         ],
-        "summary": "Upload an advertisement image",
+        "summary": "Upload the 6:1 banner of an ad",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/small/ad/side-icon": {
+      "put": {
+        "operationId": "upload.adSideIcon",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload the square icon an ad shows in the collapsed sidebar",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/small/ad/side-image": {
+      "put": {
+        "operationId": "upload.adSideImage",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload the sidebar image of an ad",
         "tags": [
           "upload"
         ]

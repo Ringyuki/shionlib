@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -60,49 +61,54 @@ func Name(v string) predicate.Ad {
 	return predicate.Ad(sql.FieldEQ(FieldName, v))
 }
 
-// Placement applies equality check predicate on the "placement" field. It's identical to PlacementEQ.
-func Placement(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldPlacement, v))
-}
-
-// ImageZh applies equality check predicate on the "image_zh" field. It's identical to ImageZhEQ.
-func ImageZh(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageZh, v))
-}
-
-// ImageJa applies equality check predicate on the "image_ja" field. It's identical to ImageJaEQ.
-func ImageJa(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageJa, v))
-}
-
-// ImageEn applies equality check predicate on the "image_en" field. It's identical to ImageEnEQ.
-func ImageEn(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageEn, v))
-}
-
-// Aspect applies equality check predicate on the "aspect" field. It's identical to AspectEQ.
-func Aspect(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldAspect, v))
-}
-
 // Link applies equality check predicate on the "link" field. It's identical to LinkEQ.
 func Link(v string) predicate.Ad {
 	return predicate.Ad(sql.FieldEQ(FieldLink, v))
 }
 
-// ExcludeLocales applies equality check predicate on the "exclude_locales" field. It's identical to ExcludeLocalesEQ.
-func ExcludeLocales(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldExcludeLocales, v))
+// Banner applies equality check predicate on the "banner" field. It's identical to BannerEQ.
+func Banner(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldBanner, v))
+}
+
+// BannerAdult applies equality check predicate on the "banner_adult" field. It's identical to BannerAdultEQ.
+func BannerAdult(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldBannerAdult, v))
+}
+
+// SideImage applies equality check predicate on the "side_image" field. It's identical to SideImageEQ.
+func SideImage(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideImage, v))
+}
+
+// SideIcon applies equality check predicate on the "side_icon" field. It's identical to SideIconEQ.
+func SideIcon(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideIcon, v))
+}
+
+// SideAdult applies equality check predicate on the "side_adult" field. It's identical to SideAdultEQ.
+func SideAdult(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideAdult, v))
+}
+
+// Placement applies equality check predicate on the "placement" field. It's identical to PlacementEQ.
+func Placement(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldPlacement, v))
+}
+
+// Languages applies equality check predicate on the "languages" field. It's identical to LanguagesEQ.
+func Languages(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldLanguages, v))
+}
+
+// Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
+func Weight(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldWeight, v))
 }
 
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
 func Enabled(v bool) predicate.Ad {
 	return predicate.Ad(sql.FieldEQ(FieldEnabled, v))
-}
-
-// Sort applies equality check predicate on the "sort" field. It's identical to SortEQ.
-func Sort(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldSort, v))
 }
 
 // StartAt applies equality check predicate on the "start_at" field. It's identical to StartAtEQ.
@@ -190,336 +196,6 @@ func NameContainsFold(v string) predicate.Ad {
 	return predicate.Ad(sql.FieldContainsFold(FieldName, v))
 }
 
-// PlacementEQ applies the EQ predicate on the "placement" field.
-func PlacementEQ(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldPlacement, v))
-}
-
-// PlacementNEQ applies the NEQ predicate on the "placement" field.
-func PlacementNEQ(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldPlacement, v))
-}
-
-// PlacementIn applies the In predicate on the "placement" field.
-func PlacementIn(vs ...pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldPlacement, vs...))
-}
-
-// PlacementNotIn applies the NotIn predicate on the "placement" field.
-func PlacementNotIn(vs ...pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldPlacement, vs...))
-}
-
-// PlacementGT applies the GT predicate on the "placement" field.
-func PlacementGT(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldPlacement, v))
-}
-
-// PlacementGTE applies the GTE predicate on the "placement" field.
-func PlacementGTE(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldPlacement, v))
-}
-
-// PlacementLT applies the LT predicate on the "placement" field.
-func PlacementLT(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldPlacement, v))
-}
-
-// PlacementLTE applies the LTE predicate on the "placement" field.
-func PlacementLTE(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldPlacement, v))
-}
-
-// PlacementIsNil applies the IsNil predicate on the "placement" field.
-func PlacementIsNil() predicate.Ad {
-	return predicate.Ad(sql.FieldIsNull(FieldPlacement))
-}
-
-// PlacementNotNil applies the NotNil predicate on the "placement" field.
-func PlacementNotNil() predicate.Ad {
-	return predicate.Ad(sql.FieldNotNull(FieldPlacement))
-}
-
-// ImageZhEQ applies the EQ predicate on the "image_zh" field.
-func ImageZhEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageZh, v))
-}
-
-// ImageZhNEQ applies the NEQ predicate on the "image_zh" field.
-func ImageZhNEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldImageZh, v))
-}
-
-// ImageZhIn applies the In predicate on the "image_zh" field.
-func ImageZhIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldImageZh, vs...))
-}
-
-// ImageZhNotIn applies the NotIn predicate on the "image_zh" field.
-func ImageZhNotIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldImageZh, vs...))
-}
-
-// ImageZhGT applies the GT predicate on the "image_zh" field.
-func ImageZhGT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldImageZh, v))
-}
-
-// ImageZhGTE applies the GTE predicate on the "image_zh" field.
-func ImageZhGTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldImageZh, v))
-}
-
-// ImageZhLT applies the LT predicate on the "image_zh" field.
-func ImageZhLT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldImageZh, v))
-}
-
-// ImageZhLTE applies the LTE predicate on the "image_zh" field.
-func ImageZhLTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldImageZh, v))
-}
-
-// ImageZhContains applies the Contains predicate on the "image_zh" field.
-func ImageZhContains(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContains(FieldImageZh, v))
-}
-
-// ImageZhHasPrefix applies the HasPrefix predicate on the "image_zh" field.
-func ImageZhHasPrefix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasPrefix(FieldImageZh, v))
-}
-
-// ImageZhHasSuffix applies the HasSuffix predicate on the "image_zh" field.
-func ImageZhHasSuffix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasSuffix(FieldImageZh, v))
-}
-
-// ImageZhEqualFold applies the EqualFold predicate on the "image_zh" field.
-func ImageZhEqualFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEqualFold(FieldImageZh, v))
-}
-
-// ImageZhContainsFold applies the ContainsFold predicate on the "image_zh" field.
-func ImageZhContainsFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContainsFold(FieldImageZh, v))
-}
-
-// ImageJaEQ applies the EQ predicate on the "image_ja" field.
-func ImageJaEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageJa, v))
-}
-
-// ImageJaNEQ applies the NEQ predicate on the "image_ja" field.
-func ImageJaNEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldImageJa, v))
-}
-
-// ImageJaIn applies the In predicate on the "image_ja" field.
-func ImageJaIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldImageJa, vs...))
-}
-
-// ImageJaNotIn applies the NotIn predicate on the "image_ja" field.
-func ImageJaNotIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldImageJa, vs...))
-}
-
-// ImageJaGT applies the GT predicate on the "image_ja" field.
-func ImageJaGT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldImageJa, v))
-}
-
-// ImageJaGTE applies the GTE predicate on the "image_ja" field.
-func ImageJaGTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldImageJa, v))
-}
-
-// ImageJaLT applies the LT predicate on the "image_ja" field.
-func ImageJaLT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldImageJa, v))
-}
-
-// ImageJaLTE applies the LTE predicate on the "image_ja" field.
-func ImageJaLTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldImageJa, v))
-}
-
-// ImageJaContains applies the Contains predicate on the "image_ja" field.
-func ImageJaContains(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContains(FieldImageJa, v))
-}
-
-// ImageJaHasPrefix applies the HasPrefix predicate on the "image_ja" field.
-func ImageJaHasPrefix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasPrefix(FieldImageJa, v))
-}
-
-// ImageJaHasSuffix applies the HasSuffix predicate on the "image_ja" field.
-func ImageJaHasSuffix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasSuffix(FieldImageJa, v))
-}
-
-// ImageJaIsNil applies the IsNil predicate on the "image_ja" field.
-func ImageJaIsNil() predicate.Ad {
-	return predicate.Ad(sql.FieldIsNull(FieldImageJa))
-}
-
-// ImageJaNotNil applies the NotNil predicate on the "image_ja" field.
-func ImageJaNotNil() predicate.Ad {
-	return predicate.Ad(sql.FieldNotNull(FieldImageJa))
-}
-
-// ImageJaEqualFold applies the EqualFold predicate on the "image_ja" field.
-func ImageJaEqualFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEqualFold(FieldImageJa, v))
-}
-
-// ImageJaContainsFold applies the ContainsFold predicate on the "image_ja" field.
-func ImageJaContainsFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContainsFold(FieldImageJa, v))
-}
-
-// ImageEnEQ applies the EQ predicate on the "image_en" field.
-func ImageEnEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldImageEn, v))
-}
-
-// ImageEnNEQ applies the NEQ predicate on the "image_en" field.
-func ImageEnNEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldImageEn, v))
-}
-
-// ImageEnIn applies the In predicate on the "image_en" field.
-func ImageEnIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldImageEn, vs...))
-}
-
-// ImageEnNotIn applies the NotIn predicate on the "image_en" field.
-func ImageEnNotIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldImageEn, vs...))
-}
-
-// ImageEnGT applies the GT predicate on the "image_en" field.
-func ImageEnGT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldImageEn, v))
-}
-
-// ImageEnGTE applies the GTE predicate on the "image_en" field.
-func ImageEnGTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldImageEn, v))
-}
-
-// ImageEnLT applies the LT predicate on the "image_en" field.
-func ImageEnLT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldImageEn, v))
-}
-
-// ImageEnLTE applies the LTE predicate on the "image_en" field.
-func ImageEnLTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldImageEn, v))
-}
-
-// ImageEnContains applies the Contains predicate on the "image_en" field.
-func ImageEnContains(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContains(FieldImageEn, v))
-}
-
-// ImageEnHasPrefix applies the HasPrefix predicate on the "image_en" field.
-func ImageEnHasPrefix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasPrefix(FieldImageEn, v))
-}
-
-// ImageEnHasSuffix applies the HasSuffix predicate on the "image_en" field.
-func ImageEnHasSuffix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasSuffix(FieldImageEn, v))
-}
-
-// ImageEnIsNil applies the IsNil predicate on the "image_en" field.
-func ImageEnIsNil() predicate.Ad {
-	return predicate.Ad(sql.FieldIsNull(FieldImageEn))
-}
-
-// ImageEnNotNil applies the NotNil predicate on the "image_en" field.
-func ImageEnNotNil() predicate.Ad {
-	return predicate.Ad(sql.FieldNotNull(FieldImageEn))
-}
-
-// ImageEnEqualFold applies the EqualFold predicate on the "image_en" field.
-func ImageEnEqualFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEqualFold(FieldImageEn, v))
-}
-
-// ImageEnContainsFold applies the ContainsFold predicate on the "image_en" field.
-func ImageEnContainsFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContainsFold(FieldImageEn, v))
-}
-
-// AspectEQ applies the EQ predicate on the "aspect" field.
-func AspectEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldAspect, v))
-}
-
-// AspectNEQ applies the NEQ predicate on the "aspect" field.
-func AspectNEQ(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldAspect, v))
-}
-
-// AspectIn applies the In predicate on the "aspect" field.
-func AspectIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldAspect, vs...))
-}
-
-// AspectNotIn applies the NotIn predicate on the "aspect" field.
-func AspectNotIn(vs ...string) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldAspect, vs...))
-}
-
-// AspectGT applies the GT predicate on the "aspect" field.
-func AspectGT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldAspect, v))
-}
-
-// AspectGTE applies the GTE predicate on the "aspect" field.
-func AspectGTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldAspect, v))
-}
-
-// AspectLT applies the LT predicate on the "aspect" field.
-func AspectLT(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldAspect, v))
-}
-
-// AspectLTE applies the LTE predicate on the "aspect" field.
-func AspectLTE(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldAspect, v))
-}
-
-// AspectContains applies the Contains predicate on the "aspect" field.
-func AspectContains(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContains(FieldAspect, v))
-}
-
-// AspectHasPrefix applies the HasPrefix predicate on the "aspect" field.
-func AspectHasPrefix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasPrefix(FieldAspect, v))
-}
-
-// AspectHasSuffix applies the HasSuffix predicate on the "aspect" field.
-func AspectHasSuffix(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldHasSuffix(FieldAspect, v))
-}
-
-// AspectEqualFold applies the EqualFold predicate on the "aspect" field.
-func AspectEqualFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldEqualFold(FieldAspect, v))
-}
-
-// AspectContainsFold applies the ContainsFold predicate on the "aspect" field.
-func AspectContainsFold(v string) predicate.Ad {
-	return predicate.Ad(sql.FieldContainsFold(FieldAspect, v))
-}
-
 // LinkEQ applies the EQ predicate on the "link" field.
 func LinkEQ(v string) predicate.Ad {
 	return predicate.Ad(sql.FieldEQ(FieldLink, v))
@@ -585,54 +261,389 @@ func LinkContainsFold(v string) predicate.Ad {
 	return predicate.Ad(sql.FieldContainsFold(FieldLink, v))
 }
 
-// ExcludeLocalesEQ applies the EQ predicate on the "exclude_locales" field.
-func ExcludeLocalesEQ(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldExcludeLocales, v))
+// BannerEQ applies the EQ predicate on the "banner" field.
+func BannerEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldBanner, v))
 }
 
-// ExcludeLocalesNEQ applies the NEQ predicate on the "exclude_locales" field.
-func ExcludeLocalesNEQ(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldExcludeLocales, v))
+// BannerNEQ applies the NEQ predicate on the "banner" field.
+func BannerNEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldBanner, v))
 }
 
-// ExcludeLocalesIn applies the In predicate on the "exclude_locales" field.
-func ExcludeLocalesIn(vs ...pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldExcludeLocales, vs...))
+// BannerIn applies the In predicate on the "banner" field.
+func BannerIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldBanner, vs...))
 }
 
-// ExcludeLocalesNotIn applies the NotIn predicate on the "exclude_locales" field.
-func ExcludeLocalesNotIn(vs ...pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldExcludeLocales, vs...))
+// BannerNotIn applies the NotIn predicate on the "banner" field.
+func BannerNotIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldBanner, vs...))
 }
 
-// ExcludeLocalesGT applies the GT predicate on the "exclude_locales" field.
-func ExcludeLocalesGT(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldExcludeLocales, v))
+// BannerGT applies the GT predicate on the "banner" field.
+func BannerGT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldBanner, v))
 }
 
-// ExcludeLocalesGTE applies the GTE predicate on the "exclude_locales" field.
-func ExcludeLocalesGTE(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldExcludeLocales, v))
+// BannerGTE applies the GTE predicate on the "banner" field.
+func BannerGTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldBanner, v))
 }
 
-// ExcludeLocalesLT applies the LT predicate on the "exclude_locales" field.
-func ExcludeLocalesLT(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldExcludeLocales, v))
+// BannerLT applies the LT predicate on the "banner" field.
+func BannerLT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldBanner, v))
 }
 
-// ExcludeLocalesLTE applies the LTE predicate on the "exclude_locales" field.
-func ExcludeLocalesLTE(v pgvalue.Strings) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldExcludeLocales, v))
+// BannerLTE applies the LTE predicate on the "banner" field.
+func BannerLTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldBanner, v))
 }
 
-// ExcludeLocalesIsNil applies the IsNil predicate on the "exclude_locales" field.
-func ExcludeLocalesIsNil() predicate.Ad {
-	return predicate.Ad(sql.FieldIsNull(FieldExcludeLocales))
+// BannerContains applies the Contains predicate on the "banner" field.
+func BannerContains(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContains(FieldBanner, v))
 }
 
-// ExcludeLocalesNotNil applies the NotNil predicate on the "exclude_locales" field.
-func ExcludeLocalesNotNil() predicate.Ad {
-	return predicate.Ad(sql.FieldNotNull(FieldExcludeLocales))
+// BannerHasPrefix applies the HasPrefix predicate on the "banner" field.
+func BannerHasPrefix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasPrefix(FieldBanner, v))
+}
+
+// BannerHasSuffix applies the HasSuffix predicate on the "banner" field.
+func BannerHasSuffix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasSuffix(FieldBanner, v))
+}
+
+// BannerIsNil applies the IsNil predicate on the "banner" field.
+func BannerIsNil() predicate.Ad {
+	return predicate.Ad(sql.FieldIsNull(FieldBanner))
+}
+
+// BannerNotNil applies the NotNil predicate on the "banner" field.
+func BannerNotNil() predicate.Ad {
+	return predicate.Ad(sql.FieldNotNull(FieldBanner))
+}
+
+// BannerEqualFold applies the EqualFold predicate on the "banner" field.
+func BannerEqualFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEqualFold(FieldBanner, v))
+}
+
+// BannerContainsFold applies the ContainsFold predicate on the "banner" field.
+func BannerContainsFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContainsFold(FieldBanner, v))
+}
+
+// BannerAdultEQ applies the EQ predicate on the "banner_adult" field.
+func BannerAdultEQ(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldBannerAdult, v))
+}
+
+// BannerAdultNEQ applies the NEQ predicate on the "banner_adult" field.
+func BannerAdultNEQ(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldBannerAdult, v))
+}
+
+// SideImageEQ applies the EQ predicate on the "side_image" field.
+func SideImageEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideImage, v))
+}
+
+// SideImageNEQ applies the NEQ predicate on the "side_image" field.
+func SideImageNEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldSideImage, v))
+}
+
+// SideImageIn applies the In predicate on the "side_image" field.
+func SideImageIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldSideImage, vs...))
+}
+
+// SideImageNotIn applies the NotIn predicate on the "side_image" field.
+func SideImageNotIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldSideImage, vs...))
+}
+
+// SideImageGT applies the GT predicate on the "side_image" field.
+func SideImageGT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldSideImage, v))
+}
+
+// SideImageGTE applies the GTE predicate on the "side_image" field.
+func SideImageGTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldSideImage, v))
+}
+
+// SideImageLT applies the LT predicate on the "side_image" field.
+func SideImageLT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldSideImage, v))
+}
+
+// SideImageLTE applies the LTE predicate on the "side_image" field.
+func SideImageLTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldSideImage, v))
+}
+
+// SideImageContains applies the Contains predicate on the "side_image" field.
+func SideImageContains(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContains(FieldSideImage, v))
+}
+
+// SideImageHasPrefix applies the HasPrefix predicate on the "side_image" field.
+func SideImageHasPrefix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasPrefix(FieldSideImage, v))
+}
+
+// SideImageHasSuffix applies the HasSuffix predicate on the "side_image" field.
+func SideImageHasSuffix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasSuffix(FieldSideImage, v))
+}
+
+// SideImageIsNil applies the IsNil predicate on the "side_image" field.
+func SideImageIsNil() predicate.Ad {
+	return predicate.Ad(sql.FieldIsNull(FieldSideImage))
+}
+
+// SideImageNotNil applies the NotNil predicate on the "side_image" field.
+func SideImageNotNil() predicate.Ad {
+	return predicate.Ad(sql.FieldNotNull(FieldSideImage))
+}
+
+// SideImageEqualFold applies the EqualFold predicate on the "side_image" field.
+func SideImageEqualFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEqualFold(FieldSideImage, v))
+}
+
+// SideImageContainsFold applies the ContainsFold predicate on the "side_image" field.
+func SideImageContainsFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContainsFold(FieldSideImage, v))
+}
+
+// SideIconEQ applies the EQ predicate on the "side_icon" field.
+func SideIconEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideIcon, v))
+}
+
+// SideIconNEQ applies the NEQ predicate on the "side_icon" field.
+func SideIconNEQ(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldSideIcon, v))
+}
+
+// SideIconIn applies the In predicate on the "side_icon" field.
+func SideIconIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldSideIcon, vs...))
+}
+
+// SideIconNotIn applies the NotIn predicate on the "side_icon" field.
+func SideIconNotIn(vs ...string) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldSideIcon, vs...))
+}
+
+// SideIconGT applies the GT predicate on the "side_icon" field.
+func SideIconGT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldSideIcon, v))
+}
+
+// SideIconGTE applies the GTE predicate on the "side_icon" field.
+func SideIconGTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldSideIcon, v))
+}
+
+// SideIconLT applies the LT predicate on the "side_icon" field.
+func SideIconLT(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldSideIcon, v))
+}
+
+// SideIconLTE applies the LTE predicate on the "side_icon" field.
+func SideIconLTE(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldSideIcon, v))
+}
+
+// SideIconContains applies the Contains predicate on the "side_icon" field.
+func SideIconContains(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContains(FieldSideIcon, v))
+}
+
+// SideIconHasPrefix applies the HasPrefix predicate on the "side_icon" field.
+func SideIconHasPrefix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasPrefix(FieldSideIcon, v))
+}
+
+// SideIconHasSuffix applies the HasSuffix predicate on the "side_icon" field.
+func SideIconHasSuffix(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldHasSuffix(FieldSideIcon, v))
+}
+
+// SideIconIsNil applies the IsNil predicate on the "side_icon" field.
+func SideIconIsNil() predicate.Ad {
+	return predicate.Ad(sql.FieldIsNull(FieldSideIcon))
+}
+
+// SideIconNotNil applies the NotNil predicate on the "side_icon" field.
+func SideIconNotNil() predicate.Ad {
+	return predicate.Ad(sql.FieldNotNull(FieldSideIcon))
+}
+
+// SideIconEqualFold applies the EqualFold predicate on the "side_icon" field.
+func SideIconEqualFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldEqualFold(FieldSideIcon, v))
+}
+
+// SideIconContainsFold applies the ContainsFold predicate on the "side_icon" field.
+func SideIconContainsFold(v string) predicate.Ad {
+	return predicate.Ad(sql.FieldContainsFold(FieldSideIcon, v))
+}
+
+// SideAdultEQ applies the EQ predicate on the "side_adult" field.
+func SideAdultEQ(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldSideAdult, v))
+}
+
+// SideAdultNEQ applies the NEQ predicate on the "side_adult" field.
+func SideAdultNEQ(v bool) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldSideAdult, v))
+}
+
+// PlacementEQ applies the EQ predicate on the "placement" field.
+func PlacementEQ(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldPlacement, v))
+}
+
+// PlacementNEQ applies the NEQ predicate on the "placement" field.
+func PlacementNEQ(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldPlacement, v))
+}
+
+// PlacementIn applies the In predicate on the "placement" field.
+func PlacementIn(vs ...pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldPlacement, vs...))
+}
+
+// PlacementNotIn applies the NotIn predicate on the "placement" field.
+func PlacementNotIn(vs ...pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldPlacement, vs...))
+}
+
+// PlacementGT applies the GT predicate on the "placement" field.
+func PlacementGT(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldPlacement, v))
+}
+
+// PlacementGTE applies the GTE predicate on the "placement" field.
+func PlacementGTE(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldPlacement, v))
+}
+
+// PlacementLT applies the LT predicate on the "placement" field.
+func PlacementLT(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldPlacement, v))
+}
+
+// PlacementLTE applies the LTE predicate on the "placement" field.
+func PlacementLTE(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldPlacement, v))
+}
+
+// PlacementIsNil applies the IsNil predicate on the "placement" field.
+func PlacementIsNil() predicate.Ad {
+	return predicate.Ad(sql.FieldIsNull(FieldPlacement))
+}
+
+// PlacementNotNil applies the NotNil predicate on the "placement" field.
+func PlacementNotNil() predicate.Ad {
+	return predicate.Ad(sql.FieldNotNull(FieldPlacement))
+}
+
+// LanguagesEQ applies the EQ predicate on the "languages" field.
+func LanguagesEQ(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldLanguages, v))
+}
+
+// LanguagesNEQ applies the NEQ predicate on the "languages" field.
+func LanguagesNEQ(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldLanguages, v))
+}
+
+// LanguagesIn applies the In predicate on the "languages" field.
+func LanguagesIn(vs ...pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldLanguages, vs...))
+}
+
+// LanguagesNotIn applies the NotIn predicate on the "languages" field.
+func LanguagesNotIn(vs ...pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldLanguages, vs...))
+}
+
+// LanguagesGT applies the GT predicate on the "languages" field.
+func LanguagesGT(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldLanguages, v))
+}
+
+// LanguagesGTE applies the GTE predicate on the "languages" field.
+func LanguagesGTE(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldLanguages, v))
+}
+
+// LanguagesLT applies the LT predicate on the "languages" field.
+func LanguagesLT(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldLanguages, v))
+}
+
+// LanguagesLTE applies the LTE predicate on the "languages" field.
+func LanguagesLTE(v pgvalue.Strings) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldLanguages, v))
+}
+
+// LanguagesIsNil applies the IsNil predicate on the "languages" field.
+func LanguagesIsNil() predicate.Ad {
+	return predicate.Ad(sql.FieldIsNull(FieldLanguages))
+}
+
+// LanguagesNotNil applies the NotNil predicate on the "languages" field.
+func LanguagesNotNil() predicate.Ad {
+	return predicate.Ad(sql.FieldNotNull(FieldLanguages))
+}
+
+// WeightEQ applies the EQ predicate on the "weight" field.
+func WeightEQ(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldEQ(FieldWeight, v))
+}
+
+// WeightNEQ applies the NEQ predicate on the "weight" field.
+func WeightNEQ(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldNEQ(FieldWeight, v))
+}
+
+// WeightIn applies the In predicate on the "weight" field.
+func WeightIn(vs ...int) predicate.Ad {
+	return predicate.Ad(sql.FieldIn(FieldWeight, vs...))
+}
+
+// WeightNotIn applies the NotIn predicate on the "weight" field.
+func WeightNotIn(vs ...int) predicate.Ad {
+	return predicate.Ad(sql.FieldNotIn(FieldWeight, vs...))
+}
+
+// WeightGT applies the GT predicate on the "weight" field.
+func WeightGT(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldGT(FieldWeight, v))
+}
+
+// WeightGTE applies the GTE predicate on the "weight" field.
+func WeightGTE(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldGTE(FieldWeight, v))
+}
+
+// WeightLT applies the LT predicate on the "weight" field.
+func WeightLT(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldLT(FieldWeight, v))
+}
+
+// WeightLTE applies the LTE predicate on the "weight" field.
+func WeightLTE(v int) predicate.Ad {
+	return predicate.Ad(sql.FieldLTE(FieldWeight, v))
 }
 
 // EnabledEQ applies the EQ predicate on the "enabled" field.
@@ -643,46 +654,6 @@ func EnabledEQ(v bool) predicate.Ad {
 // EnabledNEQ applies the NEQ predicate on the "enabled" field.
 func EnabledNEQ(v bool) predicate.Ad {
 	return predicate.Ad(sql.FieldNEQ(FieldEnabled, v))
-}
-
-// SortEQ applies the EQ predicate on the "sort" field.
-func SortEQ(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldEQ(FieldSort, v))
-}
-
-// SortNEQ applies the NEQ predicate on the "sort" field.
-func SortNEQ(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldNEQ(FieldSort, v))
-}
-
-// SortIn applies the In predicate on the "sort" field.
-func SortIn(vs ...int) predicate.Ad {
-	return predicate.Ad(sql.FieldIn(FieldSort, vs...))
-}
-
-// SortNotIn applies the NotIn predicate on the "sort" field.
-func SortNotIn(vs ...int) predicate.Ad {
-	return predicate.Ad(sql.FieldNotIn(FieldSort, vs...))
-}
-
-// SortGT applies the GT predicate on the "sort" field.
-func SortGT(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldGT(FieldSort, v))
-}
-
-// SortGTE applies the GTE predicate on the "sort" field.
-func SortGTE(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldGTE(FieldSort, v))
-}
-
-// SortLT applies the LT predicate on the "sort" field.
-func SortLT(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldLT(FieldSort, v))
-}
-
-// SortLTE applies the LTE predicate on the "sort" field.
-func SortLTE(v int) predicate.Ad {
-	return predicate.Ad(sql.FieldLTE(FieldSort, v))
 }
 
 // StartAtEQ applies the EQ predicate on the "start_at" field.
@@ -863,6 +834,29 @@ func UpdatedLT(v time.Time) predicate.Ad {
 // UpdatedLTE applies the LTE predicate on the "updated" field.
 func UpdatedLTE(v time.Time) predicate.Ad {
 	return predicate.Ad(sql.FieldLTE(FieldUpdated, v))
+}
+
+// HasStats applies the HasEdge predicate on the "stats" edge.
+func HasStats() predicate.Ad {
+	return predicate.Ad(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StatsTable, StatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStatsWith applies the HasEdge predicate on the "stats" edge with a given conditions (other predicates).
+func HasStatsWith(preds ...predicate.AdDailyStat) predicate.Ad {
+	return predicate.Ad(func(s *sql.Selector) {
+		step := newStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.
