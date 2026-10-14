@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/email"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/hips"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/activitypg"
@@ -70,6 +71,7 @@ type Shared struct {
 	Tokens     *jwt.Codec
 	Families   *authredis.FamilyBlocklist
 	GameCards  *game.CardService
+	Masker     *hips.Masker
 	Messages   *message.Service
 	Activities *activity.Service
 	Catalog    *catalog.Service
@@ -99,6 +101,7 @@ var wirings = []wiring{
 	wireCommunity,
 	wireComposition,
 	wireOpen,
+	wireIndexing,
 	wireAdmin,
 }
 
@@ -122,7 +125,8 @@ func buildShared(infra *Infra) *Shared {
 	cfg := infra.Config
 	hub := realtime.NewHub(infra.Redis, infra.Logger)
 	transactor := postgres.NewTransactor(infra.Ent)
-	gameCards := game.NewCardService(gamepg.NewCardStore(infra.Ent))
+	masker := hips.NewMasker(cfg.Storage.ImageProcessorURL, cfg.Storage.ImageBucketURL)
+	gameCards := game.NewCardService(gamepg.NewCardStore(infra.Ent), masker)
 	shared := &Shared{
 		Config:     cfg,
 		Logger:     infra.Logger,
@@ -137,6 +141,7 @@ func buildShared(infra *Infra) *Shared {
 		Tokens:     jwt.NewCodec(cfg.Token.Secret, cfg.Token.ExpiresIn, infra.Now),
 		Families:   authredis.NewFamilyBlocklist(infra.Redis),
 		GameCards:  gameCards,
+		Masker:     masker,
 	}
 	shared.Settings, shared.Watcher = buildSettings(infra, transactor)
 	shared.Activities = activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)

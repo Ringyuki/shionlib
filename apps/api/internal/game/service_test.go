@@ -47,7 +47,7 @@ func newFixture(entries ...gametest.Entry) fixture {
 	catalog := gametest.NewCatalog(entries...)
 	recent := &gametest.RecentUpdates{}
 	prefs := gametest.Preferences{}
-	service := game.NewService(catalog, recent, prefs, game.NewCardService(catalog), func() time.Time { return now }, func(n int) int { return n - 1 })
+	service := game.NewService(catalog, recent, prefs, game.NewCardService(catalog, gametest.Masker{}), gametest.Masker{}, func() time.Time { return now }, func(n int) int { return n - 1 })
 	return fixture{catalog: catalog, recent: recent, prefs: prefs, service: service}
 }
 
@@ -234,13 +234,23 @@ func TestDetailVisibility(t *testing.T) {
 	hidden.Hidden = true
 	f := newFixture(rich, safe(2), ratedCover(3), hidden, nsfw(5), ratedCover(6))
 
-	for _, id := range []int{5, 6, 404} {
-		if _, err := f.service.Get(ctx, guest, id); !errors.Is(err, game.ErrNotFound) {
-			t.Fatalf("game %d must be hidden from strict viewers: %v", id, err)
+	for _, id := range []int{5, 6} {
+		if _, err := f.service.Get(ctx, guest, id); err != nil {
+			t.Fatalf("guests open adult game %d: %v", id, err)
 		}
-		if _, err := f.service.Header(ctx, strictUser, id); !errors.Is(err, game.ErrNotFound) {
-			t.Fatalf("header %d must be hidden from strict viewers: %v", id, err)
+		if _, err := f.service.Header(ctx, strictUser, id); err != nil {
+			t.Fatalf("viewers who hide adult pictures open adult game %d: %v", id, err)
 		}
+	}
+	if _, err := f.service.Get(ctx, guest, 404); !errors.Is(err, game.ErrNotFound) {
+		t.Fatalf("missing games are not found: %v", err)
+	}
+	masked, _ := f.service.Header(ctx, guest, 6)
+	if len(masked.Covers) != 2 || masked.Covers[0].Masked || masked.Covers[1].URL != "masked:rated.webp" || !masked.Covers[1].Masked {
+		t.Fatalf("guests get adult covers blurred: %+v", masked.Covers)
+	}
+	if hidden, _ := f.service.Header(ctx, strictUser, 6); len(hidden.Covers) != 1 || hidden.Covers[0].URL != "safe.webp" {
+		t.Fatalf("viewers who hide adult pictures get none: %+v", hidden.Covers)
 	}
 	if _, err := f.service.Get(ctx, guest, 4); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("hidden games are not found: %v", err)

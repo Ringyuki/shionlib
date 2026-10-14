@@ -12838,6 +12838,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeIndexingKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/IndexingKeyDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeInitUploadDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13995,6 +14028,84 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/SettingDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListSitemapEntryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SitemapEntryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListSitemapSectionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SitemapSectionDTO"
             },
             "type": [
               "array",
@@ -17381,6 +17492,10 @@
             ],
             "type": "string"
           },
+          "masked": {
+            "description": "The picture was blurred for a viewer who does not see adult pictures; url is the blurred copy",
+            "type": "boolean"
+          },
           "sexual": {
             "format": "int64",
             "type": "integer"
@@ -17406,7 +17521,8 @@
           "url",
           "dims",
           "sexual",
-          "violence"
+          "violence",
+          "masked"
         ],
         "type": "object"
       },
@@ -18269,6 +18385,19 @@
         },
         "required": [
           "upload_session_ids"
+        ],
+        "type": "object"
+      },
+      "IndexingKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "What /indexnow.txt answers, so search engines accept the addresses the site pushes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
         ],
         "type": "object"
       },
@@ -22686,6 +22815,54 @@
         },
         "required": [
           "value"
+        ],
+        "type": "object"
+      },
+      "SitemapEntryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "game_id": {
+            "description": "The game a resource or walkthrough belongs to",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "modified": {
+            "description": "When what the page shows last changed; absent when it is not known",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "SitemapSectionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "pages": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "section": {
+            "enum": [
+              "game",
+              "resource",
+              "walkthrough",
+              "developer",
+              "character",
+              "translator"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "section",
+          "pages"
         ],
         "type": "object"
       },
@@ -39067,6 +39244,44 @@
         ]
       }
     },
+    "/indexing/key": {
+      "get": {
+        "operationId": "indexing.key",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeIndexingKeyDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "The IndexNow key the site file serves",
+        "tags": [
+          "site"
+        ]
+      }
+    },
     "/inspection/entry/{entry_id}/image": {
       "get": {
         "operationId": "inspection.image",
@@ -40696,6 +40911,114 @@
         "summary": "Read the settings the site shows to visitors",
         "tags": [
           "settings"
+        ]
+      }
+    },
+    "/sitemap/sections": {
+      "get": {
+        "operationId": "sitemap.sections",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSitemapSectionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Sections of the sitemap and how many pages each has",
+        "tags": [
+          "site"
+        ]
+      }
+    },
+    "/sitemap/{section}/{page}": {
+      "get": {
+        "operationId": "sitemap.entries",
+        "parameters": [
+          {
+            "description": "Kind of page the entries lead to",
+            "in": "path",
+            "name": "section",
+            "required": true,
+            "schema": {
+              "description": "Kind of page the entries lead to",
+              "enum": [
+                "game",
+                "resource",
+                "walkthrough",
+                "developer",
+                "character",
+                "translator"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "1-based page of at most 50,000 entries",
+            "in": "path",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "description": "1-based page of at most 50,000 entries",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSitemapEntryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Entries of one sitemap page",
+        "tags": [
+          "site"
         ]
       }
     },

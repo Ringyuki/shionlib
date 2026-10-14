@@ -14,7 +14,7 @@ import (
 
 var _ download.Discussions = (*commentpg.Repository)(nil)
 
-func TestGetGameResourceLoadsFilesAndHidesRatedGames(t *testing.T) {
+func TestGetGameResourceLoadsFilesOfEveryGame(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	creator := f.db.User(t)
@@ -25,20 +25,17 @@ func TestGetGameResourceLoadsFilesAndHidesRatedGames(t *testing.T) {
 	adult := f.resource(t, rated, creator)
 	f.file(t, adult.ID, creator, "c.7z")
 
-	got, err := f.repo.GetGameResource(ctx, open.ID, true)
+	got, err := f.repo.GetGameResource(ctx, open.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got.ID != open.ID || got.Creator.ID != creator || len(got.Files) != 2 || got.Files[0].Name != "a.7z" || got.Files[1].GameID != safe {
 		t.Fatalf("resource with its files in order: %+v", got)
 	}
-	if _, err := f.repo.GetGameResource(ctx, adult.ID, true); !errors.Is(err, download.ErrResourceNotFound) {
-		t.Fatalf("a strict viewer does not find the resource of a rated game: %v", err)
+	if _, err := f.repo.GetGameResource(ctx, adult.ID); err != nil {
+		t.Fatalf("the resource of a rated game is found: %v", err)
 	}
-	if _, err := f.repo.GetGameResource(ctx, adult.ID, false); err != nil {
-		t.Fatalf("other viewers do: %v", err)
-	}
-	if _, err := f.repo.GetGameResource(ctx, adult.ID+1000, false); !errors.Is(err, download.ErrResourceNotFound) {
+	if _, err := f.repo.GetGameResource(ctx, adult.ID+1000); !errors.Is(err, download.ErrResourceNotFound) {
 		t.Fatalf("missing resource: %v", err)
 	}
 }

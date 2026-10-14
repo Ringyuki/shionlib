@@ -45,6 +45,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection/inspectiontest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
@@ -135,7 +136,7 @@ func newComposeLine(t *testing.T, binary string) composeLine {
 	spool := localfs.NewSpool(root, ".part")
 	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(db.Ent), settings, clock)
 	uploads := upload.NewService(uploadpg.NewRepository(db.Ent), quota, spool, uploadtest.NewMemoryHolds(), tx, settings, clock)
-	cards := game.NewCardService(gamepg.NewCardStore(db.Ent))
+	cards := game.NewCardService(gamepg.NewCardStore(db.Ent), gametest.Masker{})
 	downloadRepo := downloadpg.NewRepository(db.Ent)
 	inspectionRepo := inspectionpg.NewRepository(db.Ent)
 	names := download.NewNameService(downloadRepo, cards, inspection.NewMediumService(inspectionRepo), tx)

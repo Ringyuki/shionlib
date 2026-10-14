@@ -8,6 +8,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
+type PictureMasker interface {
+	Mask(url string) (string, bool)
+}
+
 type CardStore interface {
 	Cards(ctx context.Context, ids []int) ([]Card, error)
 	Exists(ctx context.Context, id int) (bool, error)

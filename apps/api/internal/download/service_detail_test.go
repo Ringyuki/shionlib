@@ -63,8 +63,9 @@ func TestDetailFollowsWhatTheViewerMaySee(t *testing.T) {
 	if _, err := f.details.Detail(ctx, other, rated.ID); err != nil {
 		t.Fatalf("a viewer who sees rated games opens their resources: %v", err)
 	}
-	_, err = f.details.Detail(ctx, strict, rated.ID)
-	expectCode(t, err, download.ErrResourceNotFound)
+	if _, err := f.details.Detail(ctx, strict, rated.ID); err != nil {
+		t.Fatalf("a viewer who hides rated games still opens their resources: %v", err)
+	}
 	_, err = f.details.Events(ctx, other, pending.ID)
 	expectCode(t, err, download.ErrResourceNotFound)
 }

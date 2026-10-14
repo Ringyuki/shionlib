@@ -80,7 +80,7 @@ func setup(t *testing.T) env {
 		Resources: map[string][]byte{"subjects/42": []byte(`{"id":42,"name":"x"}`)},
 	}
 	vndb := &gametest.VNDB{Scores: map[string]game.VNDBScore{"v17": {ID: "v17", Rating: ptr(85.2), Average: ptr(8.4), VoteCount: 1200}}}
-	service := game.NewService(catalog, recent, gametest.Preferences{permissive.UserID: false}, game.NewCardService(catalog), func() time.Time { return apitest.Now }, func(int) int { return 0 })
+	service := game.NewService(catalog, recent, gametest.Preferences{permissive.UserID: false}, game.NewCardService(catalog, gametest.Masker{}), gametest.Masker{}, func() time.Time { return apitest.Now }, func(int) int { return 0 })
 	scores := game.NewScoreService(catalog, bangumi, vndb, gametest.NewCache())
 	gamehttp.NewHandler(service, scores, server.Builder).Register(server.API)
 	return env{server: server, catalog: catalog, recent: recent, bangumi: bangumi}
@@ -154,7 +154,7 @@ func TestRandomAndRecentUpdates(t *testing.T) {
 func TestRandomWithoutCandidatesIsNull(t *testing.T) {
 	server := apitest.New(t)
 	catalog := gametest.NewCatalog()
-	service := game.NewService(catalog, &gametest.RecentUpdates{}, gametest.Preferences{}, game.NewCardService(catalog), time.Now, func(int) int { return 0 })
+	service := game.NewService(catalog, &gametest.RecentUpdates{}, gametest.Preferences{}, game.NewCardService(catalog, gametest.Masker{}), gametest.Masker{}, time.Now, func(int) int { return 0 })
 	gamehttp.NewHandler(service, game.NewScoreService(catalog, &gametest.Bangumi{}, &gametest.VNDB{}, gametest.NewCache()), server.Builder).Register(server.API)
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/random"})
 	server.Expect(resp, http.StatusOK, 0)
@@ -168,7 +168,7 @@ func TestDetailEndpoints(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/1", As: &strict})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"title_jp":"タイトル","title_zh":"标题","title_en":"","intro_jp":"紹介","intro_zh":"简介","intro_en":"",` +
-		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0}],` +
+		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0,"masked":false}],` +
 		`"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
 		`"characters":[{"role":"main","image":"ch.webp","actor":"CV","character":{"id":8,"image":"ch.webp","name_jp":"穹","name_zh":"穹","name_en":"","aliases":[],"intro_jp":"","intro_zh":"","intro_en":"","gender":["f"],"blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":null,"age":null,"birthday":[3,14]}}],` +
 		`"staffs":[{"name":"Writer","role":"剧本"}],"tags":[{"tag_alias":null,"tag":{"id":3,"name":"school","aliases":["学园"],"count":9}}],"content_limit":1}`
@@ -185,7 +185,7 @@ func TestDetailEndpoints(t *testing.T) {
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/1/header"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want = `{"id":1,"v_id":"v17","b_id":"42","h_id":900,"extra_info":[{"key":"官网","value":"https://example.test"}],"title_jp":"タイトル","title_zh":"标题","title_en":"","aliases":["alias"],` +
-		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0}],"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
+		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0,"masked":false}],"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
 		`"release_date":"2024-05-01T00:00:00.000Z","release_date_tba":false,"type":"adv","platform":["win"],"content_limit":0}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected header\n got %s\nwant %s", resp.Data, want)
@@ -212,8 +212,17 @@ func TestDetailEndpoints(t *testing.T) {
 		t.Fatalf("unexpected characters %s", resp.Data)
 	}
 
-	for _, path := range []string{"/game/3", "/game/3/header", "/game/3/details", "/game/3/characters", "/game/404"} {
-		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path}), http.StatusNotFound, 400101)
+	for _, path := range []string{"/game/3", "/game/3/header", "/game/3/details", "/game/3/characters"} {
+		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path}), http.StatusOK, 0)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/404"}), http.StatusNotFound, 400101)
+	header := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/3/header"})
+	var blurred struct {
+		Covers []map[string]any `json:"covers"`
+	}
+	header.Decode(t, &blurred)
+	if len(blurred.Covers) != 1 || blurred.Covers[0]["url"] != "masked:r.webp" || blurred.Covers[0]["masked"] != true {
+		t.Fatalf("a guest gets the adult cover blurred: %s", header.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/3", As: &permissive}), http.StatusOK, 0)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/abc"}), http.StatusUnprocessableEntity, 100101)

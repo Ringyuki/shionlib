@@ -555,7 +555,7 @@ func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
 	record := f.db.Ent.Inspection.Create().SetResourceID(resource.ID).SetStatus("ready").SaveX(ctx)
 	f.db.Ent.GameDownloadResourceFile.UpdateOneID(replacedFile).SetInspectionID(record.ID).SetFileSha256("old digest").
 		SetCheckFailures(6).SetCheckError("clamd is down").SetCheckStalledAt(time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)).ExecX(ctx)
-	if read, err := f.repo.GetGameResource(ctx, resource.ID, false); err != nil || read.Files[1].InspectionID == nil || *read.Files[1].InspectionID != record.ID || read.Files[1].SHA256 == nil || *read.Files[1].SHA256 != "old digest" || read.Files[0].InspectionID != nil || read.Files[0].SHA256 != nil {
+	if read, err := f.repo.GetGameResource(ctx, resource.ID); err != nil || read.Files[1].InspectionID == nil || *read.Files[1].InspectionID != record.ID || read.Files[1].SHA256 == nil || *read.Files[1].SHA256 != "old digest" || read.Files[0].InspectionID != nil || read.Files[0].SHA256 != nil {
 		t.Fatalf("a file carries its inspection and digest once it was checked: %+v %v", read.Files, err)
 	}
 

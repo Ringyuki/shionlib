@@ -17,6 +17,7 @@ type GameCoverDTO struct {
 	Dims     []int  `json:"dims"`
 	Sexual   int    `json:"sexual"`
 	Violence int    `json:"violence"`
+	Masked   bool   `json:"masked" doc:"The picture was blurred for a viewer who does not see adult pictures; url is the blurred copy"`
 }
 
 type GameDeveloperRefDTO struct {
@@ -110,6 +111,7 @@ func ToGameCard(card game.Card) GameCardDTO {
 			Dims:     nonNilInts(cover.Dims),
 			Sexual:   cover.Sexual,
 			Violence: cover.Violence,
+			Masked:   cover.Masked,
 		}
 	}
 	for i, credit := range card.Developers {

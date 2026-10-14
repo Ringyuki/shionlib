@@ -98,12 +98,12 @@ func (d Detail) Rated() bool {
 	return d.NSFW || slices.ContainsFunc(d.Covers, Cover.Rated)
 }
 
-func (d Detail) visibleTo(viewer actor.Actor) Detail {
+func (d Detail) visibleTo(viewer actor.Actor, masker PictureMasker) Detail {
 	if viewer.IncludesRated() {
 		return d
 	}
 	visible := d
-	visible.Covers = slices.DeleteFunc(slices.Clone(d.Covers), Cover.Rated)
+	visible.Covers = shownCovers(d.Covers, viewer, masker)
 	visible.Images = slices.DeleteFunc(slices.Clone(d.Images), Image.Rated)
 	return visible
 }

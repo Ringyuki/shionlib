@@ -9,19 +9,14 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
 
 const eventResourceFK = "game_download_resource_events_resource_id_fkey"
 
-func (r *Repository) GetGameResource(ctx context.Context, id int, excludeRated bool) (download.GameResource, error) {
-	query := r.db(ctx).GameDownloadResource.Query().Where(gamedownloadresource.ID(id))
-	if excludeRated {
-		query.Where(gamedownloadresource.HasGameWith(gamepg.SafeForStrictViewers()))
-	}
-	rows, err := withFileDetails(query).All(ctx)
+func (r *Repository) GetGameResource(ctx context.Context, id int) (download.GameResource, error) {
+	rows, err := withFileDetails(r.db(ctx).GameDownloadResource.Query().Where(gamedownloadresource.ID(id))).All(ctx)
 	if err != nil {
 		return download.GameResource{}, fmt.Errorf("load download resource %d: %w", id, err)
 	}

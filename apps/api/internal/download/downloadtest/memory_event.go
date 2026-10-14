@@ -7,11 +7,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
 
-func (r *MemoryRepository) GetGameResource(_ context.Context, id int, excludeRated bool) (download.GameResource, error) {
+func (r *MemoryRepository) GetGameResource(_ context.Context, id int) (download.GameResource, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	resource, ok := r.resources[id]
-	if !ok || excludeRated && r.ratedGames[resource.GameID] {
+	if !ok {
 		return download.GameResource{}, download.ErrResourceNotFound
 	}
 	return r.gameResource(resource), nil

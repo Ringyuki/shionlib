@@ -1,7 +1,6 @@
 package game
 
 import (
-	"slices"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -34,10 +33,32 @@ type Cover struct {
 	Dims     []int
 	Sexual   int
 	Violence int
+	Masked   bool
 }
 
 func (c Cover) Rated() bool {
 	return c.Sexual > 0
+}
+
+func shownCovers(covers []Cover, viewer actor.Actor, masker PictureMasker) []Cover {
+	if viewer.IncludesRated() {
+		return covers
+	}
+	shown := make([]Cover, 0, len(covers))
+	for _, cover := range covers {
+		if !cover.Rated() {
+			shown = append(shown, cover)
+			continue
+		}
+		if !viewer.MasksRated() {
+			continue
+		}
+		if masked, ok := masker.Mask(cover.URL); ok {
+			cover.URL, cover.Masked = masked, true
+			shown = append(shown, cover)
+		}
+	}
+	return shown
 }
 
 type DeveloperRef struct {
@@ -89,12 +110,9 @@ type Card struct {
 	Tags        []TagRef
 }
 
-func (c Card) VisibleTo(viewer actor.Actor) Card {
-	if viewer.IncludesRated() {
-		return c
-	}
+func (c Card) VisibleTo(viewer actor.Actor, masker PictureMasker) Card {
 	visible := c
-	visible.Covers = slices.DeleteFunc(slices.Clone(c.Covers), Cover.Rated)
+	visible.Covers = shownCovers(c.Covers, viewer, masker)
 	return visible
 }
 

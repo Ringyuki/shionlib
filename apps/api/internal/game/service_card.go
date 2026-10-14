@@ -8,11 +8,12 @@ import (
 )
 
 type CardService struct {
-	store CardStore
+	store  CardStore
+	masker PictureMasker
 }
 
-func NewCardService(store CardStore) *CardService {
-	return &CardService{store: store}
+func NewCardService(store CardStore, masker PictureMasker) *CardService {
+	return &CardService{store: store, masker: masker}
 }
 
 func (c *CardService) ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]Card, error) {
@@ -26,7 +27,7 @@ func (c *CardService) ByIDs(ctx context.Context, ids []int, viewer actor.Actor) 
 	}
 	byID := make(map[int]Card, len(cards))
 	for _, card := range cards {
-		byID[card.ID] = card.VisibleTo(viewer)
+		byID[card.ID] = card.VisibleTo(viewer, c.masker)
 	}
 	return byID, nil
 }
