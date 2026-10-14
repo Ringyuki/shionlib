@@ -17,6 +17,8 @@ type GamePictureProps = Omit<
 
 const blurred = 'scale-150 blur-xl supports-[width:1cqw]:blur-[15cqw]'
 
+const blurredByServer = 'scale-150'
+
 export function GamePicture({
   picture,
   ratio,
@@ -29,6 +31,17 @@ export function GamePicture({
   const plain = useShowsExplicit()
   const [revealed, setRevealed] = useState<string>()
   const shown = revealed !== undefined && revealed === picture?.url
+  if (picture?.masked === true) {
+    return (
+      <Image
+        {...image}
+        src={picture.url}
+        ratio={ratio}
+        className={cn('bg-inset', className)}
+        imageClass={cn(imageClass, blurredByServer)}
+      />
+    )
+  }
   if (picture === undefined || plain || !isExplicit(picture) || shown) {
     return (
       <Image

@@ -132,6 +132,8 @@ type Storage struct {
 	Game               Bucket `envPrefix:"S3_FILE_"`
 	Backup             Bucket `envPrefix:"S3_BACKUP_"`
 	ImageBaseURL       string `env:"IMAGE_BASE_URL" envDefault:"https://t.shionlib.com"`
+	ImageBucketURL     string `env:"IMAGE_BUCKET_URL" envDefault:"https://images.yurari.moe"`
+	ImageProcessorURL  string `env:"IMAGE_PROCESSOR_URL" envDefault:"https://imagesp.yurari.moe"`
 	B2ApplicationKeyID string `env:"B2_APPLICATION_KEY_ID"`
 	B2ApplicationKey   string `env:"B2_APPLICATION_KEY"`
 }

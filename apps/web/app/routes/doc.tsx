@@ -1,16 +1,15 @@
-import { DocPage } from '~/features/docs'
+import { DocPage, docHead } from '~/features/docs'
+import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/doc'
 
 export { docLoader as loader } from '~/features/docs/docs.server'
 
-export function meta({ loaderData }: Route.MetaArgs) {
-  if (loaderData === undefined) {
-    return []
-  }
-  return [
-    { title: `${loaderData.doc.title} | Shionlib` },
-    { name: 'description', content: loaderData.doc.description },
-  ]
+export function meta(args: Route.MetaArgs) {
+  const [, lang] = args.matches
+  return pageMeta(
+    args,
+    args.loaderData && docHead(args.loaderData.doc, args.loaderData.authors, lang.loaderData),
+  )
 }
 
 export default function DocRoute({ loaderData }: Route.ComponentProps) {

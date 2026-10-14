@@ -1,9 +1,5 @@
-import { config, IMAGE_CACHE_MAX, SUPPORTED_LOCALES } from '@/config'
+import { config, IMAGE_CACHE_MAX, LOCALES } from '@/config'
 
-/**
- * Count-bounded LRU. Reading re-inserts the entry so it moves to the tail,
- * which keeps the least recently used entry as the first key.
- */
 class Lru<V> extends Map<string, V> {
   constructor(private readonly max: number) {
     super()
@@ -46,7 +42,7 @@ export function setCachedImage(type: string, id: string, locale: string, buffer:
 }
 
 export function invalidateCache(type: string, id: string): void {
-  for (const locale of SUPPORTED_LOCALES) {
+  for (const locale of LOCALES) {
     cache.delete(toKey(type, id, locale))
   }
 }

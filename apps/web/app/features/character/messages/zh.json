@@ -33,5 +33,11 @@
       "side": "配角",
       "appears": "登场"
     }
+  },
+  "seo": {
+    "named": "{name}（{original}）",
+    "titled": "{name} - {game}",
+    "lead": "{name}是《{game}》中的角色。",
+    "voiced": "{name}是《{game}》中的角色，CV {actor}。"
   }
 }

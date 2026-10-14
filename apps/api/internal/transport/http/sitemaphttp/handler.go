@@ -2,77 +2,49 @@ package sitemaphttp
 
 import (
 	"context"
-	_ "embed"
 	"net/http"
-	"regexp"
-	"strings"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/sitemap"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
-)
-
-//go:embed sitemap.xsl
-var stylesheet []byte
-
-const (
-	xmlContentType = "application/xml; charset=utf-8"
-	xslContentType = "text/xsl; charset=utf-8"
-	xmlCacheMaxAge = "public, max-age=3600"
-	xslCacheMaxAge = "public, max-age=86400"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
 var tags = []string{"site"}
 
-var validHost = regexp.MustCompile(`^[A-Za-z0-9.-]+(:[0-9]{1,5})?$`)
-
 type Handler struct {
-	service  *sitemap.Service
-	fallback string
+	service *sitemap.Service
+	resp    *response.Builder
 }
 
-func NewHandler(service *sitemap.Service, fallbackSiteURL string) *Handler {
-	return &Handler{service: service, fallback: strings.TrimSuffix(fallbackSiteURL, "/")}
+func NewHandler(service *sitemap.Service, resp *response.Builder) *Handler {
+	return &Handler{service: service, resp: resp}
 }
 
 func (h *Handler) Register(api *httpapi.API) {
-	httpapi.Register(api, httpapi.Route{ID: "sitemap.index", Method: http.MethodGet, Path: "/sitemap.xml", Summary: "Sitemap index", Tags: tags, Hidden: true}, h.index)
-	httpapi.Register(api, httpapi.Route{ID: "sitemap.stylesheet", Method: http.MethodGet, Path: "/sitemap.xsl", Summary: "Sitemap stylesheet", Tags: tags, Hidden: true}, h.stylesheet)
-	httpapi.Register(api, httpapi.Route{ID: "sitemap.section", Method: http.MethodGet, Path: "/sitemap-{type}-{page}.xml", Summary: "Sitemap section page", Tags: tags, Hidden: true}, h.section)
+	httpapi.Register(api, httpapi.Route{ID: "sitemap.sections", Method: http.MethodGet, Path: "/sitemap/sections", Summary: "Sections of the sitemap and how many pages each has", Tags: tags}, h.sections)
+	httpapi.Register(api, httpapi.Route{ID: "sitemap.entries", Method: http.MethodGet, Path: "/sitemap/{section}/{page}", Summary: "Entries of one sitemap page", Tags: tags}, h.entries)
 }
 
-func (h *Handler) index(ctx context.Context, in *sitemapIndexInput) (*sitemapOutputDTO, error) {
-	xml, err := h.service.Index(ctx, h.siteURL(ctx, in.requestSiteInput))
+func (h *Handler) sections(ctx context.Context, _ *struct{}) (*response.Output[[]sitemapSectionDTO], error) {
+	sections, err := h.service.Sections(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &sitemapOutputDTO{ContentType: xmlContentType, CacheControl: xmlCacheMaxAge, Body: []byte(xml)}, nil
+	out := make([]sitemapSectionDTO, len(sections))
+	for i, section := range sections {
+		out[i] = sitemapSectionDTO{Section: string(section.Section), Pages: section.Pages}
+	}
+	return response.OK(ctx, h.resp, out), nil
 }
 
-func (h *Handler) stylesheet(context.Context, *struct{}) (*sitemapOutputDTO, error) {
-	return &sitemapOutputDTO{ContentType: xslContentType, CacheControl: xslCacheMaxAge, Body: stylesheet}, nil
-}
-
-func (h *Handler) section(ctx context.Context, in *sitemapSectionInput) (*sitemapOutputDTO, error) {
-	xml, err := h.service.Section(ctx, h.siteURL(ctx, in.requestSiteInput), in.Type, in.Page)
+func (h *Handler) entries(ctx context.Context, in *sitemapEntriesInput) (*response.Output[[]sitemapEntryDTO], error) {
+	entries, err := h.service.Entries(ctx, sitemap.Section(in.Section), in.Page)
 	if err != nil {
 		return nil, err
 	}
-	return &sitemapOutputDTO{ContentType: xmlContentType, CacheControl: xmlCacheMaxAge, Body: []byte(xml)}, nil
-}
-
-func (h *Handler) siteURL(ctx context.Context, site requestSiteInput) string {
-	host, scheme := site.host, site.scheme
-	if clientinfo.From(ctx).Trusted {
-		if site.forwardedHost != "" {
-			host = site.forwardedHost
-		}
-		if site.forwardedProto != "" {
-			scheme = site.forwardedProto
-		}
+	out := make([]sitemapEntryDTO, len(entries))
+	for i, entry := range entries {
+		out[i] = toEntryDTO(entry)
 	}
-	if !validHost.MatchString(host) || (scheme != "http" && scheme != "https") {
-		return h.fallback
-	}
-	return scheme + "://" + host
+	return response.OK(ctx, h.resp, out), nil
 }

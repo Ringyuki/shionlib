@@ -45,7 +45,7 @@ func newFixture(entries ...gametest.Entry) fixture {
 		Source:      catalog.SourceHikarinagi,
 		Catalog:     f.catalog,
 		Games:       games,
-		Cards:       game.NewCardService(games),
+		Cards:       game.NewCardService(games, gametest.Masker{}),
 		Preferences: f.prefs,
 		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}, 51: {ID: 51, Name: "ノベル専門"}},
 		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}, 91: {ID: 91, NameJP: "アニメだけ"}},

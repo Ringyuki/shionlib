@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router'
 import { countComments } from '~/features/comment'
 import { FavoriteButton, isFavorite } from '~/features/favorite'
-import { GamePage, gameDescription, gameTitle, loadGamePage, loadScores } from '~/features/game'
+import { GamePage, gameHead, loadGamePage, loadScores } from '~/features/game'
 import { loadGameResources, summarizeResources } from '~/features/resource'
-import { isLocale } from '~/shared/i18n/locale.schema'
 import { idParam } from '~/shared/route/params'
 import { routeLoader } from '~/shared/route/route.server'
+import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/game'
 
 export { keptThroughSearch as shouldRevalidate } from '~/shared/route/revalidation'
@@ -29,14 +29,9 @@ export function loader(args: Route.LoaderArgs) {
   })
 }
 
-export function meta({ loaderData, params }: Route.MetaArgs) {
-  if (loaderData === undefined || !isLocale(params.lang)) {
-    return []
-  }
-  return [
-    { title: `${gameTitle(loaderData.header, params.lang)} | Shionlib` },
-    { name: 'description', content: gameDescription(loaderData.details, params.lang) },
-  ]
+export function meta(args: Route.MetaArgs) {
+  const [, lang] = args.matches
+  return pageMeta(args, args.loaderData && gameHead(args.loaderData, lang.loaderData))
 }
 
 export default function GameRoute({ loaderData }: Route.ComponentProps) {

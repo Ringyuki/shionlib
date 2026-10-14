@@ -56,7 +56,7 @@ func (c *ComposedService) Begin(ctx context.Context, who actor.Actor, draft Comp
 }
 
 func (c *ComposedService) Owned(ctx context.Context, who actor.Actor, resourceID int) (GameResource, error) {
-	resource, err := c.files.repo.GetGameResource(ctx, resourceID, false)
+	resource, err := c.files.repo.GetGameResource(ctx, resourceID)
 	if err != nil {
 		return GameResource{}, err
 	}
@@ -78,7 +78,7 @@ func (c *ComposedService) OfGame(ctx context.Context, viewer actor.Actor, gameID
 }
 
 func (c *ComposedService) Stored(ctx context.Context, resourceID int) (GameResource, error) {
-	resource, err := c.files.repo.GetGameResource(ctx, resourceID, false)
+	resource, err := c.files.repo.GetGameResource(ctx, resourceID)
 	if err != nil {
 		return GameResource{}, err
 	}

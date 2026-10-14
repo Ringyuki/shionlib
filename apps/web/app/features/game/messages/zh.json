@@ -98,5 +98,12 @@
     "hot": "热度最高",
     "views": "浏览最多",
     "downloads": "下载最多"
+  },
+  "seo": {
+    "titled": "{title} / {original}",
+    "madeOn": "《{title}》由 {developers} 于 {date} 发售。",
+    "made": "《{title}》由 {developers} 制作。",
+    "released": "《{title}》于 {date} 发售。",
+    "resources": "本站提供 {count, number} 个资源，平台为 {platforms}，语言为{languages}。"
   }
 }

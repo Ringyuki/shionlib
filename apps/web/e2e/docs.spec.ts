@@ -15,7 +15,7 @@ test('lists the documents in the order they are read and opens one from its row'
   await page.goto('/zh')
   await page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '文档' }).click()
   await expect(page).toHaveURL(/\/zh\/docs$/)
-  await expect(page).toHaveTitle('文档 | Shionlib')
+  await expect(page).toHaveTitle('文档 - Shionlib')
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['指南', '关于', '开发'])
   const guides = page.getByRole('region', { name: '指南' }).getByRole('link')
   await expect(guides).toHaveCount(12)
@@ -31,7 +31,7 @@ test('lists the documents in the order they are read and opens one from its row'
   await guides.nth(0).click()
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
   await expect(title(page)).toHaveText('如何下载游戏')
-  await expect(page).toHaveTitle('如何下载游戏 | Shionlib')
+  await expect(page).toHaveTitle('如何下载游戏 - Shionlib')
   await expect(page.getByRole('article').getByRole('link', { name: 'e2e_admin' })).toHaveAttribute(
     'href',
     '/zh/user/1',
@@ -126,7 +126,7 @@ test('lists the friend sites on a page of their own', async ({ page }) => {
   await page.getByLabel('站点信息').getByRole('link', { name: '友情链接' }).click()
   await expect(page).toHaveURL(/\/zh\/friend-link$/)
   await expect(title(page)).toHaveText('友情链接')
-  await expect(page).toHaveTitle('友情链接 | Shionlib')
+  await expect(page).toHaveTitle('友情链接 - Shionlib')
   const sites = page.getByRole('main').getByRole('listitem')
   await expect(sites.filter({ hasText: 'SakuGAL' })).toHaveCount(1)
   const first = sites.first().getByRole('link')

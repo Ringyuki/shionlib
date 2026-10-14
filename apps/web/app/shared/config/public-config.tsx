@@ -6,6 +6,8 @@ export type PublicConfig = {
   imageProcessorUrl: string
   hikarinagiSiteUrl: string
   capEndpoint: string
+  siteUrl: string
+  ogImageUrl: string
 }
 
 const PublicConfigContext = createContext<PublicConfig>({
@@ -14,6 +16,8 @@ const PublicConfigContext = createContext<PublicConfig>({
   imageProcessorUrl: '',
   hikarinagiSiteUrl: '',
   capEndpoint: '',
+  siteUrl: '',
+  ogImageUrl: '',
 })
 
 export function PublicConfigProvider({

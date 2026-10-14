@@ -12,5 +12,10 @@
   "retry": "再試行",
   "noResources": "リソースはまだありません",
   "upload": "リソースをアップロード",
-  "noReleases": "今月の新作はまだ登録されていません"
+  "noReleases": "今月の新作はまだ登録されていません",
+  "seo": {
+    "title": "Shionlib - ギャルゲーのダウンロード",
+    "alternateName": "书音的图书馆",
+    "description": "Shionlib はギャルゲーの作品情報と攻略をまとめ、ゲーム本体と翻訳版のダウンロードを提供しています。"
+  }
 }

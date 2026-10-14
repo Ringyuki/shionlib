@@ -41,7 +41,7 @@ func setup(t *testing.T) env {
 		Source:      catalog.SourceHikarinagi,
 		Catalog:     e.catalog,
 		Games:       games,
-		Cards:       game.NewCardService(games),
+		Cards:       game.NewCardService(games, gametest.Masker{}),
 		Preferences: gametest.Preferences{permissive.UserID: false},
 		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, WorksCount: 3}},
 		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", NameZH: &zh, Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}},

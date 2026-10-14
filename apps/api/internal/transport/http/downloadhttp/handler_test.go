@@ -388,8 +388,8 @@ func TestResourceDetailAndItsHistory(t *testing.T) {
 			t.Fatalf("detail is missing %s in %s", part, body)
 		}
 	}
-	if strings.Contains(body, "rated.webp") {
-		t.Fatalf("a guest never gets the rated cover: %s", body)
+	if strings.Contains(body, `"url":"rated.webp"`) || !strings.Contains(body, `"url":"masked:rated.webp","dims":[],"sexual":1,"violence":0,"masked":true`) {
+		t.Fatalf("a guest gets the rated cover only blurred: %s", body)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/999"}), http.StatusNotFound, 440101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/abc"}), http.StatusUnprocessableEntity, 100101)

@@ -4,7 +4,7 @@ test('finds a translator by alias and lists the games it is credited in', async 
   await page.goto('/zh')
   await page.getByRole('link', { name: '汉化组', exact: true }).click()
   await expect(page).toHaveURL(/\/zh\/translator$/)
-  await expect(page).toHaveTitle('汉化组 | Shionlib')
+  await expect(page).toHaveTitle('汉化组 - Shionlib')
   const list = page.getByRole('list', { name: '汉化组' })
   await expect(list.getByRole('link', { name: /绿茶汉化组/ })).toBeVisible()
 
@@ -16,7 +16,7 @@ test('finds a translator by alias and lists the games it is credited in', async 
 
   await list.getByRole('link', { name: /绿茶汉化组/ }).click()
   await expect(page).toHaveURL(/\/zh\/translator\/1$/)
-  await expect(page).toHaveTitle('绿茶汉化组 | Shionlib')
+  await expect(page).toHaveTitle('绿茶汉化组 - Shionlib')
   await expect(page.getByRole('heading', { name: '绿茶汉化组', level: 1 })).toBeVisible()
   await expect(page.getByText('Green Tea')).toBeVisible()
   await expect(page.getByRole('link', { name: '主页' })).toHaveAttribute(

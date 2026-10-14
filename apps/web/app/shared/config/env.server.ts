@@ -21,6 +21,8 @@ export function readServerEnv(source: NodeJS.ProcessEnv = process.env): ServerEn
       imageProcessorUrl: trimSlash(source.IMAGE_PROCESSOR_URL ?? 'https://imagesp.yurari.moe'),
       hikarinagiSiteUrl: trimSlash(source.HIKARINAGI_SITE_URL ?? 'https://www.hikarinagi.org'),
       capEndpoint: capEndpointFrom(source.CAP_ENDPOINT),
+      siteUrl: trimSlash(source.SITE_URL || 'https://shionlib.com'),
+      ogImageUrl: trimSlash(source.OG_IMAGE_URL || 'https://og.shionlib.com'),
     },
   }
 }

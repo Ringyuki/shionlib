@@ -9,7 +9,6 @@ import {
   type Platform,
   type ResourceLanguage,
   developerNames,
-  gameDescription,
   gameTitle,
   isExplicit,
   originalTitle,
@@ -23,6 +22,7 @@ import { resourceRuleFrom } from './game.schema'
 const cover = (type: Schema<'GameCoverDTO'>['type'], url: string): Schema<'GameCoverDTO'> => ({
   dims: null,
   language: 'jp',
+  masked: false,
   sexual: 0,
   type,
   url,
@@ -87,14 +87,6 @@ describe('display helpers', () => {
     expect(developerNames(game)).toEqual(['枕'])
     expect(releaseDate(game)?.getUTCFullYear()).toBe(2015)
     expect(releaseDate({ release_date: null })).toBeUndefined()
-  })
-})
-
-describe('gameDescription', () => {
-  it('flattens the preferred intro and caps it for search snippets', () => {
-    const intro = { intro_zh: '', intro_jp: '一行目\n二行目', intro_en: 'English' }
-    expect(gameDescription(intro, 'zh')).toBe('一行目 二行目')
-    expect(gameDescription({ ...intro, intro_jp: '汐'.repeat(400) }, 'ja')).toHaveLength(160)
   })
 })
 

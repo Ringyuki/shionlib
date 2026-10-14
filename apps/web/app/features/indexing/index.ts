@@ -1,0 +1,1 @@
+export { privatePaths } from './indexing'

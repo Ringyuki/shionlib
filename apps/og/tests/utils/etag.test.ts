@@ -35,18 +35,14 @@ describe('utils/etag', () => {
       expect(a).not.toBe(b)
     })
 
-    it('includes design version in the hash input (version change invalidates cache)', async () => {
-      process.env.OG_DESIGN_VERSION = '2'
-      // Re-import to pick up new config
-      const { makeETag: makeETagV2 } = await import('../../src/utils/etag')
-      // Reset
-      process.env.OG_DESIGN_VERSION = '1'
-
-      const v2 = await makeETagV2('game', '42', 'en')
-      // Both modules share the same import due to module caching — the version
-      // difference test is structural: the input string changes, producing a
-      // different digest. We verify the tag format is still correct.
-      expect(v2).toMatch(/^W\/"[0-9a-f]{64}"$/)
+    it('changes with the design version', async () => {
+      const { config } = await import('../../src/config')
+      const before = await makeETag('game', '42', 'en')
+      const kept = config.OG_DESIGN_VERSION
+      config.OG_DESIGN_VERSION = `${kept}-next`
+      const after = await makeETag('game', '42', 'en')
+      config.OG_DESIGN_VERSION = kept
+      expect(after).not.toBe(before)
     })
   })
 

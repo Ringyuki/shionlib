@@ -15,7 +15,7 @@ test('finds a developer by alias and lists its works', async ({ page }) => {
 
   await list.getByRole('link', { name: /まどそふと/ }).click()
   await expect(page).toHaveURL(/\/zh\/developer\/1$/)
-  await expect(page).toHaveTitle('まどそふと | Shionlib')
+  await expect(page).toHaveTitle('まどそふと - Shionlib')
   await expect(page.getByRole('heading', { name: 'まどそふと', level: 1 })).toBeVisible()
   await expect(page.getByText('引用来源')).toBeVisible()
   await expect(page.getByRole('heading', { name: '作品（1）' })).toBeVisible()

@@ -12,6 +12,15 @@ type Cards struct {
 	cards map[int]game.Card
 }
 
+type Masker struct{}
+
+func (Masker) Mask(url string) (string, bool) {
+	if url == "" {
+		return "", false
+	}
+	return "masked:" + url, true
+}
+
 func NewCards(cards ...game.Card) *Cards {
 	byID := make(map[int]game.Card, len(cards))
 	for _, card := range cards {
@@ -29,7 +38,7 @@ func (c *Cards) ByIDs(_ context.Context, ids []int, viewer actor.Actor) (map[int
 	result := map[int]game.Card{}
 	for _, id := range slices.Compact(slices.Sorted(slices.Values(ids))) {
 		if card, ok := c.cards[id]; ok {
-			result[id] = card.VisibleTo(viewer)
+			result[id] = card.VisibleTo(viewer, Masker{})
 		}
 	}
 	return result, nil

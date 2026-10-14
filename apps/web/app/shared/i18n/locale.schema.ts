@@ -17,6 +17,11 @@ export function chosenLocale(cookieHeader: string): Locale {
   return isLocale(fromCookie) ? fromCookie : defaultLocale
 }
 
+export function localizedRedirectStatus(cookieHeader: string, url: URL): 301 | 302 {
+  const chosen = isLocale(readCookie(cookieHeader, localeCookie))
+  return chosen || url.pathname === '/' ? 302 : 301
+}
+
 export function localizedLocation(cookieHeader: string, url: URL): string {
   return switchLocale(url.pathname, chosenLocale(cookieHeader)) + url.search
 }

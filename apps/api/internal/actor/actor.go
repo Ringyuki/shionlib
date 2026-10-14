@@ -43,6 +43,14 @@ func (a Actor) AtLeast(role Role) bool {
 	return a.Authenticated() && a.Role >= role
 }
 
+func (a Actor) MasksRated() bool {
+	return a.ContentLimit.MasksRated()
+}
+
+func (c ContentLimit) MasksRated() bool {
+	return c == ContentLimitGuest
+}
+
 func (c ContentLimit) IncludesRated() bool {
 	return c == ContentLimitShowSpoiler || c == ContentLimitJustShow
 }

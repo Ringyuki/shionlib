@@ -45,7 +45,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	games := gamepg.NewRepository(infra.Ent)
 	preferences := gamepg.NewPreferenceStore(infra.Ent)
 
-	gameService := game.NewService(games, gameredis.NewRecentUpdates(infra.Redis), preferences, shared.GameCards, shared.Now, randomIndex)
+	gameService := game.NewService(games, gameredis.NewRecentUpdates(infra.Redis), preferences, shared.GameCards, shared.Masker, shared.Now, randomIndex)
 	bangumiClient := bangumi.NewClient(bangumi.Options{
 		HTTP: outbound,
 		Credentials: func() (string, string) {
@@ -82,7 +82,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		developerhttp.NewHandler(developer.NewService(developers, shared.Transactor), shared.Builder),
 		translatorhttp.NewHandler(translator.NewService(translatorpg.NewRepository(infra.Ent)), shared.Builder),
 		searchhttp.NewHandler(searchService, shared.Builder),
-		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache, shared.Now), cfg.App.SiteURL),
+		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache), shared.Builder),
 	)
 	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, gamejobs.HotScoreTask(hotScore, shared.Logger))

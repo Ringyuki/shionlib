@@ -12,5 +12,8 @@
   "noWorks": "No works of this translation group are listed yet",
   "fieldLabel": "Translation groups",
   "fieldPlaceholder": "Type a name to search or add",
-  "create": "Add \"{name}\""
+  "create": "Add \"{name}\"",
+  "seo": {
+    "lead": "{name} has translated {count, plural, one {# game} other {# games}}, including {known}. "
+  }
 }

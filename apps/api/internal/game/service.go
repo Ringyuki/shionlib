@@ -13,12 +13,13 @@ type Service struct {
 	recent RecentUpdates
 	prefs  Preferences
 	cards  CardLookup
+	masker PictureMasker
 	now    func() time.Time
 	intn   func(n int) int
 }
 
-func NewService(repo Repository, recent RecentUpdates, prefs Preferences, cards CardLookup, now func() time.Time, intn func(n int) int) *Service {
-	return &Service{repo: repo, recent: recent, prefs: prefs, cards: cards, now: now, intn: intn}
+func NewService(repo Repository, recent RecentUpdates, prefs Preferences, cards CardLookup, masker PictureMasker, now func() time.Time, intn func(n int) int) *Service {
+	return &Service{repo: repo, recent: recent, prefs: prefs, cards: cards, masker: masker, now: now, intn: intn}
 }
 
 func (s *Service) List(ctx context.Context, viewer actor.Actor, query ListQuery) ([]Card, int, error) {
@@ -153,10 +154,7 @@ func (s *Service) visibleDetail(ctx context.Context, viewer actor.Actor, id int)
 	if err != nil {
 		return Detail{}, err
 	}
-	if !viewer.IncludesRated() && detail.Rated() {
-		return Detail{}, ErrNotFound
-	}
-	return detail.visibleTo(viewer), nil
+	return detail.visibleTo(viewer, s.masker), nil
 }
 
 func (s *Service) ordered(ctx context.Context, ids []int, viewer actor.Actor) ([]Card, error) {

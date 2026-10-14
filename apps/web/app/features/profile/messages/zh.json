@@ -62,5 +62,8 @@
       "confirm": "放弃修改",
       "cancel": "继续编辑"
     }
+  },
+  "seo": {
+    "lead": "{name} 在 Shionlib 发布了 {count, number} 个资源。"
   }
 }

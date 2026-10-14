@@ -484,6 +484,12 @@ export default defineConfig([
           selector: "CallExpression[callee.object.name='api']",
           message: 'Routes are thin: call a feature use-case instead of the API.',
         },
+        {
+          selector:
+            "ExportNamedDeclaration > FunctionDeclaration[id.name='meta'] ReturnStatement > :not(CallExpression[callee.name='pageMeta'])",
+          message:
+            "A page's head comes from pageMeta(args, head) (~/shared/seo); meta returns its result and nothing else.",
+        },
         ...apiShapes,
         nativeTags,
         mountedFeedback,

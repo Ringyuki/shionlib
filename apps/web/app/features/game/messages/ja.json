@@ -98,5 +98,12 @@
     "hot": "人気順",
     "views": "閲覧数順",
     "downloads": "ダウンロード数順"
+  },
+  "seo": {
+    "titled": "{title} / {original}",
+    "madeOn": "『{title}』は {developers} が {date} に発売したゲームです。",
+    "made": "『{title}』は {developers} のゲームです。",
+    "released": "『{title}』は {date} に発売されました。",
+    "resources": "{platforms}向け、{languages}のリソースが {count, number} 件あります。"
   }
 }

@@ -65,7 +65,7 @@ func (s *DetailService) Viewable(ctx context.Context, viewer actor.Actor, id int
 }
 
 func (s *DetailService) visibleResource(ctx context.Context, viewer actor.Actor, id int) (GameResource, error) {
-	resource, err := s.repo.GetGameResource(ctx, id, !viewer.IncludesRated())
+	resource, err := s.repo.GetGameResource(ctx, id)
 	if err != nil {
 		return GameResource{}, err
 	}

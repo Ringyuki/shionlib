@@ -1,12 +1,11 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 
-// Must be set before config module is imported
 process.env.BACKEND_INTERNAL_URL = 'http://test-backend:5000'
 process.env.OG_CACHE_DISABLED = 'false'
 
 const { getCachedImage, setCachedImage, invalidateCache } =
   await import('../../src/services/image-cache')
-const { config, IMAGE_CACHE_MAX, SUPPORTED_LOCALES } = await import('../../src/config')
+const { config, IMAGE_CACHE_MAX, LOCALES } = await import('../../src/config')
 
 const buf = (n: number): Buffer => Buffer.from([n & 0xff])
 
@@ -17,7 +16,6 @@ function fill(count: number, offset = 0): void {
 describe('image cache', () => {
   beforeEach(() => {
     config.OG_CACHE_DISABLED = false
-    // The cache is a module singleton — drop everything the previous test left.
     for (let i = 0; i < IMAGE_CACHE_MAX * 2; i++) invalidateCache('game', String(i))
   })
 
@@ -37,7 +35,6 @@ describe('image cache', () => {
   })
 
   it('evicts the oldest entry once past IMAGE_CACHE_MAX', () => {
-    // No read in between — reading '0' here would refresh it and evict '1'.
     fill(IMAGE_CACHE_MAX)
     setCachedImage('game', String(IMAGE_CACHE_MAX), 'zh', buf(0))
 
@@ -59,7 +56,6 @@ describe('image cache', () => {
   it('reading an entry protects it from the next eviction', () => {
     fill(IMAGE_CACHE_MAX)
 
-    // '0' is the oldest, but reading it moves it to the tail so '1' goes first.
     getCachedImage('game', '0', 'zh')
     setCachedImage('game', String(IMAGE_CACHE_MAX), 'zh', buf(0))
 
@@ -68,11 +64,11 @@ describe('image cache', () => {
   })
 
   it('invalidateCache drops every locale for an id', () => {
-    for (const locale of SUPPORTED_LOCALES) setCachedImage('game', '1', locale, buf(1))
+    for (const locale of LOCALES) setCachedImage('game', '1', locale, buf(1))
 
     invalidateCache('game', '1')
 
-    for (const locale of SUPPORTED_LOCALES) {
+    for (const locale of LOCALES) {
       expect(getCachedImage('game', '1', locale)).toBeNull()
     }
   })

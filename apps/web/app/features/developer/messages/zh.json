@@ -11,5 +11,9 @@
   "extra": "其他信息",
   "worksTitle": "作品（{count, number}）",
   "worksLabel": "作品",
-  "noWorks": "暂未收录这个开发商的作品"
+  "noWorks": "暂未收录这个开发商的作品",
+  "seo": {
+    "lead": "{name} 共有 {count, number} 部作品，包括 {known}。",
+    "aliased": "{name}（又名 {aliases}）共有 {count, number} 部作品，包括 {known}。"
+  }
 }

@@ -33,5 +33,11 @@
       "side": "サブキャラクター",
       "appears": "登場"
     }
+  },
+  "seo": {
+    "named": "{name}（{original}）",
+    "titled": "{name} - {game}",
+    "lead": "{name}は『{game}』の登場人物です。",
+    "voiced": "{name}は『{game}』の登場人物です（CV：{actor}）。"
   }
 }
