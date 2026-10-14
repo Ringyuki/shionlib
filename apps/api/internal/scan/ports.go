@@ -40,6 +40,7 @@ type ArchiveTool interface {
 	List(ctx context.Context, path string) (ToolRun, error)
 	Test(ctx context.Context, path string) (ToolRun, error)
 	Extract(ctx context.Context, path, destination string, selection Selection) (ToolRun, error)
+	ExtractEntry(ctx context.Context, path, entry, destination, name string) (ToolRun, error)
 }
 
 type NameReader interface {

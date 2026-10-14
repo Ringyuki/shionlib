@@ -470,10 +470,12 @@ type ArchiveTool struct {
 	Tests      map[string]scan.ToolRun
 	Contents   map[string][]string
 	Extracts   map[string]scan.ToolRun
+	EntryRuns  map[string]scan.ToolRun
 	Workspace  *Workspace
 	Inspected  []string
 	Extracted  []string
 	Selections []scan.Selection
+	Separated  []string
 	OnList     func()
 }
 
@@ -502,6 +504,14 @@ func (a *ArchiveTool) Extract(_ context.Context, path, destination string, selec
 		}
 	}
 	return a.Extracts[path], nil
+}
+
+func (a *ArchiveTool) ExtractEntry(_ context.Context, path, entry, destination, name string) (scan.ToolRun, error) {
+	a.Separated = append(a.Separated, entry+" -> "+name)
+	if slices.Contains(a.Contents[path], entry) {
+		a.Workspace.Put(destination, name)
+	}
+	return a.EntryRuns[entry], nil
 }
 
 type NameReader struct {

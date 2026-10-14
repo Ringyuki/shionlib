@@ -91,8 +91,17 @@ func (s *ContentService) unpack(ctx context.Context, r *reading, c container) er
 	if err != nil {
 		return err
 	}
+	for _, part := range plan.apart {
+		single, err := s.archives.ExtractEntry(ctx, c.path, part.entry, c.dir, part.file)
+		if err != nil {
+			return err
+		}
+		if single.Failed && !run.Failed {
+			run = single
+		}
+	}
 	if run.Failed && !run.Killed && c.depth == 0 && !r.opaque {
-		return fmt.Errorf("extract executables: %s", run.failure())
+		return fmt.Errorf("extract contents: %s", run.failure())
 	}
 	r.room -= plan.size
 	paths, err := s.workspace.Files(ctx, c.dir)
@@ -107,7 +116,7 @@ func (s *ContentService) unpack(ctx context.Context, r *reading, c container) er
 		if err != nil {
 			return err
 		}
-		key := cleanPath(filepath.ToSlash(relative))
+		key := plan.key(relative)
 		shown, known := plan.shown[key]
 		if !known {
 			shown = key
@@ -140,7 +149,7 @@ func (s *ContentService) mount(ctx context.Context, r *reading, outer container,
 	}
 	var sheet DiscSheet
 	if disc.candidate.sheet != "" {
-		sheet, err = s.discs.Sheet(ctx, filepath.Join(outer.dir, filepath.FromSlash(cleanPath(disc.candidate.sheet))), disc.size)
+		sheet, err = s.discs.Sheet(ctx, filepath.Join(outer.dir, filepath.FromSlash(disc.sheetFile)), disc.size)
 		if err != nil {
 			return err
 		}

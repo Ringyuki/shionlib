@@ -61,6 +61,7 @@ type discPlan struct {
 	index     int
 	candidate discCandidate
 	size      int64
+	sheetFile string
 }
 
 type extraction struct {
@@ -71,6 +72,8 @@ type extraction struct {
 	discs     map[string]discPlan
 	shown     map[string]string
 	targets   []string
+	apart     []apartEntry
+	aliases   map[string]string
 }
 
 func (r *reading) plan(c container, tree planted) extraction {
@@ -80,6 +83,7 @@ func (r *reading) plan(c container, tree planted) extraction {
 		nested:    map[string]int{},
 		discs:     map[string]discPlan{},
 		shown:     map[string]string{},
+		aliases:   map[string]string{},
 	}
 	var candidates []inspection.Candidate
 	images := map[int]discCandidate{}
@@ -115,7 +119,7 @@ func (r *reading) plan(c container, tree planted) extraction {
 		if image, found := images[i]; found {
 			r.contents.Draft.Entries[tree.indexes[i]].Kind = inspection.KindDisc
 			if c.depth < MaxNestingDepth {
-				plan.discs[key] = discPlan{index: tree.indexes[i], candidate: image, size: entry.Size}
+				plan.discs[key] = discPlan{index: tree.indexes[i], candidate: image, size: entry.Size, sheetFile: cleanPath(image.sheet)}
 			} else {
 				r.contents.Draft.Entries[tree.indexes[i]].Unreadable = true
 			}
@@ -161,6 +165,7 @@ func (r *reading) plan(c container, tree planted) extraction {
 		}
 		plan.previews[cleanPath(entry.Path)] = PreviewSource{Entry: tree.indexes[candidate.Index], Kind: candidate.Kind}
 	}
+	plan.separate(c.entries, r.limit)
 	return plan
 }
 
@@ -168,7 +173,7 @@ func (r *reading) missing(c container, plan extraction, extracted []string) {
 	came := map[string]bool{}
 	for _, path := range extracted {
 		if relative, err := filepath.Rel(c.dir, path); err == nil {
-			came[cleanPath(filepath.ToSlash(relative))] = true
+			came[plan.key(relative)] = true
 		}
 	}
 	for _, key := range plan.targets {
