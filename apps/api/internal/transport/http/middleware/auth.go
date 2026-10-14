@@ -13,7 +13,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-const AccessTokenCookie = "shionlib_access_token"
+const (
+	AccessTokenCookie = "shionlib_access_token"
+	APIKeyPrefix      = "shl_"
+)
 
 type Authenticator interface {
 	Authenticate(ctx context.Context, token string) (actor.Actor, error)
@@ -85,7 +88,7 @@ func bearerToken(header string) string {
 		return ""
 	}
 	token = strings.TrimSpace(token)
-	if token == "" || token == "undefined" || token == "null" {
+	if token == "" || token == "undefined" || token == "null" || strings.HasPrefix(token, APIKeyPrefix) {
 		return ""
 	}
 	return token

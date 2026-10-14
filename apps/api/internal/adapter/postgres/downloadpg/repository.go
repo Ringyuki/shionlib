@@ -60,6 +60,20 @@ func (r *Repository) ListGameResources(ctx context.Context, gameID int) ([]downl
 	return r.gameResources(ctx, rows)
 }
 
+func (r *Repository) ListGamesResources(ctx context.Context, gameIDs []int) ([]download.GameResource, error) {
+	if len(gameIDs) == 0 {
+		return []download.GameResource{}, nil
+	}
+	rows, err := withFileDetails(r.db(ctx).GameDownloadResource.Query().
+		Where(gamedownloadresource.GameIDIn(gameIDs...), gamepg.ActiveResource()).
+		Order(ent.Asc(gamedownloadresource.FieldID))).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list download resources of %d games: %w", len(gameIDs), err)
+	}
+	return r.gameResources(ctx, rows)
+}
+
 func creditedTranslators(q *ent.GameDownloadResourceTranslatorQuery) {
 	q.Order(ent.Asc(gamedownloadresourcetranslator.FieldPosition), ent.Asc(gamedownloadresourcetranslator.FieldID)).WithTranslator()
 }

@@ -95,6 +95,18 @@
         "Title": "AI route recovered",
         "Content": "The model {model} of {provider} ({upstream_id}) is available again"
       }
+    },
+    "APIKey": {
+      "Suspended": {
+        "Title": "API key suspended",
+        "Content": "An administrator suspended your API key \"{name}\" ({prefix}…); requests made with it are refused. Reason: {reason}",
+        "LinkText": "View API keys"
+      },
+      "Restored": {
+        "Title": "API key restored",
+        "Content": "Your API key \"{name}\" ({prefix}…) has been restored and can be used again.",
+        "LinkText": "View API keys"
+      }
     }
   },
   "Value": {

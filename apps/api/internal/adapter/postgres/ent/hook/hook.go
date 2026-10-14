@@ -129,6 +129,18 @@ func (f AISceneFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AISceneMutation", m)
 }
 
+// The APIKeyDailyUsageFunc type is an adapter to allow the use of ordinary
+// function as APIKeyDailyUsage mutator.
+type APIKeyDailyUsageFunc func(context.Context, *ent.APIKeyDailyUsageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f APIKeyDailyUsageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.APIKeyDailyUsageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.APIKeyDailyUsageMutation", m)
+}
+
 // The ActivityFunc type is an adapter to allow the use of ordinary
 // function as Activity mutator.
 type ActivityFunc func(context.Context, *ent.ActivityMutation) (ent.Value, error)
@@ -667,6 +679,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+}
+
+// The UserAPIKeyFunc type is an adapter to allow the use of ordinary
+// function as UserAPIKey mutator.
+type UserAPIKeyFunc func(context.Context, *ent.UserAPIKeyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAPIKeyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserAPIKeyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserAPIKeyMutation", m)
 }
 
 // The UserBannedRecordFunc type is an adapter to allow the use of ordinary

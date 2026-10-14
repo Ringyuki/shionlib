@@ -1,6 +1,7 @@
 package download
 
 import (
+	"cmp"
 	"context"
 	"slices"
 	"strings"
@@ -738,4 +739,28 @@ func (s *Service) RequeueStores(ctx context.Context, updatedBefore time.Time) er
 		}
 	}
 	return nil
+}
+
+func (s *Service) PublicResources(ctx context.Context, gameIDs []int) (map[int][]GameResource, error) {
+	resources, err := s.repo.ListGamesResources(ctx, gameIDs)
+	if err != nil {
+		return nil, err
+	}
+	byGame := make(map[int][]GameResource, len(gameIDs))
+	for _, resource := range resources {
+		if !resource.VisibleTo(0) {
+			continue
+		}
+		resource.Files = slices.DeleteFunc(resource.Files, func(f GameFile) bool { return f.Status != FileInObjectStore })
+		if len(resource.Files) == 0 {
+			continue
+		}
+		byGame[resource.GameID] = append(byGame[resource.GameID], resource)
+	}
+	for _, list := range byGame {
+		slices.SortStableFunc(list, func(a, b GameResource) int {
+			return cmp.Or(b.Updated.Compare(a.Updated), cmp.Compare(b.ID, a.ID))
+		})
+	}
+	return byGame, nil
 }

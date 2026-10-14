@@ -182,6 +182,18 @@ func (r *MemoryRepository) ListGameResources(_ context.Context, gameID int) ([]d
 	return out, nil
 }
 
+func (r *MemoryRepository) ListGamesResources(ctx context.Context, gameIDs []int) ([]download.GameResource, error) {
+	var out []download.GameResource
+	for _, gameID := range gameIDs {
+		resources, err := r.ListGameResources(ctx, gameID)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, resources...)
+	}
+	return out, nil
+}
+
 func (r *MemoryRepository) gameResource(resource download.Resource) download.GameResource {
 	item := download.GameResource{Resource: resource, Creator: r.summary(resource.CreatorID)}
 	for _, file := range r.filesOf(resource.ID) {

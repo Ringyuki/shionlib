@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -291,6 +292,20 @@ func (_c *UserCreate) SetSponsorExpiresAt(v time.Time) *UserCreate {
 func (_c *UserCreate) SetNillableSponsorExpiresAt(v *time.Time) *UserCreate {
 	if v != nil {
 		_c.SetSponsorExpiresAt(*v)
+	}
+	return _c
+}
+
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (_c *UserCreate) SetAPIRequestLimit(v int) *UserCreate {
+	_c.mutation.SetAPIRequestLimit(v)
+	return _c
+}
+
+// SetNillableAPIRequestLimit sets the "api_request_limit" field if the given value is not nil.
+func (_c *UserCreate) SetNillableAPIRequestLimit(v *int) *UserCreate {
+	if v != nil {
+		_c.SetAPIRequestLimit(*v)
 	}
 	return _c
 }
@@ -642,6 +657,21 @@ func (_c *UserCreate) AddGamePvnMappings(v ...*UserGamePvnMapping) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddGamePvnMappingIDs(ids...)
+}
+
+// AddAPIKeyIDs adds the "api_keys" edge to the UserAPIKey entity by IDs.
+func (_c *UserCreate) AddAPIKeyIDs(ids ...int) *UserCreate {
+	_c.mutation.AddAPIKeyIDs(ids...)
+	return _c
+}
+
+// AddAPIKeys adds the "api_keys" edges to the UserAPIKey entity.
+func (_c *UserCreate) AddAPIKeys(v ...*UserAPIKey) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAPIKeyIDs(ids...)
 }
 
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
@@ -1016,6 +1046,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldSponsorExpiresAt, field.TypeTime, value)
 		_node.SponsorExpiresAt = &value
 	}
+	if value, ok := _c.mutation.APIRequestLimit(); ok {
+		_spec.SetField(user.FieldAPIRequestLimit, field.TypeInt, value)
+		_node.APIRequestLimit = &value
+	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(user.FieldCreated, field.TypeTime, value)
 		_node.Created = value
@@ -1353,6 +1387,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(usergamepvnmapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.APIKeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1840,6 +1890,30 @@ func (u *UserUpsert) ClearSponsorExpiresAt() *UserUpsert {
 	return u
 }
 
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (u *UserUpsert) SetAPIRequestLimit(v int) *UserUpsert {
+	u.Set(user.FieldAPIRequestLimit, v)
+	return u
+}
+
+// UpdateAPIRequestLimit sets the "api_request_limit" field to the value that was provided on create.
+func (u *UserUpsert) UpdateAPIRequestLimit() *UserUpsert {
+	u.SetExcluded(user.FieldAPIRequestLimit)
+	return u
+}
+
+// AddAPIRequestLimit adds v to the "api_request_limit" field.
+func (u *UserUpsert) AddAPIRequestLimit(v int) *UserUpsert {
+	u.Add(user.FieldAPIRequestLimit, v)
+	return u
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (u *UserUpsert) ClearAPIRequestLimit() *UserUpsert {
+	u.SetNull(user.FieldAPIRequestLimit)
+	return u
+}
+
 // SetUpdated sets the "updated" field.
 func (u *UserUpsert) SetUpdated(v time.Time) *UserUpsert {
 	u.Set(user.FieldUpdated, v)
@@ -2250,6 +2324,34 @@ func (u *UserUpsertOne) UpdateSponsorExpiresAt() *UserUpsertOne {
 func (u *UserUpsertOne) ClearSponsorExpiresAt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearSponsorExpiresAt()
+	})
+}
+
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (u *UserUpsertOne) SetAPIRequestLimit(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAPIRequestLimit(v)
+	})
+}
+
+// AddAPIRequestLimit adds v to the "api_request_limit" field.
+func (u *UserUpsertOne) AddAPIRequestLimit(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAPIRequestLimit(v)
+	})
+}
+
+// UpdateAPIRequestLimit sets the "api_request_limit" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateAPIRequestLimit() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAPIRequestLimit()
+	})
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (u *UserUpsertOne) ClearAPIRequestLimit() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAPIRequestLimit()
 	})
 }
 
@@ -2831,6 +2933,34 @@ func (u *UserUpsertBulk) UpdateSponsorExpiresAt() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearSponsorExpiresAt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearSponsorExpiresAt()
+	})
+}
+
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (u *UserUpsertBulk) SetAPIRequestLimit(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAPIRequestLimit(v)
+	})
+}
+
+// AddAPIRequestLimit adds v to the "api_request_limit" field.
+func (u *UserUpsertBulk) AddAPIRequestLimit(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAPIRequestLimit(v)
+	})
+}
+
+// UpdateAPIRequestLimit sets the "api_request_limit" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateAPIRequestLimit() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAPIRequestLimit()
+	})
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (u *UserUpsertBulk) ClearAPIRequestLimit() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAPIRequestLimit()
 	})
 }
 

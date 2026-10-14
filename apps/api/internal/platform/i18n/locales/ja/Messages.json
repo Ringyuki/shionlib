@@ -95,6 +95,18 @@
         "Title": "AI ルートが復旧しました",
         "Content": "{provider} のモデル {model}（{upstream_id}）は再び利用できます"
       }
+    },
+    "APIKey": {
+      "Suspended": {
+        "Title": "API キーが停止されました",
+        "Content": "API キー「{name}」（{prefix}…）は管理者により停止され、このキーを使ったリクエストは拒否されます。理由：{reason}",
+        "LinkText": "API キーを確認"
+      },
+      "Restored": {
+        "Title": "API キーが再開されました",
+        "Content": "API キー「{name}」（{prefix}…）は再開され、再び使えるようになりました。",
+        "LinkText": "API キーを確認"
+      }
     }
   },
   "Value": {

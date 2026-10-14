@@ -83,4 +83,21 @@ var (
 		Label:   "上传分片限流：窗口长度",
 		Default: time.Minute, Min: time.Second, Max: day,
 	})
+	OpenThrottleLimit = setting.Int(setting.Spec[int]{
+		Name:        "throttle.open_limit",
+		Label:       "开放接口限流：每窗口次数",
+		Description: "同一账号的所有 API 密钥在一个窗口内最多可发送的请求数；在「开放接口」页单独设置了上限的账号除外。",
+		Default:     60, Min: 1, Max: 1_000_000,
+	})
+	OpenThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
+		Name:    "throttle.open_window",
+		Label:   "开放接口限流：窗口长度",
+		Default: time.Minute, Min: time.Second, Max: day,
+	})
+	OpenThrottleBlock = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "throttle.open_block",
+		Label:       "开放接口限流：超限后封禁时长",
+		Description: "超过限制后，该账号的请求被拒绝的时长；为 0 时到下一个窗口即恢复。",
+		Default:     0, Min: 0, Max: week,
+	})
 )

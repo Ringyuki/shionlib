@@ -53,6 +53,8 @@ const (
 	FieldUploadTrusted = "upload_trusted"
 	// FieldSponsorExpiresAt holds the string denoting the sponsor_expires_at field in the database.
 	FieldSponsorExpiresAt = "sponsor_expires_at"
+	// FieldAPIRequestLimit holds the string denoting the api_request_limit field in the database.
+	FieldAPIRequestLimit = "api_request_limit"
 	// FieldCreated holds the string denoting the created field in the database.
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
@@ -99,6 +101,8 @@ const (
 	EdgeSponsorOrders = "sponsor_orders"
 	// EdgeGamePvnMappings holds the string denoting the game_pvn_mappings edge name in mutations.
 	EdgeGamePvnMappings = "game_pvn_mappings"
+	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
+	EdgeAPIKeys = "api_keys"
 	// EdgePotatovnBinding holds the string denoting the potatovn_binding edge name in mutations.
 	EdgePotatovnBinding = "potatovn_binding"
 	// EdgeGameUploadSessions holds the string denoting the game_upload_sessions edge name in mutations.
@@ -264,6 +268,13 @@ const (
 	GamePvnMappingsInverseTable = "user_game_pvn_mappings"
 	// GamePvnMappingsColumn is the table column denoting the game_pvn_mappings relation/edge.
 	GamePvnMappingsColumn = "user_id"
+	// APIKeysTable is the table that holds the api_keys relation/edge.
+	APIKeysTable = "user_api_keys"
+	// APIKeysInverseTable is the table name for the UserAPIKey entity.
+	// It exists in this package in order to avoid circular dependency with the "userapikey" package.
+	APIKeysInverseTable = "user_api_keys"
+	// APIKeysColumn is the table column denoting the api_keys relation/edge.
+	APIKeysColumn = "user_id"
 	// PotatovnBindingTable is the table that holds the potatovn_binding relation/edge.
 	PotatovnBindingTable = "user_pvn_bindings"
 	// PotatovnBindingInverseTable is the table name for the UserPvnBinding entity.
@@ -351,6 +362,7 @@ var Columns = []string{
 	FieldTwoFactorEnabled,
 	FieldUploadTrusted,
 	FieldSponsorExpiresAt,
+	FieldAPIRequestLimit,
 	FieldCreated,
 	FieldUpdated,
 }
@@ -530,6 +542,11 @@ func ByUploadTrusted(opts ...sql.OrderTermOption) OrderOption {
 // BySponsorExpiresAt orders the results by the sponsor_expires_at field.
 func BySponsorExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSponsorExpiresAt, opts...).ToFunc()
+}
+
+// ByAPIRequestLimit orders the results by the api_request_limit field.
+func ByAPIRequestLimit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAPIRequestLimit, opts...).ToFunc()
 }
 
 // ByCreated orders the results by the created field.
@@ -836,6 +853,20 @@ func ByGamePvnMappings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByAPIKeysCount orders the results by api_keys count.
+func ByAPIKeysCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAPIKeysStep(), opts...)
+	}
+}
+
+// ByAPIKeys orders the results by api_keys terms.
+func ByAPIKeys(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAPIKeysStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByPotatovnBindingField orders the results by potatovn_binding field.
 func ByPotatovnBindingField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1099,6 +1130,13 @@ func newGamePvnMappingsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GamePvnMappingsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GamePvnMappingsTable, GamePvnMappingsColumn),
+	)
+}
+func newAPIKeysStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(APIKeysInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, APIKeysTable, APIKeysColumn),
 	)
 }
 func newPotatovnBindingStep() *sqlgraph.Step {

@@ -114,6 +114,9 @@ func AccessLog(logger *slog.Logger, quietPaths []string) func(http.Handler) http
 				if userID := state.UserID(); userID > 0 {
 					attrs = append(attrs, slog.Int("user_id", userID))
 				}
+				if keyID := state.KeyID(); keyID > 0 {
+					attrs = append(attrs, slog.Int("api_key_id", keyID))
+				}
 				if snapshot := state.Snapshot(); snapshot.HasError {
 					attrs = append(attrs, slog.Int("business_code", snapshot.BizCode))
 					if recorder.status >= http.StatusInternalServerError && snapshot.Err != nil {

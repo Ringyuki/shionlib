@@ -24,6 +24,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/apikeydailyusage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -67,6 +68,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -144,6 +146,7 @@ func checkColumn(t, c string) error {
 			airoute.Table:                         airoute.ValidColumn,
 			airouteadjustment.Table:               airouteadjustment.ValidColumn,
 			aiscene.Table:                         aiscene.ValidColumn,
+			apikeydailyusage.Table:                apikeydailyusage.ValidColumn,
 			activity.Table:                        activity.ValidColumn,
 			ad.Table:                              ad.ValidColumn,
 			catalogsourcelink.Table:               catalogsourcelink.ValidColumn,
@@ -189,6 +192,7 @@ func checkColumn(t, c string) error {
 			translator.Table:                      translator.ValidColumn,
 			translatordistinction.Table:           translatordistinction.ValidColumn,
 			user.Table:                            user.ValidColumn,
+			userapikey.Table:                      userapikey.ValidColumn,
 			userbannedrecord.Table:                userbannedrecord.ValidColumn,
 			userfieldpermission.Table:             userfieldpermission.ValidColumn,
 			usergamepvnmapping.Table:              usergamepvnmapping.ValidColumn,

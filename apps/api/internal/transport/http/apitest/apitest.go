@@ -31,14 +31,14 @@ type Server struct {
 	t       *testing.T
 }
 
-func New(t *testing.T) *Server {
+func New(t *testing.T, configure ...func(*httpapi.Options)) *Server {
 	t.Helper()
 	catalog, err := i18n.Load(i18n.LocaleZH)
 	if err != nil {
 		t.Fatal(err)
 	}
 	builder := response.NewBuilder(catalog, func() time.Time { return Now })
-	api := httpapi.New(httpapi.Options{
+	options := httpapi.Options{
 		Title:          "test",
 		Version:        "test",
 		Logger:         slog.New(slog.NewTextHandler(io.Discard, nil)),
@@ -47,7 +47,11 @@ func New(t *testing.T) *Server {
 		ClientResolver: clientinfo.NewResolver([]netip.Prefix{netip.MustParsePrefix("127.0.0.0/8")}),
 		Authenticator:  Authenticator{},
 		CORS:           httpapi.CORS{Origins: []string{"*"}},
-	})
+	}
+	for _, change := range configure {
+		change(&options)
+	}
+	api := httpapi.New(options)
 	return &Server{API: api, Builder: builder, t: t}
 }
 

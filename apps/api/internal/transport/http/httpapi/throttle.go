@@ -75,8 +75,13 @@ func (a *API) Throttled(name, route string, next http.Handler) http.Handler {
 	})
 }
 
+type ratelimitPolicy = ratelimit.Policy
+
 func (a *API) admit(ctx context.Context, policy ratelimit.Policy, route string, setHeader func(name, value string)) bool {
-	key := route + "|" + clientinfo.From(ctx).IP
+	return a.admitAs(ctx, policy, route+"|"+clientinfo.From(ctx).IP, setHeader)
+}
+
+func (a *API) admitAs(ctx context.Context, policy ratelimit.Policy, key string, setHeader func(name, value string)) bool {
 	decision, err := a.throttling.Limiter.Allow(ctx, policy, key)
 	if err != nil {
 		a.logger.WarnContext(ctx, "rate limiter unavailable; allowing request", slog.String("policy", policy.Name), slog.Any("error", err))

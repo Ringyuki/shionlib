@@ -39,6 +39,7 @@ func (User) Fields() []ent.Field {
 		field.Bool("two_factor_enabled").Default(false),
 		field.Bool("upload_trusted").Default(false),
 		field.Time("sponsor_expires_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Int("api_request_limit").SchemaType(pg("integer")).Optional().Nillable(),
 		created(),
 		updated(),
 	}
@@ -67,6 +68,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("messages", Message.Type).StorageKey(edge.Symbol("messages_receiver_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.To("sponsor_orders", SponsorOrder.Type).StorageKey(edge.Symbol("sponsor_orders_user_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.To("game_pvn_mappings", UserGamePvnMapping.Type).StorageKey(edge.Symbol("user_game_pvn_mappings_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("api_keys", UserAPIKey.Type).StorageKey(edge.Symbol("user_api_keys_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("potatovn_binding", UserPvnBinding.Type).Unique().StorageKey(edge.Symbol("user_pvn_bindings_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("game_upload_sessions", GameUploadSession.Type).StorageKey(edge.Symbol("game_upload_sessions_creator_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.To("walkthroughs", Walkthrough.Type).StorageKey(edge.Symbol("walkthroughs_creator_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),

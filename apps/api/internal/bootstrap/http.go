@@ -7,6 +7,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/healthhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/openhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/searchhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
 )
@@ -26,6 +27,7 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 		Authenticator:  modules.Authenticator,
 		CORS:           httpapi.CORS{Origins: cfg.HTTP.CORSOrigins, Methods: cfg.HTTP.CORSMethods},
 		QuietPaths:     []string{"/health", "/socket.io"},
+		Keys:           modules.Keys,
 		Throttling: &httpapi.Throttling{
 			Limiter:  ratelimit.New(infra.Redis),
 			Settings: modules.Settings,
@@ -35,6 +37,7 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 				"auth":                   {Limit: httpapi.AuthThrottleLimit, Window: httpapi.AuthThrottleWindow, Block: httpapi.AuthThrottleBlock},
 				searchhttp.Throttle:      {Limit: httpapi.SearchThrottleLimit, Window: httpapi.SearchThrottleWindow, Block: httpapi.DefaultThrottleBlock},
 				uploadhttp.ChunkThrottle: {Limit: httpapi.UploadChunkThrottleLimit, Window: httpapi.UploadChunkThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+				openhttp.Throttle:        {Limit: httpapi.OpenThrottleLimit, Window: httpapi.OpenThrottleWindow, Block: httpapi.OpenThrottleBlock},
 			},
 		},
 	})

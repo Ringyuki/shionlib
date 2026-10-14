@@ -14,6 +14,7 @@ import (
 
 type Repository interface {
 	ListGameResources(ctx context.Context, gameID int) ([]GameResource, error)
+	ListGamesResources(ctx context.Context, gameIDs []int) ([]GameResource, error)
 	ListCreditedResources(ctx context.Context, translatorID int) ([]int, error)
 	GetGameResource(ctx context.Context, id int, excludeRated bool) (GameResource, error)
 	ListReleases(ctx context.Context, excludeRated bool, page Page) ([]Release, int, error)

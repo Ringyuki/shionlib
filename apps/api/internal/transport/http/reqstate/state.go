@@ -11,6 +11,7 @@ type State struct {
 	err      error
 	route    string
 	userID   int
+	keyID    int
 	hasError bool
 }
 
@@ -56,6 +57,22 @@ func RecordUser(ctx context.Context, userID int) {
 	state.mu.Lock()
 	defer state.mu.Unlock()
 	state.userID = userID
+}
+
+func RecordKey(ctx context.Context, keyID int) {
+	state := From(ctx)
+	if state == nil {
+		return
+	}
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	state.keyID = keyID
+}
+
+func (s *State) KeyID() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.keyID
 }
 
 func (s *State) UserID() int {
