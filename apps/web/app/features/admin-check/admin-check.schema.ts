@@ -55,8 +55,19 @@ export function caseReviewForm(kit: FormKit, issue: CheckIssueMessage) {
   })
 }
 
+export const maxBatch = 100
+
+const ids = v.pipe(v.array(id), v.minLength(1), v.maxLength(maxBatch))
+
+export const quickReviewCommand = v.object({
+  ids,
+  decision: v.picklist(decisions),
+})
+
+export type QuickReview = v.InferOutput<typeof quickReviewCommand>
+
 export const stalledCommand = v.object({
-  fileId: id,
+  fileIds: ids,
   action: v.picklist(['recheck', 'remove']),
 })
 

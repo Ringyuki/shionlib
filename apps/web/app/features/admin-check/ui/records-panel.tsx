@@ -2,7 +2,7 @@ import { Panel, Select, Text, Time } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { RecordTable, UserRef, type Paging, type RecordColumn } from '~/features/admin'
 import { outcomes, type Outcome, type ScanCase } from '../admin-check'
-import { Detections, FileCell, OutcomeTag } from './check-cells'
+import { Detections, FileCell, fileWidth, OutcomeTag, userWidth } from './check-cells'
 
 type RecordsPanelProps = {
   records: ScanCase[]
@@ -18,9 +18,9 @@ export function RecordsPanel(props: RecordsPanelProps) {
   const { records, paging, outcome, onOutcomeChange, onOpen } = props
   const t = useTranslations('adminCheck')
   const columns: RecordColumn[] = [
-    { key: 'file', label: t('column.file'), fill: true },
+    { key: 'file', label: t('column.file'), fill: true, minWidth: fileWidth },
     { key: 'found', label: t('column.found'), wide: true },
-    { key: 'uploader', label: t('column.uploader'), wide: true },
+    { key: 'uploader', label: t('column.uploader'), wide: true, minWidth: userWidth },
     { key: 'outcome', label: t('column.outcome') },
     { key: 'reviewer', label: t('column.reviewer'), wide: true },
     { key: 'time', label: t('column.time'), wide: true },
@@ -63,7 +63,7 @@ export function RecordsPanel(props: RecordsPanelProps) {
                 />
               )
             case 'found':
-              return <Detections names={scanCase.detected_viruses ?? []} />
+              return <Detections names={scanCase.detected_viruses ?? []} wrap={false} />
             case 'uploader':
               return <UserRef user={scanCase.uploader} />
             case 'outcome':

@@ -6,6 +6,7 @@ export default [
   route('admin/*', 'routes/locale-redirect.ts', { id: 'admin-locale' }),
   route('resources/admin/reports/review', 'routes/resources.admin.reports.review.ts'),
   route('resources/admin/checks/review', 'routes/resources.admin.checks.review.ts'),
+  route('resources/admin/checks/quick-review', 'routes/resources.admin.checks.quick-review.ts'),
   route('resources/admin/checks/stalled', 'routes/resources.admin.checks.stalled.ts'),
   route('resources/admin/users', 'routes/resources.admin.users.ts'),
   route('resources/admin/games', 'routes/resources.admin.games.ts'),

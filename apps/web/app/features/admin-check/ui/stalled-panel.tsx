@@ -8,23 +8,34 @@ import { useLast } from '~/shared/ui/use-last'
 import type { Stalled } from '../admin-check'
 import type { StalledChange } from '../admin-check.schema'
 import { useStalledChange } from '../use-stalled-change'
-import { FileCell, RowActions } from './check-cells'
+import { BulkBar } from './bulk-bar'
+import { FileCell, fileWidth, RowActions, userWidth } from './check-cells'
 
-type Asked = { stalled: Stalled; action: StalledChange['action'] }
+type Asked = { fileIds: number[]; name: string; action: StalledChange['action'] }
 
 export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
   const t = useTranslations('adminCheck')
   const shared = useTranslations('admin')
+  const [selected, setSelected] = useState<number[]>([])
   const [asked, setAsked] = useState<Asked>()
   const shown = useLast(asked)
   const change = useStalledChange()
+  const chosen = selected.filter(id => stalled.some(entry => entry.file_id === id))
+  const ask = (action: Asked['action']) =>
+    setAsked({
+      fileIds: chosen,
+      name: stalled.find(entry => entry.file_id === chosen[0])?.file_name ?? '',
+      action,
+    })
+  const decide = (entry: Stalled, action: Asked['action']) =>
+    setAsked({ fileIds: [entry.file_id], name: entry.file_name, action })
   const columns: RecordColumn[] = [
-    { key: 'file', label: t('column.file'), fill: true },
+    { key: 'file', label: t('column.file'), fill: true, minWidth: fileWidth },
     { key: 'reason', label: t('column.reason'), wide: true, className: 'w-[32%] min-w-56' },
-    { key: 'uploader', label: t('column.uploader'), wide: true },
+    { key: 'uploader', label: t('column.uploader'), wide: true, minWidth: userWidth },
     { key: 'uploaded', label: t('column.uploaded'), wide: true },
     { key: 'deadline', label: t('column.deadline'), wide: true },
-    { key: 'actions', label: t('column.actions'), align: 'end' },
+    { key: 'actions', label: t('column.actions'), align: 'end', pin: 'end' },
   ]
   const attempts = (entry: Stalled) =>
     t.rich('stalled.attempts', {
@@ -38,6 +49,18 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
       description={t('stalled.description')}
       count={stalled.length}
       padded={false}
+      actions={
+        chosen.length > 0 && (
+          <BulkBar count={chosen.length} onClear={() => setSelected([])}>
+            <Button size="sm" variant="outline" tone="neutral" onClick={() => ask('recheck')}>
+              {t('stalled.recheck')}
+            </Button>
+            <Button size="sm" variant="outline" tone="danger" onClick={() => ask('remove')}>
+              {t('stalled.remove')}
+            </Button>
+          </BulkBar>
+        )
+      }
     >
       <RecordTable
         label={t('stalled.title')}
@@ -46,6 +69,10 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
         columns={columns}
         empty={t('stalled.empty')}
         emptyIcon={<CircleCheck />}
+        selected={chosen}
+        onSelectedChange={keys =>
+          setSelected(stalled.map(entry => entry.file_id).filter(id => keys.includes(id)))
+        }
         renderCell={(entry, column) => {
           switch (column) {
             case 'file':
@@ -74,7 +101,7 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
                     size="sm"
                     variant="outline"
                     tone="neutral"
-                    onClick={() => setAsked({ stalled: entry, action: 'recheck' })}
+                    onClick={() => decide(entry, 'recheck')}
                   >
                     {t('stalled.recheck')}
                   </Button>
@@ -82,7 +109,7 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
                     size="sm"
                     variant="outline"
                     tone="danger"
-                    onClick={() => setAsked({ stalled: entry, action: 'remove' })}
+                    onClick={() => decide(entry, 'remove')}
                   >
                     {t('stalled.remove')}
                   </Button>
@@ -94,7 +121,8 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
       <AlertDialog
         title={t('stalled.confirm', {
           action: shown?.action ?? 'recheck',
-          name: shown?.stalled.file_name ?? '',
+          count: shown?.fileIds.length ?? 1,
+          name: shown?.name ?? '',
         })}
         description={t('stalled.confirmHint', { action: shown?.action ?? 'recheck' })}
         confirmText={t(`stalled.${shown?.action ?? 'recheck'}`)}
@@ -110,8 +138,9 @@ export function StalledPanel({ stalled }: { stalled: Stalled[] }) {
           if (asked === undefined) {
             return
           }
-          await change.confirm({ fileId: asked.stalled.file_id, action: asked.action })
-          toast.success(t('stalled.done', { action: asked.action }))
+          await change.confirm({ fileIds: asked.fileIds, action: asked.action })
+          setSelected(current => current.filter(id => !asked.fileIds.includes(id)))
+          toast.success(t('stalled.done', { action: asked.action, count: asked.fileIds.length }))
         }}
       />
     </Panel>
