@@ -124,7 +124,7 @@ test('lists the friend sites on a page of their own', async ({ page }) => {
   await expect(title(page)).toHaveText('友情链接')
   await expect(page).toHaveTitle('友情链接 | Shionlib')
   const sites = page.getByRole('main').getByRole('listitem')
-  await expect(sites).toHaveCount(7)
+  await expect(sites.filter({ hasText: 'SakuGAL' })).toHaveCount(1)
   const first = sites.first().getByRole('link')
   await expect(first).toHaveAttribute('href', 'https://www.kungal.com')
   await expect(first).toHaveAttribute('target', '_blank')

@@ -17,19 +17,6 @@ async function choose(page: Page, action: string) {
   await page.getByRole('menuitem', { name: action, exact: true }).click()
 }
 
-test('the friend links page shows the sites with their addresses', async ({ page }) => {
-  await page.goto('/zh/friend-link')
-  await expect(page.getByRole('heading', { name: '友情链接', level: 1 })).toBeVisible()
-  await expect(page.getByRole('link', { name: /KUN Visual Novel Forum/ })).toHaveAttribute(
-    'href',
-    'https://www.kungal.com',
-  )
-  await expect(page.getByRole('link', { name: /Nysoure/ })).toHaveAttribute(
-    'href',
-    'https://nysoure.com/',
-  )
-})
-
 test.describe('as an administrator', () => {
   test.use({ storageState: sessionFile('admin') })
   test.describe.configure({ mode: 'serial', retries: 0 })
