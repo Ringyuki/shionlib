@@ -1,18 +1,21 @@
 import type { Locale } from '@/config'
 import type { CollectionView, HomeView, Shelf } from '@/cards/collection'
+import { labelsOf } from '@/i18n/messages'
 import { Brand, Frame, padding, tokens, Veil } from './parts'
 
 const shelfItem = { width: 176, height: 250 }
 
-function ShelfCover({ cover }: { cover: Shelf }) {
+const homeItem = { width: 144, height: 205 }
+
+function ShelfCover({ cover, size = shelfItem }: { cover: Shelf; size?: typeof shelfItem }) {
   return (
     <div
       style={{
         position: 'relative',
         display: 'flex',
         flexShrink: 0,
-        width: shelfItem.width,
-        height: shelfItem.height,
+        width: size.width,
+        height: size.height,
         borderRadius: 16,
         overflow: 'hidden',
         border: `2px solid ${tokens.border}`,
@@ -21,8 +24,8 @@ function ShelfCover({ cover }: { cover: Shelf }) {
     >
       <img
         src={cover.src}
-        width={shelfItem.width}
-        height={shelfItem.height}
+        width={size.width}
+        height={size.height}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
       {cover.masked ? <Veil circle={56} icon={26} /> : null}
@@ -107,20 +110,25 @@ export function HomeCard({
   view,
   locale,
   loaded,
-  host,
 }: {
   view: HomeView
   locale: Locale
   loaded: Set<string>
-  host: string
 }) {
   const shelf = view.shelf.filter(cover => loaded.has(cover.src))
   return (
     <Frame locale={locale} style={{ padding, gap: 56, alignItems: 'center' }}>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <Brand locale={locale} logo={112} wordmark={60} gap={36} stacked />
-        <div style={{ marginTop: 24, fontSize: 32, lineHeight: 1.4, color: tokens.muted }}>
-          {host}
+        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column' }}>
+          {labelsOf(locale).slogan.map(line => (
+            <div
+              key={line}
+              style={{ fontSize: 28, lineHeight: 1.5, color: tokens.muted, whiteSpace: 'nowrap' }}
+            >
+              {line}
+            </div>
+          ))}
         </div>
       </div>
       {shelf.length > 0 ? (
@@ -129,12 +137,12 @@ export function HomeCard({
             display: 'flex',
             flexWrap: 'wrap',
             gap: 20,
-            width: shelfItem.width * 3 + 40,
+            width: homeItem.width * 3 + 40,
             flexShrink: 0,
           }}
         >
           {shelf.map(cover => (
-            <ShelfCover key={cover.src} cover={cover} />
+            <ShelfCover key={cover.src} cover={cover} size={homeItem} />
           ))}
         </div>
       ) : null}
