@@ -76,7 +76,7 @@ func (h *Handler) create(ctx context.Context, in *createDownloadSourceInput) (*r
 		Platforms: in.Body.Platform,
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
-		Note:      in.Body.Note,
+		Note:      in.Body.note,
 		Info:      in.Body.info(),
 		Canonical: in.Body.Canonical == nil || *in.Body.Canonical,
 		Files:     fileUploads(in.Body.Files),
@@ -137,7 +137,7 @@ func (h *Handler) edit(ctx context.Context, in *editDownloadSourceInput) (*respo
 		Platforms: in.Body.Platform,
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
-		Note:      in.Body.Note,
+		Note:      in.Body.note,
 		Info:      in.Body.info(),
 		Canonical: in.Body.Canonical,
 	})
@@ -173,7 +173,7 @@ func (h *Handler) migrateResource(ctx context.Context, in *downloadMigrateResour
 		Platforms: in.Body.Platform,
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
-		Note:      in.Body.Note,
+		Note:      in.Body.note,
 	})
 	if err != nil {
 		return nil, err

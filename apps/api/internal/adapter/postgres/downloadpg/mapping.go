@@ -11,6 +11,13 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
+func toNote(row *ent.GameDownloadResource) *download.Note {
+	if len(row.Note) == 0 {
+		return nil
+	}
+	return &download.Note{Content: row.Note, Text: row.NoteText}
+}
+
 func toResource(row *ent.GameDownloadResource) download.Resource {
 	resource := download.Resource{
 		ID:          row.ID,
@@ -18,7 +25,7 @@ func toResource(row *ent.GameDownloadResource) download.Resource {
 		Status:      row.Status,
 		Platforms:   nonNilStrings(row.Platform),
 		Languages:   nonNilStrings(row.Language),
-		Note:        row.Note,
+		Note:        toNote(row),
 		Info:        toInfo(row),
 		Canonical:   row.CanonicalName,
 		Downloads:   row.Downloads,

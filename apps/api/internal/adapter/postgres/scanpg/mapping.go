@@ -13,7 +13,10 @@ func toView(row *ent.MalwareScanCase) scan.CaseView {
 		view.File = toCaseFile(file)
 	}
 	if resource := row.Edges.Resource; resource != nil {
-		ref := &scan.CaseResource{ID: resource.ID, GameID: resource.GameID, Note: resource.Note, Game: scan.GameTitles{ID: resource.GameID}}
+		ref := &scan.CaseResource{ID: resource.ID, GameID: resource.GameID, Game: scan.GameTitles{ID: resource.GameID}}
+		if resource.NoteText != "" {
+			ref.Note = &resource.NoteText
+		}
 		if gameRow := resource.Edges.Game; gameRow != nil {
 			ref.Game = toTitles(gameRow)
 		}

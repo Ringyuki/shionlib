@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
@@ -120,22 +122,34 @@ func (_u *GameDownloadResourceUpdate) ClearLanguage() *GameDownloadResourceUpdat
 }
 
 // SetNote sets the "note" field.
-func (_u *GameDownloadResourceUpdate) SetNote(v string) *GameDownloadResourceUpdate {
+func (_u *GameDownloadResourceUpdate) SetNote(v jsontext.Value) *GameDownloadResourceUpdate {
 	_u.mutation.SetNote(v)
 	return _u
 }
 
-// SetNillableNote sets the "note" field if the given value is not nil.
-func (_u *GameDownloadResourceUpdate) SetNillableNote(v *string) *GameDownloadResourceUpdate {
-	if v != nil {
-		_u.SetNote(*v)
-	}
+// AppendNote appends value to the "note" field.
+func (_u *GameDownloadResourceUpdate) AppendNote(v jsontext.Value) *GameDownloadResourceUpdate {
+	_u.mutation.AppendNote(v)
 	return _u
 }
 
 // ClearNote clears the value of the "note" field.
 func (_u *GameDownloadResourceUpdate) ClearNote() *GameDownloadResourceUpdate {
 	_u.mutation.ClearNote()
+	return _u
+}
+
+// SetNoteText sets the "note_text" field.
+func (_u *GameDownloadResourceUpdate) SetNoteText(v string) *GameDownloadResourceUpdate {
+	_u.mutation.SetNoteText(v)
+	return _u
+}
+
+// SetNillableNoteText sets the "note_text" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableNoteText(v *string) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetNoteText(*v)
+	}
 	return _u
 }
 
@@ -758,11 +772,6 @@ func (_u *GameDownloadResourceUpdate) check() error {
 			return &ValidationError{Name: "simulator", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.simulator": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Note(); ok {
-		if err := gamedownloadresource.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Translation(); ok {
 		if err := gamedownloadresource.TranslationValidator(v); err != nil {
 			return &ValidationError{Name: "translation", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.translation": %w`, err)}
@@ -845,10 +854,18 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 		_spec.ClearField(gamedownloadresource.FieldLanguage, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Note(); ok {
-		_spec.SetField(gamedownloadresource.FieldNote, field.TypeString, value)
+		_spec.SetField(gamedownloadresource.FieldNote, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedNote(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, gamedownloadresource.FieldNote, value)
+		})
 	}
 	if _u.mutation.NoteCleared() {
-		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeString)
+		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.NoteText(); ok {
+		_spec.SetField(gamedownloadresource.FieldNoteText, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Translation(); ok {
 		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)
@@ -1445,22 +1462,34 @@ func (_u *GameDownloadResourceUpdateOne) ClearLanguage() *GameDownloadResourceUp
 }
 
 // SetNote sets the "note" field.
-func (_u *GameDownloadResourceUpdateOne) SetNote(v string) *GameDownloadResourceUpdateOne {
+func (_u *GameDownloadResourceUpdateOne) SetNote(v jsontext.Value) *GameDownloadResourceUpdateOne {
 	_u.mutation.SetNote(v)
 	return _u
 }
 
-// SetNillableNote sets the "note" field if the given value is not nil.
-func (_u *GameDownloadResourceUpdateOne) SetNillableNote(v *string) *GameDownloadResourceUpdateOne {
-	if v != nil {
-		_u.SetNote(*v)
-	}
+// AppendNote appends value to the "note" field.
+func (_u *GameDownloadResourceUpdateOne) AppendNote(v jsontext.Value) *GameDownloadResourceUpdateOne {
+	_u.mutation.AppendNote(v)
 	return _u
 }
 
 // ClearNote clears the value of the "note" field.
 func (_u *GameDownloadResourceUpdateOne) ClearNote() *GameDownloadResourceUpdateOne {
 	_u.mutation.ClearNote()
+	return _u
+}
+
+// SetNoteText sets the "note_text" field.
+func (_u *GameDownloadResourceUpdateOne) SetNoteText(v string) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetNoteText(v)
+	return _u
+}
+
+// SetNillableNoteText sets the "note_text" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableNoteText(v *string) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetNoteText(*v)
+	}
 	return _u
 }
 
@@ -2096,11 +2125,6 @@ func (_u *GameDownloadResourceUpdateOne) check() error {
 			return &ValidationError{Name: "simulator", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.simulator": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Note(); ok {
-		if err := gamedownloadresource.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Translation(); ok {
 		if err := gamedownloadresource.TranslationValidator(v); err != nil {
 			return &ValidationError{Name: "translation", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.translation": %w`, err)}
@@ -2200,10 +2224,18 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 		_spec.ClearField(gamedownloadresource.FieldLanguage, field.TypeOther)
 	}
 	if value, ok := _u.mutation.Note(); ok {
-		_spec.SetField(gamedownloadresource.FieldNote, field.TypeString, value)
+		_spec.SetField(gamedownloadresource.FieldNote, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedNote(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, gamedownloadresource.FieldNote, value)
+		})
 	}
 	if _u.mutation.NoteCleared() {
-		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeString)
+		_spec.ClearField(gamedownloadresource.FieldNote, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.NoteText(); ok {
+		_spec.SetField(gamedownloadresource.FieldNoteText, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Translation(); ok {
 		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)

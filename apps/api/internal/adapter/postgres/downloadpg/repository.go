@@ -234,7 +234,6 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 		SetGameID(in.GameID).
 		SetPlatform(textArray(in.Platforms)).
 		SetLanguage(textArray(in.Languages)).
-		SetNillableNote(in.Note).
 		SetNillableTranslation((*string)(in.Info.Translation)).
 		SetNillablePatchVersion(in.Info.PatchVersion).
 		SetNillableReleaseURL(in.Info.ReleaseURL).
@@ -246,6 +245,9 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 		SetCreatorID(in.CreatorID)
 	if in.Simulator != nil {
 		create.SetSimulator(gamedownloadresource.Simulator(*in.Simulator))
+	}
+	if in.Note != nil {
+		create.SetNote(in.Note.Content).SetNoteText(in.Note.Text)
 	}
 	row, err := create.Save(ctx)
 	switch {
@@ -336,9 +338,7 @@ func (r *Repository) UpdateResource(ctx context.Context, id int, changes downloa
 	} else {
 		update.ClearSimulator()
 	}
-	if changes.Note != nil {
-		update.SetNote(*changes.Note)
-	}
+	setOrClear(changes.Note != nil, func() { update.SetNote(changes.Note.Content).SetNoteText(changes.Note.Text) }, func() { update.ClearNote().SetNoteText("") })
 	info := changes.Info
 	setOrClear(info.Translation != nil, func() { update.SetTranslation(string(*info.Translation)) }, func() { update.ClearTranslation() })
 	setOrClear(info.PatchVersion != nil, func() { update.SetPatchVersion(*info.PatchVersion) }, func() { update.ClearPatchVersion() })

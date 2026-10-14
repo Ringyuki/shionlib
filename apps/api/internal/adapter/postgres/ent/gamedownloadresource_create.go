@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -80,15 +81,21 @@ func (_c *GameDownloadResourceCreate) SetLanguage(v pgvalue.Strings) *GameDownlo
 }
 
 // SetNote sets the "note" field.
-func (_c *GameDownloadResourceCreate) SetNote(v string) *GameDownloadResourceCreate {
+func (_c *GameDownloadResourceCreate) SetNote(v jsontext.Value) *GameDownloadResourceCreate {
 	_c.mutation.SetNote(v)
 	return _c
 }
 
-// SetNillableNote sets the "note" field if the given value is not nil.
-func (_c *GameDownloadResourceCreate) SetNillableNote(v *string) *GameDownloadResourceCreate {
+// SetNoteText sets the "note_text" field.
+func (_c *GameDownloadResourceCreate) SetNoteText(v string) *GameDownloadResourceCreate {
+	_c.mutation.SetNoteText(v)
+	return _c
+}
+
+// SetNillableNoteText sets the "note_text" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableNoteText(v *string) *GameDownloadResourceCreate {
 	if v != nil {
-		_c.SetNote(*v)
+		_c.SetNoteText(*v)
 	}
 	return _c
 }
@@ -476,6 +483,10 @@ func (_c *GameDownloadResourceCreate) defaults() {
 		v := gamedownloadresource.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.NoteText(); !ok {
+		v := gamedownloadresource.DefaultNoteText
+		_c.mutation.SetNoteText(v)
+	}
 	if _, ok := _c.mutation.CanonicalName(); !ok {
 		v := gamedownloadresource.DefaultCanonicalName
 		_c.mutation.SetCanonicalName(v)
@@ -511,10 +522,8 @@ func (_c *GameDownloadResourceCreate) check() error {
 			return &ValidationError{Name: "simulator", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.simulator": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Note(); ok {
-		if err := gamedownloadresource.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.note": %w`, err)}
-		}
+	if _, ok := _c.mutation.NoteText(); !ok {
+		return &ValidationError{Name: "note_text", err: errors.New(`ent: missing required field "GameDownloadResource.note_text"`)}
 	}
 	if v, ok := _c.mutation.Translation(); ok {
 		if err := gamedownloadresource.TranslationValidator(v); err != nil {
@@ -617,8 +626,12 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 		_node.Language = value
 	}
 	if value, ok := _c.mutation.Note(); ok {
-		_spec.SetField(gamedownloadresource.FieldNote, field.TypeString, value)
-		_node.Note = &value
+		_spec.SetField(gamedownloadresource.FieldNote, field.TypeJSON, value)
+		_node.Note = value
+	}
+	if value, ok := _c.mutation.NoteText(); ok {
+		_spec.SetField(gamedownloadresource.FieldNoteText, field.TypeString, value)
+		_node.NoteText = value
 	}
 	if value, ok := _c.mutation.Translation(); ok {
 		_spec.SetField(gamedownloadresource.FieldTranslation, field.TypeString, value)
@@ -979,7 +992,7 @@ func (u *GameDownloadResourceUpsert) ClearLanguage() *GameDownloadResourceUpsert
 }
 
 // SetNote sets the "note" field.
-func (u *GameDownloadResourceUpsert) SetNote(v string) *GameDownloadResourceUpsert {
+func (u *GameDownloadResourceUpsert) SetNote(v jsontext.Value) *GameDownloadResourceUpsert {
 	u.Set(gamedownloadresource.FieldNote, v)
 	return u
 }
@@ -993,6 +1006,18 @@ func (u *GameDownloadResourceUpsert) UpdateNote() *GameDownloadResourceUpsert {
 // ClearNote clears the value of the "note" field.
 func (u *GameDownloadResourceUpsert) ClearNote() *GameDownloadResourceUpsert {
 	u.SetNull(gamedownloadresource.FieldNote)
+	return u
+}
+
+// SetNoteText sets the "note_text" field.
+func (u *GameDownloadResourceUpsert) SetNoteText(v string) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldNoteText, v)
+	return u
+}
+
+// UpdateNoteText sets the "note_text" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateNoteText() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldNoteText)
 	return u
 }
 
@@ -1392,7 +1417,7 @@ func (u *GameDownloadResourceUpsertOne) ClearLanguage() *GameDownloadResourceUps
 }
 
 // SetNote sets the "note" field.
-func (u *GameDownloadResourceUpsertOne) SetNote(v string) *GameDownloadResourceUpsertOne {
+func (u *GameDownloadResourceUpsertOne) SetNote(v jsontext.Value) *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.SetNote(v)
 	})
@@ -1409,6 +1434,20 @@ func (u *GameDownloadResourceUpsertOne) UpdateNote() *GameDownloadResourceUpsert
 func (u *GameDownloadResourceUpsertOne) ClearNote() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearNote()
+	})
+}
+
+// SetNoteText sets the "note_text" field.
+func (u *GameDownloadResourceUpsertOne) SetNoteText(v string) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetNoteText(v)
+	})
+}
+
+// UpdateNoteText sets the "note_text" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateNoteText() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateNoteText()
 	})
 }
 
@@ -2015,7 +2054,7 @@ func (u *GameDownloadResourceUpsertBulk) ClearLanguage() *GameDownloadResourceUp
 }
 
 // SetNote sets the "note" field.
-func (u *GameDownloadResourceUpsertBulk) SetNote(v string) *GameDownloadResourceUpsertBulk {
+func (u *GameDownloadResourceUpsertBulk) SetNote(v jsontext.Value) *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.SetNote(v)
 	})
@@ -2032,6 +2071,20 @@ func (u *GameDownloadResourceUpsertBulk) UpdateNote() *GameDownloadResourceUpser
 func (u *GameDownloadResourceUpsertBulk) ClearNote() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearNote()
+	})
+}
+
+// SetNoteText sets the "note_text" field.
+func (u *GameDownloadResourceUpsertBulk) SetNoteText(v string) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetNoteText(v)
+	})
+}
+
+// UpdateNoteText sets the "note_text" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateNoteText() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateNoteText()
 	})
 }
 

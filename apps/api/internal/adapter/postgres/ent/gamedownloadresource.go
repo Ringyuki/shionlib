@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -31,7 +33,9 @@ type GameDownloadResource struct {
 	// Language holds the value of the "language" field.
 	Language pgvalue.Strings `json:"language,omitempty"`
 	// Note holds the value of the "note" field.
-	Note *string `json:"note,omitempty"`
+	Note jsontext.Value `json:"note,omitempty"`
+	// NoteText holds the value of the "note_text" field.
+	NoteText string `json:"note_text,omitempty"`
 	// Translation holds the value of the "translation" field.
 	Translation *string `json:"translation,omitempty"`
 	// PatchVersion holds the value of the "patch_version" field.
@@ -196,13 +200,15 @@ func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case gamedownloadresource.FieldNote:
+			values[i] = new([]byte)
 		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage, gamedownloadresource.FieldExtras:
 			values[i] = new(pgvalue.Strings)
 		case gamedownloadresource.FieldCanonicalName, gamedownloadresource.FieldUndescribed:
 			values[i] = new(sql.NullBool)
 		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote, gamedownloadresource.FieldTranslation, gamedownloadresource.FieldPatchVersion, gamedownloadresource.FieldReleaseURL, gamedownloadresource.FieldEdition, gamedownloadresource.FieldEditionName, gamedownloadresource.FieldForm:
+		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNoteText, gamedownloadresource.FieldTranslation, gamedownloadresource.FieldPatchVersion, gamedownloadresource.FieldReleaseURL, gamedownloadresource.FieldEdition, gamedownloadresource.FieldEditionName, gamedownloadresource.FieldForm:
 			values[i] = new(sql.NullString)
 		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCheckRetryAt, gamedownloadresource.FieldInspectRetryAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -259,11 +265,18 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 				_m.Language = *value
 			}
 		case gamedownloadresource.FieldNote:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field note", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Note); err != nil {
+					return fmt.Errorf("unmarshal field note: %w", err)
+				}
+			}
+		case gamedownloadresource.FieldNoteText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field note_text", values[i])
 			} else if value.Valid {
-				_m.Note = new(string)
-				*_m.Note = value.String
+				_m.NoteText = value.String
 			}
 		case gamedownloadresource.FieldTranslation:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -473,10 +486,11 @@ func (_m *GameDownloadResource) String() string {
 	builder.WriteString("language=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Language))
 	builder.WriteString(", ")
-	if v := _m.Note; v != nil {
-		builder.WriteString("note=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("note=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Note))
+	builder.WriteString(", ")
+	builder.WriteString("note_text=")
+	builder.WriteString(_m.NoteText)
 	builder.WriteString(", ")
 	if v := _m.Translation; v != nil {
 		builder.WriteString("translation=")

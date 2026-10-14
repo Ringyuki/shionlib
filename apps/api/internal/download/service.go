@@ -198,7 +198,7 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 			Platforms: in.Platforms,
 			Languages: in.Languages,
 			Simulator: in.Simulator,
-			Note:      in.Note,
+			Note:      NoteOf(in.Note),
 			Info:      info.with(credited),
 			Canonical: in.Canonical,
 			CreatorID: who.UserID,
@@ -386,7 +386,7 @@ func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, in EditInpu
 		if err != nil {
 			return err
 		}
-		changes := ResourceChanges{Platforms: in.Platforms, Languages: in.Languages, Simulator: in.Simulator, Note: in.Note, Info: info.with(credited), Canonical: in.Canonical}
+		changes := ResourceChanges{Platforms: in.Platforms, Languages: in.Languages, Simulator: in.Simulator, Note: NoteOf(in.Note), Info: info.with(credited), Canonical: in.Canonical}
 		if err := s.repo.UpdateResource(ctx, id, changes); err != nil {
 			return err
 		}
@@ -504,7 +504,7 @@ func (s *Service) MigrateResource(ctx context.Context, gameID int, in MigrateRes
 			Platforms: in.Platforms,
 			Languages: in.Languages,
 			Simulator: in.Simulator,
-			Note:      in.Note,
+			Note:      NoteOf(in.Note),
 			CreatorID: migrationCreatorID,
 		})
 		id = resource.ID

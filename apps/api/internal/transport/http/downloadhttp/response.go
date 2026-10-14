@@ -7,6 +7,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
@@ -61,7 +62,7 @@ type downloadResourceDTO struct {
 	Platform        []string                `json:"platform"`
 	Language        []string                `json:"language"`
 	Simulator       *string                 `json:"simulator"`
-	Note            *string                 `json:"note"`
+	Note            richtexthttp.Content    `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out when the resource has no note"`
 	Translation     *download.Translation   `json:"translation" enum:"none,official,group,machine" doc:"Where the text in a language other than Japanese comes from; null when nobody has said"`
 	Translators     []downloadTranslatorDTO `json:"translators" doc:"The translators credited, in the order they were given; empty unless the translation is by a group"`
 	PatchVersion    *string                 `json:"patch_version"`
@@ -177,7 +178,7 @@ type downloadReleaseDTO struct {
 	ID          int                     `json:"id"`
 	Platform    []string                `json:"platform"`
 	Language    []string                `json:"language"`
-	Note        *string                 `json:"note"`
+	Note        richtexthttp.Content    `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out when the resource has no note"`
 	Downloads   int                     `json:"downloads"`
 	Game        gamehttp.GameCardDTO    `json:"game"`
 	Files       []string                `json:"files"`
@@ -201,7 +202,7 @@ type downloadUserResourceDTO struct {
 	ID              int                     `json:"id"`
 	Platform        []string                `json:"platform"`
 	Language        []string                `json:"language"`
-	Note            *string                 `json:"note"`
+	Note            richtexthttp.Content    `json:"note,omitempty" doc:"Paragraphs with bold, links and spoilers; left out when the resource has no note"`
 	Downloads       int                     `json:"downloads"`
 	FileName        string                  `json:"file_name"`
 	MoreThanOneFile bool                    `json:"more_than_one_file"`
@@ -265,7 +266,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 		Platform:       nonNil(r.Platforms),
 		Language:       nonNil(r.Languages),
 		Simulator:      r.Simulator,
-		Note:           r.Note,
+		Note:           noteContent(r.Note),
 		Translation:    r.Info.Translation,
 		Translators:    make([]downloadTranslatorDTO, len(r.Info.Translators)),
 		PatchVersion:   r.Info.PatchVersion,
@@ -332,7 +333,7 @@ func toReleaseDTO(r download.Release, now time.Time) downloadReleaseDTO {
 		ID:          r.ID,
 		Platform:    nonNil(r.Platforms),
 		Language:    nonNil(r.Languages),
-		Note:        r.Note,
+		Note:        noteContent(r.Note),
 		Downloads:   r.Downloads,
 		Game:        gamehttp.ToGameCard(r.Game),
 		Files:       nonNil(r.FileNames),
@@ -348,7 +349,7 @@ func toUserResourceDTO(r download.UserResource, now time.Time) downloadUserResou
 		ID:              r.ID,
 		Platform:        nonNil(r.Platforms),
 		Language:        nonNil(r.Languages),
-		Note:            r.Note,
+		Note:            noteContent(r.Note),
 		Downloads:       r.Downloads,
 		MoreThanOneFile: r.FilesCount > 1,
 		FilesCount:      r.FilesCount,
@@ -399,4 +400,11 @@ func nonNil(values []string) []string {
 		return []string{}
 	}
 	return values
+}
+
+func noteContent(note *download.Note) richtexthttp.Content {
+	if note == nil {
+		return nil
+	}
+	return richtexthttp.Content(note.Content)
 }

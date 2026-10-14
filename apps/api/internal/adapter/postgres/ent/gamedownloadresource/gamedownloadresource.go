@@ -27,6 +27,8 @@ const (
 	FieldLanguage = "language"
 	// FieldNote holds the string denoting the note field in the database.
 	FieldNote = "note"
+	// FieldNoteText holds the string denoting the note_text field in the database.
+	FieldNoteText = "note_text"
 	// FieldTranslation holds the string denoting the translation field in the database.
 	FieldTranslation = "translation"
 	// FieldPatchVersion holds the string denoting the patch_version field in the database.
@@ -162,6 +164,7 @@ var Columns = []string{
 	FieldSimulator,
 	FieldLanguage,
 	FieldNote,
+	FieldNoteText,
 	FieldTranslation,
 	FieldPatchVersion,
 	FieldReleaseURL,
@@ -193,8 +196,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus int
-	// NoteValidator is a validator for the "note" field. It is called by the builders before save.
-	NoteValidator func(string) error
+	// DefaultNoteText holds the default value on creation for the "note_text" field.
+	DefaultNoteText string
 	// TranslationValidator is a validator for the "translation" field. It is called by the builders before save.
 	TranslationValidator func(string) error
 	// PatchVersionValidator is a validator for the "patch_version" field. It is called by the builders before save.
@@ -279,9 +282,9 @@ func ByLanguage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLanguage, opts...).ToFunc()
 }
 
-// ByNote orders the results by the note field.
-func ByNote(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNote, opts...).ToFunc()
+// ByNoteText orders the results by the note_text field.
+func ByNoteText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNoteText, opts...).ToFunc()
 }
 
 // ByTranslation orders the results by the translation field.

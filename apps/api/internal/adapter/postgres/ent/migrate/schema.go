@@ -1421,7 +1421,8 @@ var (
 		{Name: "platform", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
 		{Name: "simulator", Type: field.TypeEnum, Nullable: true, Enums: []string{"KRKR", "ONS", "ARTEMIS", "OTHER"}, SchemaType: map[string]string{"postgres": "game_download_resource_simulator"}},
 		{Name: "language", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
-		{Name: "note", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
+		{Name: "note", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "note_text", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "translation", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
 		{Name: "patch_version", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
 		{Name: "release_url", Type: field.TypeString, Nullable: true, Size: 512, SchemaType: map[string]string{"postgres": "character varying(512)"}},
@@ -1448,13 +1449,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resources_game_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[21]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[22]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resources_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[22]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[23]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1463,7 +1464,7 @@ var (
 			{
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourcesColumns[21], GameDownloadResourcesColumns[1]},
+				Columns: []*schema.Column{GameDownloadResourcesColumns[22], GameDownloadResourcesColumns[1]},
 			},
 		},
 	}

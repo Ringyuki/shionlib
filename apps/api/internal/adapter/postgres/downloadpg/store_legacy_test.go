@@ -22,7 +22,7 @@ func TestLegacyStoreListsResourcesWithTheirNamesAndDiscs(t *testing.T) {
 	store := downloadpg.NewLegacyStore(f.db.Ent)
 	creator, gameID := f.db.User(t), f.db.Game(t)
 	first := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) {
-		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组").SetUndescribed(true)
+		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote(paragraph("绿茶汉化组")).SetNoteText("绿茶汉化组").SetUndescribed(true)
 	})
 	f.resource(t, gameID, creator)
 	f.file(t, first.ID, creator, "game.part1.rar")
@@ -76,7 +76,7 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 	creator, gameID := f.db.User(t), f.db.Game(t)
 	tea := f.db.Ent.Translator.Create().SetName("绿茶汉化组").SetNameKey(translator.Key("绿茶汉化组")).SaveX(ctx)
 	resource := f.resource(t, gameID, creator, func(c *ent.GameDownloadResourceCreate) {
-		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote("绿茶汉化组").SetUndescribed(true)
+		c.SetLanguage(pgvalue.Strings{"zh"}).SetNote(paragraph("绿茶汉化组")).SetNoteText("绿茶汉化组").SetUndescribed(true)
 	})
 	before, err := f.repo.GetResource(ctx, resource.ID)
 	if err != nil {
@@ -95,7 +95,7 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, err := f.repo.GetResource(ctx, resource.ID)
-	if err != nil || got.Note != nil || *got.Info.Translation != download.TranslationGroup || len(got.Info.Translators) != 1 || got.Info.Translators[0].ID != tea.ID ||
+	if err != nil || got.Note != nil || f.db.Ent.GameDownloadResource.GetX(ctx, resource.ID).NoteText != "" || *got.Info.Translation != download.TranslationGroup || len(got.Info.Translators) != 1 || got.Info.Translators[0].ID != tea.ID ||
 		*got.Info.ReleaseURL != "https://example.org/release" || *got.Info.Edition != download.EditionDownload || *got.Info.Form != download.FormDisc {
 		t.Fatalf("described %+v %v", got, err)
 	}

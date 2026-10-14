@@ -36,7 +36,7 @@ func ptr[T any](v T) *T {
 
 func (f fixture) resource(t *testing.T, gameID, creator int) *ent.GameDownloadResource {
 	t.Helper()
-	row, err := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(creator).SetNote("resource note").Save(context.Background())
+	row, err := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(creator).SetNote(json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"resource note"}]}]}`)).SetNoteText("resource note").Save(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -323,7 +323,7 @@ func TestCaseLifecycle(t *testing.T) {
 	if view.File == nil || view.File.ID != file.ID || view.File.CreatorID != uploader || view.File.Status != download.FileOnServer {
 		t.Fatalf("view file: %+v", view.File)
 	}
-	if view.Resource == nil || view.Resource.ID != resource.ID || view.Resource.GameID != gameID || view.Resource.Note == nil || view.Resource.Game.TitleZH != "中文" || view.Resource.Game.TitleEN != "English" {
+	if view.Resource == nil || view.Resource.ID != resource.ID || view.Resource.GameID != gameID || view.Resource.Note == nil || *view.Resource.Note != "resource note" || view.Resource.Game.TitleZH != "中文" || view.Resource.Game.TitleEN != "English" {
 		t.Fatalf("view resource: %+v", view.Resource)
 	}
 	if view.Uploader.ID != uploader || view.Uploader.Name == "" || view.Uploader.Role != 1 || view.Uploader.Status != 1 || view.Reviewer == nil || view.Reviewer.ID != reviewer {

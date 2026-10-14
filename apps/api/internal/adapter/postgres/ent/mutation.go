@@ -37465,7 +37465,9 @@ type GameDownloadResourceMutation struct {
 	platform                  *pgvalue.Strings
 	simulator                 *gamedownloadresource.Simulator
 	language                  *pgvalue.Strings
-	note                      *string
+	note                      *jsontext.Value
+	appendnote                jsontext.Value
+	note_text                 *string
 	translation               *string
 	patch_version             *string
 	release_url               *string
@@ -37860,12 +37862,13 @@ func (m *GameDownloadResourceMutation) ResetLanguage() {
 }
 
 // SetNote sets the "note" field.
-func (m *GameDownloadResourceMutation) SetNote(s string) {
-	m.note = &s
+func (m *GameDownloadResourceMutation) SetNote(j jsontext.Value) {
+	m.note = &j
+	m.appendnote = nil
 }
 
 // Note returns the value of the "note" field in the mutation.
-func (m *GameDownloadResourceMutation) Note() (r string, exists bool) {
+func (m *GameDownloadResourceMutation) Note() (r jsontext.Value, exists bool) {
 	v := m.note
 	if v == nil {
 		return
@@ -37876,7 +37879,7 @@ func (m *GameDownloadResourceMutation) Note() (r string, exists bool) {
 // OldNote returns the old "note" field's value of the GameDownloadResource entity.
 // If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GameDownloadResourceMutation) OldNote(ctx context.Context) (v *string, err error) {
+func (m *GameDownloadResourceMutation) OldNote(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNote is only allowed on UpdateOne operations")
 	}
@@ -37890,9 +37893,23 @@ func (m *GameDownloadResourceMutation) OldNote(ctx context.Context) (v *string, 
 	return oldValue.Note, nil
 }
 
+// AppendNote adds j to the "note" field.
+func (m *GameDownloadResourceMutation) AppendNote(j jsontext.Value) {
+	m.appendnote = append(m.appendnote, j...)
+}
+
+// AppendedNote returns the list of values that were appended to the "note" field in this mutation.
+func (m *GameDownloadResourceMutation) AppendedNote() (jsontext.Value, bool) {
+	if len(m.appendnote) == 0 {
+		return nil, false
+	}
+	return m.appendnote, true
+}
+
 // ClearNote clears the value of the "note" field.
 func (m *GameDownloadResourceMutation) ClearNote() {
 	m.note = nil
+	m.appendnote = nil
 	m.clearedFields[gamedownloadresource.FieldNote] = struct{}{}
 }
 
@@ -37905,7 +37922,44 @@ func (m *GameDownloadResourceMutation) NoteCleared() bool {
 // ResetNote resets all changes to the "note" field.
 func (m *GameDownloadResourceMutation) ResetNote() {
 	m.note = nil
+	m.appendnote = nil
 	delete(m.clearedFields, gamedownloadresource.FieldNote)
+}
+
+// SetNoteText sets the "note_text" field.
+func (m *GameDownloadResourceMutation) SetNoteText(s string) {
+	m.note_text = &s
+}
+
+// NoteText returns the value of the "note_text" field in the mutation.
+func (m *GameDownloadResourceMutation) NoteText() (r string, exists bool) {
+	v := m.note_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNoteText returns the old "note_text" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldNoteText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNoteText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNoteText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNoteText: %w", err)
+	}
+	return oldValue.NoteText, nil
+}
+
+// ResetNoteText resets all changes to the "note_text" field.
+func (m *GameDownloadResourceMutation) ResetNoteText() {
+	m.note_text = nil
 }
 
 // SetTranslation sets the "translation" field.
@@ -39154,7 +39208,7 @@ func (m *GameDownloadResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m.status != nil {
 		fields = append(fields, gamedownloadresource.FieldStatus)
 	}
@@ -39172,6 +39226,9 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	}
 	if m.note != nil {
 		fields = append(fields, gamedownloadresource.FieldNote)
+	}
+	if m.note_text != nil {
+		fields = append(fields, gamedownloadresource.FieldNoteText)
 	}
 	if m.translation != nil {
 		fields = append(fields, gamedownloadresource.FieldTranslation)
@@ -39241,6 +39298,8 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Language()
 	case gamedownloadresource.FieldNote:
 		return m.Note()
+	case gamedownloadresource.FieldNoteText:
+		return m.NoteText()
 	case gamedownloadresource.FieldTranslation:
 		return m.Translation()
 	case gamedownloadresource.FieldPatchVersion:
@@ -39294,6 +39353,8 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldLanguage(ctx)
 	case gamedownloadresource.FieldNote:
 		return m.OldNote(ctx)
+	case gamedownloadresource.FieldNoteText:
+		return m.OldNoteText(ctx)
 	case gamedownloadresource.FieldTranslation:
 		return m.OldTranslation(ctx)
 	case gamedownloadresource.FieldPatchVersion:
@@ -39371,11 +39432,18 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 		m.SetLanguage(v)
 		return nil
 	case gamedownloadresource.FieldNote:
-		v, ok := value.(string)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNote(v)
+		return nil
+	case gamedownloadresource.FieldNoteText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNoteText(v)
 		return nil
 	case gamedownloadresource.FieldTranslation:
 		v, ok := value.(string)
@@ -39669,6 +39737,9 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresource.FieldNote:
 		m.ResetNote()
+		return nil
+	case gamedownloadresource.FieldNoteText:
+		m.ResetNoteText()
 		return nil
 	case gamedownloadresource.FieldTranslation:
 		m.ResetTranslation()

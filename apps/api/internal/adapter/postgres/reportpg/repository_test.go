@@ -2,6 +2,7 @@ package reportpg_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -35,7 +36,7 @@ func ptr[T any](v T) *T {
 func (f fixture) resource(t *testing.T, gameID, creator, files int) *ent.GameDownloadResource {
 	t.Helper()
 	ctx := context.Background()
-	row, err := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(creator).SetNote("note").Save(ctx)
+	row, err := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(creator).SetNote(json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"note"}]}]}`)).SetNoteText("note").Save(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +127,7 @@ func TestReportLifecycle(t *testing.T) {
 	if view.Status != report.StatusValid || view.Level != report.LevelHigh || view.ProcessedBy == nil || *view.ProcessedBy != admin || view.ProcessedAt == nil || !view.ProcessedAt.Equal(processedAt) || view.ProcessNote == nil || *view.ProcessNote != "confirmed" || !view.ReportedPenaltyApplied || !view.ReporterPenaltyApplied {
 		t.Fatalf("resolution: %+v", view.Report)
 	}
-	if view.Resource.ID != resource.ID || view.Resource.GameID != gameID || view.Resource.Note == nil || view.Resource.Game.TitleZH != "游戏" || len(view.Resource.Files) != 7 {
+	if view.Resource.ID != resource.ID || view.Resource.GameID != gameID || view.Resource.Note == nil || *view.Resource.Note != "note" || view.Resource.Game.TitleZH != "游戏" || len(view.Resource.Files) != 7 {
 		t.Fatalf("detail resource: %+v", view.Resource)
 	}
 	if file := view.Resource.Files[6]; file.Name != "part6.7z" || file.Size != 1006 || file.Status != download.FileInObjectStore || file.CheckStatus != 1 || file.HashAlgorithm != upload.HashBLAKE3 || file.Hash != "h6" {

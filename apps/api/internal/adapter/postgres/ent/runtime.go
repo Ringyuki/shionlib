@@ -920,52 +920,52 @@ func init() {
 	gamedownloadresourceDescStatus := gamedownloadresourceFields[0].Descriptor()
 	// gamedownloadresource.DefaultStatus holds the default value on creation for the status field.
 	gamedownloadresource.DefaultStatus = gamedownloadresourceDescStatus.Default.(int)
-	// gamedownloadresourceDescNote is the schema descriptor for note field.
-	gamedownloadresourceDescNote := gamedownloadresourceFields[6].Descriptor()
-	// gamedownloadresource.NoteValidator is a validator for the "note" field. It is called by the builders before save.
-	gamedownloadresource.NoteValidator = gamedownloadresourceDescNote.Validators[0].(func(string) error)
+	// gamedownloadresourceDescNoteText is the schema descriptor for note_text field.
+	gamedownloadresourceDescNoteText := gamedownloadresourceFields[7].Descriptor()
+	// gamedownloadresource.DefaultNoteText holds the default value on creation for the note_text field.
+	gamedownloadresource.DefaultNoteText = gamedownloadresourceDescNoteText.Default.(string)
 	// gamedownloadresourceDescTranslation is the schema descriptor for translation field.
-	gamedownloadresourceDescTranslation := gamedownloadresourceFields[7].Descriptor()
+	gamedownloadresourceDescTranslation := gamedownloadresourceFields[8].Descriptor()
 	// gamedownloadresource.TranslationValidator is a validator for the "translation" field. It is called by the builders before save.
 	gamedownloadresource.TranslationValidator = gamedownloadresourceDescTranslation.Validators[0].(func(string) error)
 	// gamedownloadresourceDescPatchVersion is the schema descriptor for patch_version field.
-	gamedownloadresourceDescPatchVersion := gamedownloadresourceFields[8].Descriptor()
+	gamedownloadresourceDescPatchVersion := gamedownloadresourceFields[9].Descriptor()
 	// gamedownloadresource.PatchVersionValidator is a validator for the "patch_version" field. It is called by the builders before save.
 	gamedownloadresource.PatchVersionValidator = gamedownloadresourceDescPatchVersion.Validators[0].(func(string) error)
 	// gamedownloadresourceDescReleaseURL is the schema descriptor for release_url field.
-	gamedownloadresourceDescReleaseURL := gamedownloadresourceFields[9].Descriptor()
+	gamedownloadresourceDescReleaseURL := gamedownloadresourceFields[10].Descriptor()
 	// gamedownloadresource.ReleaseURLValidator is a validator for the "release_url" field. It is called by the builders before save.
 	gamedownloadresource.ReleaseURLValidator = gamedownloadresourceDescReleaseURL.Validators[0].(func(string) error)
 	// gamedownloadresourceDescEdition is the schema descriptor for edition field.
-	gamedownloadresourceDescEdition := gamedownloadresourceFields[10].Descriptor()
+	gamedownloadresourceDescEdition := gamedownloadresourceFields[11].Descriptor()
 	// gamedownloadresource.EditionValidator is a validator for the "edition" field. It is called by the builders before save.
 	gamedownloadresource.EditionValidator = gamedownloadresourceDescEdition.Validators[0].(func(string) error)
 	// gamedownloadresourceDescEditionName is the schema descriptor for edition_name field.
-	gamedownloadresourceDescEditionName := gamedownloadresourceFields[11].Descriptor()
+	gamedownloadresourceDescEditionName := gamedownloadresourceFields[12].Descriptor()
 	// gamedownloadresource.EditionNameValidator is a validator for the "edition_name" field. It is called by the builders before save.
 	gamedownloadresource.EditionNameValidator = gamedownloadresourceDescEditionName.Validators[0].(func(string) error)
 	// gamedownloadresourceDescForm is the schema descriptor for form field.
-	gamedownloadresourceDescForm := gamedownloadresourceFields[12].Descriptor()
+	gamedownloadresourceDescForm := gamedownloadresourceFields[13].Descriptor()
 	// gamedownloadresource.FormValidator is a validator for the "form" field. It is called by the builders before save.
 	gamedownloadresource.FormValidator = gamedownloadresourceDescForm.Validators[0].(func(string) error)
 	// gamedownloadresourceDescCanonicalName is the schema descriptor for canonical_name field.
-	gamedownloadresourceDescCanonicalName := gamedownloadresourceFields[14].Descriptor()
+	gamedownloadresourceDescCanonicalName := gamedownloadresourceFields[15].Descriptor()
 	// gamedownloadresource.DefaultCanonicalName holds the default value on creation for the canonical_name field.
 	gamedownloadresource.DefaultCanonicalName = gamedownloadresourceDescCanonicalName.Default.(bool)
 	// gamedownloadresourceDescDownloads is the schema descriptor for downloads field.
-	gamedownloadresourceDescDownloads := gamedownloadresourceFields[15].Descriptor()
+	gamedownloadresourceDescDownloads := gamedownloadresourceFields[16].Descriptor()
 	// gamedownloadresource.DefaultDownloads holds the default value on creation for the downloads field.
 	gamedownloadresource.DefaultDownloads = gamedownloadresourceDescDownloads.Default.(int)
 	// gamedownloadresourceDescUndescribed is the schema descriptor for undescribed field.
-	gamedownloadresourceDescUndescribed := gamedownloadresourceFields[19].Descriptor()
+	gamedownloadresourceDescUndescribed := gamedownloadresourceFields[20].Descriptor()
 	// gamedownloadresource.DefaultUndescribed holds the default value on creation for the undescribed field.
 	gamedownloadresource.DefaultUndescribed = gamedownloadresourceDescUndescribed.Default.(bool)
 	// gamedownloadresourceDescCreated is the schema descriptor for created field.
-	gamedownloadresourceDescCreated := gamedownloadresourceFields[21].Descriptor()
+	gamedownloadresourceDescCreated := gamedownloadresourceFields[22].Descriptor()
 	// gamedownloadresource.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresource.DefaultCreated = gamedownloadresourceDescCreated.Default.(func() time.Time)
 	// gamedownloadresourceDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourceDescUpdated := gamedownloadresourceFields[22].Descriptor()
+	gamedownloadresourceDescUpdated := gamedownloadresourceFields[23].Descriptor()
 	// gamedownloadresource.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.

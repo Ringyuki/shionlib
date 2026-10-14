@@ -845,14 +845,20 @@ func (s *e2eSeeder) createResource(ctx context.Context, tx *ent.Client, gameID, 
 		now := s.now()
 		publishedAt = &now
 	}
-	row, err := tx.GameDownloadResource.Create().
+	create := tx.GameDownloadResource.Create().
 		SetGameID(gameID).
 		SetCreatorID(creatorID).
 		SetPlatform(pgvalue.Strings(resource.Platform)).
 		SetLanguage(pgvalue.Strings(resource.Language)).
-		SetNote(resource.Note).
-		SetNillablePublishedAt(publishedAt).
-		Save(ctx)
+		SetNillablePublishedAt(publishedAt)
+	if resource.Note != "" {
+		note, err := e2eParagraph(resource.Note)
+		if err != nil {
+			return 0, nil, fmt.Errorf("encode the note of a download resource for game %d: %w", gameID, err)
+		}
+		create.SetNote(note).SetNoteText(resource.Note)
+	}
+	row, err := create.Save(ctx)
 	if err != nil {
 		return 0, nil, fmt.Errorf("create download resource for game %d: %w", gameID, err)
 	}
