@@ -15,11 +15,12 @@ The **<Ellipsis />** menu in the top-right corner of a resource card applies to 
 
 - **History** — shows the replacement records of the files; visible to everyone
 - **Edit resource**, **Add files** — only the uploader or an administrator can use them
+- **Update the patch** — only on a resource composed with a patch; the uploader or an administrator uploads a new version of the patch, and the resource is composed again with it
 - **Report** — visible to users other than the uploader
 
 ![What the uploader sees in the menu of a resource card](/assets/images/resource-maintenance/en/resource-menu@2x.webp)
 
-**Replace file**, **Rename** and **Remove**, which apply to a single file, are in the **<Ellipsis />** menu at the end of each file's row on the resource card, and are likewise visible only to the uploader or an administrator.
+**Replace file**, **Rename** and **Remove**, which apply to a single file, are in the **<Ellipsis />** menu at the end of each file's row on the resource card, and are likewise visible only to the uploader or an administrator. A file that uses the canonical file name has no **Rename**; to rename it, first turn off **Use the canonical file name** in **Edit resource**.
 
 ![The menu at the end of a file’s row](/assets/images/resource-maintenance/en/file-menu@2x.webp)
 
@@ -27,12 +28,9 @@ On the resource page and the **My uploads** page, the file actions are also insi
 
 ## Editing resource information
 
-Click **<Ellipsis />** → **Edit resource** to change the descriptive information of the resource, without touching the files themselves:
+Click **<Ellipsis />** → **Edit resource** to change the information of the resource, without touching the files themselves. The fields are the same as when uploading (see [How to Upload Game Files](/en/docs/guides/upload-game-files)): platforms, languages, engine, translation, edition, form, extras and note. When editing, the translation and the form may be left empty for now.
 
-- **Platforms** — applicable platforms (choose at least one), multiple choices allowed
-- **Languages** — languages of the resource (choose at least one), multiple choices allowed
-- **Engine** — required when the platforms include Android or iOS; indicates which kind of emulator the resource needs to run
-- **Note** — a supplementary note on the resource (optional), such as the version number, the contents or special requirements
+Under **File name** you can turn **Use the canonical file name** on or off: while it is on, the file name follows the changes to the resource information; once it is off, the file gets back the name it was uploaded with.
 
 ![Editing the information of a resource](/assets/images/resource-maintenance/en/edit-resource@2x.webp)
 
@@ -79,7 +77,7 @@ Open the resource page and switch to the **History** tab to see all changes made
 
 Each record contains:
 
-- The type of change: publishing the resource, replacing a file, renaming a file, adding a file, removing a file, or editing the resource information
+- The type of change: publishing the resource, replacing a file, renaming a file, adding a file, removing a file, editing the resource information, clearing a file after review, composing the resource or composing it again, and changes the system makes itself, such as finding a disc image in an archive or filling in the form from what the check found in the archive
 - The files involved, and the content before and after the change
 - The replacement reason (if one was given)
 - The operator and the time

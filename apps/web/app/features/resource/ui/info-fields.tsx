@@ -31,7 +31,7 @@ export function InfoFields({ values, complete, onChange }: InfoFieldsProps) {
             placeholder={t('editionNameExample')}
             aria-label={t('editionNameLabel')}
             maxLength={lengthOf('EditDownloadSourceBodyInput', 'edition_name').max}
-            className="w-64 max-sm:w-full"
+            className="w-80 max-sm:w-full"
           />
         </Inline>
       </FormField>

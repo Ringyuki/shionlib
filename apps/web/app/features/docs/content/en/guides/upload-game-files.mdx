@@ -57,22 +57,34 @@ We recommend packaging the files as a zip/rar/7z archive before uploading. The a
 
 A resource can contain multiple files. Split archives can be uploaded directly without repacking: put the volumes of one set in the same resource and keep their original file names (such as `.part1.rar`, `.r00`, `.7z.001`, `.z01`). The system recognizes the volumes by their file names and checks them together once all volumes have been uploaded.
 
-When naming the file, you can refer to the following format:
+You do not need to tidy up the file names yourself. A resource uses the **canonical file name** by default: when it is published, the site renames the file from the game's entry and the resource information, in this format:
 
-- `[Developer] [Game Name] [Translated Name (optional)]`
+- `[release date][brand] original title translated title edition [translation][patch version] (form).extension`
 
-For example:
+The release date, brand and titles come from the game's entry, the translated title is used only for Chinese resources, and the rest comes from the resource information; a part without content is left out. The form in brackets is the format of the disc image for a disc image (such as `iso+mds`, found by the file check) and `files` for an installer or a portable game. For example:
 
-- `[SAGA PLANETS] AMBITIOUS MISSION`
-- `[MAGES. & ニトロプラス] STEINS;GATE 命运石之门`
+- `[160729][ゆずソフト] 千恋＊万花 [官方中文] (files).part1.rar`
 
-For other information, such as language, translation group/translator, version number, etc., you can fill it in as part of the resource information (explained below).
+The canonical file name applies only to the first file of a resource, or to every volume of its set. To keep the name the file was uploaded with, turn off **Use the canonical file name**.
+
+Fill in the language, the translation, the translation groups, the patch version and similar information in the resource information (see below), not in the file name.
 
 ### Start the upload
 
 Click the **Upload** button at the top of the sidebar, or the **Upload** button on a game page, to open the upload page.
 
-On the upload page, choose the game and the files to upload, then fill in the resource information: platforms, languages and a note; when the platforms include Android or iOS, you also need to choose the engine. The page shows your storage and how much of it the files chosen this time will take up.
+On the upload page, choose the game and the files to upload, then fill in the resource information. Once you choose the files, the page reads the translation, the translation groups, the patch version, the edition and the form from the file name and fills in the fields that are still empty; check each of them. The page shows your storage and how much of it the files chosen this time will take up.
+
+The resource information consists of:
+
+- **Platforms**, **Languages** — required; several can be chosen
+- **Engine** — required when the platforms include Android or iOS: the engine that runs the resource
+- **Translation** — required when the languages include one other than Japanese: None, Official translation, Translation group or Machine translation. For a translation group, enter the names of the **Translation groups**, at most 6; the groups already on the site are suggested as you type. For a translation group or a machine translation you can also enter the **Patch version** and the **Release page**
+- **Edition** — Download edition, Package edition or Steam edition, and an edition name such as 初回限定版; optional
+- **Form** — required: Disc image, Installer or Portable. When the check finds a disc image in the archive, the form becomes Disc image by itself
+- **Extras** — Full CG save, Bonus content; optional
+- **Note** — a supplementary note on the resource; optional, up to 255 characters, with bold, spoilers and links
+- **File name** — the name the file will have once the resource is published; see the canonical file name above
 
 ![Choosing the game and the files and filling in the resource information](/assets/images/upload-game-files/en/upload-page@2x.webp)
 
