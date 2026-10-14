@@ -102,6 +102,8 @@ type Tx struct {
 	InspectionEntry *InspectionEntryClient
 	// MalwareScanCase is the client for interacting with the MalwareScanCase builders.
 	MalwareScanCase *MalwareScanCaseClient
+	// MalwareScanDetection is the client for interacting with the MalwareScanDetection builders.
+	MalwareScanDetection *MalwareScanDetectionClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
 	// ModerationEvent is the client for interacting with the ModerationEvent builders.
@@ -319,6 +321,7 @@ func (tx *Tx) init() {
 	tx.Inspection = NewInspectionClient(tx.config)
 	tx.InspectionEntry = NewInspectionEntryClient(tx.config)
 	tx.MalwareScanCase = NewMalwareScanCaseClient(tx.config)
+	tx.MalwareScanDetection = NewMalwareScanDetectionClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
 	tx.ModerationEvent = NewModerationEventClient(tx.config)
 	tx.OidcIdentity = NewOidcIdentityClient(tx.config)

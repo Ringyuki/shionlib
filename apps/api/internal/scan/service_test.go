@@ -823,3 +823,117 @@ func TestAFileIsReleasedEvenWhenItsPreviewsCannotBeKept(t *testing.T) {
 		t.Fatalf("a store that fails is not asked again for the same file: %d calls", f.inspections.PreviewCalls)
 	}
 }
+
+const crackSignature = "Win.Malware.Misc-10040264-0"
+
+func (f fixture) upload(id int, entries ...string) {
+	path := fmt.Sprintf("/spool/%d.part", id)
+	f.repo.SeedFile(pending(id, path))
+	listed := make([]listed, len(entries))
+	for i, entry := range entries {
+		listed[i] = file(entry, 5)
+	}
+	f.tool.Listings[path] = listing("zip", "", listed...)
+	f.tool.Contents[path] = entries
+}
+
+func TestAnIgnoredSignatureDoesNotHoldTheFile(t *testing.T) {
+	f := newFixture(true)
+	f.upload(1, "game/Mai@KF.dll", "game/game.exe")
+	f.scanner.Reports["game/Mai@KF.dll"] = scan.Report{Infected: true, Viruses: []string{crackSignature}}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckOK {
+		t.Fatalf("the file passes: %+v", file)
+	}
+	if jobs := f.events.Jobs(); len(jobs) != 1 || jobs[0] != (download.StoreFile{FileID: 1}) {
+		t.Fatalf("the file is stored: %+v", jobs)
+	}
+	if f.repo.Case(1).ID != 0 {
+		t.Fatal("no case is opened")
+	}
+	scanned := f.inspections.Drafts[0].Scan
+	if !slices.Equal(scanned.Detections, []inspection.Detection{{Path: "game/Mai@KF.dll", Signature: crackSignature}}) || scanned.ClearedAt == nil || !scanned.ClearedAt.Equal(now) {
+		t.Fatalf("the record shows the detection as released: %+v", scanned)
+	}
+}
+
+func TestOnlyTheSignaturesOnTheListAreIgnored(t *testing.T) {
+	f := newFixture(true)
+	settingtest.Set(f.settings, scan.IgnoredSignatures, " Packer.A \n\nCrack.B\n")
+	f.upload(1, "bin/setup.exe", "bin/crack.dll")
+	f.workspace.Content["setup.exe"] = "setup bytes"
+	f.scanner.Reports["bin/setup.exe"] = scan.Report{Infected: true, Viruses: []string{"Packer.A", "Trojan.C"}}
+	f.scanner.Reports["bin/crack.dll"] = scan.Report{Infected: true, Viruses: []string{"Crack.B"}}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckHarmfulPendingReview {
+		t.Fatalf("the file is held: %+v", file)
+	}
+	if viruses := f.repo.Case(1).Viruses; !slices.Equal(viruses, []string{"Trojan.C (bin/setup.exe)"}) {
+		t.Fatalf("the case names what was not ignored: %v", viruses)
+	}
+	if findings := f.repo.Findings(1); !slices.Equal(findings, []scan.Finding{{Path: "bin/setup.exe", SHA256: digestOf("setup bytes"), Signature: "Trojan.C"}}) {
+		t.Fatalf("the case keeps the digest of what it holds: %+v", findings)
+	}
+	want := []inspection.Detection{{Path: "bin/setup.exe", Signature: "Trojan.C"}, {Path: "bin/setup.exe", Signature: "Packer.A"}, {Path: "bin/crack.dll", Signature: "Crack.B"}}
+	if scanned := f.inspections.Drafts[0].Scan; !slices.Equal(scanned.Detections, want) || scanned.ClearedAt != nil {
+		t.Fatalf("the record shows every detection and waits for the review: %+v", scanned)
+	}
+}
+
+func TestAFileAnAdministratorReleasedIsNotHeldAgain(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(true)
+	f.workspace.Content["patch.exe"] = "the same patch"
+	f.scanner.Reports["chs/patch.exe"] = scan.Report{Infected: true, Viruses: []string{"Win.Trojan.Generic-9907583-0"}}
+	f.scanner.Reports["chs/other.exe"] = scan.Report{Infected: true, Viruses: []string{"Win.Trojan.Generic-9907583-0"}}
+	f.upload(1, "chs/patch.exe")
+	if err := f.service.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Review(ctx, reviewer, 1, scan.ReviewInput{Decision: scan.DecisionAllow}); err != nil {
+		t.Fatal(err)
+	}
+	f.upload(2, "chs/patch.exe")
+	f.upload(3, "chs/other.exe")
+	if err := f.service.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(2); file.CheckStatus != download.CheckOK {
+		t.Fatalf("the released file passes: %+v", file)
+	}
+	if scanned := f.inspections.Drafts[1].Scan; len(scanned.Detections) != 1 || scanned.ClearedAt == nil {
+		t.Fatalf("the record shows the detection as released: %+v", scanned)
+	}
+	if file, _ := f.repo.File(3); file.CheckStatus != download.CheckHarmfulPendingReview {
+		t.Fatalf("a different file with the same signature is held: %+v", file)
+	}
+}
+
+func TestAFileAnAdministratorDeletedIsHeldEvenIfAnotherReleasedIt(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(true)
+	f.workspace.Content["patch.exe"] = "the same patch"
+	f.scanner.Reports["chs/patch.exe"] = scan.Report{Infected: true, Viruses: []string{"Win.Trojan.Generic-9907583-0"}}
+	f.upload(1, "chs/patch.exe")
+	f.upload(2, "chs/patch.exe")
+	if err := f.service.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Review(ctx, reviewer, 1, scan.ReviewInput{Decision: scan.DecisionAllow}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Review(ctx, reviewer, 2, scan.ReviewInput{Decision: scan.DecisionDelete}); err != nil {
+		t.Fatal(err)
+	}
+	f.upload(3, "chs/patch.exe")
+	if err := f.service.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(3); file.CheckStatus != download.CheckHarmfulPendingReview {
+		t.Fatalf("the file is held: %+v", file)
+	}
+}

@@ -56,6 +56,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescandetection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
@@ -134,6 +135,7 @@ const (
 	TypeInspection                      = "Inspection"
 	TypeInspectionEntry                 = "InspectionEntry"
 	TypeMalwareScanCase                 = "MalwareScanCase"
+	TypeMalwareScanDetection            = "MalwareScanDetection"
 	TypeMessage                         = "Message"
 	TypeModerationEvent                 = "ModerationEvent"
 	TypeOidcIdentity                    = "OidcIdentity"
@@ -54663,6 +54665,9 @@ type MalwareScanCaseMutation struct {
 	cleareduploader          bool
 	reviewer                 *int
 	clearedreviewer          bool
+	detections               map[int]struct{}
+	removeddetections        map[int]struct{}
+	cleareddetections        bool
 	done                     bool
 	oldValue                 func(context.Context) (*MalwareScanCase, error)
 	predicates               []predicate.MalwareScanCase
@@ -55953,6 +55958,60 @@ func (m *MalwareScanCaseMutation) ResetReviewer() {
 	m.clearedreviewer = false
 }
 
+// AddDetectionIDs adds the "detections" edge to the MalwareScanDetection entity by ids.
+func (m *MalwareScanCaseMutation) AddDetectionIDs(ids ...int) {
+	if m.detections == nil {
+		m.detections = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.detections[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDetections clears the "detections" edge to the MalwareScanDetection entity.
+func (m *MalwareScanCaseMutation) ClearDetections() {
+	m.cleareddetections = true
+}
+
+// DetectionsCleared reports if the "detections" edge to the MalwareScanDetection entity was cleared.
+func (m *MalwareScanCaseMutation) DetectionsCleared() bool {
+	return m.cleareddetections
+}
+
+// RemoveDetectionIDs removes the "detections" edge to the MalwareScanDetection entity by IDs.
+func (m *MalwareScanCaseMutation) RemoveDetectionIDs(ids ...int) {
+	if m.removeddetections == nil {
+		m.removeddetections = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.detections, ids[i])
+		m.removeddetections[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDetections returns the removed IDs of the "detections" edge to the MalwareScanDetection entity.
+func (m *MalwareScanCaseMutation) RemovedDetectionsIDs() (ids []int) {
+	for id := range m.removeddetections {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DetectionsIDs returns the "detections" edge IDs in the mutation.
+func (m *MalwareScanCaseMutation) DetectionsIDs() (ids []int) {
+	for id := range m.detections {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDetections resets all changes to the "detections" edge.
+func (m *MalwareScanCaseMutation) ResetDetections() {
+	m.detections = nil
+	m.cleareddetections = false
+	m.removeddetections = nil
+}
+
 // Where appends a list predicates to the MalwareScanCaseMutation builder.
 func (m *MalwareScanCaseMutation) Where(ps ...predicate.MalwareScanCase) {
 	m.predicates = append(m.predicates, ps...)
@@ -56556,7 +56615,7 @@ func (m *MalwareScanCaseMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MalwareScanCaseMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.resource != nil {
 		edges = append(edges, malwarescancase.EdgeResource)
 	}
@@ -56571,6 +56630,9 @@ func (m *MalwareScanCaseMutation) AddedEdges() []string {
 	}
 	if m.reviewer != nil {
 		edges = append(edges, malwarescancase.EdgeReviewer)
+	}
+	if m.detections != nil {
+		edges = append(edges, malwarescancase.EdgeDetections)
 	}
 	return edges
 }
@@ -56599,25 +56661,42 @@ func (m *MalwareScanCaseMutation) AddedIDs(name string) []ent.Value {
 		if id := m.reviewer; id != nil {
 			return []ent.Value{*id}
 		}
+	case malwarescancase.EdgeDetections:
+		ids := make([]ent.Value, 0, len(m.detections))
+		for id := range m.detections {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MalwareScanCaseMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
+	if m.removeddetections != nil {
+		edges = append(edges, malwarescancase.EdgeDetections)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *MalwareScanCaseMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case malwarescancase.EdgeDetections:
+		ids := make([]ent.Value, 0, len(m.removeddetections))
+		for id := range m.removeddetections {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MalwareScanCaseMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedresource {
 		edges = append(edges, malwarescancase.EdgeResource)
 	}
@@ -56632,6 +56711,9 @@ func (m *MalwareScanCaseMutation) ClearedEdges() []string {
 	}
 	if m.clearedreviewer {
 		edges = append(edges, malwarescancase.EdgeReviewer)
+	}
+	if m.cleareddetections {
+		edges = append(edges, malwarescancase.EdgeDetections)
 	}
 	return edges
 }
@@ -56650,6 +56732,8 @@ func (m *MalwareScanCaseMutation) EdgeCleared(name string) bool {
 		return m.cleareduploader
 	case malwarescancase.EdgeReviewer:
 		return m.clearedreviewer
+	case malwarescancase.EdgeDetections:
+		return m.cleareddetections
 	}
 	return false
 }
@@ -56696,8 +56780,562 @@ func (m *MalwareScanCaseMutation) ResetEdge(name string) error {
 	case malwarescancase.EdgeReviewer:
 		m.ResetReviewer()
 		return nil
+	case malwarescancase.EdgeDetections:
+		m.ResetDetections()
+		return nil
 	}
 	return fmt.Errorf("unknown MalwareScanCase edge %s", name)
+}
+
+// MalwareScanDetectionMutation represents an operation that mutates the MalwareScanDetection nodes in the graph.
+type MalwareScanDetectionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	_path         *string
+	sha256        *string
+	signature     *string
+	clearedFields map[string]struct{}
+	_case         *int
+	cleared_case  bool
+	done          bool
+	oldValue      func(context.Context) (*MalwareScanDetection, error)
+	predicates    []predicate.MalwareScanDetection
+}
+
+var _ ent.Mutation = (*MalwareScanDetectionMutation)(nil)
+
+// malwarescandetectionOption allows management of the mutation configuration using functional options.
+type malwarescandetectionOption func(*MalwareScanDetectionMutation)
+
+// newMalwareScanDetectionMutation creates new mutation for the MalwareScanDetection entity.
+func newMalwareScanDetectionMutation(c config, op Op, opts ...malwarescandetectionOption) *MalwareScanDetectionMutation {
+	m := &MalwareScanDetectionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMalwareScanDetection,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMalwareScanDetectionID sets the ID field of the mutation.
+func withMalwareScanDetectionID(id int) malwarescandetectionOption {
+	return func(m *MalwareScanDetectionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MalwareScanDetection
+		)
+		m.oldValue = func(ctx context.Context) (*MalwareScanDetection, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MalwareScanDetection.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMalwareScanDetection sets the old MalwareScanDetection of the mutation.
+func withMalwareScanDetection(node *MalwareScanDetection) malwarescandetectionOption {
+	return func(m *MalwareScanDetectionMutation) {
+		m.oldValue = func(context.Context) (*MalwareScanDetection, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MalwareScanDetectionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MalwareScanDetectionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MalwareScanDetection entities.
+func (m *MalwareScanDetectionMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MalwareScanDetectionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MalwareScanDetectionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MalwareScanDetection.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCaseID sets the "case_id" field.
+func (m *MalwareScanDetectionMutation) SetCaseID(i int) {
+	m._case = &i
+}
+
+// CaseID returns the value of the "case_id" field in the mutation.
+func (m *MalwareScanDetectionMutation) CaseID() (r int, exists bool) {
+	v := m._case
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCaseID returns the old "case_id" field's value of the MalwareScanDetection entity.
+// If the MalwareScanDetection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MalwareScanDetectionMutation) OldCaseID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCaseID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCaseID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCaseID: %w", err)
+	}
+	return oldValue.CaseID, nil
+}
+
+// ResetCaseID resets all changes to the "case_id" field.
+func (m *MalwareScanDetectionMutation) ResetCaseID() {
+	m._case = nil
+}
+
+// SetPath sets the "path" field.
+func (m *MalwareScanDetectionMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *MalwareScanDetectionMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the MalwareScanDetection entity.
+// If the MalwareScanDetection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MalwareScanDetectionMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *MalwareScanDetectionMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetSha256 sets the "sha256" field.
+func (m *MalwareScanDetectionMutation) SetSha256(s string) {
+	m.sha256 = &s
+}
+
+// Sha256 returns the value of the "sha256" field in the mutation.
+func (m *MalwareScanDetectionMutation) Sha256() (r string, exists bool) {
+	v := m.sha256
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSha256 returns the old "sha256" field's value of the MalwareScanDetection entity.
+// If the MalwareScanDetection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MalwareScanDetectionMutation) OldSha256(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSha256 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSha256 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSha256: %w", err)
+	}
+	return oldValue.Sha256, nil
+}
+
+// ResetSha256 resets all changes to the "sha256" field.
+func (m *MalwareScanDetectionMutation) ResetSha256() {
+	m.sha256 = nil
+}
+
+// SetSignature sets the "signature" field.
+func (m *MalwareScanDetectionMutation) SetSignature(s string) {
+	m.signature = &s
+}
+
+// Signature returns the value of the "signature" field in the mutation.
+func (m *MalwareScanDetectionMutation) Signature() (r string, exists bool) {
+	v := m.signature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignature returns the old "signature" field's value of the MalwareScanDetection entity.
+// If the MalwareScanDetection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MalwareScanDetectionMutation) OldSignature(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignature: %w", err)
+	}
+	return oldValue.Signature, nil
+}
+
+// ResetSignature resets all changes to the "signature" field.
+func (m *MalwareScanDetectionMutation) ResetSignature() {
+	m.signature = nil
+}
+
+// ClearCase clears the "case" edge to the MalwareScanCase entity.
+func (m *MalwareScanDetectionMutation) ClearCase() {
+	m.cleared_case = true
+	m.clearedFields[malwarescandetection.FieldCaseID] = struct{}{}
+}
+
+// CaseCleared reports if the "case" edge to the MalwareScanCase entity was cleared.
+func (m *MalwareScanDetectionMutation) CaseCleared() bool {
+	return m.cleared_case
+}
+
+// CaseIDs returns the "case" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CaseID instead. It exists only for internal usage by the builders.
+func (m *MalwareScanDetectionMutation) CaseIDs() (ids []int) {
+	if id := m._case; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCase resets all changes to the "case" edge.
+func (m *MalwareScanDetectionMutation) ResetCase() {
+	m._case = nil
+	m.cleared_case = false
+}
+
+// Where appends a list predicates to the MalwareScanDetectionMutation builder.
+func (m *MalwareScanDetectionMutation) Where(ps ...predicate.MalwareScanDetection) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MalwareScanDetectionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MalwareScanDetectionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MalwareScanDetection, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MalwareScanDetectionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MalwareScanDetectionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MalwareScanDetection).
+func (m *MalwareScanDetectionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MalwareScanDetectionMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m._case != nil {
+		fields = append(fields, malwarescandetection.FieldCaseID)
+	}
+	if m._path != nil {
+		fields = append(fields, malwarescandetection.FieldPath)
+	}
+	if m.sha256 != nil {
+		fields = append(fields, malwarescandetection.FieldSha256)
+	}
+	if m.signature != nil {
+		fields = append(fields, malwarescandetection.FieldSignature)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MalwareScanDetectionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case malwarescandetection.FieldCaseID:
+		return m.CaseID()
+	case malwarescandetection.FieldPath:
+		return m.Path()
+	case malwarescandetection.FieldSha256:
+		return m.Sha256()
+	case malwarescandetection.FieldSignature:
+		return m.Signature()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MalwareScanDetectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case malwarescandetection.FieldCaseID:
+		return m.OldCaseID(ctx)
+	case malwarescandetection.FieldPath:
+		return m.OldPath(ctx)
+	case malwarescandetection.FieldSha256:
+		return m.OldSha256(ctx)
+	case malwarescandetection.FieldSignature:
+		return m.OldSignature(ctx)
+	}
+	return nil, fmt.Errorf("unknown MalwareScanDetection field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MalwareScanDetectionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case malwarescandetection.FieldCaseID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCaseID(v)
+		return nil
+	case malwarescandetection.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case malwarescandetection.FieldSha256:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSha256(v)
+		return nil
+	case malwarescandetection.FieldSignature:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignature(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MalwareScanDetection field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MalwareScanDetectionMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MalwareScanDetectionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MalwareScanDetectionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown MalwareScanDetection numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MalwareScanDetectionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MalwareScanDetectionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MalwareScanDetectionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown MalwareScanDetection nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MalwareScanDetectionMutation) ResetField(name string) error {
+	switch name {
+	case malwarescandetection.FieldCaseID:
+		m.ResetCaseID()
+		return nil
+	case malwarescandetection.FieldPath:
+		m.ResetPath()
+		return nil
+	case malwarescandetection.FieldSha256:
+		m.ResetSha256()
+		return nil
+	case malwarescandetection.FieldSignature:
+		m.ResetSignature()
+		return nil
+	}
+	return fmt.Errorf("unknown MalwareScanDetection field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MalwareScanDetectionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m._case != nil {
+		edges = append(edges, malwarescandetection.EdgeCase)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MalwareScanDetectionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case malwarescandetection.EdgeCase:
+		if id := m._case; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MalwareScanDetectionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MalwareScanDetectionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MalwareScanDetectionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleared_case {
+		edges = append(edges, malwarescandetection.EdgeCase)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MalwareScanDetectionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case malwarescandetection.EdgeCase:
+		return m.cleared_case
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MalwareScanDetectionMutation) ClearEdge(name string) error {
+	switch name {
+	case malwarescandetection.EdgeCase:
+		m.ClearCase()
+		return nil
+	}
+	return fmt.Errorf("unknown MalwareScanDetection unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MalwareScanDetectionMutation) ResetEdge(name string) error {
+	switch name {
+	case malwarescandetection.EdgeCase:
+		m.ResetCase()
+		return nil
+	}
+	return fmt.Errorf("unknown MalwareScanDetection edge %s", name)
 }
 
 // MessageMutation represents an operation that mutates the Message nodes in the graph.

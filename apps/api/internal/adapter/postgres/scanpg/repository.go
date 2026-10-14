@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescandetection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
@@ -276,7 +277,46 @@ func (r *Repository) CreateCase(ctx context.Context, in scan.NewCase) (scan.Case
 	if err != nil {
 		return scan.Case{}, fmt.Errorf("create malware scan case: %w", err)
 	}
+	if err := r.addFindings(ctx, row.ID, in.Findings); err != nil {
+		return scan.Case{}, err
+	}
 	return toCase(row), nil
+}
+
+func (r *Repository) addFindings(ctx context.Context, caseID int, findings []scan.Finding) error {
+	if len(findings) == 0 {
+		return nil
+	}
+	builders := make([]*ent.MalwareScanDetectionCreate, len(findings))
+	for i, finding := range findings {
+		builders[i] = r.db(ctx).MalwareScanDetection.Create().
+			SetCaseID(caseID).
+			SetPath(finding.Path).
+			SetSha256(finding.SHA256).
+			SetSignature(finding.Signature)
+	}
+	if err := r.db(ctx).MalwareScanDetection.CreateBulk(builders...).Exec(ctx); err != nil {
+		return fmt.Errorf("record the findings of malware scan case %d: %w", caseID, err)
+	}
+	return nil
+}
+
+func (r *Repository) Verdicts(ctx context.Context, sha256 string) ([]scan.Verdict, error) {
+	rows, err := r.db(ctx).MalwareScanDetection.Query().
+		Where(malwarescandetection.Sha256(sha256), malwarescandetection.HasCaseWith(malwarescancase.DecisionSourceNotNil())).
+		WithCase(func(query *ent.MalwareScanCaseQuery) { query.Select(malwarescancase.FieldDecisionSource) }).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load the verdicts on file %s: %w", sha256, err)
+	}
+	verdicts := make([]scan.Verdict, 0, len(rows))
+	for _, row := range rows {
+		if row.Edges.Case == nil || row.Edges.Case.DecisionSource == nil {
+			continue
+		}
+		verdicts = append(verdicts, scan.Verdict{Signature: row.Signature, Source: scan.DecisionSource(*row.Edges.Case.DecisionSource)})
+	}
+	return verdicts, nil
 }
 
 func (r *Repository) LockCase(ctx context.Context, id int) (scan.Target, error) {

@@ -44,6 +44,13 @@ var (
 		Description: "检查记录上线前存储的文件没有内容记录，后台会从存储桶逐个下载这些文件，按上传检查的步骤读取内容并扫描。该项为同时处理的资源数，设为 0 时暂停。处理中的文件占用暂存盘空间，并与上传检查共用病毒扫描。",
 		Default:     2, Min: 0, Max: BackfillWorkerLimit,
 	})
+	IgnoredSignatures = setting.Text(setting.Spec[string]{
+		Name:        "scan.ignored_signatures",
+		Label:       "不隔离的病毒特征",
+		Description: "病毒扫描报告的特征名称与其中一行完全相同时，不隔离文件，检查记录中记为已放行。每行一个名称。",
+		Default:     "Win.Malware.Misc-10040264-0\nWin.Trojan.Generic-10004069-0",
+		MaxLength:   4000,
+	})
 	AutoDeleteNote = setting.Text(setting.Spec[string]{
 		Name:        "scan.auto_delete_note",
 		Label:       "超时删除说明",

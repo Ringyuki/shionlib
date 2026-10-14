@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -352,6 +353,43 @@ func TestCaseLifecycle(t *testing.T) {
 	}
 	if err := f.repo.ResolveCase(ctx, 987654, scan.Resolution{Status: scan.CaseDeleted, Source: scan.SourceAdminDelete}); !errors.Is(err, scan.ErrCaseNotFound) {
 		t.Fatalf("missing case resolve: %v", err)
+	}
+}
+
+func TestVerdictsComeFromTheDecidedCasesThatFoundTheFile(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	uploader := f.db.User(t)
+	gameID := f.db.Game(t)
+	deadline := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	decide := func(source scan.DecisionSource, findings ...scan.Finding) {
+		t.Helper()
+		file := f.file(t, f.resource(t, gameID, uploader).ID, uploader, nil)
+		created, err := f.repo.CreateCase(ctx, scan.NewCase{FileID: file.ID, ResourceID: file.GameDownloadResourceID, GameID: gameID, UploaderID: uploader, ReviewDeadline: deadline, FileName: file.FileName, FileHash: file.FileHash, Findings: findings})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if source == "" {
+			return
+		}
+		if err := f.repo.ResolveCase(ctx, created.ID, scan.Resolution{Status: scan.CaseReleased, Source: source, ReviewedAt: deadline}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	decide(scan.SourceAdminAllow, scan.Finding{Path: "chs/patch.exe", SHA256: "aa", Signature: "Trojan.A"}, scan.Finding{Path: "chs/tool.exe", SHA256: "bb", Signature: "Packed.B"})
+	decide(scan.SourceAdminDelete, scan.Finding{Path: "patch.exe", SHA256: "aa", Signature: "Trojan.C"})
+	decide("", scan.Finding{Path: "patch.exe", SHA256: "aa", Signature: "Worm.D"})
+
+	verdicts, err := f.repo.Verdicts(ctx, "aa")
+	if err != nil {
+		t.Fatal(err)
+	}
+	slices.SortFunc(verdicts, func(a, b scan.Verdict) int { return strings.Compare(a.Signature, b.Signature) })
+	if !slices.Equal(verdicts, []scan.Verdict{{Signature: "Trojan.A", Source: scan.SourceAdminAllow}, {Signature: "Trojan.C", Source: scan.SourceAdminDelete}}) {
+		t.Fatalf("verdicts %+v", verdicts)
+	}
+	if none, err := f.repo.Verdicts(ctx, "cc"); err != nil || len(none) != 0 {
+		t.Fatalf("an unknown file has no verdicts: %+v %v", none, err)
 	}
 }
 

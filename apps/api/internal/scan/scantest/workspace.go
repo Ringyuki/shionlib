@@ -13,12 +13,13 @@ type Workspace struct {
 	mu        sync.Mutex
 	next      int
 	Links     map[string]string
+	Content   map[string]string
 	files     map[string][]string
 	Discarded []string
 }
 
 func NewWorkspace() *Workspace {
-	return &Workspace{Links: map[string]string{}, files: map[string][]string{}}
+	return &Workspace{Links: map[string]string{}, Content: map[string]string{}, files: map[string][]string{}}
 }
 
 func (w *Workspace) Put(dir string, names ...string) {
@@ -50,6 +51,11 @@ func (w *Workspace) Files(_ context.Context, dir string) ([]string, error) {
 }
 
 func (w *Workspace) Open(_ context.Context, path string) (io.ReadCloser, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if content, ok := w.Content[filepath.Base(path)]; ok {
+		return io.NopCloser(strings.NewReader(content)), nil
+	}
 	return io.NopCloser(strings.NewReader(path)), nil
 }
 

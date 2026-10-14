@@ -56,6 +56,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescandetection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
@@ -181,6 +182,7 @@ func checkColumn(t, c string) error {
 			inspection.Table:                      inspection.ValidColumn,
 			inspectionentry.Table:                 inspectionentry.ValidColumn,
 			malwarescancase.Table:                 malwarescancase.ValidColumn,
+			malwarescandetection.Table:            malwarescandetection.ValidColumn,
 			message.Table:                         message.ValidColumn,
 			moderationevent.Table:                 moderationevent.ValidColumn,
 			oidcidentity.Table:                    oidcidentity.ValidColumn,

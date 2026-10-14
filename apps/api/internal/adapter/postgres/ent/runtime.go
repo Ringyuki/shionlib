@@ -47,6 +47,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescandetection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
@@ -1271,6 +1272,12 @@ func init() {
 	malwarescancase.DefaultUpdated = malwarescancaseDescUpdated.Default.(func() time.Time)
 	// malwarescancase.UpdateDefaultUpdated holds the default value on update for the updated field.
 	malwarescancase.UpdateDefaultUpdated = malwarescancaseDescUpdated.UpdateDefault.(func() time.Time)
+	malwarescandetectionFields := schema.MalwareScanDetection{}.Fields()
+	_ = malwarescandetectionFields
+	// malwarescandetectionDescSha256 is the schema descriptor for sha256 field.
+	malwarescandetectionDescSha256 := malwarescandetectionFields[3].Descriptor()
+	// malwarescandetection.Sha256Validator is a validator for the "sha256" field. It is called by the builders before save.
+	malwarescandetection.Sha256Validator = malwarescandetectionDescSha256.Validators[0].(func(string) error)
 	messageFields := schema.Message{}.Fields()
 	_ = messageFields
 	// messageDescTitle is the schema descriptor for title field.
