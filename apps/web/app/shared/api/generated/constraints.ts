@@ -1075,6 +1075,40 @@ export const constraints = {
       "maxLength": 255
     }
   },
+  "CreateFriendLinkInputBody": {
+    "description": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 200
+    },
+    "logo": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 500
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "url": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^https?://"
+    },
+    "visible": {
+      "type": "boolean",
+      "required": false,
+      "nullable": false
+    }
+  },
   "CreateReportInputBody": {
     "detail": {
       "type": "string",
@@ -1859,6 +1893,14 @@ export const constraints = {
       "maxLength": 255
     }
   },
+  "ReorderFriendLinksInputBody": {
+    "ids": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 1000
+    }
+  },
   "RequestCodeInputBody": {
     "email": {
       "type": "string",
@@ -2184,6 +2226,40 @@ export const constraints = {
       "required": false,
       "nullable": false,
       "maxLength": 2000
+    }
+  },
+  "UpdateFriendLinkInputBody": {
+    "description": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 200
+    },
+    "logo": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "maxLength": 500
+    },
+    "name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "url": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^https?://"
+    },
+    "visible": {
+      "type": "boolean",
+      "required": false,
+      "nullable": false
     }
   },
   "UpdateLangInputBody": {

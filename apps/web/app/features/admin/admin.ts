@@ -14,6 +14,7 @@ export const adminPaths = {
   translators: `${adminRoot}/translators`,
   users: `${adminRoot}/users`,
   sponsors: `${adminRoot}/sponsors`,
+  friendLinks: `${adminRoot}/friend-links`,
   catalog: `${adminRoot}/catalog`,
   ai: `${adminRoot}/ai`,
   settings: `${adminRoot}/settings`,
@@ -47,6 +48,7 @@ export type NavKey =
   | 'translators'
   | 'users'
   | 'sponsors'
+  | 'friendLinks'
   | 'catalog'
   | 'ai'
   | 'settings'
@@ -93,6 +95,7 @@ export function navigationOf(pending: Pending): Navigation {
           entry('translators', adminPaths.translators),
           entry('users', adminPaths.users),
           entry('sponsors', adminPaths.sponsors),
+          entry('friendLinks', adminPaths.friendLinks),
         ],
       },
       {
