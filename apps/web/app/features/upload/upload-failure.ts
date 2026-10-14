@@ -1,5 +1,12 @@
 import { ApiError } from '~/shared/api/error'
+import { FileReadError } from './file-hasher'
 import type { FailureReason, WaitReason } from './upload'
+import {
+  describeError,
+  type ErrorReport,
+  type FailureOrigin,
+  type FailureStage,
+} from './upload-report'
 import { sleep } from './upload-slots'
 
 export type Decision =
@@ -16,21 +23,47 @@ const busyDelay = 30_000
 
 const changedFileAttempts = 2
 
+type Place = { stage?: FailureStage; chunk?: number }
+
 export class UploadFailure extends Error {
   readonly reason: FailureReason
   readonly detail: string | undefined
+  readonly origin: ErrorReport
+  readonly place: Place
 
-  constructor(reason: FailureReason, detail?: string) {
+  constructor(
+    reason: FailureReason,
+    detail: string | undefined,
+    origin: ErrorReport,
+    place: Place = {},
+  ) {
     super(detail ?? reason)
     this.reason = reason
     this.detail = detail
+    this.origin = origin
+    this.place = place
+  }
+
+  at(stage: FailureStage, chunk?: number): UploadFailure {
+    return this.place.stage === undefined
+      ? new UploadFailure(this.reason, this.detail, this.origin, { stage, chunk })
+      : this
+  }
+
+  originOf(fallback: FailureStage): FailureOrigin {
+    return {
+      reason: this.reason,
+      error: this.origin,
+      stage: this.place.stage ?? fallback,
+      ...(this.place.chunk === undefined ? {} : { chunk: this.place.chunk }),
+    }
   }
 }
 
 export class HeldElsewhere extends Error {}
 
 export type Waiting = {
-  wait: (reason: WaitReason) => void
+  wait: (reason: WaitReason, error: unknown) => void
   resume: () => void
   random: () => number
 }
@@ -56,9 +89,9 @@ export async function retrying<Result>(
         throw new HeldElsewhere()
       }
       if (decision.kind === 'fail') {
-        throw new UploadFailure(decision.reason, decision.message)
+        throw new UploadFailure(decision.reason, decision.message, describeError(error))
       }
-      waiting.wait(decision.reason)
+      waiting.wait(decision.reason, error)
       await sleep(decision.delay, scope)
       waiting.resume()
     }
@@ -69,7 +102,19 @@ export function failureOf(error: unknown): UploadFailure | undefined {
   if (error instanceof DOMException && error.name === 'AbortError') {
     return undefined
   }
-  return error instanceof UploadFailure ? error : new UploadFailure('rejected', String(error))
+  return error instanceof UploadFailure
+    ? error
+    : new UploadFailure('rejected', undefined, describeError(error))
+}
+
+export function locate(error: unknown, stage: FailureStage, chunk?: number): unknown {
+  if (error instanceof FileReadError) {
+    return new UploadFailure('unreadable', undefined, describeError(error), {
+      stage: 'read',
+      chunk,
+    })
+  }
+  return error instanceof UploadFailure ? error.at(stage, chunk) : error
 }
 
 export function spoilsSession(failure: UploadFailure): boolean {
@@ -129,7 +174,11 @@ function decideApiError(error: ApiError, attempt: number, random: number): Decis
   if (error.is('GAME_UPLOAD_SESSION_EXPIRED') || error.is('GAME_UPLOAD_SESSION_NOT_FOUND')) {
     return { kind: 'fail', reason: 'expired' }
   }
-  return { kind: 'fail', reason: 'rejected', message: error.message }
+  return {
+    kind: 'fail',
+    reason: 'rejected',
+    ...(error.message === '' ? {} : { message: error.message }),
+  }
 }
 
 export function backoff(attempt: number, random: number): number {

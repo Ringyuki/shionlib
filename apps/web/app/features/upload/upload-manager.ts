@@ -1,12 +1,13 @@
 import { ApiError } from '~/shared/api/error'
-import type { UploadTarget } from './upload'
+import type { SubmissionPhase, UploadTarget } from './upload'
 import { identityOf, matchFiles, syncEvery } from './upload'
 import { stopped } from './upload-failure'
+import { describeError, submissionReport } from './upload-report'
 import { UploadRuns } from './upload-runs'
 import { findUpload, nextToStart, readyToSubmit, uploadsOf, type UploadEvent } from './upload-state'
 import { UploadStore } from './upload-store'
 import { heldSessions } from './upload-sync'
-import type { UploadDeps } from './upload-transfer'
+import { sendReport, type UploadDeps } from './upload-transfer'
 import { discardSession, restoreUploads, submitUploads, syncSessions } from './upload.use-cases'
 
 export type PickedFile = { file: File; name?: string }
@@ -175,8 +176,10 @@ export class UploadManager {
       uploads.forEach(upload => upload.session !== undefined && this.gone.add(upload.session.id))
       this.dispatch({ type: 'submission', submission, phase: { name: 'submitted' } })
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : undefined
-      this.dispatch({ type: 'submission', submission, phase: { name: 'failed', message } })
+      const message = error instanceof ApiError && error.message !== '' ? error.message : undefined
+      const phase: SubmissionPhase = { name: 'failed', message, error: describeError(error) }
+      this.dispatch({ type: 'submission', submission, phase })
+      sendReport(this.deps, submissionReport(entry.label, uploadsOf(this.state, submission), error))
     }
   }
 

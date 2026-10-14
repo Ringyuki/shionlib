@@ -2,9 +2,10 @@ import type { FileHasher } from './file-hasher'
 import type { UploadState } from './upload'
 import { chunkSlots } from './upload'
 import { failureOf, HeldElsewhere, spoilsSession, stopped } from './upload-failure'
+import { uploadReport, type FailureAttempt } from './upload-report'
 import { Slots } from './upload-slots'
 import { findUpload, type UploadEvent } from './upload-state'
-import { transfer, type TransferContext, type UploadDeps } from './upload-transfer'
+import { sendReport, transfer, type TransferContext, type UploadDeps } from './upload-transfer'
 
 export type RunsQueue = {
   state: () => UploadState
@@ -22,6 +23,7 @@ export class UploadRuns {
   private readonly files = new Map<string, File>()
   private readonly running = new Map<string, AbortController>()
   private readonly hashers = new Map<string, FileHasher>()
+  private readonly attempts = new Map<string, FailureAttempt[]>()
 
   constructor(deps: UploadDeps, queue: RunsQueue) {
     this.deps = deps
@@ -30,6 +32,7 @@ export class UploadRuns {
       deps,
       slots: new Slots(chunkSlots),
       hashers: this.hashers,
+      attempts: this.attempts,
       dispatch: queue.dispatch,
     }
   }
@@ -46,6 +49,7 @@ export class UploadRuns {
 
   forget(upload: string) {
     this.files.delete(upload)
+    this.attempts.delete(upload)
     this.hashers.get(upload)?.dispose()
     this.hashers.delete(upload)
   }
@@ -117,6 +121,8 @@ export class UploadRuns {
     if (failure === undefined) {
       return
     }
+    const upload = findUpload(this.queue.state(), id)
+    const attempts = this.attempts.get(id) ?? []
     if (spoilsSession(failure)) {
       this.queue.discard(id)
     }
@@ -126,6 +132,11 @@ export class UploadRuns {
       upload: id,
       reason: failure.reason,
       message: failure.detail,
+      error: failure.origin,
     })
+    if (upload !== undefined) {
+      const origin = failure.originOf(upload.session === undefined ? 'open' : 'chunk')
+      sendReport(this.deps, uploadReport(upload, origin, attempts))
+    }
   }
 }

@@ -7,6 +7,13 @@ export type HashWorker = {
 
 type Waiter = { resolve: (digest: string) => void; reject: (error: Error) => void }
 
+export class FileReadError extends Error {
+  constructor(name: string, message: string) {
+    super(message)
+    this.name = name
+  }
+}
+
 export class FileHasher {
   private readonly worker: HashWorker
   private readonly chunks = new Map<number, string>()
@@ -46,7 +53,7 @@ export class FileHasher {
 
   private receive(report: HashReport) {
     if (report.kind === 'error') {
-      this.fail(new Error(report.message))
+      this.fail(new FileReadError(report.name ?? 'Error', report.message))
       return
     }
     const key = report.kind === 'chunk' ? report.index : 'file'

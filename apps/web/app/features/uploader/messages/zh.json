@@ -96,6 +96,7 @@
     "failure": {
       "differentFile": "所选文件与之前上传的文件不是同一个",
       "changedFile": "文件在上传过程中被修改",
+      "unreadable": "无法读取文件，请确认文件没有被移动、修改或删除后重新选择",
       "expired": "上传已过期，请重新上传",
       "rejected": "上传失败"
     },
@@ -106,6 +107,12 @@
       "patch": "合成用的补丁",
       "save": "合成用的全CG存档"
     },
-    "rebuilds": "更新合成资源的补丁"
+    "rebuilds": "更新合成资源的补丁",
+    "facts": {
+      "status": "HTTP {status}",
+      "code": "错误码 {code}",
+      "request": "请求 ID {id}",
+      "ray": "Ray ID {id}"
+    }
   }
 }

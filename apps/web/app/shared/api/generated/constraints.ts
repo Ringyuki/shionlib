@@ -954,6 +954,46 @@ export const constraints = {
       "nullable": false
     }
   },
+  "ClientErrorInput": {
+    "code": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64"
+    },
+    "message": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "maxLength": 2000
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "maxLength": 100
+    },
+    "ray": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 100
+    },
+    "request_id": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 100
+    },
+    "status": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 0,
+      "maximum": 999
+    }
+  },
   "CompleteUploadInputBody": {
     "file_sha256": {
       "type": "string",
@@ -1628,6 +1668,30 @@ export const constraints = {
       "maxItems": 6
     }
   },
+  "FailureAttemptInput": {
+    "at": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "format": "date-time"
+    },
+    "error": {
+      "type": "unknown",
+      "required": true,
+      "nullable": false
+    },
+    "wait": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "network",
+        "busy",
+        "in_flight",
+        "signed_out"
+      ]
+    }
+  },
   "ForgotPasswordInputBody": {
     "email": {
       "type": "string",
@@ -1917,6 +1981,70 @@ export const constraints = {
       "required": true,
       "nullable": true,
       "maxItems": 1000
+    }
+  },
+  "ReportFailureInputBody": {
+    "attempts": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 10
+    },
+    "chunk": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 0
+    },
+    "error": {
+      "type": "unknown",
+      "required": true,
+      "nullable": false
+    },
+    "file_name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "maxLength": 1000
+    },
+    "file_size": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 0
+    },
+    "reason": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "different_file",
+        "changed_file",
+        "unreadable",
+        "expired",
+        "rejected"
+      ]
+    },
+    "session_id": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
+    },
+    "stage": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "open",
+        "read",
+        "chunk",
+        "complete",
+        "submit"
+      ]
     }
   },
   "RequestCodeInputBody": {

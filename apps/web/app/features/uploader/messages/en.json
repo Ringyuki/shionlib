@@ -96,6 +96,7 @@
     "failure": {
       "differentFile": "The chosen file is not the one uploaded before",
       "changedFile": "The file changed while it was uploading",
+      "unreadable": "The file could not be read; check that it has not been moved, changed or deleted, then choose it again",
       "expired": "The upload expired; upload the file again",
       "rejected": "The upload failed"
     },
@@ -106,6 +107,12 @@
       "patch": "Patch for a composition",
       "save": "Full CG save for a composition"
     },
-    "rebuilds": "New patch for a composed resource"
+    "rebuilds": "New patch for a composed resource",
+    "facts": {
+      "status": "HTTP {status}",
+      "code": "Code {code}",
+      "request": "Request ID {id}",
+      "ray": "Ray ID {id}"
+    }
   }
 }

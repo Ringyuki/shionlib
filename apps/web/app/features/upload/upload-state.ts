@@ -10,6 +10,7 @@ import type {
   WaitReason,
 } from './upload'
 import { activeFiles, settled, unowned } from './upload'
+import type { ErrorReport } from './upload-report'
 import { syncState } from './upload-sync'
 
 export type UploadEvent =
@@ -25,7 +26,7 @@ export type UploadEvent =
   | { type: 'paused'; upload: string }
   | { type: 'resumed'; upload: string }
   | { type: 'finished'; upload: string }
-  | { type: 'failed'; upload: string; reason: FailureReason; message?: string }
+  | { type: 'failed'; upload: string; reason: FailureReason; message?: string; error?: ErrorReport }
   | { type: 'removed'; upload: string }
   | { type: 'submission'; submission: string; phase: SubmissionPhase }
   | { type: 'dismissed'; submission: string }
@@ -69,7 +70,7 @@ export function reduce(state: UploadState, event: UploadEvent): UploadState {
       return finish(state, event.upload)
     case 'failed':
       return update(state, event.upload, {
-        phase: { name: 'failed', reason: event.reason, message: event.message },
+        phase: { name: 'failed', reason: event.reason, message: event.message, error: event.error },
         speed: 0,
       })
     case 'removed':
