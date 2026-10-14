@@ -69,6 +69,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("sponsor_orders", SponsorOrder.Type).StorageKey(edge.Symbol("sponsor_orders_user_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.To("game_pvn_mappings", UserGamePvnMapping.Type).StorageKey(edge.Symbol("user_game_pvn_mappings_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("api_keys", UserAPIKey.Type).StorageKey(edge.Symbol("user_api_keys_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("upload_failures", UploadFailure.Type).StorageKey(edge.Symbol("upload_failures_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("potatovn_binding", UserPvnBinding.Type).Unique().StorageKey(edge.Symbol("user_pvn_bindings_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("game_upload_sessions", GameUploadSession.Type).StorageKey(edge.Symbol("game_upload_sessions_creator_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.To("walkthroughs", Walkthrough.Type).StorageKey(edge.Symbol("walkthroughs_creator_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),

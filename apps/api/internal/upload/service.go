@@ -462,3 +462,21 @@ func (s *Service) removeOwned(ctx context.Context, path string) error {
 	}
 	return s.spool.Remove(ctx, path)
 }
+
+func (s *Service) ReportFailure(ctx context.Context, who actor.Actor, report FailureReport) (int, error) {
+	if report.SessionID != nil {
+		session, err := s.repo.GetSession(ctx, *report.SessionID)
+		switch {
+		case errors.Is(err, ErrSessionNotFound):
+			report.SessionID = nil
+		case err != nil:
+			return 0, err
+		case session.CreatorID != who.UserID:
+			return 0, ErrSessionNotOwner
+		}
+	}
+	if len(report.Attempts) > MaxFailureAttempts {
+		report.Attempts = report.Attempts[len(report.Attempts)-MaxFailureAttempts:]
+	}
+	return s.repo.RecordFailure(ctx, who.UserID, report, s.now())
+}

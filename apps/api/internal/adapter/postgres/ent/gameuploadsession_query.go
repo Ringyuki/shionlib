@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 )
 
@@ -30,6 +31,7 @@ type GameUploadSessionQuery struct {
 	withGameDownloadResourceFile *GameDownloadResourceFileQuery
 	withGameUploadChunks         *GameUploadChunkQuery
 	withCreator                  *UserQuery
+	withFailures                 *UploadFailureQuery
 	modifiers                    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -126,6 +128,28 @@ func (_q *GameUploadSessionQuery) QueryCreator() *UserQuery {
 			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, gameuploadsession.CreatorTable, gameuploadsession.CreatorColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFailures chains the current query on the "failures" edge.
+func (_q *GameUploadSessionQuery) QueryFailures() *UploadFailureQuery {
+	query := (&UploadFailureClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, selector),
+			sqlgraph.To(uploadfailure.Table, uploadfailure.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gameuploadsession.FailuresTable, gameuploadsession.FailuresColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -328,6 +352,7 @@ func (_q *GameUploadSessionQuery) Clone() *GameUploadSessionQuery {
 		withGameDownloadResourceFile: _q.withGameDownloadResourceFile.Clone(),
 		withGameUploadChunks:         _q.withGameUploadChunks.Clone(),
 		withCreator:                  _q.withCreator.Clone(),
+		withFailures:                 _q.withFailures.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -365,6 +390,17 @@ func (_q *GameUploadSessionQuery) WithCreator(opts ...func(*UserQuery)) *GameUpl
 		opt(query)
 	}
 	_q.withCreator = query
+	return _q
+}
+
+// WithFailures tells the query-builder to eager-load the nodes that are connected to
+// the "failures" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GameUploadSessionQuery) WithFailures(opts ...func(*UploadFailureQuery)) *GameUploadSessionQuery {
+	query := (&UploadFailureClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFailures = query
 	return _q
 }
 
@@ -446,10 +482,11 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*GameUploadSession{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withGameDownloadResourceFile != nil,
 			_q.withGameUploadChunks != nil,
 			_q.withCreator != nil,
+			_q.withFailures != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -491,6 +528,13 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if query := _q.withCreator; query != nil {
 		if err := _q.loadCreator(ctx, query, nodes, nil,
 			func(n *GameUploadSession, e *User) { n.Edges.Creator = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFailures; query != nil {
+		if err := _q.loadFailures(ctx, query, nodes,
+			func(n *GameUploadSession) { n.Edges.Failures = []*UploadFailure{} },
+			func(n *GameUploadSession, e *UploadFailure) { n.Edges.Failures = append(n.Edges.Failures, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -583,6 +627,39 @@ func (_q *GameUploadSessionQuery) loadCreator(ctx context.Context, query *UserQu
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (_q *GameUploadSessionQuery) loadFailures(ctx context.Context, query *UploadFailureQuery, nodes []*GameUploadSession, init func(*GameUploadSession), assign func(*GameUploadSession, *UploadFailure)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GameUploadSession)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(uploadfailure.FieldSessionID)
+	}
+	query.Where(predicate.UploadFailure(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(gameuploadsession.FailuresColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SessionID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "session_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "session_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

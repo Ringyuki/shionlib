@@ -17,6 +17,14 @@ type MemoryRepository struct {
 	sessions map[int]upload.Session
 	attached map[int]bool
 	paths    map[string]bool
+	Failures []RecordedFailure
+}
+
+type RecordedFailure struct {
+	ID     int
+	UserID int
+	At     time.Time
+	Report upload.FailureReport
 }
 
 func NewMemoryRepository(now func() time.Time) *MemoryRepository {
@@ -123,6 +131,14 @@ func (r *MemoryRepository) PendingBytes(_ context.Context, now time.Time) (int64
 
 func (r *MemoryRepository) LockAdmission(context.Context) error {
 	return nil
+}
+
+func (r *MemoryRepository) RecordFailure(_ context.Context, userID int, report upload.FailureReport, at time.Time) (int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	recorded := RecordedFailure{ID: len(r.Failures) + 1, UserID: userID, At: at, Report: report}
+	r.Failures = append(r.Failures, recorded)
+	return recorded.ID, nil
 }
 
 func (r *MemoryRepository) AddChunk(_ context.Context, id, index int, expiresAt time.Time) error {

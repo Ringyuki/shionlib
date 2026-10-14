@@ -49,6 +49,8 @@ const (
 	EdgeGameUploadChunks = "game_upload_chunks"
 	// EdgeCreator holds the string denoting the creator edge name in mutations.
 	EdgeCreator = "creator"
+	// EdgeFailures holds the string denoting the failures edge name in mutations.
+	EdgeFailures = "failures"
 	// Table holds the table name of the gameuploadsession in the database.
 	Table = "game_upload_sessions"
 	// GameDownloadResourceFileTable is the table that holds the game_download_resource_file relation/edge.
@@ -72,6 +74,13 @@ const (
 	CreatorInverseTable = "users"
 	// CreatorColumn is the table column denoting the creator relation/edge.
 	CreatorColumn = "creator_id"
+	// FailuresTable is the table that holds the failures relation/edge.
+	FailuresTable = "upload_failures"
+	// FailuresInverseTable is the table name for the UploadFailure entity.
+	// It exists in this package in order to avoid circular dependency with the "uploadfailure" package.
+	FailuresInverseTable = "upload_failures"
+	// FailuresColumn is the table column denoting the failures relation/edge.
+	FailuresColumn = "session_id"
 )
 
 // Columns holds all SQL columns for gameuploadsession fields.
@@ -269,6 +278,20 @@ func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCreatorStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByFailuresCount orders the results by failures count.
+func ByFailuresCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFailuresStep(), opts...)
+	}
+}
+
+// ByFailures orders the results by failures terms.
+func ByFailures(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFailuresStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newGameDownloadResourceFileStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -288,5 +311,12 @@ func newCreatorStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CreatorInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CreatorTable, CreatorColumn),
+	)
+}
+func newFailuresStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FailuresInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FailuresTable, FailuresColumn),
 	)
 }

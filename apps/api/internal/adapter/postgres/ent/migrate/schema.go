@@ -2531,6 +2531,60 @@ var (
 			},
 		},
 	}
+	// UploadFailuresColumns holds the columns for the "upload_failures" table.
+	UploadFailuresColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "stage", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "reason", Type: field.TypeString, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "error_name", Type: field.TypeString, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "error_message", Type: field.TypeString, Size: 2147483647},
+		{Name: "status", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "code", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "request_id", Type: field.TypeString, Nullable: true, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "ray", Type: field.TypeString, Nullable: true, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "chunk", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "file_name", Type: field.TypeString, Size: 2147483647},
+		{Name: "file_size", Type: field.TypeInt64, SchemaType: map[string]string{"postgres": "bigint"}},
+		{Name: "attempts", Type: field.TypeJSON, Default: schema.Expr("'[]'::jsonb"), SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "client", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "ip", Type: field.TypeString, Size: 2147483647},
+		{Name: "user_agent", Type: field.TypeString, Size: 2147483647},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "session_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "user_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// UploadFailuresTable holds the schema information for the "upload_failures" table.
+	UploadFailuresTable = &schema.Table{
+		Name:       "upload_failures",
+		Columns:    UploadFailuresColumns,
+		PrimaryKey: []*schema.Column{UploadFailuresColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "upload_failures_session_id_fkey",
+				Columns:    []*schema.Column{UploadFailuresColumns[17]},
+				RefColumns: []*schema.Column{GameUploadSessionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "upload_failures_user_id_fkey",
+				Columns:    []*schema.Column{UploadFailuresColumns[18]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "upload_failures_user_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{UploadFailuresColumns[18]},
+			},
+			{
+				Name:    "upload_failures_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{UploadFailuresColumns[16]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -3002,6 +3056,7 @@ var (
 		TagsTable,
 		TranslatorsTable,
 		TranslatorDistinctionsTable,
+		UploadFailuresTable,
 		UsersTable,
 		UserAPIKeysTable,
 		UserBannedRecordsTable,
@@ -3260,6 +3315,11 @@ func init() {
 	}
 	TranslatorDistinctionsTable.Annotation = &entsql.Annotation{
 		Table: "translator_distinctions",
+	}
+	UploadFailuresTable.ForeignKeys[0].RefTable = GameUploadSessionsTable
+	UploadFailuresTable.ForeignKeys[1].RefTable = UsersTable
+	UploadFailuresTable.Annotation = &entsql.Annotation{
+		Table: "upload_failures",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",

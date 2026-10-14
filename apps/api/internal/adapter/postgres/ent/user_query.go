@@ -31,6 +31,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -71,6 +72,7 @@ type UserQuery struct {
 	withSponsorOrders                     *SponsorOrderQuery
 	withGamePvnMappings                   *UserGamePvnMappingQuery
 	withAPIKeys                           *UserAPIKeyQuery
+	withUploadFailures                    *UploadFailureQuery
 	withPotatovnBinding                   *UserPvnBindingQuery
 	withGameUploadSessions                *GameUploadSessionQuery
 	withWalkthroughs                      *WalkthroughQuery
@@ -601,6 +603,28 @@ func (_q *UserQuery) QueryAPIKeys() *UserAPIKeyQuery {
 	return query
 }
 
+// QueryUploadFailures chains the current query on the "upload_failures" edge.
+func (_q *UserQuery) QueryUploadFailures() *UploadFailureQuery {
+	query := (&UploadFailureClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(uploadfailure.Table, uploadfailure.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UploadFailuresTable, user.UploadFailuresColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryPotatovnBinding chains the current query on the "potatovn_binding" edge.
 func (_q *UserQuery) QueryPotatovnBinding() *UserPvnBindingQuery {
 	query := (&UserPvnBindingClient{config: _q.config}).Query()
@@ -1013,6 +1037,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withSponsorOrders:                     _q.withSponsorOrders.Clone(),
 		withGamePvnMappings:                   _q.withGamePvnMappings.Clone(),
 		withAPIKeys:                           _q.withAPIKeys.Clone(),
+		withUploadFailures:                    _q.withUploadFailures.Clone(),
 		withPotatovnBinding:                   _q.withPotatovnBinding.Clone(),
 		withGameUploadSessions:                _q.withGameUploadSessions.Clone(),
 		withWalkthroughs:                      _q.withWalkthroughs.Clone(),
@@ -1271,6 +1296,17 @@ func (_q *UserQuery) WithAPIKeys(opts ...func(*UserAPIKeyQuery)) *UserQuery {
 	return _q
 }
 
+// WithUploadFailures tells the query-builder to eager-load the nodes that are connected to
+// the "upload_failures" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithUploadFailures(opts ...func(*UploadFailureQuery)) *UserQuery {
+	query := (&UploadFailureClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUploadFailures = query
+	return _q
+}
+
 // WithPotatovnBinding tells the query-builder to eager-load the nodes that are connected to
 // the "potatovn_binding" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithPotatovnBinding(opts ...func(*UserPvnBindingQuery)) *UserQuery {
@@ -1448,7 +1484,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [31]bool{
+		loadedTypes = [32]bool{
 			_q.withActivities != nil,
 			_q.withComments != nil,
 			_q.withLikedComments != nil,
@@ -1471,6 +1507,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withSponsorOrders != nil,
 			_q.withGamePvnMappings != nil,
 			_q.withAPIKeys != nil,
+			_q.withUploadFailures != nil,
 			_q.withPotatovnBinding != nil,
 			_q.withGameUploadSessions != nil,
 			_q.withWalkthroughs != nil,
@@ -1670,6 +1707,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadAPIKeys(ctx, query, nodes,
 			func(n *User) { n.Edges.APIKeys = []*UserAPIKey{} },
 			func(n *User, e *UserAPIKey) { n.Edges.APIKeys = append(n.Edges.APIKeys, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withUploadFailures; query != nil {
+		if err := _q.loadUploadFailures(ctx, query, nodes,
+			func(n *User) { n.Edges.UploadFailures = []*UploadFailure{} },
+			func(n *User, e *UploadFailure) { n.Edges.UploadFailures = append(n.Edges.UploadFailures, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -2434,6 +2478,36 @@ func (_q *UserQuery) loadAPIKeys(ctx context.Context, query *UserAPIKeyQuery, no
 	}
 	query.Where(predicate.UserAPIKey(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.APIKeysColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadUploadFailures(ctx context.Context, query *UploadFailureQuery, nodes []*User, init func(*User), assign func(*User, *UploadFailure)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(uploadfailure.FieldUserID)
+	}
+	query.Where(predicate.UploadFailure(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.UploadFailuresColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

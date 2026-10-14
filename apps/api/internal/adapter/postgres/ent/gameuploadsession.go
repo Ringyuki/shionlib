@@ -62,9 +62,11 @@ type GameUploadSessionEdges struct {
 	GameUploadChunks []*GameUploadChunk `json:"game_upload_chunks,omitempty"`
 	// Creator holds the value of the creator edge.
 	Creator *User `json:"creator,omitempty"`
+	// Failures holds the value of the failures edge.
+	Failures []*UploadFailure `json:"failures,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // GameDownloadResourceFileOrErr returns the GameDownloadResourceFile value or an error if the edge
@@ -96,6 +98,15 @@ func (e GameUploadSessionEdges) CreatorOrErr() (*User, error) {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
+}
+
+// FailuresOrErr returns the Failures value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameUploadSessionEdges) FailuresOrErr() ([]*UploadFailure, error) {
+	if e.loadedTypes[3] {
+		return e.Failures, nil
+	}
+	return nil, &NotLoadedError{edge: "failures"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -243,6 +254,11 @@ func (_m *GameUploadSession) QueryGameUploadChunks() *GameUploadChunkQuery {
 // QueryCreator queries the "creator" edge of the GameUploadSession entity.
 func (_m *GameUploadSession) QueryCreator() *UserQuery {
 	return NewGameUploadSessionClient(_m.config).QueryCreator(_m)
+}
+
+// QueryFailures queries the "failures" edge of the GameUploadSession entity.
+func (_m *GameUploadSession) QueryFailures() *UploadFailureQuery {
+	return NewGameUploadSessionClient(_m.config).QueryFailures(_m)
 }
 
 // Update returns a builder for updating this GameUploadSession.

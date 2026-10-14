@@ -68,6 +68,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -144,6 +145,7 @@ const (
 	TypeTag                             = "Tag"
 	TypeTranslator                      = "Translator"
 	TypeTranslatorDistinction           = "TranslatorDistinction"
+	TypeUploadFailure                   = "UploadFailure"
 	TypeUser                            = "User"
 	TypeUserAPIKey                      = "UserAPIKey"
 	TypeUserBannedRecord                = "UserBannedRecord"
@@ -49597,6 +49599,9 @@ type GameUploadSessionMutation struct {
 	clearedgame_upload_chunks          bool
 	creator                            *int
 	clearedcreator                     bool
+	failures                           map[int]struct{}
+	removedfailures                    map[int]struct{}
+	clearedfailures                    bool
 	done                               bool
 	oldValue                           func(context.Context) (*GameUploadSession, error)
 	predicates                         []predicate.GameUploadSession
@@ -50416,6 +50421,60 @@ func (m *GameUploadSessionMutation) ResetCreator() {
 	m.clearedcreator = false
 }
 
+// AddFailureIDs adds the "failures" edge to the UploadFailure entity by ids.
+func (m *GameUploadSessionMutation) AddFailureIDs(ids ...int) {
+	if m.failures == nil {
+		m.failures = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.failures[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFailures clears the "failures" edge to the UploadFailure entity.
+func (m *GameUploadSessionMutation) ClearFailures() {
+	m.clearedfailures = true
+}
+
+// FailuresCleared reports if the "failures" edge to the UploadFailure entity was cleared.
+func (m *GameUploadSessionMutation) FailuresCleared() bool {
+	return m.clearedfailures
+}
+
+// RemoveFailureIDs removes the "failures" edge to the UploadFailure entity by IDs.
+func (m *GameUploadSessionMutation) RemoveFailureIDs(ids ...int) {
+	if m.removedfailures == nil {
+		m.removedfailures = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.failures, ids[i])
+		m.removedfailures[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFailures returns the removed IDs of the "failures" edge to the UploadFailure entity.
+func (m *GameUploadSessionMutation) RemovedFailuresIDs() (ids []int) {
+	for id := range m.removedfailures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FailuresIDs returns the "failures" edge IDs in the mutation.
+func (m *GameUploadSessionMutation) FailuresIDs() (ids []int) {
+	for id := range m.failures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFailures resets all changes to the "failures" edge.
+func (m *GameUploadSessionMutation) ResetFailures() {
+	m.failures = nil
+	m.clearedfailures = false
+	m.removedfailures = nil
+}
+
 // Where appends a list predicates to the GameUploadSessionMutation builder.
 func (m *GameUploadSessionMutation) Where(ps ...predicate.GameUploadSession) {
 	m.predicates = append(m.predicates, ps...)
@@ -50824,7 +50883,7 @@ func (m *GameUploadSessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameUploadSessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.game_download_resource_file != nil {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
@@ -50833,6 +50892,9 @@ func (m *GameUploadSessionMutation) AddedEdges() []string {
 	}
 	if m.creator != nil {
 		edges = append(edges, gameuploadsession.EdgeCreator)
+	}
+	if m.failures != nil {
+		edges = append(edges, gameuploadsession.EdgeFailures)
 	}
 	return edges
 }
@@ -50855,15 +50917,24 @@ func (m *GameUploadSessionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.creator; id != nil {
 			return []ent.Value{*id}
 		}
+	case gameuploadsession.EdgeFailures:
+		ids := make([]ent.Value, 0, len(m.failures))
+		for id := range m.failures {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameUploadSessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedgame_upload_chunks != nil {
 		edges = append(edges, gameuploadsession.EdgeGameUploadChunks)
+	}
+	if m.removedfailures != nil {
+		edges = append(edges, gameuploadsession.EdgeFailures)
 	}
 	return edges
 }
@@ -50878,13 +50949,19 @@ func (m *GameUploadSessionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gameuploadsession.EdgeFailures:
+		ids := make([]ent.Value, 0, len(m.removedfailures))
+		for id := range m.removedfailures {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameUploadSessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedgame_download_resource_file {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
@@ -50893,6 +50970,9 @@ func (m *GameUploadSessionMutation) ClearedEdges() []string {
 	}
 	if m.clearedcreator {
 		edges = append(edges, gameuploadsession.EdgeCreator)
+	}
+	if m.clearedfailures {
+		edges = append(edges, gameuploadsession.EdgeFailures)
 	}
 	return edges
 }
@@ -50907,6 +50987,8 @@ func (m *GameUploadSessionMutation) EdgeCleared(name string) bool {
 		return m.clearedgame_upload_chunks
 	case gameuploadsession.EdgeCreator:
 		return m.clearedcreator
+	case gameuploadsession.EdgeFailures:
+		return m.clearedfailures
 	}
 	return false
 }
@@ -50937,6 +51019,9 @@ func (m *GameUploadSessionMutation) ResetEdge(name string) error {
 		return nil
 	case gameuploadsession.EdgeCreator:
 		m.ResetCreator()
+		return nil
+	case gameuploadsession.EdgeFailures:
+		m.ResetFailures()
 		return nil
 	}
 	return fmt.Errorf("unknown GameUploadSession edge %s", name)
@@ -65868,6 +65953,1627 @@ func (m *TranslatorDistinctionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown TranslatorDistinction edge %s", name)
 }
 
+// UploadFailureMutation represents an operation that mutates the UploadFailure nodes in the graph.
+type UploadFailureMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	stage          *string
+	reason         *string
+	error_name     *string
+	error_message  *string
+	status         *int
+	addstatus      *int
+	code           *int
+	addcode        *int
+	request_id     *string
+	ray            *string
+	chunk          *int
+	addchunk       *int
+	file_name      *string
+	file_size      *int64
+	addfile_size   *int64
+	attempts       *jsontext.Value
+	appendattempts jsontext.Value
+	client         *string
+	ip             *string
+	user_agent     *string
+	created        *time.Time
+	clearedFields  map[string]struct{}
+	user           *int
+	cleareduser    bool
+	session        *int
+	clearedsession bool
+	done           bool
+	oldValue       func(context.Context) (*UploadFailure, error)
+	predicates     []predicate.UploadFailure
+}
+
+var _ ent.Mutation = (*UploadFailureMutation)(nil)
+
+// uploadfailureOption allows management of the mutation configuration using functional options.
+type uploadfailureOption func(*UploadFailureMutation)
+
+// newUploadFailureMutation creates new mutation for the UploadFailure entity.
+func newUploadFailureMutation(c config, op Op, opts ...uploadfailureOption) *UploadFailureMutation {
+	m := &UploadFailureMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUploadFailure,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUploadFailureID sets the ID field of the mutation.
+func withUploadFailureID(id int) uploadfailureOption {
+	return func(m *UploadFailureMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *UploadFailure
+		)
+		m.oldValue = func(ctx context.Context) (*UploadFailure, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().UploadFailure.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUploadFailure sets the old UploadFailure of the mutation.
+func withUploadFailure(node *UploadFailure) uploadfailureOption {
+	return func(m *UploadFailureMutation) {
+		m.oldValue = func(context.Context) (*UploadFailure, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UploadFailureMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UploadFailureMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of UploadFailure entities.
+func (m *UploadFailureMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UploadFailureMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UploadFailureMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().UploadFailure.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *UploadFailureMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *UploadFailureMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *UploadFailureMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *UploadFailureMutation) SetSessionID(i int) {
+	m.session = &i
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *UploadFailureMutation) SessionID() (r int, exists bool) {
+	v := m.session
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldSessionID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ClearSessionID clears the value of the "session_id" field.
+func (m *UploadFailureMutation) ClearSessionID() {
+	m.session = nil
+	m.clearedFields[uploadfailure.FieldSessionID] = struct{}{}
+}
+
+// SessionIDCleared returns if the "session_id" field was cleared in this mutation.
+func (m *UploadFailureMutation) SessionIDCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldSessionID]
+	return ok
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *UploadFailureMutation) ResetSessionID() {
+	m.session = nil
+	delete(m.clearedFields, uploadfailure.FieldSessionID)
+}
+
+// SetStage sets the "stage" field.
+func (m *UploadFailureMutation) SetStage(s string) {
+	m.stage = &s
+}
+
+// Stage returns the value of the "stage" field in the mutation.
+func (m *UploadFailureMutation) Stage() (r string, exists bool) {
+	v := m.stage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStage returns the old "stage" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldStage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStage: %w", err)
+	}
+	return oldValue.Stage, nil
+}
+
+// ResetStage resets all changes to the "stage" field.
+func (m *UploadFailureMutation) ResetStage() {
+	m.stage = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *UploadFailureMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *UploadFailureMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *UploadFailureMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetErrorName sets the "error_name" field.
+func (m *UploadFailureMutation) SetErrorName(s string) {
+	m.error_name = &s
+}
+
+// ErrorName returns the value of the "error_name" field in the mutation.
+func (m *UploadFailureMutation) ErrorName() (r string, exists bool) {
+	v := m.error_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorName returns the old "error_name" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldErrorName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorName: %w", err)
+	}
+	return oldValue.ErrorName, nil
+}
+
+// ResetErrorName resets all changes to the "error_name" field.
+func (m *UploadFailureMutation) ResetErrorName() {
+	m.error_name = nil
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *UploadFailureMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *UploadFailureMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldErrorMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *UploadFailureMutation) ResetErrorMessage() {
+	m.error_message = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *UploadFailureMutation) SetStatus(i int) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *UploadFailureMutation) Status() (r int, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldStatus(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *UploadFailureMutation) AddStatus(i int) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *UploadFailureMutation) AddedStatus() (r int, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *UploadFailureMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[uploadfailure.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *UploadFailureMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *UploadFailureMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, uploadfailure.FieldStatus)
+}
+
+// SetCode sets the "code" field.
+func (m *UploadFailureMutation) SetCode(i int) {
+	m.code = &i
+	m.addcode = nil
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *UploadFailureMutation) Code() (r int, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldCode(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// AddCode adds i to the "code" field.
+func (m *UploadFailureMutation) AddCode(i int) {
+	if m.addcode != nil {
+		*m.addcode += i
+	} else {
+		m.addcode = &i
+	}
+}
+
+// AddedCode returns the value that was added to the "code" field in this mutation.
+func (m *UploadFailureMutation) AddedCode() (r int, exists bool) {
+	v := m.addcode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCode clears the value of the "code" field.
+func (m *UploadFailureMutation) ClearCode() {
+	m.code = nil
+	m.addcode = nil
+	m.clearedFields[uploadfailure.FieldCode] = struct{}{}
+}
+
+// CodeCleared returns if the "code" field was cleared in this mutation.
+func (m *UploadFailureMutation) CodeCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldCode]
+	return ok
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *UploadFailureMutation) ResetCode() {
+	m.code = nil
+	m.addcode = nil
+	delete(m.clearedFields, uploadfailure.FieldCode)
+}
+
+// SetRequestID sets the "request_id" field.
+func (m *UploadFailureMutation) SetRequestID(s string) {
+	m.request_id = &s
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *UploadFailureMutation) RequestID() (r string, exists bool) {
+	v := m.request_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldRequestID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ClearRequestID clears the value of the "request_id" field.
+func (m *UploadFailureMutation) ClearRequestID() {
+	m.request_id = nil
+	m.clearedFields[uploadfailure.FieldRequestID] = struct{}{}
+}
+
+// RequestIDCleared returns if the "request_id" field was cleared in this mutation.
+func (m *UploadFailureMutation) RequestIDCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldRequestID]
+	return ok
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *UploadFailureMutation) ResetRequestID() {
+	m.request_id = nil
+	delete(m.clearedFields, uploadfailure.FieldRequestID)
+}
+
+// SetRay sets the "ray" field.
+func (m *UploadFailureMutation) SetRay(s string) {
+	m.ray = &s
+}
+
+// Ray returns the value of the "ray" field in the mutation.
+func (m *UploadFailureMutation) Ray() (r string, exists bool) {
+	v := m.ray
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRay returns the old "ray" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldRay(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRay: %w", err)
+	}
+	return oldValue.Ray, nil
+}
+
+// ClearRay clears the value of the "ray" field.
+func (m *UploadFailureMutation) ClearRay() {
+	m.ray = nil
+	m.clearedFields[uploadfailure.FieldRay] = struct{}{}
+}
+
+// RayCleared returns if the "ray" field was cleared in this mutation.
+func (m *UploadFailureMutation) RayCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldRay]
+	return ok
+}
+
+// ResetRay resets all changes to the "ray" field.
+func (m *UploadFailureMutation) ResetRay() {
+	m.ray = nil
+	delete(m.clearedFields, uploadfailure.FieldRay)
+}
+
+// SetChunk sets the "chunk" field.
+func (m *UploadFailureMutation) SetChunk(i int) {
+	m.chunk = &i
+	m.addchunk = nil
+}
+
+// Chunk returns the value of the "chunk" field in the mutation.
+func (m *UploadFailureMutation) Chunk() (r int, exists bool) {
+	v := m.chunk
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChunk returns the old "chunk" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldChunk(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChunk is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChunk requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChunk: %w", err)
+	}
+	return oldValue.Chunk, nil
+}
+
+// AddChunk adds i to the "chunk" field.
+func (m *UploadFailureMutation) AddChunk(i int) {
+	if m.addchunk != nil {
+		*m.addchunk += i
+	} else {
+		m.addchunk = &i
+	}
+}
+
+// AddedChunk returns the value that was added to the "chunk" field in this mutation.
+func (m *UploadFailureMutation) AddedChunk() (r int, exists bool) {
+	v := m.addchunk
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearChunk clears the value of the "chunk" field.
+func (m *UploadFailureMutation) ClearChunk() {
+	m.chunk = nil
+	m.addchunk = nil
+	m.clearedFields[uploadfailure.FieldChunk] = struct{}{}
+}
+
+// ChunkCleared returns if the "chunk" field was cleared in this mutation.
+func (m *UploadFailureMutation) ChunkCleared() bool {
+	_, ok := m.clearedFields[uploadfailure.FieldChunk]
+	return ok
+}
+
+// ResetChunk resets all changes to the "chunk" field.
+func (m *UploadFailureMutation) ResetChunk() {
+	m.chunk = nil
+	m.addchunk = nil
+	delete(m.clearedFields, uploadfailure.FieldChunk)
+}
+
+// SetFileName sets the "file_name" field.
+func (m *UploadFailureMutation) SetFileName(s string) {
+	m.file_name = &s
+}
+
+// FileName returns the value of the "file_name" field in the mutation.
+func (m *UploadFailureMutation) FileName() (r string, exists bool) {
+	v := m.file_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileName returns the old "file_name" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldFileName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileName: %w", err)
+	}
+	return oldValue.FileName, nil
+}
+
+// ResetFileName resets all changes to the "file_name" field.
+func (m *UploadFailureMutation) ResetFileName() {
+	m.file_name = nil
+}
+
+// SetFileSize sets the "file_size" field.
+func (m *UploadFailureMutation) SetFileSize(i int64) {
+	m.file_size = &i
+	m.addfile_size = nil
+}
+
+// FileSize returns the value of the "file_size" field in the mutation.
+func (m *UploadFailureMutation) FileSize() (r int64, exists bool) {
+	v := m.file_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileSize returns the old "file_size" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldFileSize(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileSize: %w", err)
+	}
+	return oldValue.FileSize, nil
+}
+
+// AddFileSize adds i to the "file_size" field.
+func (m *UploadFailureMutation) AddFileSize(i int64) {
+	if m.addfile_size != nil {
+		*m.addfile_size += i
+	} else {
+		m.addfile_size = &i
+	}
+}
+
+// AddedFileSize returns the value that was added to the "file_size" field in this mutation.
+func (m *UploadFailureMutation) AddedFileSize() (r int64, exists bool) {
+	v := m.addfile_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFileSize resets all changes to the "file_size" field.
+func (m *UploadFailureMutation) ResetFileSize() {
+	m.file_size = nil
+	m.addfile_size = nil
+}
+
+// SetAttempts sets the "attempts" field.
+func (m *UploadFailureMutation) SetAttempts(j jsontext.Value) {
+	m.attempts = &j
+	m.appendattempts = nil
+}
+
+// Attempts returns the value of the "attempts" field in the mutation.
+func (m *UploadFailureMutation) Attempts() (r jsontext.Value, exists bool) {
+	v := m.attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttempts returns the old "attempts" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldAttempts(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttempts: %w", err)
+	}
+	return oldValue.Attempts, nil
+}
+
+// AppendAttempts adds j to the "attempts" field.
+func (m *UploadFailureMutation) AppendAttempts(j jsontext.Value) {
+	m.appendattempts = append(m.appendattempts, j...)
+}
+
+// AppendedAttempts returns the list of values that were appended to the "attempts" field in this mutation.
+func (m *UploadFailureMutation) AppendedAttempts() (jsontext.Value, bool) {
+	if len(m.appendattempts) == 0 {
+		return nil, false
+	}
+	return m.appendattempts, true
+}
+
+// ResetAttempts resets all changes to the "attempts" field.
+func (m *UploadFailureMutation) ResetAttempts() {
+	m.attempts = nil
+	m.appendattempts = nil
+}
+
+// SetClient sets the "client" field.
+func (m *UploadFailureMutation) SetClient(s string) {
+	m.client = &s
+}
+
+// GetClient returns the value of the "client" field in the mutation.
+func (m *UploadFailureMutation) GetClient() (r string, exists bool) {
+	v := m.client
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClient returns the old "client" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldClient(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClient is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClient requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClient: %w", err)
+	}
+	return oldValue.Client, nil
+}
+
+// ResetClient resets all changes to the "client" field.
+func (m *UploadFailureMutation) ResetClient() {
+	m.client = nil
+}
+
+// SetIP sets the "ip" field.
+func (m *UploadFailureMutation) SetIP(s string) {
+	m.ip = &s
+}
+
+// IP returns the value of the "ip" field in the mutation.
+func (m *UploadFailureMutation) IP() (r string, exists bool) {
+	v := m.ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIP returns the old "ip" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+	}
+	return oldValue.IP, nil
+}
+
+// ResetIP resets all changes to the "ip" field.
+func (m *UploadFailureMutation) ResetIP() {
+	m.ip = nil
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *UploadFailureMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *UploadFailureMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *UploadFailureMutation) ResetUserAgent() {
+	m.user_agent = nil
+}
+
+// SetCreated sets the "created" field.
+func (m *UploadFailureMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *UploadFailureMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the UploadFailure entity.
+// If the UploadFailure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UploadFailureMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *UploadFailureMutation) ResetCreated() {
+	m.created = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *UploadFailureMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[uploadfailure.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *UploadFailureMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *UploadFailureMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *UploadFailureMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// ClearSession clears the "session" edge to the GameUploadSession entity.
+func (m *UploadFailureMutation) ClearSession() {
+	m.clearedsession = true
+	m.clearedFields[uploadfailure.FieldSessionID] = struct{}{}
+}
+
+// SessionCleared reports if the "session" edge to the GameUploadSession entity was cleared.
+func (m *UploadFailureMutation) SessionCleared() bool {
+	return m.SessionIDCleared() || m.clearedsession
+}
+
+// SessionIDs returns the "session" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SessionID instead. It exists only for internal usage by the builders.
+func (m *UploadFailureMutation) SessionIDs() (ids []int) {
+	if id := m.session; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSession resets all changes to the "session" edge.
+func (m *UploadFailureMutation) ResetSession() {
+	m.session = nil
+	m.clearedsession = false
+}
+
+// Where appends a list predicates to the UploadFailureMutation builder.
+func (m *UploadFailureMutation) Where(ps ...predicate.UploadFailure) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UploadFailureMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UploadFailureMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.UploadFailure, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UploadFailureMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UploadFailureMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (UploadFailure).
+func (m *UploadFailureMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UploadFailureMutation) Fields() []string {
+	fields := make([]string, 0, 18)
+	if m.user != nil {
+		fields = append(fields, uploadfailure.FieldUserID)
+	}
+	if m.session != nil {
+		fields = append(fields, uploadfailure.FieldSessionID)
+	}
+	if m.stage != nil {
+		fields = append(fields, uploadfailure.FieldStage)
+	}
+	if m.reason != nil {
+		fields = append(fields, uploadfailure.FieldReason)
+	}
+	if m.error_name != nil {
+		fields = append(fields, uploadfailure.FieldErrorName)
+	}
+	if m.error_message != nil {
+		fields = append(fields, uploadfailure.FieldErrorMessage)
+	}
+	if m.status != nil {
+		fields = append(fields, uploadfailure.FieldStatus)
+	}
+	if m.code != nil {
+		fields = append(fields, uploadfailure.FieldCode)
+	}
+	if m.request_id != nil {
+		fields = append(fields, uploadfailure.FieldRequestID)
+	}
+	if m.ray != nil {
+		fields = append(fields, uploadfailure.FieldRay)
+	}
+	if m.chunk != nil {
+		fields = append(fields, uploadfailure.FieldChunk)
+	}
+	if m.file_name != nil {
+		fields = append(fields, uploadfailure.FieldFileName)
+	}
+	if m.file_size != nil {
+		fields = append(fields, uploadfailure.FieldFileSize)
+	}
+	if m.attempts != nil {
+		fields = append(fields, uploadfailure.FieldAttempts)
+	}
+	if m.client != nil {
+		fields = append(fields, uploadfailure.FieldClient)
+	}
+	if m.ip != nil {
+		fields = append(fields, uploadfailure.FieldIP)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, uploadfailure.FieldUserAgent)
+	}
+	if m.created != nil {
+		fields = append(fields, uploadfailure.FieldCreated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UploadFailureMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case uploadfailure.FieldUserID:
+		return m.UserID()
+	case uploadfailure.FieldSessionID:
+		return m.SessionID()
+	case uploadfailure.FieldStage:
+		return m.Stage()
+	case uploadfailure.FieldReason:
+		return m.Reason()
+	case uploadfailure.FieldErrorName:
+		return m.ErrorName()
+	case uploadfailure.FieldErrorMessage:
+		return m.ErrorMessage()
+	case uploadfailure.FieldStatus:
+		return m.Status()
+	case uploadfailure.FieldCode:
+		return m.Code()
+	case uploadfailure.FieldRequestID:
+		return m.RequestID()
+	case uploadfailure.FieldRay:
+		return m.Ray()
+	case uploadfailure.FieldChunk:
+		return m.Chunk()
+	case uploadfailure.FieldFileName:
+		return m.FileName()
+	case uploadfailure.FieldFileSize:
+		return m.FileSize()
+	case uploadfailure.FieldAttempts:
+		return m.Attempts()
+	case uploadfailure.FieldClient:
+		return m.GetClient()
+	case uploadfailure.FieldIP:
+		return m.IP()
+	case uploadfailure.FieldUserAgent:
+		return m.UserAgent()
+	case uploadfailure.FieldCreated:
+		return m.Created()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UploadFailureMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case uploadfailure.FieldUserID:
+		return m.OldUserID(ctx)
+	case uploadfailure.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case uploadfailure.FieldStage:
+		return m.OldStage(ctx)
+	case uploadfailure.FieldReason:
+		return m.OldReason(ctx)
+	case uploadfailure.FieldErrorName:
+		return m.OldErrorName(ctx)
+	case uploadfailure.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case uploadfailure.FieldStatus:
+		return m.OldStatus(ctx)
+	case uploadfailure.FieldCode:
+		return m.OldCode(ctx)
+	case uploadfailure.FieldRequestID:
+		return m.OldRequestID(ctx)
+	case uploadfailure.FieldRay:
+		return m.OldRay(ctx)
+	case uploadfailure.FieldChunk:
+		return m.OldChunk(ctx)
+	case uploadfailure.FieldFileName:
+		return m.OldFileName(ctx)
+	case uploadfailure.FieldFileSize:
+		return m.OldFileSize(ctx)
+	case uploadfailure.FieldAttempts:
+		return m.OldAttempts(ctx)
+	case uploadfailure.FieldClient:
+		return m.OldClient(ctx)
+	case uploadfailure.FieldIP:
+		return m.OldIP(ctx)
+	case uploadfailure.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case uploadfailure.FieldCreated:
+		return m.OldCreated(ctx)
+	}
+	return nil, fmt.Errorf("unknown UploadFailure field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UploadFailureMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case uploadfailure.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case uploadfailure.FieldSessionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case uploadfailure.FieldStage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStage(v)
+		return nil
+	case uploadfailure.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case uploadfailure.FieldErrorName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorName(v)
+		return nil
+	case uploadfailure.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case uploadfailure.FieldStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case uploadfailure.FieldCode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case uploadfailure.FieldRequestID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
+	case uploadfailure.FieldRay:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRay(v)
+		return nil
+	case uploadfailure.FieldChunk:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChunk(v)
+		return nil
+	case uploadfailure.FieldFileName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileName(v)
+		return nil
+	case uploadfailure.FieldFileSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileSize(v)
+		return nil
+	case uploadfailure.FieldAttempts:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttempts(v)
+		return nil
+	case uploadfailure.FieldClient:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClient(v)
+		return nil
+	case uploadfailure.FieldIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIP(v)
+		return nil
+	case uploadfailure.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case uploadfailure.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UploadFailureMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, uploadfailure.FieldStatus)
+	}
+	if m.addcode != nil {
+		fields = append(fields, uploadfailure.FieldCode)
+	}
+	if m.addchunk != nil {
+		fields = append(fields, uploadfailure.FieldChunk)
+	}
+	if m.addfile_size != nil {
+		fields = append(fields, uploadfailure.FieldFileSize)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UploadFailureMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case uploadfailure.FieldStatus:
+		return m.AddedStatus()
+	case uploadfailure.FieldCode:
+		return m.AddedCode()
+	case uploadfailure.FieldChunk:
+		return m.AddedChunk()
+	case uploadfailure.FieldFileSize:
+		return m.AddedFileSize()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UploadFailureMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case uploadfailure.FieldStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	case uploadfailure.FieldCode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCode(v)
+		return nil
+	case uploadfailure.FieldChunk:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChunk(v)
+		return nil
+	case uploadfailure.FieldFileSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFileSize(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UploadFailureMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(uploadfailure.FieldSessionID) {
+		fields = append(fields, uploadfailure.FieldSessionID)
+	}
+	if m.FieldCleared(uploadfailure.FieldStatus) {
+		fields = append(fields, uploadfailure.FieldStatus)
+	}
+	if m.FieldCleared(uploadfailure.FieldCode) {
+		fields = append(fields, uploadfailure.FieldCode)
+	}
+	if m.FieldCleared(uploadfailure.FieldRequestID) {
+		fields = append(fields, uploadfailure.FieldRequestID)
+	}
+	if m.FieldCleared(uploadfailure.FieldRay) {
+		fields = append(fields, uploadfailure.FieldRay)
+	}
+	if m.FieldCleared(uploadfailure.FieldChunk) {
+		fields = append(fields, uploadfailure.FieldChunk)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UploadFailureMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UploadFailureMutation) ClearField(name string) error {
+	switch name {
+	case uploadfailure.FieldSessionID:
+		m.ClearSessionID()
+		return nil
+	case uploadfailure.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case uploadfailure.FieldCode:
+		m.ClearCode()
+		return nil
+	case uploadfailure.FieldRequestID:
+		m.ClearRequestID()
+		return nil
+	case uploadfailure.FieldRay:
+		m.ClearRay()
+		return nil
+	case uploadfailure.FieldChunk:
+		m.ClearChunk()
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UploadFailureMutation) ResetField(name string) error {
+	switch name {
+	case uploadfailure.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case uploadfailure.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case uploadfailure.FieldStage:
+		m.ResetStage()
+		return nil
+	case uploadfailure.FieldReason:
+		m.ResetReason()
+		return nil
+	case uploadfailure.FieldErrorName:
+		m.ResetErrorName()
+		return nil
+	case uploadfailure.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case uploadfailure.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case uploadfailure.FieldCode:
+		m.ResetCode()
+		return nil
+	case uploadfailure.FieldRequestID:
+		m.ResetRequestID()
+		return nil
+	case uploadfailure.FieldRay:
+		m.ResetRay()
+		return nil
+	case uploadfailure.FieldChunk:
+		m.ResetChunk()
+		return nil
+	case uploadfailure.FieldFileName:
+		m.ResetFileName()
+		return nil
+	case uploadfailure.FieldFileSize:
+		m.ResetFileSize()
+		return nil
+	case uploadfailure.FieldAttempts:
+		m.ResetAttempts()
+		return nil
+	case uploadfailure.FieldClient:
+		m.ResetClient()
+		return nil
+	case uploadfailure.FieldIP:
+		m.ResetIP()
+		return nil
+	case uploadfailure.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case uploadfailure.FieldCreated:
+		m.ResetCreated()
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UploadFailureMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.user != nil {
+		edges = append(edges, uploadfailure.EdgeUser)
+	}
+	if m.session != nil {
+		edges = append(edges, uploadfailure.EdgeSession)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UploadFailureMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case uploadfailure.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case uploadfailure.EdgeSession:
+		if id := m.session; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UploadFailureMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UploadFailureMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UploadFailureMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareduser {
+		edges = append(edges, uploadfailure.EdgeUser)
+	}
+	if m.clearedsession {
+		edges = append(edges, uploadfailure.EdgeSession)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UploadFailureMutation) EdgeCleared(name string) bool {
+	switch name {
+	case uploadfailure.EdgeUser:
+		return m.cleareduser
+	case uploadfailure.EdgeSession:
+		return m.clearedsession
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UploadFailureMutation) ClearEdge(name string) error {
+	switch name {
+	case uploadfailure.EdgeUser:
+		m.ClearUser()
+		return nil
+	case uploadfailure.EdgeSession:
+		m.ClearSession()
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UploadFailureMutation) ResetEdge(name string) error {
+	switch name {
+	case uploadfailure.EdgeUser:
+		m.ResetUser()
+		return nil
+	case uploadfailure.EdgeSession:
+		m.ResetSession()
+		return nil
+	}
+	return fmt.Errorf("unknown UploadFailure edge %s", name)
+}
+
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
@@ -65968,6 +67674,9 @@ type UserMutation struct {
 	api_keys                                     map[int]struct{}
 	removedapi_keys                              map[int]struct{}
 	clearedapi_keys                              bool
+	upload_failures                              map[int]struct{}
+	removedupload_failures                       map[int]struct{}
+	clearedupload_failures                       bool
 	potatovn_binding                             *int
 	clearedpotatovn_binding                      bool
 	game_upload_sessions                         map[int]struct{}
@@ -68298,6 +70007,60 @@ func (m *UserMutation) ResetAPIKeys() {
 	m.removedapi_keys = nil
 }
 
+// AddUploadFailureIDs adds the "upload_failures" edge to the UploadFailure entity by ids.
+func (m *UserMutation) AddUploadFailureIDs(ids ...int) {
+	if m.upload_failures == nil {
+		m.upload_failures = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.upload_failures[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUploadFailures clears the "upload_failures" edge to the UploadFailure entity.
+func (m *UserMutation) ClearUploadFailures() {
+	m.clearedupload_failures = true
+}
+
+// UploadFailuresCleared reports if the "upload_failures" edge to the UploadFailure entity was cleared.
+func (m *UserMutation) UploadFailuresCleared() bool {
+	return m.clearedupload_failures
+}
+
+// RemoveUploadFailureIDs removes the "upload_failures" edge to the UploadFailure entity by IDs.
+func (m *UserMutation) RemoveUploadFailureIDs(ids ...int) {
+	if m.removedupload_failures == nil {
+		m.removedupload_failures = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.upload_failures, ids[i])
+		m.removedupload_failures[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUploadFailures returns the removed IDs of the "upload_failures" edge to the UploadFailure entity.
+func (m *UserMutation) RemovedUploadFailuresIDs() (ids []int) {
+	for id := range m.removedupload_failures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UploadFailuresIDs returns the "upload_failures" edge IDs in the mutation.
+func (m *UserMutation) UploadFailuresIDs() (ids []int) {
+	for id := range m.upload_failures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUploadFailures resets all changes to the "upload_failures" edge.
+func (m *UserMutation) ResetUploadFailures() {
+	m.upload_failures = nil
+	m.clearedupload_failures = false
+	m.removedupload_failures = nil
+}
+
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by id.
 func (m *UserMutation) SetPotatovnBindingID(id int) {
 	m.potatovn_binding = &id
@@ -69325,7 +71088,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 30)
+	edges := make([]string, 0, 31)
 	if m.activities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -69391,6 +71154,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.api_keys != nil {
 		edges = append(edges, user.EdgeAPIKeys)
+	}
+	if m.upload_failures != nil {
+		edges = append(edges, user.EdgeUploadFailures)
 	}
 	if m.potatovn_binding != nil {
 		edges = append(edges, user.EdgePotatovnBinding)
@@ -69555,6 +71321,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeUploadFailures:
+		ids := make([]ent.Value, 0, len(m.upload_failures))
+		for id := range m.upload_failures {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgePotatovnBinding:
 		if id := m.potatovn_binding; id != nil {
 			return []ent.Value{*id}
@@ -69607,7 +71379,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 30)
+	edges := make([]string, 0, 31)
 	if m.removedactivities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -69673,6 +71445,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedapi_keys != nil {
 		edges = append(edges, user.EdgeAPIKeys)
+	}
+	if m.removedupload_failures != nil {
+		edges = append(edges, user.EdgeUploadFailures)
 	}
 	if m.removedgame_upload_sessions != nil {
 		edges = append(edges, user.EdgeGameUploadSessions)
@@ -69834,6 +71609,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeUploadFailures:
+		ids := make([]ent.Value, 0, len(m.removedupload_failures))
+		for id := range m.removedupload_failures {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeGameUploadSessions:
 		ids := make([]ent.Value, 0, len(m.removedgame_upload_sessions))
 		for id := range m.removedgame_upload_sessions {
@@ -69882,7 +71663,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 30)
+	edges := make([]string, 0, 31)
 	if m.clearedactivities {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -69948,6 +71729,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedapi_keys {
 		edges = append(edges, user.EdgeAPIKeys)
+	}
+	if m.clearedupload_failures {
+		edges = append(edges, user.EdgeUploadFailures)
 	}
 	if m.clearedpotatovn_binding {
 		edges = append(edges, user.EdgePotatovnBinding)
@@ -70024,6 +71808,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedgame_pvn_mappings
 	case user.EdgeAPIKeys:
 		return m.clearedapi_keys
+	case user.EdgeUploadFailures:
+		return m.clearedupload_failures
 	case user.EdgePotatovnBinding:
 		return m.clearedpotatovn_binding
 	case user.EdgeGameUploadSessions:
@@ -70124,6 +71910,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeAPIKeys:
 		m.ResetAPIKeys()
+		return nil
+	case user.EdgeUploadFailures:
+		m.ResetUploadFailures()
 		return nil
 	case user.EdgePotatovnBinding:
 		m.ResetPotatovnBinding()

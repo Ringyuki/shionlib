@@ -59,6 +59,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -1496,6 +1497,36 @@ func init() {
 	translatordistinctionDescCreated := translatordistinctionFields[3].Descriptor()
 	// translatordistinction.DefaultCreated holds the default value on creation for the created field.
 	translatordistinction.DefaultCreated = translatordistinctionDescCreated.Default.(func() time.Time)
+	uploadfailureFields := schema.UploadFailure{}.Fields()
+	_ = uploadfailureFields
+	// uploadfailureDescStage is the schema descriptor for stage field.
+	uploadfailureDescStage := uploadfailureFields[3].Descriptor()
+	// uploadfailure.StageValidator is a validator for the "stage" field. It is called by the builders before save.
+	uploadfailure.StageValidator = uploadfailureDescStage.Validators[0].(func(string) error)
+	// uploadfailureDescReason is the schema descriptor for reason field.
+	uploadfailureDescReason := uploadfailureFields[4].Descriptor()
+	// uploadfailure.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	uploadfailure.ReasonValidator = uploadfailureDescReason.Validators[0].(func(string) error)
+	// uploadfailureDescErrorName is the schema descriptor for error_name field.
+	uploadfailureDescErrorName := uploadfailureFields[5].Descriptor()
+	// uploadfailure.ErrorNameValidator is a validator for the "error_name" field. It is called by the builders before save.
+	uploadfailure.ErrorNameValidator = uploadfailureDescErrorName.Validators[0].(func(string) error)
+	// uploadfailureDescRequestID is the schema descriptor for request_id field.
+	uploadfailureDescRequestID := uploadfailureFields[9].Descriptor()
+	// uploadfailure.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
+	uploadfailure.RequestIDValidator = uploadfailureDescRequestID.Validators[0].(func(string) error)
+	// uploadfailureDescRay is the schema descriptor for ray field.
+	uploadfailureDescRay := uploadfailureFields[10].Descriptor()
+	// uploadfailure.RayValidator is a validator for the "ray" field. It is called by the builders before save.
+	uploadfailure.RayValidator = uploadfailureDescRay.Validators[0].(func(string) error)
+	// uploadfailureDescClient is the schema descriptor for client field.
+	uploadfailureDescClient := uploadfailureFields[15].Descriptor()
+	// uploadfailure.ClientValidator is a validator for the "client" field. It is called by the builders before save.
+	uploadfailure.ClientValidator = uploadfailureDescClient.Validators[0].(func(string) error)
+	// uploadfailureDescCreated is the schema descriptor for created field.
+	uploadfailureDescCreated := uploadfailureFields[18].Descriptor()
+	// uploadfailure.DefaultCreated holds the default value on creation for the created field.
+	uploadfailure.DefaultCreated = uploadfailureDescCreated.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

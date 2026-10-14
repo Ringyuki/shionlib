@@ -805,6 +805,29 @@ func HasCreatorWith(preds ...predicate.User) predicate.GameUploadSession {
 	})
 }
 
+// HasFailures applies the HasEdge predicate on the "failures" edge.
+func HasFailures() predicate.GameUploadSession {
+	return predicate.GameUploadSession(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FailuresTable, FailuresColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFailuresWith applies the HasEdge predicate on the "failures" edge with a given conditions (other predicates).
+func HasFailuresWith(preds ...predicate.UploadFailure) predicate.GameUploadSession {
+	return predicate.GameUploadSession(func(s *sql.Selector) {
+		step := newFailuresStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.GameUploadSession) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.AndPredicates(predicates...))

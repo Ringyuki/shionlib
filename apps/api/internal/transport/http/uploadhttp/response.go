@@ -109,3 +109,7 @@ func toUploadStatus(s upload.Session) uploadStatusDTO {
 		ExpiresAt:      s.ExpiresAt,
 	}
 }
+
+type uploadFailureDTO struct {
+	ID int `json:"id" doc:"The record of the failure"`
+}

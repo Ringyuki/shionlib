@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -758,6 +759,21 @@ func (_u *UserUpdate) AddAPIKeys(v ...*UserAPIKey) *UserUpdate {
 	return _u.AddAPIKeyIDs(ids...)
 }
 
+// AddUploadFailureIDs adds the "upload_failures" edge to the UploadFailure entity by IDs.
+func (_u *UserUpdate) AddUploadFailureIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddUploadFailureIDs(ids...)
+	return _u
+}
+
+// AddUploadFailures adds the "upload_failures" edges to the UploadFailure entity.
+func (_u *UserUpdate) AddUploadFailures(v ...*UploadFailure) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUploadFailureIDs(ids...)
+}
+
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
 func (_u *UserUpdate) SetPotatovnBindingID(id int) *UserUpdate {
 	_u.mutation.SetPotatovnBindingID(id)
@@ -1347,6 +1363,27 @@ func (_u *UserUpdate) RemoveAPIKeys(v ...*UserAPIKey) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAPIKeyIDs(ids...)
+}
+
+// ClearUploadFailures clears all "upload_failures" edges to the UploadFailure entity.
+func (_u *UserUpdate) ClearUploadFailures() *UserUpdate {
+	_u.mutation.ClearUploadFailures()
+	return _u
+}
+
+// RemoveUploadFailureIDs removes the "upload_failures" edge to UploadFailure entities by IDs.
+func (_u *UserUpdate) RemoveUploadFailureIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveUploadFailureIDs(ids...)
+	return _u
+}
+
+// RemoveUploadFailures removes "upload_failures" edges to UploadFailure entities.
+func (_u *UserUpdate) RemoveUploadFailures(v ...*UploadFailure) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUploadFailureIDs(ids...)
 }
 
 // ClearPotatovnBinding clears the "potatovn_binding" edge to the UserPvnBinding entity.
@@ -2676,6 +2713,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.UploadFailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUploadFailuresIDs(); len(nodes) > 0 && !_u.mutation.UploadFailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UploadFailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.PotatovnBindingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -3747,6 +3829,21 @@ func (_u *UserUpdateOne) AddAPIKeys(v ...*UserAPIKey) *UserUpdateOne {
 	return _u.AddAPIKeyIDs(ids...)
 }
 
+// AddUploadFailureIDs adds the "upload_failures" edge to the UploadFailure entity by IDs.
+func (_u *UserUpdateOne) AddUploadFailureIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddUploadFailureIDs(ids...)
+	return _u
+}
+
+// AddUploadFailures adds the "upload_failures" edges to the UploadFailure entity.
+func (_u *UserUpdateOne) AddUploadFailures(v ...*UploadFailure) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUploadFailureIDs(ids...)
+}
+
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
 func (_u *UserUpdateOne) SetPotatovnBindingID(id int) *UserUpdateOne {
 	_u.mutation.SetPotatovnBindingID(id)
@@ -4336,6 +4433,27 @@ func (_u *UserUpdateOne) RemoveAPIKeys(v ...*UserAPIKey) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAPIKeyIDs(ids...)
+}
+
+// ClearUploadFailures clears all "upload_failures" edges to the UploadFailure entity.
+func (_u *UserUpdateOne) ClearUploadFailures() *UserUpdateOne {
+	_u.mutation.ClearUploadFailures()
+	return _u
+}
+
+// RemoveUploadFailureIDs removes the "upload_failures" edge to UploadFailure entities by IDs.
+func (_u *UserUpdateOne) RemoveUploadFailureIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveUploadFailureIDs(ids...)
+	return _u
+}
+
+// RemoveUploadFailures removes "upload_failures" edges to UploadFailure entities.
+func (_u *UserUpdateOne) RemoveUploadFailures(v ...*UploadFailure) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUploadFailureIDs(ids...)
 }
 
 // ClearPotatovnBinding clears the "potatovn_binding" edge to the UserPvnBinding entity.
@@ -5688,6 +5806,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UploadFailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUploadFailuresIDs(); len(nodes) > 0 && !_u.mutation.UploadFailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UploadFailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

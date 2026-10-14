@@ -14,6 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -185,6 +186,21 @@ func (_c *GameUploadSessionCreate) AddGameUploadChunks(v ...*GameUploadChunk) *G
 // SetCreator sets the "creator" edge to the User entity.
 func (_c *GameUploadSessionCreate) SetCreator(v *User) *GameUploadSessionCreate {
 	return _c.SetCreatorID(v.ID)
+}
+
+// AddFailureIDs adds the "failures" edge to the UploadFailure entity by IDs.
+func (_c *GameUploadSessionCreate) AddFailureIDs(ids ...int) *GameUploadSessionCreate {
+	_c.mutation.AddFailureIDs(ids...)
+	return _c
+}
+
+// AddFailures adds the "failures" edges to the UploadFailure entity.
+func (_c *GameUploadSessionCreate) AddFailures(v ...*UploadFailure) *GameUploadSessionCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddFailureIDs(ids...)
 }
 
 // Mutation returns the GameUploadSessionMutation object of the builder.
@@ -416,6 +432,22 @@ func (_c *GameUploadSessionCreate) createSpec() (*GameUploadSession, *sqlgraph.C
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CreatorID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
