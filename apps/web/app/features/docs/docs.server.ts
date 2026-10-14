@@ -1,6 +1,7 @@
 import { data, redirect, type LoaderFunctionArgs } from 'react-router'
 import { defaultLocale, locales, type Locale } from '~/shared/i18n/locale'
 import { isLocale } from '~/shared/i18n/locale.schema'
+import { routeLoader } from '~/shared/route/route.server'
 import {
   docsPath,
   inOrder,
@@ -12,6 +13,7 @@ import {
   type DocRef,
 } from './docs'
 import { categoryFrom, docFrom } from './docs.schema'
+import { loadAuthors } from './docs.use-cases'
 
 const heads = import.meta.glob('./content/*/*/*.mdx', { eager: true, import: 'frontmatter' })
 
@@ -70,9 +72,10 @@ export function docLoader(args: LoaderFunctionArgs) {
     throw data(null, { status: 404 })
   }
   const { previous, next } = neighboursOf(docs, doc)
-  return {
+  return routeLoader(args, async api => ({
     doc,
+    authors: await loadAuthors(api, doc.authorIds),
     previous: previous === undefined ? undefined : linkOf(previous),
     next: next === undefined ? undefined : linkOf(next),
-  }
+  }))
 }

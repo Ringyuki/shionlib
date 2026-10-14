@@ -1,34 +1,56 @@
-import { Avatar, Grid, Image, Inline, Link, PageHeader, Text } from '@hina-ui/react'
+import {
+  Avatar,
+  AvatarGroup,
+  Grid,
+  Image,
+  Inline,
+  Link,
+  PageHeader,
+  Text,
+  useImageResolver,
+} from '@hina-ui/react'
 import { Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale } from 'use-intl'
 import { sitePaths } from '~/features/shell'
-import type { Doc } from '../docs'
+import type { Doc, DocAuthor } from '../docs'
 import { docColumns } from './doc-columns'
 
 type DocHeadProps = {
   doc: Doc
+  authors: DocAuthor[]
 }
 
-export function DocHead({ doc }: DocHeadProps) {
+export function DocHead({ doc, authors }: DocHeadProps) {
   const locale = useLocale()
   const format = useFormatter()
-  const { author } = doc
+  const resolveImage = useImageResolver()
   return (
     <Grid gap="none" className={docColumns.head}>
       <PageHeader title={doc.title} description={doc.description} className="min-w-0">
         <Inline gap="sm" align="center">
-          {author !== undefined && (
+          {authors.length > 0 && (
             <>
-              <Avatar size="sm" name={author.name} src={author.avatar} />
-              {author.id === undefined ? (
-                <Text size="sm" weight="medium">
-                  {author.name}
-                </Text>
-              ) : (
-                <Link asChild tone="neutral" className="text-sm font-medium">
-                  <RouterLink to={sitePaths(locale).profile(author.id)}>{author.name}</RouterLink>
-                </Link>
-              )}
+              <AvatarGroup size="sm" max={4}>
+                {authors.map(author => (
+                  <Avatar
+                    key={author.id}
+                    name={author.name}
+                    src={author.avatar === null ? undefined : resolveImage(author.avatar, 'image')}
+                  />
+                ))}
+              </AvatarGroup>
+              <Text as="span" size="sm">
+                {format.list(
+                  authors.map(author => (
+                    <Link key={author.id} asChild tone="neutral" className="font-medium">
+                      <RouterLink to={sitePaths(locale).profile(author.id)}>
+                        {author.name}
+                      </RouterLink>
+                    </Link>
+                  )),
+                  { type: 'conjunction' },
+                )}
+              </Text>
             </>
           )}
           <Text size="sm" tone="muted" className="tabular-nums">

@@ -2,17 +2,18 @@ import { Link, Stack } from '@hina-ui/react'
 import { ArrowLeft } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { docsPath, type Doc, type DocLink } from '../docs'
+import { docsPath, type Doc, type DocAuthor, type DocLink } from '../docs'
 import { DocHead } from './doc-head'
 import { DocView } from './doc-view'
 
 type DocPageProps = {
   doc: Doc
+  authors: DocAuthor[]
   previous: DocLink | undefined
   next: DocLink | undefined
 }
 
-export function DocPage({ doc, previous, next }: DocPageProps) {
+export function DocPage({ doc, authors, previous, next }: DocPageProps) {
   const t = useTranslations('docs')
   const locale = useLocale()
   return (
@@ -28,7 +29,7 @@ export function DocPage({ doc, previous, next }: DocPageProps) {
         </RouterLink>
       </Link>
       <Stack as="article" gap="xl">
-        <DocHead doc={doc} />
+        <DocHead doc={doc} authors={authors} />
         <DocView doc={doc} previous={previous} next={next} />
       </Stack>
     </Stack>

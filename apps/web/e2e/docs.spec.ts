@@ -32,7 +32,7 @@ test('lists the documents in the order they are read and opens one from its row'
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
   await expect(title(page)).toHaveText('如何下载游戏')
   await expect(page).toHaveTitle('如何下载游戏 | Shionlib')
-  await expect(page.getByRole('article').getByRole('link', { name: 'ringyuki' })).toHaveAttribute(
+  await expect(page.getByRole('article').getByRole('link', { name: 'e2e_admin' })).toHaveAttribute(
     'href',
     '/zh/user/1',
   )

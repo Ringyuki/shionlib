@@ -14,5 +14,12 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export default function DocRoute({ loaderData }: Route.ComponentProps) {
-  return <DocPage doc={loaderData.doc} previous={loaderData.previous} next={loaderData.next} />
+  return (
+    <DocPage
+      doc={loaderData.doc}
+      authors={loaderData.authors}
+      previous={loaderData.previous}
+      next={loaderData.next}
+    />
+  )
 }
