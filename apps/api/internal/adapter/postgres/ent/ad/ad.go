@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -15,24 +16,26 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldPlacement holds the string denoting the placement field in the database.
-	FieldPlacement = "placement"
-	// FieldImageZh holds the string denoting the image_zh field in the database.
-	FieldImageZh = "image_zh"
-	// FieldImageJa holds the string denoting the image_ja field in the database.
-	FieldImageJa = "image_ja"
-	// FieldImageEn holds the string denoting the image_en field in the database.
-	FieldImageEn = "image_en"
-	// FieldAspect holds the string denoting the aspect field in the database.
-	FieldAspect = "aspect"
 	// FieldLink holds the string denoting the link field in the database.
 	FieldLink = "link"
-	// FieldExcludeLocales holds the string denoting the exclude_locales field in the database.
-	FieldExcludeLocales = "exclude_locales"
+	// FieldBanner holds the string denoting the banner field in the database.
+	FieldBanner = "banner"
+	// FieldBannerAdult holds the string denoting the banner_adult field in the database.
+	FieldBannerAdult = "banner_adult"
+	// FieldSideImage holds the string denoting the side_image field in the database.
+	FieldSideImage = "side_image"
+	// FieldSideIcon holds the string denoting the side_icon field in the database.
+	FieldSideIcon = "side_icon"
+	// FieldSideAdult holds the string denoting the side_adult field in the database.
+	FieldSideAdult = "side_adult"
+	// FieldPlacement holds the string denoting the placement field in the database.
+	FieldPlacement = "placement"
+	// FieldLanguages holds the string denoting the languages field in the database.
+	FieldLanguages = "languages"
+	// FieldWeight holds the string denoting the weight field in the database.
+	FieldWeight = "weight"
 	// FieldEnabled holds the string denoting the enabled field in the database.
 	FieldEnabled = "enabled"
-	// FieldSort holds the string denoting the sort field in the database.
-	FieldSort = "sort"
 	// FieldStartAt holds the string denoting the start_at field in the database.
 	FieldStartAt = "start_at"
 	// FieldEndAt holds the string denoting the end_at field in the database.
@@ -41,23 +44,33 @@ const (
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
 	FieldUpdated = "updated"
+	// EdgeStats holds the string denoting the stats edge name in mutations.
+	EdgeStats = "stats"
 	// Table holds the table name of the ad in the database.
 	Table = "ads"
+	// StatsTable is the table that holds the stats relation/edge.
+	StatsTable = "ad_daily_stats"
+	// StatsInverseTable is the table name for the AdDailyStat entity.
+	// It exists in this package in order to avoid circular dependency with the "addailystat" package.
+	StatsInverseTable = "ad_daily_stats"
+	// StatsColumn is the table column denoting the stats relation/edge.
+	StatsColumn = "ad_id"
 )
 
 // Columns holds all SQL columns for ad fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldPlacement,
-	FieldImageZh,
-	FieldImageJa,
-	FieldImageEn,
-	FieldAspect,
 	FieldLink,
-	FieldExcludeLocales,
+	FieldBanner,
+	FieldBannerAdult,
+	FieldSideImage,
+	FieldSideIcon,
+	FieldSideAdult,
+	FieldPlacement,
+	FieldLanguages,
+	FieldWeight,
 	FieldEnabled,
-	FieldSort,
 	FieldStartAt,
 	FieldEndAt,
 	FieldCreated,
@@ -77,20 +90,22 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// ImageZhValidator is a validator for the "image_zh" field. It is called by the builders before save.
-	ImageZhValidator func(string) error
-	// ImageJaValidator is a validator for the "image_ja" field. It is called by the builders before save.
-	ImageJaValidator func(string) error
-	// ImageEnValidator is a validator for the "image_en" field. It is called by the builders before save.
-	ImageEnValidator func(string) error
-	// AspectValidator is a validator for the "aspect" field. It is called by the builders before save.
-	AspectValidator func(string) error
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
+	// BannerValidator is a validator for the "banner" field. It is called by the builders before save.
+	BannerValidator func(string) error
+	// DefaultBannerAdult holds the default value on creation for the "banner_adult" field.
+	DefaultBannerAdult bool
+	// SideImageValidator is a validator for the "side_image" field. It is called by the builders before save.
+	SideImageValidator func(string) error
+	// SideIconValidator is a validator for the "side_icon" field. It is called by the builders before save.
+	SideIconValidator func(string) error
+	// DefaultSideAdult holds the default value on creation for the "side_adult" field.
+	DefaultSideAdult bool
+	// DefaultWeight holds the default value on creation for the "weight" field.
+	DefaultWeight int
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
-	// DefaultSort holds the default value on creation for the "sort" field.
-	DefaultSort int
 	// DefaultCreated holds the default value on creation for the "created" field.
 	DefaultCreated func() time.Time
 	// DefaultUpdated holds the default value on creation for the "updated" field.
@@ -112,49 +127,54 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByPlacement orders the results by the placement field.
-func ByPlacement(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPlacement, opts...).ToFunc()
-}
-
-// ByImageZh orders the results by the image_zh field.
-func ByImageZh(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldImageZh, opts...).ToFunc()
-}
-
-// ByImageJa orders the results by the image_ja field.
-func ByImageJa(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldImageJa, opts...).ToFunc()
-}
-
-// ByImageEn orders the results by the image_en field.
-func ByImageEn(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldImageEn, opts...).ToFunc()
-}
-
-// ByAspect orders the results by the aspect field.
-func ByAspect(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAspect, opts...).ToFunc()
-}
-
 // ByLink orders the results by the link field.
 func ByLink(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLink, opts...).ToFunc()
 }
 
-// ByExcludeLocales orders the results by the exclude_locales field.
-func ByExcludeLocales(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExcludeLocales, opts...).ToFunc()
+// ByBanner orders the results by the banner field.
+func ByBanner(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBanner, opts...).ToFunc()
+}
+
+// ByBannerAdult orders the results by the banner_adult field.
+func ByBannerAdult(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBannerAdult, opts...).ToFunc()
+}
+
+// BySideImage orders the results by the side_image field.
+func BySideImage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSideImage, opts...).ToFunc()
+}
+
+// BySideIcon orders the results by the side_icon field.
+func BySideIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSideIcon, opts...).ToFunc()
+}
+
+// BySideAdult orders the results by the side_adult field.
+func BySideAdult(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSideAdult, opts...).ToFunc()
+}
+
+// ByPlacement orders the results by the placement field.
+func ByPlacement(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlacement, opts...).ToFunc()
+}
+
+// ByLanguages orders the results by the languages field.
+func ByLanguages(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLanguages, opts...).ToFunc()
+}
+
+// ByWeight orders the results by the weight field.
+func ByWeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWeight, opts...).ToFunc()
 }
 
 // ByEnabled orders the results by the enabled field.
 func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
-}
-
-// BySort orders the results by the sort field.
-func BySort(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSort, opts...).ToFunc()
 }
 
 // ByStartAt orders the results by the start_at field.
@@ -175,4 +195,25 @@ func ByCreated(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdated orders the results by the updated field.
 func ByUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdated, opts...).ToFunc()
+}
+
+// ByStatsCount orders the results by stats count.
+func ByStatsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStatsStep(), opts...)
+	}
+}
+
+// ByStats orders the results by stats terms.
+func ByStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StatsTable, StatsColumn),
+	)
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import type { DownloadSubject } from '../download'
 import { useDownload } from '../use-download'
+import { useDownloadArea } from '../use-download-area'
 import { DownloadMenu } from './download-menu'
 
 type DownloadButtonProps = DownloadSubject & {
@@ -23,6 +24,7 @@ export function DownloadButton({
 }: DownloadButtonProps) {
   const t = useTranslations('download')
   const download = useDownload({ resourceId, file })
+  const area = useDownloadArea()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   return (
     <>
@@ -61,6 +63,7 @@ export function DownloadButton({
               </Text>
             </Stack>
             <Progress value={download.progress} size="sm" aria-label={t('verifying')} />
+            {area?.banner}
           </Stack>
         }
       />

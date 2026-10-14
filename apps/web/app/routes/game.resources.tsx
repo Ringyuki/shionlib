@@ -1,3 +1,4 @@
+import { adsIn, DownloadBanner } from '~/features/ad'
 import { loadMoyuEntries, ResourceList } from '~/features/resource'
 import { idParam } from '~/shared/route/params'
 import { routeLoader } from '~/shared/route/route.server'
@@ -18,6 +19,7 @@ export default function GameResources({ matches, loaderData }: Route.ComponentPr
       resources={game.loaderData.resources}
       entries={loaderData}
       viewer={site.loaderData.viewer}
+      downloadBanner={<DownloadBanner ads={adsIn(game.loaderData.ads, 'download')} />}
     />
   )
 }

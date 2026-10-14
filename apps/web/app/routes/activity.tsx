@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { ActivityPage } from '~/features/activity'
 import type { Route } from './+types/activity'
 import { pageMeta } from '~/shared/seo/seo'
+
+export const handle = adPage
 
 export { feedLoader as loader } from '~/features/activity/activity.server'
 

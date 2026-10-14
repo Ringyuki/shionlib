@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -44,86 +45,6 @@ func (_u *AdUpdate) SetNillableName(v *string) *AdUpdate {
 	return _u
 }
 
-// SetPlacement sets the "placement" field.
-func (_u *AdUpdate) SetPlacement(v pgvalue.Strings) *AdUpdate {
-	_u.mutation.SetPlacement(v)
-	return _u
-}
-
-// ClearPlacement clears the value of the "placement" field.
-func (_u *AdUpdate) ClearPlacement() *AdUpdate {
-	_u.mutation.ClearPlacement()
-	return _u
-}
-
-// SetImageZh sets the "image_zh" field.
-func (_u *AdUpdate) SetImageZh(v string) *AdUpdate {
-	_u.mutation.SetImageZh(v)
-	return _u
-}
-
-// SetNillableImageZh sets the "image_zh" field if the given value is not nil.
-func (_u *AdUpdate) SetNillableImageZh(v *string) *AdUpdate {
-	if v != nil {
-		_u.SetImageZh(*v)
-	}
-	return _u
-}
-
-// SetImageJa sets the "image_ja" field.
-func (_u *AdUpdate) SetImageJa(v string) *AdUpdate {
-	_u.mutation.SetImageJa(v)
-	return _u
-}
-
-// SetNillableImageJa sets the "image_ja" field if the given value is not nil.
-func (_u *AdUpdate) SetNillableImageJa(v *string) *AdUpdate {
-	if v != nil {
-		_u.SetImageJa(*v)
-	}
-	return _u
-}
-
-// ClearImageJa clears the value of the "image_ja" field.
-func (_u *AdUpdate) ClearImageJa() *AdUpdate {
-	_u.mutation.ClearImageJa()
-	return _u
-}
-
-// SetImageEn sets the "image_en" field.
-func (_u *AdUpdate) SetImageEn(v string) *AdUpdate {
-	_u.mutation.SetImageEn(v)
-	return _u
-}
-
-// SetNillableImageEn sets the "image_en" field if the given value is not nil.
-func (_u *AdUpdate) SetNillableImageEn(v *string) *AdUpdate {
-	if v != nil {
-		_u.SetImageEn(*v)
-	}
-	return _u
-}
-
-// ClearImageEn clears the value of the "image_en" field.
-func (_u *AdUpdate) ClearImageEn() *AdUpdate {
-	_u.mutation.ClearImageEn()
-	return _u
-}
-
-// SetAspect sets the "aspect" field.
-func (_u *AdUpdate) SetAspect(v string) *AdUpdate {
-	_u.mutation.SetAspect(v)
-	return _u
-}
-
-// SetNillableAspect sets the "aspect" field if the given value is not nil.
-func (_u *AdUpdate) SetNillableAspect(v *string) *AdUpdate {
-	if v != nil {
-		_u.SetAspect(*v)
-	}
-	return _u
-}
-
 // SetLink sets the "link" field.
 func (_u *AdUpdate) SetLink(v string) *AdUpdate {
 	_u.mutation.SetLink(v)
@@ -138,15 +59,136 @@ func (_u *AdUpdate) SetNillableLink(v *string) *AdUpdate {
 	return _u
 }
 
-// SetExcludeLocales sets the "exclude_locales" field.
-func (_u *AdUpdate) SetExcludeLocales(v pgvalue.Strings) *AdUpdate {
-	_u.mutation.SetExcludeLocales(v)
+// SetBanner sets the "banner" field.
+func (_u *AdUpdate) SetBanner(v string) *AdUpdate {
+	_u.mutation.SetBanner(v)
 	return _u
 }
 
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (_u *AdUpdate) ClearExcludeLocales() *AdUpdate {
-	_u.mutation.ClearExcludeLocales()
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableBanner(v *string) *AdUpdate {
+	if v != nil {
+		_u.SetBanner(*v)
+	}
+	return _u
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (_u *AdUpdate) ClearBanner() *AdUpdate {
+	_u.mutation.ClearBanner()
+	return _u
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (_u *AdUpdate) SetBannerAdult(v bool) *AdUpdate {
+	_u.mutation.SetBannerAdult(v)
+	return _u
+}
+
+// SetNillableBannerAdult sets the "banner_adult" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableBannerAdult(v *bool) *AdUpdate {
+	if v != nil {
+		_u.SetBannerAdult(*v)
+	}
+	return _u
+}
+
+// SetSideImage sets the "side_image" field.
+func (_u *AdUpdate) SetSideImage(v string) *AdUpdate {
+	_u.mutation.SetSideImage(v)
+	return _u
+}
+
+// SetNillableSideImage sets the "side_image" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableSideImage(v *string) *AdUpdate {
+	if v != nil {
+		_u.SetSideImage(*v)
+	}
+	return _u
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (_u *AdUpdate) ClearSideImage() *AdUpdate {
+	_u.mutation.ClearSideImage()
+	return _u
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (_u *AdUpdate) SetSideIcon(v string) *AdUpdate {
+	_u.mutation.SetSideIcon(v)
+	return _u
+}
+
+// SetNillableSideIcon sets the "side_icon" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableSideIcon(v *string) *AdUpdate {
+	if v != nil {
+		_u.SetSideIcon(*v)
+	}
+	return _u
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (_u *AdUpdate) ClearSideIcon() *AdUpdate {
+	_u.mutation.ClearSideIcon()
+	return _u
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (_u *AdUpdate) SetSideAdult(v bool) *AdUpdate {
+	_u.mutation.SetSideAdult(v)
+	return _u
+}
+
+// SetNillableSideAdult sets the "side_adult" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableSideAdult(v *bool) *AdUpdate {
+	if v != nil {
+		_u.SetSideAdult(*v)
+	}
+	return _u
+}
+
+// SetPlacement sets the "placement" field.
+func (_u *AdUpdate) SetPlacement(v pgvalue.Strings) *AdUpdate {
+	_u.mutation.SetPlacement(v)
+	return _u
+}
+
+// ClearPlacement clears the value of the "placement" field.
+func (_u *AdUpdate) ClearPlacement() *AdUpdate {
+	_u.mutation.ClearPlacement()
+	return _u
+}
+
+// SetLanguages sets the "languages" field.
+func (_u *AdUpdate) SetLanguages(v pgvalue.Strings) *AdUpdate {
+	_u.mutation.SetLanguages(v)
+	return _u
+}
+
+// ClearLanguages clears the value of the "languages" field.
+func (_u *AdUpdate) ClearLanguages() *AdUpdate {
+	_u.mutation.ClearLanguages()
+	return _u
+}
+
+// SetWeight sets the "weight" field.
+func (_u *AdUpdate) SetWeight(v int) *AdUpdate {
+	_u.mutation.ResetWeight()
+	_u.mutation.SetWeight(v)
+	return _u
+}
+
+// SetNillableWeight sets the "weight" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableWeight(v *int) *AdUpdate {
+	if v != nil {
+		_u.SetWeight(*v)
+	}
+	return _u
+}
+
+// AddWeight adds value to the "weight" field.
+func (_u *AdUpdate) AddWeight(v int) *AdUpdate {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
@@ -161,27 +203,6 @@ func (_u *AdUpdate) SetNillableEnabled(v *bool) *AdUpdate {
 	if v != nil {
 		_u.SetEnabled(*v)
 	}
-	return _u
-}
-
-// SetSort sets the "sort" field.
-func (_u *AdUpdate) SetSort(v int) *AdUpdate {
-	_u.mutation.ResetSort()
-	_u.mutation.SetSort(v)
-	return _u
-}
-
-// SetNillableSort sets the "sort" field if the given value is not nil.
-func (_u *AdUpdate) SetNillableSort(v *int) *AdUpdate {
-	if v != nil {
-		_u.SetSort(*v)
-	}
-	return _u
-}
-
-// AddSort adds value to the "sort" field.
-func (_u *AdUpdate) AddSort(v int) *AdUpdate {
-	_u.mutation.AddSort(v)
 	return _u
 }
 
@@ -231,9 +252,45 @@ func (_u *AdUpdate) SetUpdated(v time.Time) *AdUpdate {
 	return _u
 }
 
+// AddStatIDs adds the "stats" edge to the AdDailyStat entity by IDs.
+func (_u *AdUpdate) AddStatIDs(ids ...int) *AdUpdate {
+	_u.mutation.AddStatIDs(ids...)
+	return _u
+}
+
+// AddStats adds the "stats" edges to the AdDailyStat entity.
+func (_u *AdUpdate) AddStats(v ...*AdDailyStat) *AdUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStatIDs(ids...)
+}
+
 // Mutation returns the AdMutation object of the builder.
 func (_u *AdUpdate) Mutation() *AdMutation {
 	return _u.mutation
+}
+
+// ClearStats clears all "stats" edges to the AdDailyStat entity.
+func (_u *AdUpdate) ClearStats() *AdUpdate {
+	_u.mutation.ClearStats()
+	return _u
+}
+
+// RemoveStatIDs removes the "stats" edge to AdDailyStat entities by IDs.
+func (_u *AdUpdate) RemoveStatIDs(ids ...int) *AdUpdate {
+	_u.mutation.RemoveStatIDs(ids...)
+	return _u
+}
+
+// RemoveStats removes "stats" edges to AdDailyStat entities.
+func (_u *AdUpdate) RemoveStats(v ...*AdDailyStat) *AdUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -279,29 +336,24 @@ func (_u *AdUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Ad.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ImageZh(); ok {
-		if err := ad.ImageZhValidator(v); err != nil {
-			return &ValidationError{Name: "image_zh", err: fmt.Errorf(`ent: validator failed for field "Ad.image_zh": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.ImageJa(); ok {
-		if err := ad.ImageJaValidator(v); err != nil {
-			return &ValidationError{Name: "image_ja", err: fmt.Errorf(`ent: validator failed for field "Ad.image_ja": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.ImageEn(); ok {
-		if err := ad.ImageEnValidator(v); err != nil {
-			return &ValidationError{Name: "image_en", err: fmt.Errorf(`ent: validator failed for field "Ad.image_en": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.Aspect(); ok {
-		if err := ad.AspectValidator(v); err != nil {
-			return &ValidationError{Name: "aspect", err: fmt.Errorf(`ent: validator failed for field "Ad.aspect": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Link(); ok {
 		if err := ad.LinkValidator(v); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "Ad.link": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Banner(); ok {
+		if err := ad.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`ent: validator failed for field "Ad.banner": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SideImage(); ok {
+		if err := ad.SideImageValidator(v); err != nil {
+			return &ValidationError{Name: "side_image", err: fmt.Errorf(`ent: validator failed for field "Ad.side_image": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SideIcon(); ok {
+		if err := ad.SideIconValidator(v); err != nil {
+			return &ValidationError{Name: "side_icon", err: fmt.Errorf(`ent: validator failed for field "Ad.side_icon": %w`, err)}
 		}
 	}
 	return nil
@@ -328,47 +380,53 @@ func (_u *AdUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(ad.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Link(); ok {
+		_spec.SetField(ad.FieldLink, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Banner(); ok {
+		_spec.SetField(ad.FieldBanner, field.TypeString, value)
+	}
+	if _u.mutation.BannerCleared() {
+		_spec.ClearField(ad.FieldBanner, field.TypeString)
+	}
+	if value, ok := _u.mutation.BannerAdult(); ok {
+		_spec.SetField(ad.FieldBannerAdult, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SideImage(); ok {
+		_spec.SetField(ad.FieldSideImage, field.TypeString, value)
+	}
+	if _u.mutation.SideImageCleared() {
+		_spec.ClearField(ad.FieldSideImage, field.TypeString)
+	}
+	if value, ok := _u.mutation.SideIcon(); ok {
+		_spec.SetField(ad.FieldSideIcon, field.TypeString, value)
+	}
+	if _u.mutation.SideIconCleared() {
+		_spec.ClearField(ad.FieldSideIcon, field.TypeString)
+	}
+	if value, ok := _u.mutation.SideAdult(); ok {
+		_spec.SetField(ad.FieldSideAdult, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.Placement(); ok {
 		_spec.SetField(ad.FieldPlacement, field.TypeOther, value)
 	}
 	if _u.mutation.PlacementCleared() {
 		_spec.ClearField(ad.FieldPlacement, field.TypeOther)
 	}
-	if value, ok := _u.mutation.ImageZh(); ok {
-		_spec.SetField(ad.FieldImageZh, field.TypeString, value)
+	if value, ok := _u.mutation.Languages(); ok {
+		_spec.SetField(ad.FieldLanguages, field.TypeOther, value)
 	}
-	if value, ok := _u.mutation.ImageJa(); ok {
-		_spec.SetField(ad.FieldImageJa, field.TypeString, value)
+	if _u.mutation.LanguagesCleared() {
+		_spec.ClearField(ad.FieldLanguages, field.TypeOther)
 	}
-	if _u.mutation.ImageJaCleared() {
-		_spec.ClearField(ad.FieldImageJa, field.TypeString)
+	if value, ok := _u.mutation.Weight(); ok {
+		_spec.SetField(ad.FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ImageEn(); ok {
-		_spec.SetField(ad.FieldImageEn, field.TypeString, value)
-	}
-	if _u.mutation.ImageEnCleared() {
-		_spec.ClearField(ad.FieldImageEn, field.TypeString)
-	}
-	if value, ok := _u.mutation.Aspect(); ok {
-		_spec.SetField(ad.FieldAspect, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Link(); ok {
-		_spec.SetField(ad.FieldLink, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.ExcludeLocales(); ok {
-		_spec.SetField(ad.FieldExcludeLocales, field.TypeOther, value)
-	}
-	if _u.mutation.ExcludeLocalesCleared() {
-		_spec.ClearField(ad.FieldExcludeLocales, field.TypeOther)
+	if value, ok := _u.mutation.AddedWeight(); ok {
+		_spec.AddField(ad.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(ad.FieldEnabled, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Sort(); ok {
-		_spec.SetField(ad.FieldSort, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSort(); ok {
-		_spec.AddField(ad.FieldSort, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.StartAt(); ok {
 		_spec.SetField(ad.FieldStartAt, field.TypeTime, value)
@@ -384,6 +442,51 @@ func (_u *AdUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(ad.FieldUpdated, field.TypeTime, value)
+	}
+	if _u.mutation.StatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStatsIDs(); len(nodes) > 0 && !_u.mutation.StatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -421,86 +524,6 @@ func (_u *AdUpdateOne) SetNillableName(v *string) *AdUpdateOne {
 	return _u
 }
 
-// SetPlacement sets the "placement" field.
-func (_u *AdUpdateOne) SetPlacement(v pgvalue.Strings) *AdUpdateOne {
-	_u.mutation.SetPlacement(v)
-	return _u
-}
-
-// ClearPlacement clears the value of the "placement" field.
-func (_u *AdUpdateOne) ClearPlacement() *AdUpdateOne {
-	_u.mutation.ClearPlacement()
-	return _u
-}
-
-// SetImageZh sets the "image_zh" field.
-func (_u *AdUpdateOne) SetImageZh(v string) *AdUpdateOne {
-	_u.mutation.SetImageZh(v)
-	return _u
-}
-
-// SetNillableImageZh sets the "image_zh" field if the given value is not nil.
-func (_u *AdUpdateOne) SetNillableImageZh(v *string) *AdUpdateOne {
-	if v != nil {
-		_u.SetImageZh(*v)
-	}
-	return _u
-}
-
-// SetImageJa sets the "image_ja" field.
-func (_u *AdUpdateOne) SetImageJa(v string) *AdUpdateOne {
-	_u.mutation.SetImageJa(v)
-	return _u
-}
-
-// SetNillableImageJa sets the "image_ja" field if the given value is not nil.
-func (_u *AdUpdateOne) SetNillableImageJa(v *string) *AdUpdateOne {
-	if v != nil {
-		_u.SetImageJa(*v)
-	}
-	return _u
-}
-
-// ClearImageJa clears the value of the "image_ja" field.
-func (_u *AdUpdateOne) ClearImageJa() *AdUpdateOne {
-	_u.mutation.ClearImageJa()
-	return _u
-}
-
-// SetImageEn sets the "image_en" field.
-func (_u *AdUpdateOne) SetImageEn(v string) *AdUpdateOne {
-	_u.mutation.SetImageEn(v)
-	return _u
-}
-
-// SetNillableImageEn sets the "image_en" field if the given value is not nil.
-func (_u *AdUpdateOne) SetNillableImageEn(v *string) *AdUpdateOne {
-	if v != nil {
-		_u.SetImageEn(*v)
-	}
-	return _u
-}
-
-// ClearImageEn clears the value of the "image_en" field.
-func (_u *AdUpdateOne) ClearImageEn() *AdUpdateOne {
-	_u.mutation.ClearImageEn()
-	return _u
-}
-
-// SetAspect sets the "aspect" field.
-func (_u *AdUpdateOne) SetAspect(v string) *AdUpdateOne {
-	_u.mutation.SetAspect(v)
-	return _u
-}
-
-// SetNillableAspect sets the "aspect" field if the given value is not nil.
-func (_u *AdUpdateOne) SetNillableAspect(v *string) *AdUpdateOne {
-	if v != nil {
-		_u.SetAspect(*v)
-	}
-	return _u
-}
-
 // SetLink sets the "link" field.
 func (_u *AdUpdateOne) SetLink(v string) *AdUpdateOne {
 	_u.mutation.SetLink(v)
@@ -515,15 +538,136 @@ func (_u *AdUpdateOne) SetNillableLink(v *string) *AdUpdateOne {
 	return _u
 }
 
-// SetExcludeLocales sets the "exclude_locales" field.
-func (_u *AdUpdateOne) SetExcludeLocales(v pgvalue.Strings) *AdUpdateOne {
-	_u.mutation.SetExcludeLocales(v)
+// SetBanner sets the "banner" field.
+func (_u *AdUpdateOne) SetBanner(v string) *AdUpdateOne {
+	_u.mutation.SetBanner(v)
 	return _u
 }
 
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (_u *AdUpdateOne) ClearExcludeLocales() *AdUpdateOne {
-	_u.mutation.ClearExcludeLocales()
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableBanner(v *string) *AdUpdateOne {
+	if v != nil {
+		_u.SetBanner(*v)
+	}
+	return _u
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (_u *AdUpdateOne) ClearBanner() *AdUpdateOne {
+	_u.mutation.ClearBanner()
+	return _u
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (_u *AdUpdateOne) SetBannerAdult(v bool) *AdUpdateOne {
+	_u.mutation.SetBannerAdult(v)
+	return _u
+}
+
+// SetNillableBannerAdult sets the "banner_adult" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableBannerAdult(v *bool) *AdUpdateOne {
+	if v != nil {
+		_u.SetBannerAdult(*v)
+	}
+	return _u
+}
+
+// SetSideImage sets the "side_image" field.
+func (_u *AdUpdateOne) SetSideImage(v string) *AdUpdateOne {
+	_u.mutation.SetSideImage(v)
+	return _u
+}
+
+// SetNillableSideImage sets the "side_image" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableSideImage(v *string) *AdUpdateOne {
+	if v != nil {
+		_u.SetSideImage(*v)
+	}
+	return _u
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (_u *AdUpdateOne) ClearSideImage() *AdUpdateOne {
+	_u.mutation.ClearSideImage()
+	return _u
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (_u *AdUpdateOne) SetSideIcon(v string) *AdUpdateOne {
+	_u.mutation.SetSideIcon(v)
+	return _u
+}
+
+// SetNillableSideIcon sets the "side_icon" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableSideIcon(v *string) *AdUpdateOne {
+	if v != nil {
+		_u.SetSideIcon(*v)
+	}
+	return _u
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (_u *AdUpdateOne) ClearSideIcon() *AdUpdateOne {
+	_u.mutation.ClearSideIcon()
+	return _u
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (_u *AdUpdateOne) SetSideAdult(v bool) *AdUpdateOne {
+	_u.mutation.SetSideAdult(v)
+	return _u
+}
+
+// SetNillableSideAdult sets the "side_adult" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableSideAdult(v *bool) *AdUpdateOne {
+	if v != nil {
+		_u.SetSideAdult(*v)
+	}
+	return _u
+}
+
+// SetPlacement sets the "placement" field.
+func (_u *AdUpdateOne) SetPlacement(v pgvalue.Strings) *AdUpdateOne {
+	_u.mutation.SetPlacement(v)
+	return _u
+}
+
+// ClearPlacement clears the value of the "placement" field.
+func (_u *AdUpdateOne) ClearPlacement() *AdUpdateOne {
+	_u.mutation.ClearPlacement()
+	return _u
+}
+
+// SetLanguages sets the "languages" field.
+func (_u *AdUpdateOne) SetLanguages(v pgvalue.Strings) *AdUpdateOne {
+	_u.mutation.SetLanguages(v)
+	return _u
+}
+
+// ClearLanguages clears the value of the "languages" field.
+func (_u *AdUpdateOne) ClearLanguages() *AdUpdateOne {
+	_u.mutation.ClearLanguages()
+	return _u
+}
+
+// SetWeight sets the "weight" field.
+func (_u *AdUpdateOne) SetWeight(v int) *AdUpdateOne {
+	_u.mutation.ResetWeight()
+	_u.mutation.SetWeight(v)
+	return _u
+}
+
+// SetNillableWeight sets the "weight" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableWeight(v *int) *AdUpdateOne {
+	if v != nil {
+		_u.SetWeight(*v)
+	}
+	return _u
+}
+
+// AddWeight adds value to the "weight" field.
+func (_u *AdUpdateOne) AddWeight(v int) *AdUpdateOne {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
@@ -538,27 +682,6 @@ func (_u *AdUpdateOne) SetNillableEnabled(v *bool) *AdUpdateOne {
 	if v != nil {
 		_u.SetEnabled(*v)
 	}
-	return _u
-}
-
-// SetSort sets the "sort" field.
-func (_u *AdUpdateOne) SetSort(v int) *AdUpdateOne {
-	_u.mutation.ResetSort()
-	_u.mutation.SetSort(v)
-	return _u
-}
-
-// SetNillableSort sets the "sort" field if the given value is not nil.
-func (_u *AdUpdateOne) SetNillableSort(v *int) *AdUpdateOne {
-	if v != nil {
-		_u.SetSort(*v)
-	}
-	return _u
-}
-
-// AddSort adds value to the "sort" field.
-func (_u *AdUpdateOne) AddSort(v int) *AdUpdateOne {
-	_u.mutation.AddSort(v)
 	return _u
 }
 
@@ -608,9 +731,45 @@ func (_u *AdUpdateOne) SetUpdated(v time.Time) *AdUpdateOne {
 	return _u
 }
 
+// AddStatIDs adds the "stats" edge to the AdDailyStat entity by IDs.
+func (_u *AdUpdateOne) AddStatIDs(ids ...int) *AdUpdateOne {
+	_u.mutation.AddStatIDs(ids...)
+	return _u
+}
+
+// AddStats adds the "stats" edges to the AdDailyStat entity.
+func (_u *AdUpdateOne) AddStats(v ...*AdDailyStat) *AdUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStatIDs(ids...)
+}
+
 // Mutation returns the AdMutation object of the builder.
 func (_u *AdUpdateOne) Mutation() *AdMutation {
 	return _u.mutation
+}
+
+// ClearStats clears all "stats" edges to the AdDailyStat entity.
+func (_u *AdUpdateOne) ClearStats() *AdUpdateOne {
+	_u.mutation.ClearStats()
+	return _u
+}
+
+// RemoveStatIDs removes the "stats" edge to AdDailyStat entities by IDs.
+func (_u *AdUpdateOne) RemoveStatIDs(ids ...int) *AdUpdateOne {
+	_u.mutation.RemoveStatIDs(ids...)
+	return _u
+}
+
+// RemoveStats removes "stats" edges to AdDailyStat entities.
+func (_u *AdUpdateOne) RemoveStats(v ...*AdDailyStat) *AdUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStatIDs(ids...)
 }
 
 // Where appends a list predicates to the AdUpdate builder.
@@ -669,29 +828,24 @@ func (_u *AdUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Ad.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ImageZh(); ok {
-		if err := ad.ImageZhValidator(v); err != nil {
-			return &ValidationError{Name: "image_zh", err: fmt.Errorf(`ent: validator failed for field "Ad.image_zh": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.ImageJa(); ok {
-		if err := ad.ImageJaValidator(v); err != nil {
-			return &ValidationError{Name: "image_ja", err: fmt.Errorf(`ent: validator failed for field "Ad.image_ja": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.ImageEn(); ok {
-		if err := ad.ImageEnValidator(v); err != nil {
-			return &ValidationError{Name: "image_en", err: fmt.Errorf(`ent: validator failed for field "Ad.image_en": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.Aspect(); ok {
-		if err := ad.AspectValidator(v); err != nil {
-			return &ValidationError{Name: "aspect", err: fmt.Errorf(`ent: validator failed for field "Ad.aspect": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Link(); ok {
 		if err := ad.LinkValidator(v); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "Ad.link": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Banner(); ok {
+		if err := ad.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`ent: validator failed for field "Ad.banner": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SideImage(); ok {
+		if err := ad.SideImageValidator(v); err != nil {
+			return &ValidationError{Name: "side_image", err: fmt.Errorf(`ent: validator failed for field "Ad.side_image": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SideIcon(); ok {
+		if err := ad.SideIconValidator(v); err != nil {
+			return &ValidationError{Name: "side_icon", err: fmt.Errorf(`ent: validator failed for field "Ad.side_icon": %w`, err)}
 		}
 	}
 	return nil
@@ -735,47 +889,53 @@ func (_u *AdUpdateOne) sqlSave(ctx context.Context) (_node *Ad, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(ad.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Link(); ok {
+		_spec.SetField(ad.FieldLink, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Banner(); ok {
+		_spec.SetField(ad.FieldBanner, field.TypeString, value)
+	}
+	if _u.mutation.BannerCleared() {
+		_spec.ClearField(ad.FieldBanner, field.TypeString)
+	}
+	if value, ok := _u.mutation.BannerAdult(); ok {
+		_spec.SetField(ad.FieldBannerAdult, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SideImage(); ok {
+		_spec.SetField(ad.FieldSideImage, field.TypeString, value)
+	}
+	if _u.mutation.SideImageCleared() {
+		_spec.ClearField(ad.FieldSideImage, field.TypeString)
+	}
+	if value, ok := _u.mutation.SideIcon(); ok {
+		_spec.SetField(ad.FieldSideIcon, field.TypeString, value)
+	}
+	if _u.mutation.SideIconCleared() {
+		_spec.ClearField(ad.FieldSideIcon, field.TypeString)
+	}
+	if value, ok := _u.mutation.SideAdult(); ok {
+		_spec.SetField(ad.FieldSideAdult, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.Placement(); ok {
 		_spec.SetField(ad.FieldPlacement, field.TypeOther, value)
 	}
 	if _u.mutation.PlacementCleared() {
 		_spec.ClearField(ad.FieldPlacement, field.TypeOther)
 	}
-	if value, ok := _u.mutation.ImageZh(); ok {
-		_spec.SetField(ad.FieldImageZh, field.TypeString, value)
+	if value, ok := _u.mutation.Languages(); ok {
+		_spec.SetField(ad.FieldLanguages, field.TypeOther, value)
 	}
-	if value, ok := _u.mutation.ImageJa(); ok {
-		_spec.SetField(ad.FieldImageJa, field.TypeString, value)
+	if _u.mutation.LanguagesCleared() {
+		_spec.ClearField(ad.FieldLanguages, field.TypeOther)
 	}
-	if _u.mutation.ImageJaCleared() {
-		_spec.ClearField(ad.FieldImageJa, field.TypeString)
+	if value, ok := _u.mutation.Weight(); ok {
+		_spec.SetField(ad.FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ImageEn(); ok {
-		_spec.SetField(ad.FieldImageEn, field.TypeString, value)
-	}
-	if _u.mutation.ImageEnCleared() {
-		_spec.ClearField(ad.FieldImageEn, field.TypeString)
-	}
-	if value, ok := _u.mutation.Aspect(); ok {
-		_spec.SetField(ad.FieldAspect, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Link(); ok {
-		_spec.SetField(ad.FieldLink, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.ExcludeLocales(); ok {
-		_spec.SetField(ad.FieldExcludeLocales, field.TypeOther, value)
-	}
-	if _u.mutation.ExcludeLocalesCleared() {
-		_spec.ClearField(ad.FieldExcludeLocales, field.TypeOther)
+	if value, ok := _u.mutation.AddedWeight(); ok {
+		_spec.AddField(ad.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(ad.FieldEnabled, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Sort(); ok {
-		_spec.SetField(ad.FieldSort, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSort(); ok {
-		_spec.AddField(ad.FieldSort, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.StartAt(); ok {
 		_spec.SetField(ad.FieldStartAt, field.TypeTime, value)
@@ -791,6 +951,51 @@ func (_u *AdUpdateOne) sqlSave(ctx context.Context) (_node *Ad, err error) {
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(ad.FieldUpdated, field.TypeTime, value)
+	}
+	if _u.mutation.StatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStatsIDs(); len(nodes) > 0 && !_u.mutation.StatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Ad{config: _u.config}

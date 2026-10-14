@@ -1,4 +1,5 @@
 import account from '~/features/account/messages/en.json'
+import ad from '~/features/ad/messages/en.json'
 import apiKey from '~/features/api-key/messages/en.json'
 import activity from '~/features/activity/messages/en.json'
 import auth from '~/features/auth/messages/en.json'
@@ -33,6 +34,7 @@ import type { Messages } from './zh'
 
 export const messages: Messages = {
   account,
+  ad,
   apiKey,
   activity,
   auth,

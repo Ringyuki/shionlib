@@ -165,6 +165,18 @@ func (f AdFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdMutation", m)
 }
 
+// The AdDailyStatFunc type is an adapter to allow the use of ordinary
+// function as AdDailyStat mutator.
+type AdDailyStatFunc func(context.Context, *ent.AdDailyStatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdDailyStatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdDailyStatMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdDailyStatMutation", m)
+}
+
 // The CatalogSourceLinkFunc type is an adapter to allow the use of ordinary
 // function as CatalogSourceLink mutator.
 type CatalogSourceLinkFunc func(context.Context, *ent.CatalogSourceLinkMutation) (ent.Value, error)

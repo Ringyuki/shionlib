@@ -2,6 +2,8 @@ package bootstrap
 
 import (
 	"context"
+	"crypto/rand"
+	"math/big"
 	"strings"
 	"time"
 
@@ -18,6 +20,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/potatovnpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/sponsorpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/pvnapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/adredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/s3store"
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/analysis"
@@ -39,7 +42,7 @@ import (
 
 const sponsorOrderAccessPurpose = "shionlib:sponsor-order-access"
 
-func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
+func wireCommunity(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
 
 	paymentCallbacks := strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/"
@@ -60,7 +63,18 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 	)
 
 	adRepository := adpg.NewRepository(shared.Ent)
-	adService := ad.NewService(adRepository, adRepository, shared.Cache, shared.Now)
+	adOptions := ad.Options{ClockOffset: admin.StatsDayOffset}
+	adService := ad.NewService(ad.Deps{Repo: adRepository, Cache: shared.Cache, Settings: shared.Settings, Now: shared.Now, Options: adOptions})
+	adPlacements := ad.NewPlacementService(ad.PlacementDeps{
+		Repo:     adRepository,
+		Sponsors: adRepository,
+		Cache:    shared.Cache,
+		Guard:    adredis.NewClickGuard(infra.Redis),
+		Settings: shared.Settings,
+		Now:      shared.Now,
+		Random:   randomFraction,
+		Options:  adOptions,
+	})
 
 	moyuService := moyu.NewService(
 		moyupg.NewGameStore(shared.Ent),
@@ -94,7 +108,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 
 	modules.Handlers = append(modules.Handlers,
 		sponsorhttp.NewHandler(sponsorService, shared.Builder),
-		adhttp.NewHandler(adService, shared.Builder),
+		adhttp.NewHandler(adService, adPlacements, shared.Builder),
 		friendlinkhttp.NewHandler(friendlink.NewService(friendlinkpg.NewRepository(shared.Ent), shared.Transactor), shared.Builder),
 		moyuhttp.NewHandler(moyuService, shared.Builder),
 		potatovnhttp.NewHandler(pvnService, shared.Builder),
@@ -121,4 +135,13 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 			jobs.Task{Name: "database_backup_weekly", Schedule: "0 3 * * 0", Timeout: 3 * time.Hour, Run: backupService.RunWeekly},
 		)
 	}
+}
+
+func randomFraction() float64 {
+	const span = 1 << 53
+	picked, err := rand.Int(rand.Reader, big.NewInt(span))
+	if err != nil {
+		return 0
+	}
+	return float64(picked.Int64()) / span
 }

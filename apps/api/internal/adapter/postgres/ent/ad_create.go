@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
 
@@ -29,61 +30,105 @@ func (_c *AdCreate) SetName(v string) *AdCreate {
 	return _c
 }
 
-// SetPlacement sets the "placement" field.
-func (_c *AdCreate) SetPlacement(v pgvalue.Strings) *AdCreate {
-	_c.mutation.SetPlacement(v)
-	return _c
-}
-
-// SetImageZh sets the "image_zh" field.
-func (_c *AdCreate) SetImageZh(v string) *AdCreate {
-	_c.mutation.SetImageZh(v)
-	return _c
-}
-
-// SetImageJa sets the "image_ja" field.
-func (_c *AdCreate) SetImageJa(v string) *AdCreate {
-	_c.mutation.SetImageJa(v)
-	return _c
-}
-
-// SetNillableImageJa sets the "image_ja" field if the given value is not nil.
-func (_c *AdCreate) SetNillableImageJa(v *string) *AdCreate {
-	if v != nil {
-		_c.SetImageJa(*v)
-	}
-	return _c
-}
-
-// SetImageEn sets the "image_en" field.
-func (_c *AdCreate) SetImageEn(v string) *AdCreate {
-	_c.mutation.SetImageEn(v)
-	return _c
-}
-
-// SetNillableImageEn sets the "image_en" field if the given value is not nil.
-func (_c *AdCreate) SetNillableImageEn(v *string) *AdCreate {
-	if v != nil {
-		_c.SetImageEn(*v)
-	}
-	return _c
-}
-
-// SetAspect sets the "aspect" field.
-func (_c *AdCreate) SetAspect(v string) *AdCreate {
-	_c.mutation.SetAspect(v)
-	return _c
-}
-
 // SetLink sets the "link" field.
 func (_c *AdCreate) SetLink(v string) *AdCreate {
 	_c.mutation.SetLink(v)
 	return _c
 }
 
-// SetExcludeLocales sets the "exclude_locales" field.
-func (_c *AdCreate) SetExcludeLocales(v pgvalue.Strings) *AdCreate {
-	_c.mutation.SetExcludeLocales(v)
+// SetBanner sets the "banner" field.
+func (_c *AdCreate) SetBanner(v string) *AdCreate {
+	_c.mutation.SetBanner(v)
+	return _c
+}
+
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_c *AdCreate) SetNillableBanner(v *string) *AdCreate {
+	if v != nil {
+		_c.SetBanner(*v)
+	}
+	return _c
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (_c *AdCreate) SetBannerAdult(v bool) *AdCreate {
+	_c.mutation.SetBannerAdult(v)
+	return _c
+}
+
+// SetNillableBannerAdult sets the "banner_adult" field if the given value is not nil.
+func (_c *AdCreate) SetNillableBannerAdult(v *bool) *AdCreate {
+	if v != nil {
+		_c.SetBannerAdult(*v)
+	}
+	return _c
+}
+
+// SetSideImage sets the "side_image" field.
+func (_c *AdCreate) SetSideImage(v string) *AdCreate {
+	_c.mutation.SetSideImage(v)
+	return _c
+}
+
+// SetNillableSideImage sets the "side_image" field if the given value is not nil.
+func (_c *AdCreate) SetNillableSideImage(v *string) *AdCreate {
+	if v != nil {
+		_c.SetSideImage(*v)
+	}
+	return _c
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (_c *AdCreate) SetSideIcon(v string) *AdCreate {
+	_c.mutation.SetSideIcon(v)
+	return _c
+}
+
+// SetNillableSideIcon sets the "side_icon" field if the given value is not nil.
+func (_c *AdCreate) SetNillableSideIcon(v *string) *AdCreate {
+	if v != nil {
+		_c.SetSideIcon(*v)
+	}
+	return _c
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (_c *AdCreate) SetSideAdult(v bool) *AdCreate {
+	_c.mutation.SetSideAdult(v)
+	return _c
+}
+
+// SetNillableSideAdult sets the "side_adult" field if the given value is not nil.
+func (_c *AdCreate) SetNillableSideAdult(v *bool) *AdCreate {
+	if v != nil {
+		_c.SetSideAdult(*v)
+	}
+	return _c
+}
+
+// SetPlacement sets the "placement" field.
+func (_c *AdCreate) SetPlacement(v pgvalue.Strings) *AdCreate {
+	_c.mutation.SetPlacement(v)
+	return _c
+}
+
+// SetLanguages sets the "languages" field.
+func (_c *AdCreate) SetLanguages(v pgvalue.Strings) *AdCreate {
+	_c.mutation.SetLanguages(v)
+	return _c
+}
+
+// SetWeight sets the "weight" field.
+func (_c *AdCreate) SetWeight(v int) *AdCreate {
+	_c.mutation.SetWeight(v)
+	return _c
+}
+
+// SetNillableWeight sets the "weight" field if the given value is not nil.
+func (_c *AdCreate) SetNillableWeight(v *int) *AdCreate {
+	if v != nil {
+		_c.SetWeight(*v)
+	}
 	return _c
 }
 
@@ -97,20 +142,6 @@ func (_c *AdCreate) SetEnabled(v bool) *AdCreate {
 func (_c *AdCreate) SetNillableEnabled(v *bool) *AdCreate {
 	if v != nil {
 		_c.SetEnabled(*v)
-	}
-	return _c
-}
-
-// SetSort sets the "sort" field.
-func (_c *AdCreate) SetSort(v int) *AdCreate {
-	_c.mutation.SetSort(v)
-	return _c
-}
-
-// SetNillableSort sets the "sort" field if the given value is not nil.
-func (_c *AdCreate) SetNillableSort(v *int) *AdCreate {
-	if v != nil {
-		_c.SetSort(*v)
 	}
 	return _c
 }
@@ -177,6 +208,21 @@ func (_c *AdCreate) SetID(v int) *AdCreate {
 	return _c
 }
 
+// AddStatIDs adds the "stats" edge to the AdDailyStat entity by IDs.
+func (_c *AdCreate) AddStatIDs(ids ...int) *AdCreate {
+	_c.mutation.AddStatIDs(ids...)
+	return _c
+}
+
+// AddStats adds the "stats" edges to the AdDailyStat entity.
+func (_c *AdCreate) AddStats(v ...*AdDailyStat) *AdCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddStatIDs(ids...)
+}
+
 // Mutation returns the AdMutation object of the builder.
 func (_c *AdCreate) Mutation() *AdMutation {
 	return _c.mutation
@@ -212,13 +258,21 @@ func (_c *AdCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *AdCreate) defaults() {
+	if _, ok := _c.mutation.BannerAdult(); !ok {
+		v := ad.DefaultBannerAdult
+		_c.mutation.SetBannerAdult(v)
+	}
+	if _, ok := _c.mutation.SideAdult(); !ok {
+		v := ad.DefaultSideAdult
+		_c.mutation.SetSideAdult(v)
+	}
+	if _, ok := _c.mutation.Weight(); !ok {
+		v := ad.DefaultWeight
+		_c.mutation.SetWeight(v)
+	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		v := ad.DefaultEnabled
 		_c.mutation.SetEnabled(v)
-	}
-	if _, ok := _c.mutation.Sort(); !ok {
-		v := ad.DefaultSort
-		_c.mutation.SetSort(v)
 	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := ad.DefaultCreated()
@@ -240,32 +294,6 @@ func (_c *AdCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Ad.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.ImageZh(); !ok {
-		return &ValidationError{Name: "image_zh", err: errors.New(`ent: missing required field "Ad.image_zh"`)}
-	}
-	if v, ok := _c.mutation.ImageZh(); ok {
-		if err := ad.ImageZhValidator(v); err != nil {
-			return &ValidationError{Name: "image_zh", err: fmt.Errorf(`ent: validator failed for field "Ad.image_zh": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ImageJa(); ok {
-		if err := ad.ImageJaValidator(v); err != nil {
-			return &ValidationError{Name: "image_ja", err: fmt.Errorf(`ent: validator failed for field "Ad.image_ja": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ImageEn(); ok {
-		if err := ad.ImageEnValidator(v); err != nil {
-			return &ValidationError{Name: "image_en", err: fmt.Errorf(`ent: validator failed for field "Ad.image_en": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Aspect(); !ok {
-		return &ValidationError{Name: "aspect", err: errors.New(`ent: missing required field "Ad.aspect"`)}
-	}
-	if v, ok := _c.mutation.Aspect(); ok {
-		if err := ad.AspectValidator(v); err != nil {
-			return &ValidationError{Name: "aspect", err: fmt.Errorf(`ent: validator failed for field "Ad.aspect": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Link(); !ok {
 		return &ValidationError{Name: "link", err: errors.New(`ent: missing required field "Ad.link"`)}
 	}
@@ -274,11 +302,32 @@ func (_c *AdCreate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "Ad.link": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.Banner(); ok {
+		if err := ad.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`ent: validator failed for field "Ad.banner": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BannerAdult(); !ok {
+		return &ValidationError{Name: "banner_adult", err: errors.New(`ent: missing required field "Ad.banner_adult"`)}
+	}
+	if v, ok := _c.mutation.SideImage(); ok {
+		if err := ad.SideImageValidator(v); err != nil {
+			return &ValidationError{Name: "side_image", err: fmt.Errorf(`ent: validator failed for field "Ad.side_image": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.SideIcon(); ok {
+		if err := ad.SideIconValidator(v); err != nil {
+			return &ValidationError{Name: "side_icon", err: fmt.Errorf(`ent: validator failed for field "Ad.side_icon": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.SideAdult(); !ok {
+		return &ValidationError{Name: "side_adult", err: errors.New(`ent: missing required field "Ad.side_adult"`)}
+	}
+	if _, ok := _c.mutation.Weight(); !ok {
+		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Ad.weight"`)}
+	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`ent: missing required field "Ad.enabled"`)}
-	}
-	if _, ok := _c.mutation.Sort(); !ok {
-		return &ValidationError{Name: "sort", err: errors.New(`ent: missing required field "Ad.sort"`)}
 	}
 	if _, ok := _c.mutation.Updated(); !ok {
 		return &ValidationError{Name: "updated", err: errors.New(`ent: missing required field "Ad.updated"`)}
@@ -320,41 +369,45 @@ func (_c *AdCreate) createSpec() (*Ad, *sqlgraph.CreateSpec) {
 		_spec.SetField(ad.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Placement(); ok {
-		_spec.SetField(ad.FieldPlacement, field.TypeOther, value)
-		_node.Placement = value
-	}
-	if value, ok := _c.mutation.ImageZh(); ok {
-		_spec.SetField(ad.FieldImageZh, field.TypeString, value)
-		_node.ImageZh = value
-	}
-	if value, ok := _c.mutation.ImageJa(); ok {
-		_spec.SetField(ad.FieldImageJa, field.TypeString, value)
-		_node.ImageJa = &value
-	}
-	if value, ok := _c.mutation.ImageEn(); ok {
-		_spec.SetField(ad.FieldImageEn, field.TypeString, value)
-		_node.ImageEn = &value
-	}
-	if value, ok := _c.mutation.Aspect(); ok {
-		_spec.SetField(ad.FieldAspect, field.TypeString, value)
-		_node.Aspect = value
-	}
 	if value, ok := _c.mutation.Link(); ok {
 		_spec.SetField(ad.FieldLink, field.TypeString, value)
 		_node.Link = value
 	}
-	if value, ok := _c.mutation.ExcludeLocales(); ok {
-		_spec.SetField(ad.FieldExcludeLocales, field.TypeOther, value)
-		_node.ExcludeLocales = value
+	if value, ok := _c.mutation.Banner(); ok {
+		_spec.SetField(ad.FieldBanner, field.TypeString, value)
+		_node.Banner = &value
+	}
+	if value, ok := _c.mutation.BannerAdult(); ok {
+		_spec.SetField(ad.FieldBannerAdult, field.TypeBool, value)
+		_node.BannerAdult = value
+	}
+	if value, ok := _c.mutation.SideImage(); ok {
+		_spec.SetField(ad.FieldSideImage, field.TypeString, value)
+		_node.SideImage = &value
+	}
+	if value, ok := _c.mutation.SideIcon(); ok {
+		_spec.SetField(ad.FieldSideIcon, field.TypeString, value)
+		_node.SideIcon = &value
+	}
+	if value, ok := _c.mutation.SideAdult(); ok {
+		_spec.SetField(ad.FieldSideAdult, field.TypeBool, value)
+		_node.SideAdult = value
+	}
+	if value, ok := _c.mutation.Placement(); ok {
+		_spec.SetField(ad.FieldPlacement, field.TypeOther, value)
+		_node.Placement = value
+	}
+	if value, ok := _c.mutation.Languages(); ok {
+		_spec.SetField(ad.FieldLanguages, field.TypeOther, value)
+		_node.Languages = value
+	}
+	if value, ok := _c.mutation.Weight(); ok {
+		_spec.SetField(ad.FieldWeight, field.TypeInt, value)
+		_node.Weight = value
 	}
 	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(ad.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
-	}
-	if value, ok := _c.mutation.Sort(); ok {
-		_spec.SetField(ad.FieldSort, field.TypeInt, value)
-		_node.Sort = value
 	}
 	if value, ok := _c.mutation.StartAt(); ok {
 		_spec.SetField(ad.FieldStartAt, field.TypeTime, value)
@@ -371,6 +424,22 @@ func (_c *AdCreate) createSpec() (*Ad, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Updated(); ok {
 		_spec.SetField(ad.FieldUpdated, field.TypeTime, value)
 		_node.Updated = value
+	}
+	if nodes := _c.mutation.StatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ad.StatsTable,
+			Columns: []string{ad.StatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addailystat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -436,6 +505,96 @@ func (u *AdUpsert) UpdateName() *AdUpsert {
 	return u
 }
 
+// SetLink sets the "link" field.
+func (u *AdUpsert) SetLink(v string) *AdUpsert {
+	u.Set(ad.FieldLink, v)
+	return u
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *AdUpsert) UpdateLink() *AdUpsert {
+	u.SetExcluded(ad.FieldLink)
+	return u
+}
+
+// SetBanner sets the "banner" field.
+func (u *AdUpsert) SetBanner(v string) *AdUpsert {
+	u.Set(ad.FieldBanner, v)
+	return u
+}
+
+// UpdateBanner sets the "banner" field to the value that was provided on create.
+func (u *AdUpsert) UpdateBanner() *AdUpsert {
+	u.SetExcluded(ad.FieldBanner)
+	return u
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (u *AdUpsert) ClearBanner() *AdUpsert {
+	u.SetNull(ad.FieldBanner)
+	return u
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (u *AdUpsert) SetBannerAdult(v bool) *AdUpsert {
+	u.Set(ad.FieldBannerAdult, v)
+	return u
+}
+
+// UpdateBannerAdult sets the "banner_adult" field to the value that was provided on create.
+func (u *AdUpsert) UpdateBannerAdult() *AdUpsert {
+	u.SetExcluded(ad.FieldBannerAdult)
+	return u
+}
+
+// SetSideImage sets the "side_image" field.
+func (u *AdUpsert) SetSideImage(v string) *AdUpsert {
+	u.Set(ad.FieldSideImage, v)
+	return u
+}
+
+// UpdateSideImage sets the "side_image" field to the value that was provided on create.
+func (u *AdUpsert) UpdateSideImage() *AdUpsert {
+	u.SetExcluded(ad.FieldSideImage)
+	return u
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (u *AdUpsert) ClearSideImage() *AdUpsert {
+	u.SetNull(ad.FieldSideImage)
+	return u
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (u *AdUpsert) SetSideIcon(v string) *AdUpsert {
+	u.Set(ad.FieldSideIcon, v)
+	return u
+}
+
+// UpdateSideIcon sets the "side_icon" field to the value that was provided on create.
+func (u *AdUpsert) UpdateSideIcon() *AdUpsert {
+	u.SetExcluded(ad.FieldSideIcon)
+	return u
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (u *AdUpsert) ClearSideIcon() *AdUpsert {
+	u.SetNull(ad.FieldSideIcon)
+	return u
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (u *AdUpsert) SetSideAdult(v bool) *AdUpsert {
+	u.Set(ad.FieldSideAdult, v)
+	return u
+}
+
+// UpdateSideAdult sets the "side_adult" field to the value that was provided on create.
+func (u *AdUpsert) UpdateSideAdult() *AdUpsert {
+	u.SetExcluded(ad.FieldSideAdult)
+	return u
+}
+
 // SetPlacement sets the "placement" field.
 func (u *AdUpsert) SetPlacement(v pgvalue.Strings) *AdUpsert {
 	u.Set(ad.FieldPlacement, v)
@@ -454,93 +613,39 @@ func (u *AdUpsert) ClearPlacement() *AdUpsert {
 	return u
 }
 
-// SetImageZh sets the "image_zh" field.
-func (u *AdUpsert) SetImageZh(v string) *AdUpsert {
-	u.Set(ad.FieldImageZh, v)
+// SetLanguages sets the "languages" field.
+func (u *AdUpsert) SetLanguages(v pgvalue.Strings) *AdUpsert {
+	u.Set(ad.FieldLanguages, v)
 	return u
 }
 
-// UpdateImageZh sets the "image_zh" field to the value that was provided on create.
-func (u *AdUpsert) UpdateImageZh() *AdUpsert {
-	u.SetExcluded(ad.FieldImageZh)
+// UpdateLanguages sets the "languages" field to the value that was provided on create.
+func (u *AdUpsert) UpdateLanguages() *AdUpsert {
+	u.SetExcluded(ad.FieldLanguages)
 	return u
 }
 
-// SetImageJa sets the "image_ja" field.
-func (u *AdUpsert) SetImageJa(v string) *AdUpsert {
-	u.Set(ad.FieldImageJa, v)
+// ClearLanguages clears the value of the "languages" field.
+func (u *AdUpsert) ClearLanguages() *AdUpsert {
+	u.SetNull(ad.FieldLanguages)
 	return u
 }
 
-// UpdateImageJa sets the "image_ja" field to the value that was provided on create.
-func (u *AdUpsert) UpdateImageJa() *AdUpsert {
-	u.SetExcluded(ad.FieldImageJa)
+// SetWeight sets the "weight" field.
+func (u *AdUpsert) SetWeight(v int) *AdUpsert {
+	u.Set(ad.FieldWeight, v)
 	return u
 }
 
-// ClearImageJa clears the value of the "image_ja" field.
-func (u *AdUpsert) ClearImageJa() *AdUpsert {
-	u.SetNull(ad.FieldImageJa)
+// UpdateWeight sets the "weight" field to the value that was provided on create.
+func (u *AdUpsert) UpdateWeight() *AdUpsert {
+	u.SetExcluded(ad.FieldWeight)
 	return u
 }
 
-// SetImageEn sets the "image_en" field.
-func (u *AdUpsert) SetImageEn(v string) *AdUpsert {
-	u.Set(ad.FieldImageEn, v)
-	return u
-}
-
-// UpdateImageEn sets the "image_en" field to the value that was provided on create.
-func (u *AdUpsert) UpdateImageEn() *AdUpsert {
-	u.SetExcluded(ad.FieldImageEn)
-	return u
-}
-
-// ClearImageEn clears the value of the "image_en" field.
-func (u *AdUpsert) ClearImageEn() *AdUpsert {
-	u.SetNull(ad.FieldImageEn)
-	return u
-}
-
-// SetAspect sets the "aspect" field.
-func (u *AdUpsert) SetAspect(v string) *AdUpsert {
-	u.Set(ad.FieldAspect, v)
-	return u
-}
-
-// UpdateAspect sets the "aspect" field to the value that was provided on create.
-func (u *AdUpsert) UpdateAspect() *AdUpsert {
-	u.SetExcluded(ad.FieldAspect)
-	return u
-}
-
-// SetLink sets the "link" field.
-func (u *AdUpsert) SetLink(v string) *AdUpsert {
-	u.Set(ad.FieldLink, v)
-	return u
-}
-
-// UpdateLink sets the "link" field to the value that was provided on create.
-func (u *AdUpsert) UpdateLink() *AdUpsert {
-	u.SetExcluded(ad.FieldLink)
-	return u
-}
-
-// SetExcludeLocales sets the "exclude_locales" field.
-func (u *AdUpsert) SetExcludeLocales(v pgvalue.Strings) *AdUpsert {
-	u.Set(ad.FieldExcludeLocales, v)
-	return u
-}
-
-// UpdateExcludeLocales sets the "exclude_locales" field to the value that was provided on create.
-func (u *AdUpsert) UpdateExcludeLocales() *AdUpsert {
-	u.SetExcluded(ad.FieldExcludeLocales)
-	return u
-}
-
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (u *AdUpsert) ClearExcludeLocales() *AdUpsert {
-	u.SetNull(ad.FieldExcludeLocales)
+// AddWeight adds v to the "weight" field.
+func (u *AdUpsert) AddWeight(v int) *AdUpsert {
+	u.Add(ad.FieldWeight, v)
 	return u
 }
 
@@ -553,24 +658,6 @@ func (u *AdUpsert) SetEnabled(v bool) *AdUpsert {
 // UpdateEnabled sets the "enabled" field to the value that was provided on create.
 func (u *AdUpsert) UpdateEnabled() *AdUpsert {
 	u.SetExcluded(ad.FieldEnabled)
-	return u
-}
-
-// SetSort sets the "sort" field.
-func (u *AdUpsert) SetSort(v int) *AdUpsert {
-	u.Set(ad.FieldSort, v)
-	return u
-}
-
-// UpdateSort sets the "sort" field to the value that was provided on create.
-func (u *AdUpsert) UpdateSort() *AdUpsert {
-	u.SetExcluded(ad.FieldSort)
-	return u
-}
-
-// AddSort adds v to the "sort" field.
-func (u *AdUpsert) AddSort(v int) *AdUpsert {
-	u.Add(ad.FieldSort, v)
 	return u
 }
 
@@ -687,6 +774,111 @@ func (u *AdUpsertOne) UpdateName() *AdUpsertOne {
 	})
 }
 
+// SetLink sets the "link" field.
+func (u *AdUpsertOne) SetLink(v string) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetLink(v)
+	})
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateLink() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateLink()
+	})
+}
+
+// SetBanner sets the "banner" field.
+func (u *AdUpsertOne) SetBanner(v string) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetBanner(v)
+	})
+}
+
+// UpdateBanner sets the "banner" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateBanner() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateBanner()
+	})
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (u *AdUpsertOne) ClearBanner() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearBanner()
+	})
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (u *AdUpsertOne) SetBannerAdult(v bool) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetBannerAdult(v)
+	})
+}
+
+// UpdateBannerAdult sets the "banner_adult" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateBannerAdult() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateBannerAdult()
+	})
+}
+
+// SetSideImage sets the "side_image" field.
+func (u *AdUpsertOne) SetSideImage(v string) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideImage(v)
+	})
+}
+
+// UpdateSideImage sets the "side_image" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateSideImage() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideImage()
+	})
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (u *AdUpsertOne) ClearSideImage() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearSideImage()
+	})
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (u *AdUpsertOne) SetSideIcon(v string) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideIcon(v)
+	})
+}
+
+// UpdateSideIcon sets the "side_icon" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateSideIcon() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideIcon()
+	})
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (u *AdUpsertOne) ClearSideIcon() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearSideIcon()
+	})
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (u *AdUpsertOne) SetSideAdult(v bool) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideAdult(v)
+	})
+}
+
+// UpdateSideAdult sets the "side_adult" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateSideAdult() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideAdult()
+	})
+}
+
 // SetPlacement sets the "placement" field.
 func (u *AdUpsertOne) SetPlacement(v pgvalue.Strings) *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
@@ -708,108 +900,45 @@ func (u *AdUpsertOne) ClearPlacement() *AdUpsertOne {
 	})
 }
 
-// SetImageZh sets the "image_zh" field.
-func (u *AdUpsertOne) SetImageZh(v string) *AdUpsertOne {
+// SetLanguages sets the "languages" field.
+func (u *AdUpsertOne) SetLanguages(v pgvalue.Strings) *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageZh(v)
+		s.SetLanguages(v)
 	})
 }
 
-// UpdateImageZh sets the "image_zh" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateImageZh() *AdUpsertOne {
+// UpdateLanguages sets the "languages" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateLanguages() *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageZh()
+		s.UpdateLanguages()
 	})
 }
 
-// SetImageJa sets the "image_ja" field.
-func (u *AdUpsertOne) SetImageJa(v string) *AdUpsertOne {
+// ClearLanguages clears the value of the "languages" field.
+func (u *AdUpsertOne) ClearLanguages() *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageJa(v)
+		s.ClearLanguages()
 	})
 }
 
-// UpdateImageJa sets the "image_ja" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateImageJa() *AdUpsertOne {
+// SetWeight sets the "weight" field.
+func (u *AdUpsertOne) SetWeight(v int) *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageJa()
+		s.SetWeight(v)
 	})
 }
 
-// ClearImageJa clears the value of the "image_ja" field.
-func (u *AdUpsertOne) ClearImageJa() *AdUpsertOne {
+// AddWeight adds v to the "weight" field.
+func (u *AdUpsertOne) AddWeight(v int) *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.ClearImageJa()
+		s.AddWeight(v)
 	})
 }
 
-// SetImageEn sets the "image_en" field.
-func (u *AdUpsertOne) SetImageEn(v string) *AdUpsertOne {
+// UpdateWeight sets the "weight" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateWeight() *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageEn(v)
-	})
-}
-
-// UpdateImageEn sets the "image_en" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateImageEn() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageEn()
-	})
-}
-
-// ClearImageEn clears the value of the "image_en" field.
-func (u *AdUpsertOne) ClearImageEn() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.ClearImageEn()
-	})
-}
-
-// SetAspect sets the "aspect" field.
-func (u *AdUpsertOne) SetAspect(v string) *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.SetAspect(v)
-	})
-}
-
-// UpdateAspect sets the "aspect" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateAspect() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateAspect()
-	})
-}
-
-// SetLink sets the "link" field.
-func (u *AdUpsertOne) SetLink(v string) *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.SetLink(v)
-	})
-}
-
-// UpdateLink sets the "link" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateLink() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateLink()
-	})
-}
-
-// SetExcludeLocales sets the "exclude_locales" field.
-func (u *AdUpsertOne) SetExcludeLocales(v pgvalue.Strings) *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.SetExcludeLocales(v)
-	})
-}
-
-// UpdateExcludeLocales sets the "exclude_locales" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateExcludeLocales() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateExcludeLocales()
-	})
-}
-
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (u *AdUpsertOne) ClearExcludeLocales() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.ClearExcludeLocales()
+		s.UpdateWeight()
 	})
 }
 
@@ -824,27 +953,6 @@ func (u *AdUpsertOne) SetEnabled(v bool) *AdUpsertOne {
 func (u *AdUpsertOne) UpdateEnabled() *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
 		s.UpdateEnabled()
-	})
-}
-
-// SetSort sets the "sort" field.
-func (u *AdUpsertOne) SetSort(v int) *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.SetSort(v)
-	})
-}
-
-// AddSort adds v to the "sort" field.
-func (u *AdUpsertOne) AddSort(v int) *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.AddSort(v)
-	})
-}
-
-// UpdateSort sets the "sort" field to the value that was provided on create.
-func (u *AdUpsertOne) UpdateSort() *AdUpsertOne {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateSort()
 	})
 }
 
@@ -1135,6 +1243,111 @@ func (u *AdUpsertBulk) UpdateName() *AdUpsertBulk {
 	})
 }
 
+// SetLink sets the "link" field.
+func (u *AdUpsertBulk) SetLink(v string) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetLink(v)
+	})
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateLink() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateLink()
+	})
+}
+
+// SetBanner sets the "banner" field.
+func (u *AdUpsertBulk) SetBanner(v string) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetBanner(v)
+	})
+}
+
+// UpdateBanner sets the "banner" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateBanner() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateBanner()
+	})
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (u *AdUpsertBulk) ClearBanner() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearBanner()
+	})
+}
+
+// SetBannerAdult sets the "banner_adult" field.
+func (u *AdUpsertBulk) SetBannerAdult(v bool) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetBannerAdult(v)
+	})
+}
+
+// UpdateBannerAdult sets the "banner_adult" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateBannerAdult() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateBannerAdult()
+	})
+}
+
+// SetSideImage sets the "side_image" field.
+func (u *AdUpsertBulk) SetSideImage(v string) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideImage(v)
+	})
+}
+
+// UpdateSideImage sets the "side_image" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateSideImage() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideImage()
+	})
+}
+
+// ClearSideImage clears the value of the "side_image" field.
+func (u *AdUpsertBulk) ClearSideImage() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearSideImage()
+	})
+}
+
+// SetSideIcon sets the "side_icon" field.
+func (u *AdUpsertBulk) SetSideIcon(v string) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideIcon(v)
+	})
+}
+
+// UpdateSideIcon sets the "side_icon" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateSideIcon() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideIcon()
+	})
+}
+
+// ClearSideIcon clears the value of the "side_icon" field.
+func (u *AdUpsertBulk) ClearSideIcon() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.ClearSideIcon()
+	})
+}
+
+// SetSideAdult sets the "side_adult" field.
+func (u *AdUpsertBulk) SetSideAdult(v bool) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetSideAdult(v)
+	})
+}
+
+// UpdateSideAdult sets the "side_adult" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateSideAdult() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateSideAdult()
+	})
+}
+
 // SetPlacement sets the "placement" field.
 func (u *AdUpsertBulk) SetPlacement(v pgvalue.Strings) *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
@@ -1156,108 +1369,45 @@ func (u *AdUpsertBulk) ClearPlacement() *AdUpsertBulk {
 	})
 }
 
-// SetImageZh sets the "image_zh" field.
-func (u *AdUpsertBulk) SetImageZh(v string) *AdUpsertBulk {
+// SetLanguages sets the "languages" field.
+func (u *AdUpsertBulk) SetLanguages(v pgvalue.Strings) *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageZh(v)
+		s.SetLanguages(v)
 	})
 }
 
-// UpdateImageZh sets the "image_zh" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateImageZh() *AdUpsertBulk {
+// UpdateLanguages sets the "languages" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateLanguages() *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageZh()
+		s.UpdateLanguages()
 	})
 }
 
-// SetImageJa sets the "image_ja" field.
-func (u *AdUpsertBulk) SetImageJa(v string) *AdUpsertBulk {
+// ClearLanguages clears the value of the "languages" field.
+func (u *AdUpsertBulk) ClearLanguages() *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageJa(v)
+		s.ClearLanguages()
 	})
 }
 
-// UpdateImageJa sets the "image_ja" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateImageJa() *AdUpsertBulk {
+// SetWeight sets the "weight" field.
+func (u *AdUpsertBulk) SetWeight(v int) *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageJa()
+		s.SetWeight(v)
 	})
 }
 
-// ClearImageJa clears the value of the "image_ja" field.
-func (u *AdUpsertBulk) ClearImageJa() *AdUpsertBulk {
+// AddWeight adds v to the "weight" field.
+func (u *AdUpsertBulk) AddWeight(v int) *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.ClearImageJa()
+		s.AddWeight(v)
 	})
 }
 
-// SetImageEn sets the "image_en" field.
-func (u *AdUpsertBulk) SetImageEn(v string) *AdUpsertBulk {
+// UpdateWeight sets the "weight" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateWeight() *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
-		s.SetImageEn(v)
-	})
-}
-
-// UpdateImageEn sets the "image_en" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateImageEn() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateImageEn()
-	})
-}
-
-// ClearImageEn clears the value of the "image_en" field.
-func (u *AdUpsertBulk) ClearImageEn() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.ClearImageEn()
-	})
-}
-
-// SetAspect sets the "aspect" field.
-func (u *AdUpsertBulk) SetAspect(v string) *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.SetAspect(v)
-	})
-}
-
-// UpdateAspect sets the "aspect" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateAspect() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateAspect()
-	})
-}
-
-// SetLink sets the "link" field.
-func (u *AdUpsertBulk) SetLink(v string) *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.SetLink(v)
-	})
-}
-
-// UpdateLink sets the "link" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateLink() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateLink()
-	})
-}
-
-// SetExcludeLocales sets the "exclude_locales" field.
-func (u *AdUpsertBulk) SetExcludeLocales(v pgvalue.Strings) *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.SetExcludeLocales(v)
-	})
-}
-
-// UpdateExcludeLocales sets the "exclude_locales" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateExcludeLocales() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateExcludeLocales()
-	})
-}
-
-// ClearExcludeLocales clears the value of the "exclude_locales" field.
-func (u *AdUpsertBulk) ClearExcludeLocales() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.ClearExcludeLocales()
+		s.UpdateWeight()
 	})
 }
 
@@ -1272,27 +1422,6 @@ func (u *AdUpsertBulk) SetEnabled(v bool) *AdUpsertBulk {
 func (u *AdUpsertBulk) UpdateEnabled() *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
 		s.UpdateEnabled()
-	})
-}
-
-// SetSort sets the "sort" field.
-func (u *AdUpsertBulk) SetSort(v int) *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.SetSort(v)
-	})
-}
-
-// AddSort adds v to the "sort" field.
-func (u *AdUpsertBulk) AddSort(v int) *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.AddSort(v)
-	})
-}
-
-// UpdateSort sets the "sort" field to the value that was provided on create.
-func (u *AdUpsertBulk) UpdateSort() *AdUpsertBulk {
-	return u.Update(func(s *AdUpsert) {
-		s.UpdateSort()
 	})
 }
 

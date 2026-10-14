@@ -19,10 +19,13 @@ var (
 	member = actor.Actor{UserID: 2, Role: actor.RoleUser, ContentLimit: actor.ContentLimitJustShow}
 )
 
-type transcoder struct{}
+type transcoder struct {
+	width  int
+	height int
+}
 
-func (transcoder) ToWebP(_ context.Context, data []byte, _ media.Bounds) (media.Encoded, error) {
-	return media.Encoded{Data: data, ContentType: "image/webp", Extension: ".webp"}, nil
+func (t transcoder) ToWebP(_ context.Context, data []byte, _ media.Bounds) (media.Encoded, error) {
+	return media.Encoded{Data: data, ContentType: "image/webp", Extension: ".webp", Width: t.width, Height: t.height}, nil
 }
 
 type bucket struct {
@@ -36,15 +39,20 @@ func (b *bucket) PutBytes(_ context.Context, key string, _ []byte, _ string, _ m
 
 func setup(t *testing.T) (*apitest.Server, *bucket) {
 	t.Helper()
+	return setupSized(t, 1200, 200)
+}
+
+func setupSized(t *testing.T, width, height int) (*apitest.Server, *bucket) {
+	t.Helper()
 	server := apitest.New(t)
 	store := &bucket{}
-	mediahttp.NewHandler(media.NewService(transcoder{}, store, func() string { return "uuid" }), server.Builder).Register(server.API)
+	mediahttp.NewHandler(media.NewService(transcoder{width: width, height: height}, store, func() string { return "uuid" }), server.Builder).Register(server.API)
 	return server, store
 }
 
 func upload(t *testing.T, field, contentType string, size int) apitest.Request {
 	t.Helper()
-	return uploadTo(t, "/uploads/small/ad/image", field, contentType, size)
+	return uploadTo(t, "/uploads/small/ad/banner", field, contentType, size)
 }
 
 func uploadTo(t *testing.T, path, field, contentType string, size int) apitest.Request {
@@ -72,14 +80,46 @@ func as(req apitest.Request, who actor.Actor) apitest.Request {
 	return req
 }
 
-func TestAdImageUploadIsForAdmins(t *testing.T) {
+func TestAdBannerUploadIsForAdmins(t *testing.T) {
 	server, store := setup(t)
 	server.Expect(server.Do(upload(t, "file", "image/webp", 10)), http.StatusUnauthorized, 200101)
 	server.Expect(server.Do(as(upload(t, "file", "image/webp", 10), member)), http.StatusForbidden, http.StatusForbidden)
 	resp := server.Do(as(upload(t, "file", "image/webp", 10), admin))
 	server.Expect(resp, http.StatusOK, 0)
-	if string(resp.Data) != `{"key":"ad/image/uuid.webp"}` || len(store.keys) != 1 || store.keys[0] != "ad/image/uuid.webp" {
-		t.Fatalf("ad image %s stored %v", resp.Data, store.keys)
+	if string(resp.Data) != `{"key":"spotlight/banner/uuid.webp"}` || len(store.keys) != 1 || store.keys[0] != "spotlight/banner/uuid.webp" {
+		t.Fatalf("ad banner %s stored %v", resp.Data, store.keys)
+	}
+}
+
+func TestEachAdImageMustHaveItsShape(t *testing.T) {
+	cases := []struct {
+		path          string
+		width, height int
+		key           string
+		code          int
+	}{
+		{path: "/uploads/small/ad/banner", width: 1920, height: 320, key: "spotlight/banner/uuid.webp"},
+		{path: "/uploads/small/ad/banner", width: 1200, height: 260, code: 490104},
+		{path: "/uploads/small/ad/banner", width: 900, height: 150, code: 490104},
+		{path: "/uploads/small/ad/side-image", width: 500, height: 193, key: "spotlight/side/uuid.webp"},
+		{path: "/uploads/small/ad/side-image", width: 200, height: 60, code: 490105},
+		{path: "/uploads/small/ad/side-icon", width: 128, height: 128, key: "spotlight/icon/uuid.webp"},
+		{path: "/uploads/small/ad/side-icon", width: 128, height: 96, code: 490106},
+	}
+	for _, c := range cases {
+		server, store := setupSized(t, c.width, c.height)
+		resp := server.Do(as(uploadTo(t, c.path, "file", "image/png", 10), admin))
+		if c.code != 0 {
+			server.Expect(resp, http.StatusBadRequest, c.code)
+			if len(store.keys) != 0 {
+				t.Fatalf("%s %dx%d must not be stored: %v", c.path, c.width, c.height, store.keys)
+			}
+			continue
+		}
+		server.Expect(resp, http.StatusOK, 0)
+		if len(store.keys) != 1 || store.keys[0] != c.key {
+			t.Fatalf("%s %dx%d stored %v", c.path, c.width, c.height, store.keys)
+		}
 	}
 }
 

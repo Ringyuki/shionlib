@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { CharacterPage, characterHead } from '~/features/character'
 import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/character'
+
+export const handle = adPage
 
 export { characterLoader as loader } from '~/features/character/character.server'
 

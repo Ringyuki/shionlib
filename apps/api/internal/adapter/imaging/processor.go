@@ -42,7 +42,7 @@ func (p *Transcoder) ToWebP(ctx context.Context, data []byte, bounds media.Bound
 	if err := webp.Encode(&out, img, webp.Options{Quality: webpQuality, Method: 4}); err != nil {
 		return media.Encoded{}, fmt.Errorf("encode webp: %w", err)
 	}
-	return media.Encoded{Data: out.Bytes(), ContentType: "image/webp", Extension: ".webp"}, nil
+	return media.Encoded{Data: out.Bytes(), ContentType: "image/webp", Extension: ".webp", Width: img.Rect.Dx(), Height: img.Rect.Dy()}, nil
 }
 
 func decode(data []byte) (*image.NRGBA, error) {

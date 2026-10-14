@@ -32,8 +32,16 @@ func (s *Service) StoreBackground(ctx context.Context, userID int, file *Upload)
 	return s.save(ctx, background(userID), file)
 }
 
-func (s *Service) StoreAdImage(ctx context.Context, uploaderID int, file *Upload) (string, error) {
-	return s.save(ctx, adImage(uploaderID), file)
+func (s *Service) StoreAdBanner(ctx context.Context, uploaderID int, file *Upload) (string, error) {
+	return s.save(ctx, adBanner(uploaderID), file)
+}
+
+func (s *Service) StoreAdSideImage(ctx context.Context, uploaderID int, file *Upload) (string, error) {
+	return s.save(ctx, adSideImage(uploaderID), file)
+}
+
+func (s *Service) StoreAdSideIcon(ctx context.Context, uploaderID int, file *Upload) (string, error) {
+	return s.save(ctx, adSideIcon(uploaderID), file)
 }
 
 func (s *Service) StoreFriendLinkLogo(ctx context.Context, uploaderID int, file *Upload) (string, error) {
@@ -47,6 +55,11 @@ func (s *Service) save(ctx context.Context, k kind, file *Upload) (string, error
 	encoded, err := s.processor.ToWebP(ctx, file.Data, k.bounds)
 	if err != nil {
 		return "", err
+	}
+	if k.shape != nil {
+		if err := k.shape(encoded.Width, encoded.Height); err != nil {
+			return "", err
+		}
 	}
 	key := k.key(s.newID() + encoded.Extension)
 	if err := s.store.PutBytes(ctx, key, encoded.Data, encoded.ContentType, k.metadata); err != nil {

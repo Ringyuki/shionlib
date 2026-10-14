@@ -40,6 +40,8 @@ type Tx struct {
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
 	Ad *AdClient
+	// AdDailyStat is the client for interacting with the AdDailyStat builders.
+	AdDailyStat *AdDailyStatClient
 	// CatalogSourceLink is the client for interacting with the CatalogSourceLink builders.
 	CatalogSourceLink *CatalogSourceLinkClient
 	// CatalogSyncCursor is the client for interacting with the CatalogSyncCursor builders.
@@ -290,6 +292,7 @@ func (tx *Tx) init() {
 	tx.APIKeyDailyUsage = NewAPIKeyDailyUsageClient(tx.config)
 	tx.Activity = NewActivityClient(tx.config)
 	tx.Ad = NewAdClient(tx.config)
+	tx.AdDailyStat = NewAdDailyStatClient(tx.config)
 	tx.CatalogSourceLink = NewCatalogSourceLinkClient(tx.config)
 	tx.CatalogSyncCursor = NewCatalogSyncCursorClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)

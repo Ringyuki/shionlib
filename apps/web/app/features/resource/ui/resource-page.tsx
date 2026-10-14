@@ -11,18 +11,28 @@ import { ResourceTabs } from './resource-tabs'
 type ResourcePageProps = {
   page: Page
   viewer: ResourceViewer | null
+  banner: ReactNode
+  downloadBanner: ReactNode
   children: ReactNode
 }
 
-export function ResourcePage({ page, viewer, children }: ResourcePageProps) {
+export function ResourcePage({
+  page,
+  viewer,
+  banner,
+  downloadBanner,
+  children,
+}: ResourcePageProps) {
   const locale = useLocale()
   const { resource, game } = page
   return (
     <DownloadArea
       game={{ title: gameTitle(game, locale), b_id: game.b_id, v_id: game.v_id, h_id: game.h_id }}
+      banner={downloadBanner}
     >
       <Stack as="article" gap="lg">
         <ResourceHead page={page} viewer={viewer} />
+        {banner}
         <ResourceTabs resourceId={resource.id} comments={resource.comments}>
           {children}
         </ResourceTabs>

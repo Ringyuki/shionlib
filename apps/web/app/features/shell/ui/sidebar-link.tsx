@@ -3,6 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router'
 import { alsoWithin } from '../shell'
 import { SidebarLabel } from './sidebar-label'
+import { sidebarRow } from './sidebar-row'
 
 type SidebarLinkProps = {
   icon: LucideIcon
@@ -38,7 +39,8 @@ export function SidebarLink({
         prefetch="intent"
         aria-label={rail ? label : undefined}
         className={cn(
-          'hn-interactive hn-state-layer hn-press-none text-muted aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent-text relative isolate flex h-10 items-center gap-3 rounded-lg ps-3 pe-2 text-base select-none aria-[current=page]:font-medium [&_svg]:size-5 [&_svg]:shrink-0',
+          sidebarRow,
+          'aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent-text aria-[current=page]:font-medium [&_svg]:size-5 [&_svg]:shrink-0',
           alsoWithin({ also }, pathname) && 'bg-accent-soft text-accent-text font-medium',
         )}
       >

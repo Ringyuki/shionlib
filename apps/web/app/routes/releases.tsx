@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { ReleasesPage } from '~/features/release'
 import type { Route } from './+types/releases'
 import { pageMeta } from '~/shared/seo/seo'
+
+export const handle = adPage
 
 export { releasesLoader as loader } from '~/features/release/release.server'
 

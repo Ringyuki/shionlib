@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 )
 
@@ -23,6 +25,7 @@ type AdQuery struct {
 	order      []ad.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Ad
+	withStats  *AdDailyStatQuery
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -58,6 +61,28 @@ func (_q *AdQuery) Unique(unique bool) *AdQuery {
 func (_q *AdQuery) Order(o ...ad.OrderOption) *AdQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryStats chains the current query on the "stats" edge.
+func (_q *AdQuery) QueryStats() *AdDailyStatQuery {
+	query := (&AdDailyStatClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ad.Table, ad.FieldID, selector),
+			sqlgraph.To(addailystat.Table, addailystat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ad.StatsTable, ad.StatsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Ad entity from the query.
@@ -252,11 +277,23 @@ func (_q *AdQuery) Clone() *AdQuery {
 		order:      append([]ad.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.Ad{}, _q.predicates...),
+		withStats:  _q.withStats.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
+}
+
+// WithStats tells the query-builder to eager-load the nodes that are connected to
+// the "stats" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AdQuery) WithStats(opts ...func(*AdDailyStatQuery)) *AdQuery {
+	query := (&AdDailyStatClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withStats = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -335,8 +372,11 @@ func (_q *AdQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *AdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ad, error) {
 	var (
-		nodes = []*Ad{}
-		_spec = _q.querySpec()
+		nodes       = []*Ad{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withStats != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Ad).scanValues(nil, columns)
@@ -344,6 +384,7 @@ func (_q *AdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ad, error
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Ad{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -358,7 +399,45 @@ func (_q *AdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ad, error
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withStats; query != nil {
+		if err := _q.loadStats(ctx, query, nodes,
+			func(n *Ad) { n.Edges.Stats = []*AdDailyStat{} },
+			func(n *Ad, e *AdDailyStat) { n.Edges.Stats = append(n.Edges.Stats, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *AdQuery) loadStats(ctx context.Context, query *AdDailyStatQuery, nodes []*Ad, init func(*Ad), assign func(*Ad, *AdDailyStat)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Ad)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(addailystat.FieldAdID)
+	}
+	query.Where(predicate.AdDailyStat(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ad.StatsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AdID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "ad_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *AdQuery) sqlCount(ctx context.Context) (int, error) {

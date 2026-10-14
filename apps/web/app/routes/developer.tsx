@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { DeveloperPage, developerHead } from '~/features/developer'
 import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/developer'
+
+export const handle = adPage
 
 export { developerLoader as loader } from '~/features/developer/developer.server'
 

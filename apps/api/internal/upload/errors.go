@@ -44,6 +44,12 @@ var ErrSmallFileMissing = apperror.Define(490102, "SMALL_FILE_UPLOAD_FILE_NO_FIL
 
 var ErrSmallFileUnsupported = apperror.Define(490103, "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE", apperror.KindUnsupportedMediaType)
 
+var ErrAdBannerShape = apperror.Define(490104, "SMALL_FILE_UPLOAD_AD_BANNER_SHAPE", apperror.KindInvalidArgument)
+
+var ErrAdSideImageShape = apperror.Define(490105, "SMALL_FILE_UPLOAD_AD_SIDE_IMAGE_SHAPE", apperror.KindInvalidArgument)
+
+var ErrAdSideIconShape = apperror.Define(490106, "SMALL_FILE_UPLOAD_AD_SIDE_ICON_SHAPE", apperror.KindInvalidArgument)
+
 var ErrQuotaExceeded = apperror.Define(500102, "USER_UPLOAD_QUOTA_EXCEEDED", apperror.KindConflict)
 
 var ErrInFlightExceeded = apperror.Define(500105, "USER_UPLOAD_IN_FLIGHT_EXCEEDED", apperror.KindConflict)

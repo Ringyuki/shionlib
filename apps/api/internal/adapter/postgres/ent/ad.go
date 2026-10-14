@@ -20,24 +20,26 @@ type Ad struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Placement holds the value of the "placement" field.
-	Placement pgvalue.Strings `json:"placement,omitempty"`
-	// ImageZh holds the value of the "image_zh" field.
-	ImageZh string `json:"image_zh,omitempty"`
-	// ImageJa holds the value of the "image_ja" field.
-	ImageJa *string `json:"image_ja,omitempty"`
-	// ImageEn holds the value of the "image_en" field.
-	ImageEn *string `json:"image_en,omitempty"`
-	// Aspect holds the value of the "aspect" field.
-	Aspect string `json:"aspect,omitempty"`
 	// Link holds the value of the "link" field.
 	Link string `json:"link,omitempty"`
-	// ExcludeLocales holds the value of the "exclude_locales" field.
-	ExcludeLocales pgvalue.Strings `json:"exclude_locales,omitempty"`
+	// Banner holds the value of the "banner" field.
+	Banner *string `json:"banner,omitempty"`
+	// BannerAdult holds the value of the "banner_adult" field.
+	BannerAdult bool `json:"banner_adult,omitempty"`
+	// SideImage holds the value of the "side_image" field.
+	SideImage *string `json:"side_image,omitempty"`
+	// SideIcon holds the value of the "side_icon" field.
+	SideIcon *string `json:"side_icon,omitempty"`
+	// SideAdult holds the value of the "side_adult" field.
+	SideAdult bool `json:"side_adult,omitempty"`
+	// Placement holds the value of the "placement" field.
+	Placement pgvalue.Strings `json:"placement,omitempty"`
+	// Languages holds the value of the "languages" field.
+	Languages pgvalue.Strings `json:"languages,omitempty"`
+	// Weight holds the value of the "weight" field.
+	Weight int `json:"weight,omitempty"`
 	// Enabled holds the value of the "enabled" field.
 	Enabled bool `json:"enabled,omitempty"`
-	// Sort holds the value of the "sort" field.
-	Sort int `json:"sort,omitempty"`
 	// StartAt holds the value of the "start_at" field.
 	StartAt *time.Time `json:"start_at,omitempty"`
 	// EndAt holds the value of the "end_at" field.
@@ -45,8 +47,29 @@ type Ad struct {
 	// Created holds the value of the "created" field.
 	Created time.Time `json:"created,omitempty"`
 	// Updated holds the value of the "updated" field.
-	Updated      time.Time `json:"updated,omitempty"`
+	Updated time.Time `json:"updated,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the AdQuery when eager-loading is set.
+	Edges        AdEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// AdEdges holds the relations/edges for other nodes in the graph.
+type AdEdges struct {
+	// Stats holds the value of the stats edge.
+	Stats []*AdDailyStat `json:"stats,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// StatsOrErr returns the Stats value or an error if the edge
+// was not loaded in eager-loading.
+func (e AdEdges) StatsOrErr() ([]*AdDailyStat, error) {
+	if e.loadedTypes[0] {
+		return e.Stats, nil
+	}
+	return nil, &NotLoadedError{edge: "stats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -54,13 +77,13 @@ func (*Ad) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ad.FieldPlacement, ad.FieldExcludeLocales:
+		case ad.FieldPlacement, ad.FieldLanguages:
 			values[i] = new(pgvalue.Strings)
-		case ad.FieldEnabled:
+		case ad.FieldBannerAdult, ad.FieldSideAdult, ad.FieldEnabled:
 			values[i] = new(sql.NullBool)
-		case ad.FieldID, ad.FieldSort:
+		case ad.FieldID, ad.FieldWeight:
 			values[i] = new(sql.NullInt64)
-		case ad.FieldName, ad.FieldImageZh, ad.FieldImageJa, ad.FieldImageEn, ad.FieldAspect, ad.FieldLink:
+		case ad.FieldName, ad.FieldLink, ad.FieldBanner, ad.FieldSideImage, ad.FieldSideIcon:
 			values[i] = new(sql.NullString)
 		case ad.FieldStartAt, ad.FieldEndAt, ad.FieldCreated, ad.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -91,61 +114,68 @@ func (_m *Ad) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case ad.FieldPlacement:
-			if value, ok := values[i].(*pgvalue.Strings); !ok {
-				return fmt.Errorf("unexpected type %T for field placement", values[i])
-			} else if value != nil {
-				_m.Placement = *value
-			}
-		case ad.FieldImageZh:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field image_zh", values[i])
-			} else if value.Valid {
-				_m.ImageZh = value.String
-			}
-		case ad.FieldImageJa:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field image_ja", values[i])
-			} else if value.Valid {
-				_m.ImageJa = new(string)
-				*_m.ImageJa = value.String
-			}
-		case ad.FieldImageEn:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field image_en", values[i])
-			} else if value.Valid {
-				_m.ImageEn = new(string)
-				*_m.ImageEn = value.String
-			}
-		case ad.FieldAspect:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field aspect", values[i])
-			} else if value.Valid {
-				_m.Aspect = value.String
-			}
 		case ad.FieldLink:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field link", values[i])
 			} else if value.Valid {
 				_m.Link = value.String
 			}
-		case ad.FieldExcludeLocales:
+		case ad.FieldBanner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field banner", values[i])
+			} else if value.Valid {
+				_m.Banner = new(string)
+				*_m.Banner = value.String
+			}
+		case ad.FieldBannerAdult:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field banner_adult", values[i])
+			} else if value.Valid {
+				_m.BannerAdult = value.Bool
+			}
+		case ad.FieldSideImage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field side_image", values[i])
+			} else if value.Valid {
+				_m.SideImage = new(string)
+				*_m.SideImage = value.String
+			}
+		case ad.FieldSideIcon:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field side_icon", values[i])
+			} else if value.Valid {
+				_m.SideIcon = new(string)
+				*_m.SideIcon = value.String
+			}
+		case ad.FieldSideAdult:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field side_adult", values[i])
+			} else if value.Valid {
+				_m.SideAdult = value.Bool
+			}
+		case ad.FieldPlacement:
 			if value, ok := values[i].(*pgvalue.Strings); !ok {
-				return fmt.Errorf("unexpected type %T for field exclude_locales", values[i])
+				return fmt.Errorf("unexpected type %T for field placement", values[i])
 			} else if value != nil {
-				_m.ExcludeLocales = *value
+				_m.Placement = *value
+			}
+		case ad.FieldLanguages:
+			if value, ok := values[i].(*pgvalue.Strings); !ok {
+				return fmt.Errorf("unexpected type %T for field languages", values[i])
+			} else if value != nil {
+				_m.Languages = *value
+			}
+		case ad.FieldWeight:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight", values[i])
+			} else if value.Valid {
+				_m.Weight = int(value.Int64)
 			}
 		case ad.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field enabled", values[i])
 			} else if value.Valid {
 				_m.Enabled = value.Bool
-			}
-		case ad.FieldSort:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field sort", values[i])
-			} else if value.Valid {
-				_m.Sort = int(value.Int64)
 			}
 		case ad.FieldStartAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -186,6 +216,11 @@ func (_m *Ad) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryStats queries the "stats" edge of the Ad entity.
+func (_m *Ad) QueryStats() *AdDailyStatQuery {
+	return NewAdClient(_m.config).QueryStats(_m)
+}
+
 // Update returns a builder for updating this Ad.
 // Note that you need to call Ad.Unwrap() before calling this method if this Ad
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -212,36 +247,41 @@ func (_m *Ad) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("placement=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Placement))
-	builder.WriteString(", ")
-	builder.WriteString("image_zh=")
-	builder.WriteString(_m.ImageZh)
-	builder.WriteString(", ")
-	if v := _m.ImageJa; v != nil {
-		builder.WriteString("image_ja=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	if v := _m.ImageEn; v != nil {
-		builder.WriteString("image_en=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	builder.WriteString("aspect=")
-	builder.WriteString(_m.Aspect)
-	builder.WriteString(", ")
 	builder.WriteString("link=")
 	builder.WriteString(_m.Link)
 	builder.WriteString(", ")
-	builder.WriteString("exclude_locales=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ExcludeLocales))
+	if v := _m.Banner; v != nil {
+		builder.WriteString("banner=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("banner_adult=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BannerAdult))
+	builder.WriteString(", ")
+	if v := _m.SideImage; v != nil {
+		builder.WriteString("side_image=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.SideIcon; v != nil {
+		builder.WriteString("side_icon=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("side_adult=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SideAdult))
+	builder.WriteString(", ")
+	builder.WriteString("placement=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Placement))
+	builder.WriteString(", ")
+	builder.WriteString("languages=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Languages))
+	builder.WriteString(", ")
+	builder.WriteString("weight=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Weight))
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
-	builder.WriteString(", ")
-	builder.WriteString("sort=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Sort))
 	builder.WriteString(", ")
 	if v := _m.StartAt; v != nil {
 		builder.WriteString("start_at=")

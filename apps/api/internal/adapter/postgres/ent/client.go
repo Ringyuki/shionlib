@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/addailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
@@ -116,6 +117,8 @@ type Client struct {
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
 	Ad *AdClient
+	// AdDailyStat is the client for interacting with the AdDailyStat builders.
+	AdDailyStat *AdDailyStatClient
 	// CatalogSourceLink is the client for interacting with the CatalogSourceLink builders.
 	CatalogSourceLink *CatalogSourceLinkClient
 	// CatalogSyncCursor is the client for interacting with the CatalogSyncCursor builders.
@@ -246,6 +249,7 @@ func (c *Client) init() {
 	c.APIKeyDailyUsage = NewAPIKeyDailyUsageClient(c.config)
 	c.Activity = NewActivityClient(c.config)
 	c.Ad = NewAdClient(c.config)
+	c.AdDailyStat = NewAdDailyStatClient(c.config)
 	c.CatalogSourceLink = NewCatalogSourceLinkClient(c.config)
 	c.CatalogSyncCursor = NewCatalogSyncCursorClient(c.config)
 	c.Comment = NewCommentClient(c.config)
@@ -404,6 +408,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		APIKeyDailyUsage:                NewAPIKeyDailyUsageClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
+		AdDailyStat:                     NewAdDailyStatClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
 		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
@@ -489,6 +494,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		APIKeyDailyUsage:                NewAPIKeyDailyUsageClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
+		AdDailyStat:                     NewAdDailyStatClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
 		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
@@ -574,8 +580,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.APIKeyDailyUsage, c.Activity, c.Ad,
-		c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment, c.CommentLike,
-		c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.AdDailyStat, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
+		c.CommentLike, c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
 		c.FieldPermissionMapping, c.FriendLink, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
@@ -601,8 +607,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.APIKeyDailyUsage, c.Activity, c.Ad,
-		c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment, c.CommentLike,
-		c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.AdDailyStat, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
+		c.CommentLike, c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
 		c.FieldPermissionMapping, c.FriendLink, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
@@ -650,6 +656,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Activity.mutate(ctx, m)
 	case *AdMutation:
 		return c.Ad.mutate(ctx, m)
+	case *AdDailyStatMutation:
+		return c.AdDailyStat.mutate(ctx, m)
 	case *CatalogSourceLinkMutation:
 		return c.CatalogSourceLink.mutate(ctx, m)
 	case *CatalogSyncCursorMutation:
@@ -2993,6 +3001,22 @@ func (c *AdClient) GetX(ctx context.Context, id int) *Ad {
 	return obj
 }
 
+// QueryStats queries the stats edge of a Ad.
+func (c *AdClient) QueryStats(_m *Ad) *AdDailyStatQuery {
+	query := (&AdDailyStatClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ad.Table, ad.FieldID, id),
+			sqlgraph.To(addailystat.Table, addailystat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ad.StatsTable, ad.StatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AdClient) Hooks() []Hook {
 	return c.hooks.Ad
@@ -3015,6 +3039,155 @@ func (c *AdClient) mutate(ctx context.Context, m *AdMutation) (Value, error) {
 		return (&AdDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Ad mutation op: %q", m.Op())
+	}
+}
+
+// AdDailyStatClient is a client for the AdDailyStat schema.
+type AdDailyStatClient struct {
+	config
+}
+
+// NewAdDailyStatClient returns a client for the AdDailyStat from the given config.
+func NewAdDailyStatClient(c config) *AdDailyStatClient {
+	return &AdDailyStatClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `addailystat.Hooks(f(g(h())))`.
+func (c *AdDailyStatClient) Use(hooks ...Hook) {
+	c.hooks.AdDailyStat = append(c.hooks.AdDailyStat, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `addailystat.Intercept(f(g(h())))`.
+func (c *AdDailyStatClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdDailyStat = append(c.inters.AdDailyStat, interceptors...)
+}
+
+// Create returns a builder for creating a AdDailyStat entity.
+func (c *AdDailyStatClient) Create() *AdDailyStatCreate {
+	mutation := newAdDailyStatMutation(c.config, OpCreate)
+	return &AdDailyStatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdDailyStat entities.
+func (c *AdDailyStatClient) CreateBulk(builders ...*AdDailyStatCreate) *AdDailyStatCreateBulk {
+	return &AdDailyStatCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdDailyStatClient) MapCreateBulk(slice any, setFunc func(*AdDailyStatCreate, int)) *AdDailyStatCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdDailyStatCreateBulk{err: fmt.Errorf("calling to AdDailyStatClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdDailyStatCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdDailyStatCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdDailyStat.
+func (c *AdDailyStatClient) Update() *AdDailyStatUpdate {
+	mutation := newAdDailyStatMutation(c.config, OpUpdate)
+	return &AdDailyStatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdDailyStatClient) UpdateOne(_m *AdDailyStat) *AdDailyStatUpdateOne {
+	mutation := newAdDailyStatMutation(c.config, OpUpdateOne, withAdDailyStat(_m))
+	return &AdDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdDailyStatClient) UpdateOneID(id int) *AdDailyStatUpdateOne {
+	mutation := newAdDailyStatMutation(c.config, OpUpdateOne, withAdDailyStatID(id))
+	return &AdDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdDailyStat.
+func (c *AdDailyStatClient) Delete() *AdDailyStatDelete {
+	mutation := newAdDailyStatMutation(c.config, OpDelete)
+	return &AdDailyStatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdDailyStatClient) DeleteOne(_m *AdDailyStat) *AdDailyStatDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdDailyStatClient) DeleteOneID(id int) *AdDailyStatDeleteOne {
+	builder := c.Delete().Where(addailystat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdDailyStatDeleteOne{builder}
+}
+
+// Query returns a query builder for AdDailyStat.
+func (c *AdDailyStatClient) Query() *AdDailyStatQuery {
+	return &AdDailyStatQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdDailyStat},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdDailyStat entity by its id.
+func (c *AdDailyStatClient) Get(ctx context.Context, id int) (*AdDailyStat, error) {
+	return c.Query().Where(addailystat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdDailyStatClient) GetX(ctx context.Context, id int) *AdDailyStat {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAd queries the ad edge of a AdDailyStat.
+func (c *AdDailyStatClient) QueryAd(_m *AdDailyStat) *AdQuery {
+	query := (&AdClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addailystat.Table, addailystat.FieldID, id),
+			sqlgraph.To(ad.Table, ad.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addailystat.AdTable, addailystat.AdColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AdDailyStatClient) Hooks() []Hook {
+	return c.hooks.AdDailyStat
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdDailyStatClient) Interceptors() []Interceptor {
+	return c.inters.AdDailyStat
+}
+
+func (c *AdDailyStatClient) mutate(ctx context.Context, m *AdDailyStatMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdDailyStatCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdDailyStatUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdDailyStatDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdDailyStat mutation op: %q", m.Op())
 	}
 }
 
@@ -12582,11 +12755,11 @@ type (
 	hooks struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene,
-		APIKeyDailyUsage, Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment,
-		CommentLike, Composition, EditRecord, Favorite, FavoriteItem,
-		FieldPermissionMapping, FriendLink, Game, GameCharacter, GameCharacterRelation,
-		GameCover, GameDeveloper, GameDeveloperRelation, GameDownloadResource,
-		GameDownloadResourceEvent, GameDownloadResourceFile,
+		APIKeyDailyUsage, Activity, Ad, AdDailyStat, CatalogSourceLink,
+		CatalogSyncCursor, Comment, CommentLike, Composition, EditRecord, Favorite,
+		FavoriteItem, FieldPermissionMapping, FriendLink, Game, GameCharacter,
+		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
+		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport,
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
@@ -12600,11 +12773,11 @@ type (
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene,
-		APIKeyDailyUsage, Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment,
-		CommentLike, Composition, EditRecord, Favorite, FavoriteItem,
-		FieldPermissionMapping, FriendLink, Game, GameCharacter, GameCharacterRelation,
-		GameCover, GameDeveloper, GameDeveloperRelation, GameDownloadResource,
-		GameDownloadResourceEvent, GameDownloadResourceFile,
+		APIKeyDailyUsage, Activity, Ad, AdDailyStat, CatalogSourceLink,
+		CatalogSyncCursor, Comment, CommentLike, Composition, EditRecord, Favorite,
+		FavoriteItem, FieldPermissionMapping, FriendLink, Game, GameCharacter,
+		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
+		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport,
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
