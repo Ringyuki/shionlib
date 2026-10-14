@@ -1,0 +1,1 @@
+DELETE FROM friend_links WHERE url IN ('https://www.kungal.com', 'https://www.moyu.moe/', 'https://nysoure.com/', 'https://www.uuznav.com/', 'https://www.singureo.com/', 'https://www.touchgal.ink', 'https://sakugal.com');

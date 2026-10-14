@@ -34,6 +34,7 @@ type Options struct {
 	QuietPaths     []string
 	Global         []func(http.Handler) http.Handler
 	Throttling     *Throttling
+	Keys           KeyAuthenticator
 }
 
 type API struct {
@@ -43,6 +44,7 @@ type API struct {
 	writer     *errmap.Writer
 	builder    *response.Builder
 	throttling *Throttling
+	keys       KeyAuthenticator
 	logger     *slog.Logger
 }
 
@@ -82,6 +84,7 @@ func New(opts Options) *API {
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
 		"accessToken":  {Type: "http", Scheme: "bearer", BearerFormat: "JWT"},
 		"accessCookie": {Type: "apiKey", In: "cookie", Name: middleware.AccessTokenCookie},
+		"apiKey":       {Type: "http", Scheme: "bearer", Description: "An API key of the form shl_…"},
 	}
 
 	return &API{
@@ -91,6 +94,7 @@ func New(opts Options) *API {
 		writer:     writer,
 		builder:    opts.Builder,
 		throttling: opts.Throttling,
+		keys:       opts.Keys,
 		logger:     opts.Logger,
 	}
 }
@@ -147,7 +151,7 @@ func cors(cfg CORS) func(http.Handler) http.Handler {
 				header := w.Header()
 				header.Add("Vary", "Origin")
 				switch {
-				case allowAll:
+				case allowAll || strings.HasPrefix(r.URL.Path, OpenPrefix):
 					header.Set("Access-Control-Allow-Origin", "*")
 				case allowed[origin]:
 					header.Set("Access-Control-Allow-Origin", origin)

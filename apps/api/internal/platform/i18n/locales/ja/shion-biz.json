@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "お気に入りがすでに存在します",
   "FAVORITE_ITEM_ALREADY_EXISTS": "お気に入りにすでにこのゲームが存在します",
   "FAVORITE_NOT_FOUND": "お気に入りが見つかりません",
+  "FRIEND_LINK_NOT_FOUND": "相互リンクが見つかりません",
+  "FRIEND_LINK_ORDER_STALE": "相互リンクが変更されました。再読み込みしてからやり直してください",
   "FAVORITE_ITEM_NOT_FOUND": "このゲームはお気に入りに存在しません",
   "FAVORITE_ITEM_NOT_OWNER": "あなたはこのゲームをお気に入りから変更する権限がありません",
   "FAVORITE_NOT_OWNER": "あなたはこのお気に入りを変更する権限がありません",
@@ -179,5 +181,15 @@
   "COMPOSITION_NOT_COMPOSED": "このリソースのパッチは更新できません",
   "COMPOSITION_BUSY": "合成を処理しています",
   "COMPOSITION_BASE_GONE": "オリジナル版のリソースは存在しません",
-  "COMPOSITION_CHECKS_OFF": "ファイル検査が無効のため、現在は合成できません"
+  "COMPOSITION_CHECKS_OFF": "ファイル検査が無効のため、現在は合成できません",
+  "API_KEY_REQUIRED": "Authorization ヘッダーに API キーを指定してください",
+  "API_KEY_INVALID": "API キーが無効か、削除されています",
+  "API_KEY_SUSPENDED": "API キーは管理者により停止されています",
+  "API_KEY_OWNER_BANNED": "API キーのアカウントは利用停止中です",
+  "API_KEYS_CLOSED": "公開 API は一時停止中です",
+  "API_KEY_LIMIT_REACHED": "API キーの数が上限に達しています",
+  "API_KEY_NOT_FOUND": "API キーが見つかりません",
+  "OPEN_LOOKUP_ONE_KIND": "id、hid、bid、vid のいずれか一種類の ID を指定してください",
+  "OPEN_LOOKUP_TOO_MANY": "一度に検索できる ID は {max} 件までです",
+  "OPEN_LOOKUP_BAD_VALUE": "ID の形式が正しくありません：{value}"
 }

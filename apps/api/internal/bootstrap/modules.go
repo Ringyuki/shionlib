@@ -51,6 +51,7 @@ type Modules struct {
 	Handlers        []Registrar
 	Jobs            Jobs
 	Stalled         *scan.StalledService
+	Keys            httpapi.KeyAuthenticator
 }
 
 type Shared struct {
@@ -97,6 +98,7 @@ var wirings = []wiring{
 	wireCatalogSync,
 	wireCommunity,
 	wireComposition,
+	wireOpen,
 	wireAdmin,
 }
 

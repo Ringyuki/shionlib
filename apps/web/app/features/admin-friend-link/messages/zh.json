@@ -1,0 +1,51 @@
+{
+  "title": "友情链接",
+  "add": "添加友情链接",
+  "empty": "暂无友情链接",
+  "column": {
+    "site": "站点",
+    "description": "简介",
+    "status": "状态",
+    "updated": "更新时间"
+  },
+  "status": {
+    "shown": "显示",
+    "hidden": "隐藏"
+  },
+  "menu": {
+    "label": "「{name}」的操作",
+    "edit": "编辑",
+    "hide": "隐藏",
+    "show": "显示",
+    "remove": "删除"
+  },
+  "dialog": {
+    "create": "添加友情链接",
+    "edit": "编辑友情链接",
+    "name": "名称",
+    "namePlaceholder": "站点名称",
+    "url": "网址",
+    "logo": "图标",
+    "logoHint": "JPG、PNG、WebP 或 AVIF",
+    "pick": "选择图片",
+    "replace": "更换",
+    "removeLogo": "移除",
+    "unsupported": "不支持这种图片格式",
+    "description": "简介",
+    "descriptionPlaceholder": "选填",
+    "count": "{count, number} / {max, number}",
+    "visible": "在友情链接页显示",
+    "submitCreate": "添加",
+    "submitEdit": "保存"
+  },
+  "created": "友情链接已添加",
+  "saved": "友情链接已保存",
+  "shown": "友情链接已显示",
+  "hidden": "友情链接已隐藏",
+  "remove": {
+    "title": "确定要删除友情链接「{name}」吗？",
+    "description": "删除后友情链接页不再显示这个站点，此操作无法撤销",
+    "confirm": "删除",
+    "done": "友情链接已删除"
+  }
+}

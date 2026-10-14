@@ -1,6 +1,13 @@
 import type { Locale } from '~/shared/i18n/locale'
 
-export const sections = ['personal', 'security', 'connections', 'download', 'site'] as const
+export const sections = [
+  'personal',
+  'security',
+  'connections',
+  'download',
+  'site',
+  'api-keys',
+] as const
 
 export type Section = (typeof sections)[number]
 

@@ -56,6 +56,8 @@ type User struct {
 	UploadTrusted bool `json:"upload_trusted,omitempty"`
 	// SponsorExpiresAt holds the value of the "sponsor_expires_at" field.
 	SponsorExpiresAt *time.Time `json:"sponsor_expires_at,omitempty"`
+	// APIRequestLimit holds the value of the "api_request_limit" field.
+	APIRequestLimit *int `json:"api_request_limit,omitempty"`
 	// Created holds the value of the "created" field.
 	Created time.Time `json:"created,omitempty"`
 	// Updated holds the value of the "updated" field.
@@ -110,6 +112,8 @@ type UserEdges struct {
 	SponsorOrders []*SponsorOrder `json:"sponsor_orders,omitempty"`
 	// GamePvnMappings holds the value of the game_pvn_mappings edge.
 	GamePvnMappings []*UserGamePvnMapping `json:"game_pvn_mappings,omitempty"`
+	// APIKeys holds the value of the api_keys edge.
+	APIKeys []*UserAPIKey `json:"api_keys,omitempty"`
 	// PotatovnBinding holds the value of the potatovn_binding edge.
 	PotatovnBinding *UserPvnBinding `json:"potatovn_binding,omitempty"`
 	// GameUploadSessions holds the value of the game_upload_sessions edge.
@@ -130,7 +134,7 @@ type UserEdges struct {
 	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [30]bool
+	loadedTypes [31]bool
 }
 
 // ActivitiesOrErr returns the Activities value or an error if the edge
@@ -322,12 +326,21 @@ func (e UserEdges) GamePvnMappingsOrErr() ([]*UserGamePvnMapping, error) {
 	return nil, &NotLoadedError{edge: "game_pvn_mappings"}
 }
 
+// APIKeysOrErr returns the APIKeys value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) APIKeysOrErr() ([]*UserAPIKey, error) {
+	if e.loadedTypes[21] {
+		return e.APIKeys, nil
+	}
+	return nil, &NotLoadedError{edge: "api_keys"}
+}
+
 // PotatovnBindingOrErr returns the PotatovnBinding value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) PotatovnBindingOrErr() (*UserPvnBinding, error) {
 	if e.PotatovnBinding != nil {
 		return e.PotatovnBinding, nil
-	} else if e.loadedTypes[21] {
+	} else if e.loadedTypes[22] {
 		return nil, &NotFoundError{label: userpvnbinding.Label}
 	}
 	return nil, &NotLoadedError{edge: "potatovn_binding"}
@@ -336,7 +349,7 @@ func (e UserEdges) PotatovnBindingOrErr() (*UserPvnBinding, error) {
 // GameUploadSessionsOrErr returns the GameUploadSessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GameUploadSessionsOrErr() ([]*GameUploadSession, error) {
-	if e.loadedTypes[22] {
+	if e.loadedTypes[23] {
 		return e.GameUploadSessions, nil
 	}
 	return nil, &NotLoadedError{edge: "game_upload_sessions"}
@@ -345,7 +358,7 @@ func (e UserEdges) GameUploadSessionsOrErr() ([]*GameUploadSession, error) {
 // WalkthroughsOrErr returns the Walkthroughs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
-	if e.loadedTypes[23] {
+	if e.loadedTypes[24] {
 		return e.Walkthroughs, nil
 	}
 	return nil, &NotLoadedError{edge: "walkthroughs"}
@@ -354,7 +367,7 @@ func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
 // BannedRecordsOrErr returns the BannedRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[24] {
+	if e.loadedTypes[25] {
 		return e.BannedRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_records"}
@@ -363,7 +376,7 @@ func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
 // BannedByRecordsOrErr returns the BannedByRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[25] {
+	if e.loadedTypes[26] {
 		return e.BannedByRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_by_records"}
@@ -372,7 +385,7 @@ func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
-	if e.loadedTypes[26] {
+	if e.loadedTypes[27] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -381,7 +394,7 @@ func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
 // PasskeysOrErr returns the Passkeys value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
-	if e.loadedTypes[27] {
+	if e.loadedTypes[28] {
 		return e.Passkeys, nil
 	}
 	return nil, &NotLoadedError{edge: "passkeys"}
@@ -390,7 +403,7 @@ func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
 // OidcIdentitiesOrErr returns the OidcIdentities value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
-	if e.loadedTypes[28] {
+	if e.loadedTypes[29] {
 		return e.OidcIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "oidc_identities"}
@@ -399,7 +412,7 @@ func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
 // CommentLikesOrErr returns the CommentLikes value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentLikesOrErr() ([]*CommentLike, error) {
-	if e.loadedTypes[29] {
+	if e.loadedTypes[30] {
 		return e.CommentLikes, nil
 	}
 	return nil, &NotLoadedError{edge: "comment_likes"}
@@ -412,7 +425,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldOnlyGamesWithResources, user.FieldShowProfileBackgrounds, user.FieldTwoFactorEnabled, user.FieldUploadTrusted:
 			values[i] = new(sql.NullBool)
-		case user.FieldID, user.FieldContentLimit, user.FieldRole, user.FieldStatus, user.FieldUploadInjectedFileTimes:
+		case user.FieldID, user.FieldContentLimit, user.FieldRole, user.FieldStatus, user.FieldUploadInjectedFileTimes, user.FieldAPIRequestLimit:
 			values[i] = new(sql.NullInt64)
 		case user.FieldName, user.FieldEmail, user.FieldPassword, user.FieldAvatar, user.FieldCover, user.FieldBackground, user.FieldBio, user.FieldLang:
 			values[i] = new(sql.NullString)
@@ -561,6 +574,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				_m.SponsorExpiresAt = new(time.Time)
 				*_m.SponsorExpiresAt = value.Time
 			}
+		case user.FieldAPIRequestLimit:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field api_request_limit", values[i])
+			} else if value.Valid {
+				_m.APIRequestLimit = new(int)
+				*_m.APIRequestLimit = int(value.Int64)
+			}
 		case user.FieldCreated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created", values[i])
@@ -689,6 +709,11 @@ func (_m *User) QuerySponsorOrders() *SponsorOrderQuery {
 // QueryGamePvnMappings queries the "game_pvn_mappings" edge of the User entity.
 func (_m *User) QueryGamePvnMappings() *UserGamePvnMappingQuery {
 	return NewUserClient(_m.config).QueryGamePvnMappings(_m)
+}
+
+// QueryAPIKeys queries the "api_keys" edge of the User entity.
+func (_m *User) QueryAPIKeys() *UserAPIKeyQuery {
+	return NewUserClient(_m.config).QueryAPIKeys(_m)
 }
 
 // QueryPotatovnBinding queries the "potatovn_binding" edge of the User entity.
@@ -827,6 +852,11 @@ func (_m *User) String() string {
 	if v := _m.SponsorExpiresAt; v != nil {
 		builder.WriteString("sponsor_expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.APIRequestLimit; v != nil {
+		builder.WriteString("api_request_limit=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("created=")

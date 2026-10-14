@@ -22,7 +22,11 @@ test('lists the documents in the order they are read and opens one from its row'
   await expect(guides.nth(0)).toContainText('如何下载游戏')
   await expect(guides.nth(1)).toContainText('文件解压指南')
   await expect(guides.nth(11)).toContainText('设置编辑指南')
-  await expect(page.locator('section a')).toHaveCount(14)
+  await expect(page.getByRole('region', { name: '开发' }).getByRole('link')).toHaveText([
+    /Shionlib 开发概述/,
+    /开放接口/,
+  ])
+  await expect(page.locator('section a')).toHaveCount(15)
 
   await guides.nth(0).click()
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
@@ -124,7 +128,7 @@ test('lists the friend sites on a page of their own', async ({ page }) => {
   await expect(title(page)).toHaveText('友情链接')
   await expect(page).toHaveTitle('友情链接 | Shionlib')
   const sites = page.getByRole('main').getByRole('listitem')
-  await expect(sites).toHaveCount(7)
+  await expect(sites.filter({ hasText: 'SakuGAL' })).toHaveCount(1)
   const first = sites.first().getByRole('link')
   await expect(first).toHaveAttribute('href', 'https://www.kungal.com')
   await expect(first).toHaveAttribute('target', '_blank')

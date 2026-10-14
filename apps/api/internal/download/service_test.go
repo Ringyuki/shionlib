@@ -921,3 +921,31 @@ func TestFormReadFillsOnlyAFormNobodyGave(t *testing.T) {
 		t.Fatalf("the form an uploader gave is kept: %+v %+v", stored.Info, f.repo.Events(given.ID))
 	}
 }
+
+func TestPublicResourcesKeepWhatEveryoneCanDownloadNewestFirst(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	older := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now), Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{ResourceID: older.ID, Name: "a.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: older.ID, Name: "b.7z", Status: download.FileOnServer, CreatorID: owner.UserID})
+	newer := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now), Updated: now})
+	f.repo.SeedFile(download.File{ResourceID: newer.ID, Name: "c.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	unpublished := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: unpublished.ID, Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	unstored := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: unstored.ID, Status: download.FileOnServer, CreatorID: owner.UserID})
+	other := f.repo.SeedResource(download.Resource{GameID: 12, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: other.ID, Status: download.FileInObjectStore, CreatorID: owner.UserID})
+
+	byGame, err := f.service.PublicResources(ctx, []int{10, 11})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resources := byGame[10]
+	if len(byGame) != 1 || len(resources) != 2 || resources[0].ID != newer.ID || resources[1].ID != older.ID {
+		t.Fatalf("published resources of the games asked for, newest first: %+v", byGame)
+	}
+	if len(resources[1].Files) != 1 || resources[1].Files[0].Name != "a.7z" {
+		t.Fatalf("only stored files: %+v", resources[1].Files)
+	}
+}

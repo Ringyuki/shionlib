@@ -1,5 +1,5 @@
 import { NavLink, Select, Stack } from '@hina-ui/react'
-import { Download, Link2, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
+import { Download, KeyRound, Link2, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
 import { useLocation } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { InPageLink } from '~/shared/route/in-page-link'
@@ -14,6 +14,7 @@ const icons = {
   connections: Link2,
   download: Download,
   site: SlidersHorizontal,
+  'api-keys': KeyRound,
 } as const
 
 export function SectionNav() {

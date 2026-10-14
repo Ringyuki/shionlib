@@ -1,0 +1,29 @@
+{
+  "title": "API キー",
+  "hint": "公開されたゲームとリソースの検索にのみ使え、ログインやデータの変更には使えません。使い方は<docs>API ドキュメント</docs>をご覧ください",
+  "create": "API キーを作成",
+  "limitReached": "API キーは {limit, number} 個まで作成できます",
+  "paused": "公開 API は一時停止中のため、API キーは現在使えません",
+  "empty": "API キーはありません",
+  "created": "{date} に作成",
+  "lastUsed": "<time></time>に使用",
+  "neverUsed": "未使用",
+  "suspended": "停止中",
+  "suspendedReason": "{date} に管理者が停止しました：{reason}",
+  "remove": "「{name}」を削除",
+  "removeConfirm": "API キー「{name}」を削除しますか？",
+  "removeDescription": "このキーを使ったリクエストはすぐに失敗するようになります。この操作は取り消せません",
+  "removeAction": "削除",
+  "removed": "API キーを削除しました",
+  "cancel": "キャンセル",
+  "dialog": {
+    "title": "API キーを作成",
+    "name": "名前",
+    "nameHint": "{max, number} 文字まで",
+    "submit": "作成",
+    "createdTitle": "API キーを作成しました",
+    "warning": "閉じるとキー全体は二度と表示されません。今すぐコピーして安全に保管してください",
+    "copy": "キーをコピー",
+    "done": "完了"
+  }
+}

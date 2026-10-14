@@ -36,6 +36,9 @@ type AIRouteAdjustment func(*sql.Selector)
 // AIScene is the predicate function for aiscene builders.
 type AIScene func(*sql.Selector)
 
+// APIKeyDailyUsage is the predicate function for apikeydailyusage builders.
+type APIKeyDailyUsage func(*sql.Selector)
+
 // Activity is the predicate function for activity builders.
 type Activity func(*sql.Selector)
 
@@ -68,6 +71,9 @@ type FavoriteItem func(*sql.Selector)
 
 // FieldPermissionMapping is the predicate function for fieldpermissionmapping builders.
 type FieldPermissionMapping func(*sql.Selector)
+
+// FriendLink is the predicate function for friendlink builders.
+type FriendLink func(*sql.Selector)
 
 // Game is the predicate function for game builders.
 type Game func(*sql.Selector)
@@ -167,6 +173,9 @@ type TranslatorDistinction func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserAPIKey is the predicate function for userapikey builders.
+type UserAPIKey func(*sql.Selector)
 
 // UserBannedRecord is the predicate function for userbannedrecord builders.
 type UserBannedRecord func(*sql.Selector)

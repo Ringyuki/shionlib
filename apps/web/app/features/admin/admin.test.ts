@@ -40,8 +40,9 @@ describe('navigationOf', () => {
       ['translators', adminPaths.translators],
       ['users', adminPaths.users],
       ['sponsors', adminPaths.sponsors],
+      ['friendLinks', adminPaths.friendLinks],
     ])
-    expect(system?.entries.map(entry => entry.key)).toEqual(['catalog', 'ai', 'settings'])
+    expect(system?.entries.map(entry => entry.key)).toEqual(['catalog', 'ai', 'open', 'settings'])
   })
 
   it('marks only the overview as an exact address', () => {

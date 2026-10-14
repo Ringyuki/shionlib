@@ -95,6 +95,18 @@
         "Title": "AI 线路已恢复",
         "Content": "{provider} 的模型 {model}（{upstream_id}）已恢复可用"
       }
+    },
+    "APIKey": {
+      "Suspended": {
+        "Title": "API 密钥已被停用",
+        "Content": "你的 API 密钥「{name}」（{prefix}…）已被管理员停用，使用它的请求将被拒绝。原因：{reason}",
+        "LinkText": "查看 API 密钥"
+      },
+      "Restored": {
+        "Title": "API 密钥已恢复",
+        "Content": "你的 API 密钥「{name}」（{prefix}…）已恢复，可以继续使用。",
+        "LinkText": "查看 API 密钥"
+      }
     }
   },
   "Value": {

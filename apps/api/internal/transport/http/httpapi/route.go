@@ -18,6 +18,7 @@ const (
 	AccessUser
 	AccessAdmin
 	AccessSuperAdmin
+	AccessKey
 )
 
 type Route struct {
@@ -55,19 +56,24 @@ func Register[I, O any](api *API, route Route, handler func(context.Context, *I)
 		Hidden:        route.Hidden,
 		Metadata:      map[string]any{},
 	}
-	if route.Access != AccessOptional {
+	throttle := route.Throttle
+	if throttle == "" {
+		throttle = DefaultThrottle
+	}
+	switch route.Access {
+	case AccessOptional:
+	case AccessKey:
+		operation.Security = []map[string][]string{{"apiKey": {}}}
+		operation.Middlewares = append(operation.Middlewares, api.requireKey(throttle))
+	default:
 		operation.Security = []map[string][]string{{"accessToken": {}}, {"accessCookie": {}}}
 		operation.Middlewares = append(operation.Middlewares, api.requireAccess(route.Access))
 	}
 	if route.MaxBodyBytes > 0 {
 		operation.Middlewares = append(operation.Middlewares, api.limitBody(route.MaxBodyBytes))
 	}
-	throttle := route.Throttle
-	if throttle == "" {
-		throttle = DefaultThrottle
-	}
 	operation.Metadata[throttleMetadataKey] = throttle
-	if api.throttling != nil {
+	if api.throttling != nil && route.Access != AccessKey {
 		operation.Middlewares = append(huma.Middlewares{api.throttleMiddleware(throttle, route.Method, route.Path)}, operation.Middlewares...)
 	}
 	huma.Register(api.huma, operation, handler)

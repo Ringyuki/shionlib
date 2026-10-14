@@ -69,6 +69,25 @@ export function RecordsPanel({ detail, records }: RecordsPanelProps) {
             </Link>
           )}
         </DescriptionDetails>
+        <DescriptionTerm>{t('apiKeys')}</DescriptionTerm>
+        <DescriptionDetails>
+          {records.apiKeys === 0 ? (
+            <Text as="span" size="inherit" tone="muted">
+              {t('noApiKeys')}
+            </Text>
+          ) : (
+            <Inline gap="sm">
+              <Link asChild>
+                <RouterLink to={adminPaths.keysOf(detail.id)}>
+                  {t('apiKeysValue', { count: records.apiKeys })}
+                </RouterLink>
+              </Link>
+              <Text as="span" size="inherit" tone="muted">
+                {t('apiRequests', { count: records.apiRequests })}
+              </Text>
+            </Inline>
+          )}
+        </DescriptionDetails>
       </DescriptionList>
     </Panel>
   )

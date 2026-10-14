@@ -145,6 +145,11 @@ func SponsorExpiresAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldSponsorExpiresAt, v))
 }
 
+// APIRequestLimit applies equality check predicate on the "api_request_limit" field. It's identical to APIRequestLimitEQ.
+func APIRequestLimit(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAPIRequestLimit, v))
+}
+
 // Created applies equality check predicate on the "created" field. It's identical to CreatedEQ.
 func Created(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreated, v))
@@ -1030,6 +1035,56 @@ func SponsorExpiresAtNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldSponsorExpiresAt))
 }
 
+// APIRequestLimitEQ applies the EQ predicate on the "api_request_limit" field.
+func APIRequestLimitEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitNEQ applies the NEQ predicate on the "api_request_limit" field.
+func APIRequestLimitNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitIn applies the In predicate on the "api_request_limit" field.
+func APIRequestLimitIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAPIRequestLimit, vs...))
+}
+
+// APIRequestLimitNotIn applies the NotIn predicate on the "api_request_limit" field.
+func APIRequestLimitNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAPIRequestLimit, vs...))
+}
+
+// APIRequestLimitGT applies the GT predicate on the "api_request_limit" field.
+func APIRequestLimitGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitGTE applies the GTE predicate on the "api_request_limit" field.
+func APIRequestLimitGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitLT applies the LT predicate on the "api_request_limit" field.
+func APIRequestLimitLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitLTE applies the LTE predicate on the "api_request_limit" field.
+func APIRequestLimitLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAPIRequestLimit, v))
+}
+
+// APIRequestLimitIsNil applies the IsNil predicate on the "api_request_limit" field.
+func APIRequestLimitIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAPIRequestLimit))
+}
+
+// APIRequestLimitNotNil applies the NotNil predicate on the "api_request_limit" field.
+func APIRequestLimitNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAPIRequestLimit))
+}
+
 // CreatedEQ applies the EQ predicate on the "created" field.
 func CreatedEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreated, v))
@@ -1585,6 +1640,29 @@ func HasGamePvnMappings() predicate.User {
 func HasGamePvnMappingsWith(preds ...predicate.UserGamePvnMapping) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newGamePvnMappingsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAPIKeys applies the HasEdge predicate on the "api_keys" edge.
+func HasAPIKeys() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, APIKeysTable, APIKeysColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAPIKeysWith applies the HasEdge predicate on the "api_keys" edge with a given conditions (other predicates).
+func HasAPIKeysWith(preds ...predicate.UserAPIKey) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newAPIKeysStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

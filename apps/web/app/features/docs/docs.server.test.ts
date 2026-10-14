@@ -71,6 +71,7 @@ describe('the documents in the repository', () => {
       'guides/account-settings',
       'about/about-shionlib',
       'dev/dev-overview',
+      'dev/open-api',
     ])
     expect(names('en')).toEqual(names('zh'))
     expect(names('ja')).toEqual(names('zh'))

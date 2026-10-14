@@ -133,7 +133,11 @@
     "reportsAgainst": "被举报 {count, number} 次",
     "checks": "文件检查",
     "heldFiles": "{count, number} 个文件正在等待复核",
-    "noHeldFiles": "没有等待复核的文件"
+    "noHeldFiles": "没有等待复核的文件",
+    "apiKeys": "API 密钥",
+    "apiKeysValue": "{count, number} 个",
+    "apiRequests": "近 7 天请求 {count, number} 次",
+    "noApiKeys": "没有 API 密钥"
   },
   "badge": {
     "title": "赞助徽章",

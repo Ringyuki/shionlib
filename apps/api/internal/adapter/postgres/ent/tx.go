@@ -34,6 +34,8 @@ type Tx struct {
 	AIRouteAdjustment *AIRouteAdjustmentClient
 	// AIScene is the client for interacting with the AIScene builders.
 	AIScene *AISceneClient
+	// APIKeyDailyUsage is the client for interacting with the APIKeyDailyUsage builders.
+	APIKeyDailyUsage *APIKeyDailyUsageClient
 	// Activity is the client for interacting with the Activity builders.
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
@@ -56,6 +58,8 @@ type Tx struct {
 	FavoriteItem *FavoriteItemClient
 	// FieldPermissionMapping is the client for interacting with the FieldPermissionMapping builders.
 	FieldPermissionMapping *FieldPermissionMappingClient
+	// FriendLink is the client for interacting with the FriendLink builders.
+	FriendLink *FriendLinkClient
 	// Game is the client for interacting with the Game builders.
 	Game *GameClient
 	// GameCharacter is the client for interacting with the GameCharacter builders.
@@ -122,6 +126,8 @@ type Tx struct {
 	TranslatorDistinction *TranslatorDistinctionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserAPIKey is the client for interacting with the UserAPIKey builders.
+	UserAPIKey *UserAPIKeyClient
 	// UserBannedRecord is the client for interacting with the UserBannedRecord builders.
 	UserBannedRecord *UserBannedRecordClient
 	// UserFieldPermission is the client for interacting with the UserFieldPermission builders.
@@ -277,6 +283,7 @@ func (tx *Tx) init() {
 	tx.AIRoute = NewAIRouteClient(tx.config)
 	tx.AIRouteAdjustment = NewAIRouteAdjustmentClient(tx.config)
 	tx.AIScene = NewAISceneClient(tx.config)
+	tx.APIKeyDailyUsage = NewAPIKeyDailyUsageClient(tx.config)
 	tx.Activity = NewActivityClient(tx.config)
 	tx.Ad = NewAdClient(tx.config)
 	tx.CatalogSourceLink = NewCatalogSourceLinkClient(tx.config)
@@ -288,6 +295,7 @@ func (tx *Tx) init() {
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.FavoriteItem = NewFavoriteItemClient(tx.config)
 	tx.FieldPermissionMapping = NewFieldPermissionMappingClient(tx.config)
+	tx.FriendLink = NewFriendLinkClient(tx.config)
 	tx.Game = NewGameClient(tx.config)
 	tx.GameCharacter = NewGameCharacterClient(tx.config)
 	tx.GameCharacterRelation = NewGameCharacterRelationClient(tx.config)
@@ -321,6 +329,7 @@ func (tx *Tx) init() {
 	tx.Translator = NewTranslatorClient(tx.config)
 	tx.TranslatorDistinction = NewTranslatorDistinctionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserAPIKey = NewUserAPIKeyClient(tx.config)
 	tx.UserBannedRecord = NewUserBannedRecordClient(tx.config)
 	tx.UserFieldPermission = NewUserFieldPermissionClient(tx.config)
 	tx.UserGamePvnMapping = NewUserGamePvnMappingClient(tx.config)

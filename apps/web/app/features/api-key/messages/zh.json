@@ -1,0 +1,29 @@
+{
+  "title": "API 密钥",
+  "hint": "只能用于查询公开的游戏和资源，不能用于登录或修改数据，用法见<docs>接口文档</docs>",
+  "create": "创建 API 密钥",
+  "limitReached": "最多可以创建 {limit, number} 个 API 密钥",
+  "paused": "开放接口已暂停服务，API 密钥暂时无法使用",
+  "empty": "尚未创建 API 密钥",
+  "created": "创建于 {date}",
+  "lastUsed": "<time></time>使用过",
+  "neverUsed": "尚未使用",
+  "suspended": "已停用",
+  "suspendedReason": "管理员于 {date}停用：{reason}",
+  "remove": "删除「{name}」",
+  "removeConfirm": "确定要删除 API 密钥「{name}」吗？",
+  "removeDescription": "使用这个密钥的请求将立即失败，此操作无法撤销",
+  "removeAction": "删除",
+  "removed": "API 密钥已删除",
+  "cancel": "取消",
+  "dialog": {
+    "title": "创建 API 密钥",
+    "name": "名称",
+    "nameHint": "最多 {max, number} 字",
+    "submit": "创建",
+    "createdTitle": "API 密钥已创建",
+    "warning": "关闭后无法再次查看完整的密钥，请立即复制并妥善保存",
+    "copy": "复制密钥",
+    "done": "完成"
+  }
+}

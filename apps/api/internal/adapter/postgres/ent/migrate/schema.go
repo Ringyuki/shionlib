@@ -452,6 +452,40 @@ var (
 			},
 		},
 	}
+	// APIKeyDailyUsagesColumns holds the columns for the "api_key_daily_usages" table.
+	APIKeyDailyUsagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "day", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "requests", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "throttled", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "key_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// APIKeyDailyUsagesTable holds the schema information for the "api_key_daily_usages" table.
+	APIKeyDailyUsagesTable = &schema.Table{
+		Name:       "api_key_daily_usages",
+		Columns:    APIKeyDailyUsagesColumns,
+		PrimaryKey: []*schema.Column{APIKeyDailyUsagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "api_key_daily_usages_key_id_fkey",
+				Columns:    []*schema.Column{APIKeyDailyUsagesColumns[4]},
+				RefColumns: []*schema.Column{UserAPIKeysColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "api_key_daily_usages_key_id_day_key",
+				Unique:  true,
+				Columns: []*schema.Column{APIKeyDailyUsagesColumns[4], APIKeyDailyUsagesColumns[1]},
+			},
+			{
+				Name:    "api_key_daily_usages_day_idx",
+				Unique:  false,
+				Columns: []*schema.Column{APIKeyDailyUsagesColumns[1]},
+			},
+		},
+	}
 	// ActivitiesColumns holds the columns for the "activities" table.
 	ActivitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -959,6 +993,31 @@ var (
 				Name:    "field_permission_mappings_entity_idx",
 				Unique:  false,
 				Columns: []*schema.Column{FieldPermissionMappingsColumns[1]},
+			},
+		},
+	}
+	// FriendLinksColumns holds the columns for the "friend_links" table.
+	FriendLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 50, SchemaType: map[string]string{"postgres": "character varying(50)"}},
+		{Name: "url", Type: field.TypeString, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "logo", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "description", Type: field.TypeString, Size: 200, Default: "", SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "visible", Type: field.TypeBool, Default: true},
+		{Name: "position", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// FriendLinksTable holds the schema information for the "friend_links" table.
+	FriendLinksTable = &schema.Table{
+		Name:       "friend_links",
+		Columns:    FriendLinksColumns,
+		PrimaryKey: []*schema.Column{FriendLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "friend_links_position_idx",
+				Unique:  false,
+				Columns: []*schema.Column{FriendLinksColumns[6]},
 			},
 		},
 	}
@@ -2493,6 +2552,7 @@ var (
 		{Name: "two_factor_enabled", Type: field.TypeBool, Default: false},
 		{Name: "upload_trusted", Type: field.TypeBool, Default: false},
 		{Name: "sponsor_expires_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "api_request_limit", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 	}
@@ -2515,12 +2575,49 @@ var (
 			{
 				Name:    "users_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[20]},
+				Columns: []*schema.Column{UsersColumns[21]},
 			},
 			{
 				Name:    "users_role_idx",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[12]},
+			},
+		},
+	}
+	// UserAPIKeysColumns holds the columns for the "user_api_keys" table.
+	UserAPIKeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 50, SchemaType: map[string]string{"postgres": "character varying(50)"}},
+		{Name: "prefix", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "secret_hash", Type: field.TypeString, Unique: true, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "suspended_reason", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "suspended_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "suspended_by", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "last_used_ip", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "user_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// UserAPIKeysTable holds the schema information for the "user_api_keys" table.
+	UserAPIKeysTable = &schema.Table{
+		Name:       "user_api_keys",
+		Columns:    UserAPIKeysColumns,
+		PrimaryKey: []*schema.Column{UserAPIKeysColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_api_keys_user_id_fkey",
+				Columns:    []*schema.Column{UserAPIKeysColumns[12]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_api_keys_user_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{UserAPIKeysColumns[12]},
 			},
 		},
 	}
@@ -2859,6 +2956,7 @@ var (
 		AiRoutesTable,
 		AiRouteAdjustmentsTable,
 		AiScenesTable,
+		APIKeyDailyUsagesTable,
 		ActivitiesTable,
 		AdsTable,
 		CatalogSourceLinksTable,
@@ -2870,6 +2968,7 @@ var (
 		FavoritesTable,
 		FavoriteItemsTable,
 		FieldPermissionMappingsTable,
+		FriendLinksTable,
 		GamesTable,
 		GameCharactersTable,
 		GameCharacterRelationsTable,
@@ -2903,6 +3002,7 @@ var (
 		TranslatorsTable,
 		TranslatorDistinctionsTable,
 		UsersTable,
+		UserAPIKeysTable,
 		UserBannedRecordsTable,
 		UserFieldPermissionsTable,
 		UserGamePvnMappingsTable,
@@ -2955,6 +3055,10 @@ func init() {
 	AiScenesTable.ForeignKeys[0].RefTable = AiModelsTable
 	AiScenesTable.Annotation = &entsql.Annotation{
 		Table: "ai_scenes",
+	}
+	APIKeyDailyUsagesTable.ForeignKeys[0].RefTable = UserAPIKeysTable
+	APIKeyDailyUsagesTable.Annotation = &entsql.Annotation{
+		Table: "api_key_daily_usages",
 	}
 	ActivitiesTable.ForeignKeys[0].RefTable = CommentsTable
 	ActivitiesTable.ForeignKeys[1].RefTable = EditRecordsTable
@@ -3009,6 +3113,9 @@ func init() {
 	}
 	FieldPermissionMappingsTable.Annotation = &entsql.Annotation{
 		Table: "field_permission_mappings",
+	}
+	FriendLinksTable.Annotation = &entsql.Annotation{
+		Table: "friend_links",
 	}
 	GamesTable.ForeignKeys[0].RefTable = UsersTable
 	GamesTable.Annotation = &entsql.Annotation{
@@ -3155,6 +3262,10 @@ func init() {
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",
+	}
+	UserAPIKeysTable.ForeignKeys[0].RefTable = UsersTable
+	UserAPIKeysTable.Annotation = &entsql.Annotation{
+		Table: "user_api_keys",
 	}
 	UserBannedRecordsTable.ForeignKeys[0].RefTable = UsersTable
 	UserBannedRecordsTable.ForeignKeys[1].RefTable = UsersTable

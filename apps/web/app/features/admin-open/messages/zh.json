@@ -1,0 +1,94 @@
+{
+  "title": "开放接口",
+  "figure": {
+    "today": "今日请求",
+    "throttled": "近 7 天被限流的请求",
+    "used": "近 7 天使用过的 API 密钥",
+    "usedValue": "{used, number} / {total, number}",
+    "state": "开放接口",
+    "open": "已开放",
+    "closed": "已关闭",
+    "openNext": "在<settings>设置</settings>中关闭",
+    "closedNext": "在<settings>设置</settings>中开放"
+  },
+  "chart": {
+    "title": "请求次数",
+    "requests": "请求",
+    "throttled": "被限流",
+    "range": "时间范围",
+    "days": "{days} 天"
+  },
+  "filter": {
+    "status": "状态",
+    "all": "全部",
+    "search": "搜索名称、用户名或密钥开头",
+    "sort": "排序",
+    "user": "用户 {id} 的 API 密钥",
+    "clearUser": "查看全部"
+  },
+  "sort": {
+    "requests": "近 7 天请求最多",
+    "used": "最近使用",
+    "created": "最近创建"
+  },
+  "status": {
+    "active": "正常",
+    "suspended": "已停用"
+  },
+  "column": {
+    "key": "API 密钥",
+    "owner": "用户",
+    "requests": "近 7 天请求",
+    "throttled": "近 7 天被限流",
+    "used": "最近使用",
+    "created": "创建时间",
+    "status": "状态"
+  },
+  "neverUsed": "尚未使用",
+  "empty": "{filtered, select, true {没有符合条件的 API 密钥} other {暂无 API 密钥}}",
+  "narrow": "近 7 天 {requests, number} 次请求",
+  "menu": {
+    "label": "「{name}」的操作",
+    "user": "查看用户",
+    "suspend": "停用",
+    "restore": "恢复"
+  },
+  "pane": {
+    "key": "API 密钥",
+    "owner": "用户",
+    "created": "创建时间",
+    "used": "最近使用",
+    "usedFrom": "<time></time>，来自 {ip}",
+    "suspended": "停用",
+    "suspendedAt": "{date}：{reason}",
+    "usage": "近 30 天的请求",
+    "usageTotal": "请求 {requests, number}，被限流 {throttled, number}",
+    "account": "账号",
+    "limit": "请求上限",
+    "limitDefault": "默认，与设置中的开放接口限流相同",
+    "limitOwn": "每窗口 {limit, number} 次",
+    "change": "修改",
+    "others": "其他密钥",
+    "noOthers": "没有其他 API 密钥"
+  },
+  "suspend": {
+    "title": "停用 API 密钥「{name}」",
+    "description": "停用后使用这个密钥的请求将返回 403，{owner} 会收到附带原因的通知",
+    "reason": "原因",
+    "reasonHint": "会写入发给用户的通知",
+    "submit": "停用",
+    "done": "API 密钥已停用"
+  },
+  "restored": "API 密钥已恢复",
+  "limit": {
+    "title": "修改请求上限",
+    "description": "适用于 {owner} 的所有 API 密钥",
+    "default": "使用默认值",
+    "defaultHint": "随设置中的「开放接口限流」变化",
+    "own": "单独设置",
+    "perWindow": "每窗口次数",
+    "required": "请填写次数",
+    "submit": "保存",
+    "done": "请求上限已保存"
+  }
+}

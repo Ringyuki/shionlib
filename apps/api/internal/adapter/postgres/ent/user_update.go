@@ -29,6 +29,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -394,6 +395,33 @@ func (_u *UserUpdate) ClearSponsorExpiresAt() *UserUpdate {
 	return _u
 }
 
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (_u *UserUpdate) SetAPIRequestLimit(v int) *UserUpdate {
+	_u.mutation.ResetAPIRequestLimit()
+	_u.mutation.SetAPIRequestLimit(v)
+	return _u
+}
+
+// SetNillableAPIRequestLimit sets the "api_request_limit" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAPIRequestLimit(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetAPIRequestLimit(*v)
+	}
+	return _u
+}
+
+// AddAPIRequestLimit adds value to the "api_request_limit" field.
+func (_u *UserUpdate) AddAPIRequestLimit(v int) *UserUpdate {
+	_u.mutation.AddAPIRequestLimit(v)
+	return _u
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (_u *UserUpdate) ClearAPIRequestLimit() *UserUpdate {
+	_u.mutation.ClearAPIRequestLimit()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *UserUpdate) SetUpdated(v time.Time) *UserUpdate {
 	_u.mutation.SetUpdated(v)
@@ -713,6 +741,21 @@ func (_u *UserUpdate) AddGamePvnMappings(v ...*UserGamePvnMapping) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddGamePvnMappingIDs(ids...)
+}
+
+// AddAPIKeyIDs adds the "api_keys" edge to the UserAPIKey entity by IDs.
+func (_u *UserUpdate) AddAPIKeyIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddAPIKeyIDs(ids...)
+	return _u
+}
+
+// AddAPIKeys adds the "api_keys" edges to the UserAPIKey entity.
+func (_u *UserUpdate) AddAPIKeys(v ...*UserAPIKey) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAPIKeyIDs(ids...)
 }
 
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
@@ -1285,6 +1328,27 @@ func (_u *UserUpdate) RemoveGamePvnMappings(v ...*UserGamePvnMapping) *UserUpdat
 	return _u.RemoveGamePvnMappingIDs(ids...)
 }
 
+// ClearAPIKeys clears all "api_keys" edges to the UserAPIKey entity.
+func (_u *UserUpdate) ClearAPIKeys() *UserUpdate {
+	_u.mutation.ClearAPIKeys()
+	return _u
+}
+
+// RemoveAPIKeyIDs removes the "api_keys" edge to UserAPIKey entities by IDs.
+func (_u *UserUpdate) RemoveAPIKeyIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveAPIKeyIDs(ids...)
+	return _u
+}
+
+// RemoveAPIKeys removes "api_keys" edges to UserAPIKey entities.
+func (_u *UserUpdate) RemoveAPIKeys(v ...*UserAPIKey) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAPIKeyIDs(ids...)
+}
+
 // ClearPotatovnBinding clears the "potatovn_binding" edge to the UserPvnBinding entity.
 func (_u *UserUpdate) ClearPotatovnBinding() *UserUpdate {
 	_u.mutation.ClearPotatovnBinding()
@@ -1609,6 +1673,15 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.SponsorExpiresAtCleared() {
 		_spec.ClearField(user.FieldSponsorExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.APIRequestLimit(); ok {
+		_spec.SetField(user.FieldAPIRequestLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAPIRequestLimit(); ok {
+		_spec.AddField(user.FieldAPIRequestLimit, field.TypeInt, value)
+	}
+	if _u.mutation.APIRequestLimitCleared() {
+		_spec.ClearField(user.FieldAPIRequestLimit, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(user.FieldUpdated, field.TypeTime, value)
@@ -2551,6 +2624,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(usergamepvnmapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.APIKeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAPIKeysIDs(); len(nodes) > 0 && !_u.mutation.APIKeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.APIKeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -3266,6 +3384,33 @@ func (_u *UserUpdateOne) ClearSponsorExpiresAt() *UserUpdateOne {
 	return _u
 }
 
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (_u *UserUpdateOne) SetAPIRequestLimit(v int) *UserUpdateOne {
+	_u.mutation.ResetAPIRequestLimit()
+	_u.mutation.SetAPIRequestLimit(v)
+	return _u
+}
+
+// SetNillableAPIRequestLimit sets the "api_request_limit" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAPIRequestLimit(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetAPIRequestLimit(*v)
+	}
+	return _u
+}
+
+// AddAPIRequestLimit adds value to the "api_request_limit" field.
+func (_u *UserUpdateOne) AddAPIRequestLimit(v int) *UserUpdateOne {
+	_u.mutation.AddAPIRequestLimit(v)
+	return _u
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (_u *UserUpdateOne) ClearAPIRequestLimit() *UserUpdateOne {
+	_u.mutation.ClearAPIRequestLimit()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *UserUpdateOne) SetUpdated(v time.Time) *UserUpdateOne {
 	_u.mutation.SetUpdated(v)
@@ -3585,6 +3730,21 @@ func (_u *UserUpdateOne) AddGamePvnMappings(v ...*UserGamePvnMapping) *UserUpdat
 		ids[i] = v[i].ID
 	}
 	return _u.AddGamePvnMappingIDs(ids...)
+}
+
+// AddAPIKeyIDs adds the "api_keys" edge to the UserAPIKey entity by IDs.
+func (_u *UserUpdateOne) AddAPIKeyIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddAPIKeyIDs(ids...)
+	return _u
+}
+
+// AddAPIKeys adds the "api_keys" edges to the UserAPIKey entity.
+func (_u *UserUpdateOne) AddAPIKeys(v ...*UserAPIKey) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAPIKeyIDs(ids...)
 }
 
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
@@ -4157,6 +4317,27 @@ func (_u *UserUpdateOne) RemoveGamePvnMappings(v ...*UserGamePvnMapping) *UserUp
 	return _u.RemoveGamePvnMappingIDs(ids...)
 }
 
+// ClearAPIKeys clears all "api_keys" edges to the UserAPIKey entity.
+func (_u *UserUpdateOne) ClearAPIKeys() *UserUpdateOne {
+	_u.mutation.ClearAPIKeys()
+	return _u
+}
+
+// RemoveAPIKeyIDs removes the "api_keys" edge to UserAPIKey entities by IDs.
+func (_u *UserUpdateOne) RemoveAPIKeyIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveAPIKeyIDs(ids...)
+	return _u
+}
+
+// RemoveAPIKeys removes "api_keys" edges to UserAPIKey entities.
+func (_u *UserUpdateOne) RemoveAPIKeys(v ...*UserAPIKey) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAPIKeyIDs(ids...)
+}
+
 // ClearPotatovnBinding clears the "potatovn_binding" edge to the UserPvnBinding entity.
 func (_u *UserUpdateOne) ClearPotatovnBinding() *UserUpdateOne {
 	_u.mutation.ClearPotatovnBinding()
@@ -4511,6 +4692,15 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if _u.mutation.SponsorExpiresAtCleared() {
 		_spec.ClearField(user.FieldSponsorExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.APIRequestLimit(); ok {
+		_spec.SetField(user.FieldAPIRequestLimit, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAPIRequestLimit(); ok {
+		_spec.AddField(user.FieldAPIRequestLimit, field.TypeInt, value)
+	}
+	if _u.mutation.APIRequestLimitCleared() {
+		_spec.ClearField(user.FieldAPIRequestLimit, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(user.FieldUpdated, field.TypeTime, value)
@@ -5453,6 +5643,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(usergamepvnmapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.APIKeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAPIKeysIDs(); len(nodes) > 0 && !_u.mutation.APIKeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.APIKeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.APIKeysTable,
+			Columns: []string{user.APIKeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

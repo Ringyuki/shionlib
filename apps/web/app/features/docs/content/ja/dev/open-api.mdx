@@ -1,0 +1,176 @@
+---
+title: 公開 API
+description: 'API キーを使い、Shionlib・Hikarinagi・Bangumi・VNDB の ID でゲームのリソースを検索します。'
+date: 2026-10-14
+order: 2
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## API キーの用意
+
+1. **設定** → **API キー** を開きます（または `/user/settings/api-keys` へ移動）
+2. **API キーを作成** をクリックし、名前を入力します
+3. 表示されたキーをコピーします。ダイアログを閉じると二度と表示されないため、紛失した場合は削除して作り直してください
+
+API キーは 1 アカウントにつき 10 個まで作成できます。API キーは公開 API 専用で、ログインやサイトのほかの API には使えません。
+
+> API キーはサーバーや自分の端末に保管し、公開されるウェブページやリポジトリに書かないでください。
+
+## リクエストの送信
+
+`Authorization` ヘッダーに `Bearer` 形式で API キーを付けます：
+
+```bash
+curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
+  "https://shionlib.com/api/open/v1/games?vid=v1141"
+```
+
+どのオリジンからのリクエストも受け付け、Cookie は読みません。
+
+## クエリパラメーター
+
+4 種類の ID のうち 1 種類を指定します：
+
+| パラメーター | ID                                   | 例      |
+| ------------ | ------------------------------------ | ------- |
+| `id`         | Shionlib のゲーム ID                 | `1947`  |
+| `hid`        | Hikarinagi ID                        | `2303`  |
+| `bid`        | Bangumi のサブジェクト ID            | `7868`  |
+| `vid`        | VNDB ID（先頭の `v` は省略できます） | `v1141` |
+
+- 一度に 50 件まで、半角カンマ区切りで検索できます。例：`bid=7868,15004`
+- 1 つの ID が複数のゲームに対応することがあります（原作とリメイクが同じ VNDB ID を持つ場合など）。その場合はすべて返します
+- 公開されたゲームと公開済みのリソース、ダウンロードできるファイルだけを返します。成人向けのゲームも返し、`nsfw` で示します
+
+## レスポンス
+
+```json
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "games": [
+      {
+        "id": 1947,
+        "hid": 2303,
+        "bid": "7868",
+        "vid": "v1141",
+        "title_jp": "俺たちに翼はない",
+        "title_zh": "我们没有翅膀",
+        "title_en": "",
+        "nsfw": false,
+        "url": "https://shionlib.com/game/1947",
+        "resources": [
+          {
+            "id": 3443,
+            "url": "https://shionlib.com/resource/3443",
+            "platform": ["win"],
+            "language": ["zh"],
+            "translation": "group",
+            "translators": [{ "id": 447, "name": "新米日文游戏中文化技术交流小组" }],
+            "patch_version": null,
+            "release_url": null,
+            "edition": null,
+            "edition_name": null,
+            "form": "portable",
+            "extras": [],
+            "note": null,
+            "downloads": 237,
+            "creator": { "id": 1, "name": "ringyuki" },
+            "published_at": "2026-01-04T16:36:08.028Z",
+            "updated": "2026-03-21T06:21:10.994Z",
+            "files": [
+              {
+                "id": 3434,
+                "file_name": "[Navel] 俺たちに翼はない.7z",
+                "file_size": 2468559932,
+                "hash_algorithm": "blake3",
+                "file_hash": "11985d4448c7fd28…",
+                "sha256": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "missing": []
+  },
+  "requestId": "0f6c2a8e-6c1f-4f3e-9d0a-2b7d1c9e5a41",
+  "timestamp": "2026-10-14T03:12:45.120Z"
+}
+```
+
+`data.games` は指定した ID の順に並び、同じ ID に対応する複数のゲームは ID の昇順に並びます。`data.missing` はゲームが見つからなかった ID で、指定されたとおりの表記で返します。ページのアドレスには言語が含まれず、開いたときに閲覧者の言語設定に従って移動します。
+
+### ゲーム
+
+| フィールド                       | 型                | 説明                                                   |
+| -------------------------------- | ----------------- | ------------------------------------------------------ |
+| `id`                             | 整数              | Shionlib のゲーム ID                                   |
+| `hid`                            | 整数または null   | Hikarinagi ID                                          |
+| `bid`                            | 文字列または null | Bangumi のサブジェクト ID                              |
+| `vid`                            | 文字列または null | VNDB ID                                                |
+| `title_jp` `title_zh` `title_en` | 文字列            | 日本語・中国語・英語のタイトル。ない場合は空文字列     |
+| `nsfw`                           | 真偽値            | 成人向けかどうか                                       |
+| `url`                            | 文字列            | ゲームのページ                                         |
+| `resources`                      | 配列              | 公開済みのリソース。更新の新しい順。ない場合は空の配列 |
+
+### リソース
+
+| フィールド               | 説明                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `id`                     | リソース ID                                                                                     |
+| `url`                    | リソースのページ。ダウンロードはこのページで行います                                            |
+| `platform`               | プラットフォーム：`win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`             |
+| `language`               | 言語：`jp` `zh` `zh-hant` `en`                                                                  |
+| `translation`            | 翻訳：`none` なし、`official` 公式翻訳、`group` 翻訳グループ、`machine` 機械翻訳。未記入は null |
+| `translators`            | 翻訳グループ。`id` と `name` を含み、クレジットの順に並びます                                   |
+| `patch_version`          | パッチのバージョン                                                                              |
+| `release_url`            | 翻訳の公開ページ                                                                                |
+| `edition`                | エディション：`download` ダウンロード版、`package` パッケージ版、`steam` Steam 版               |
+| `edition_name`           | エディション名                                                                                  |
+| `form`                   | 形態：`disc` ディスクイメージ、`installer` インストーラー、`portable` インストール不要          |
+| `extras`                 | 付属物：`save` 全 CG セーブデータ、`bonus` 特典                                                 |
+| `note`                   | 説明                                                                                            |
+| `downloads`              | ダウンロード数                                                                                  |
+| `creator`                | アップロードした人。`id` と `name` を含みます                                                   |
+| `published_at` `updated` | 公開日時と最終更新日時                                                                          |
+| `files`                  | ダウンロードできるファイル。分割ファイルはまとめて順に並びます                                  |
+
+### ファイル
+
+| フィールド                   | 説明                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `id`                         | ファイル ID                                                            |
+| `file_name`                  | ファイル名                                                             |
+| `file_size`                  | サイズ（バイト）                                                       |
+| `hash_algorithm` `file_hash` | アップロード時のハッシュとそのアルゴリズム（`blake3` または `sha256`） |
+| `sha256`                     | ファイルの検査時に計算した SHA-256。未計算の場合は null                |
+
+## エラー
+
+エラーのとき `code` は業務コード、`message` は `Accept-Language` の言語での説明、`data` は null です。
+
+| ステータス | 意味                                                                       |
+| ---------- | -------------------------------------------------------------------------- |
+| 401        | API キーが指定されていないか、無効または削除されています                   |
+| 403        | キーが管理者により停止されているか、アカウントが利用停止中です             |
+| 422        | パラメーターが正しくありません（ID がない、複数種類、50 件超、形式の誤り） |
+| 429        | リクエストが多すぎます。`Retry-After` の秒数待ってから再試行してください   |
+| 503        | 公開 API は一時停止中です                                                  |
+
+## リクエストの頻度
+
+アカウントのすべての API キーで 1 つの上限を共有し、既定は 1 分あたり 60 回です。すべてのレスポンスに次のヘッダーが付きます：
+
+| ヘッダー                | 意味                             |
+| ----------------------- | -------------------------------- |
+| `X-RateLimit-Limit`     | 1 ウィンドウあたりの上限         |
+| `X-RateLimit-Remaining` | 現在のウィンドウで残っている回数 |
+| `X-RateLimit-Reset`     | 回数が戻るまでの秒数             |
+
+## OpenAPI ドキュメント
+
+公開 API の OpenAPI ドキュメントは `https://shionlib.com/api/open/v1/openapi.json` にあり、クライアントコードの生成に使えます。

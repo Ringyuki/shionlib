@@ -1,6 +1,24 @@
 {
   "components": {
     "schemas": {
+      "AccountLimitInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "description": "Requests a window for every key of the account; null follows the site's limit",
+            "maximum": 1000000,
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "type": "object"
+      },
       "ActivityCommentDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1291,6 +1309,127 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "AdminKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_used_ip": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummaryDTO"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "recent": {
+            "$ref": "#/components/schemas/UsageDTO",
+            "description": "Requests in the last 7 days"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string"
+          },
+          "suspended_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspended_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "prefix",
+          "status",
+          "suspended_reason",
+          "suspended_at",
+          "last_used_at",
+          "last_used_ip",
+          "created",
+          "owner",
+          "recent"
+        ],
+        "type": "object"
+      },
+      "AdminKeyDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "account_limit": {
+            "description": "The account's own limit; null when it follows the site's",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "days": {
+            "description": "The last 30 days, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/DayDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "key": {
+            "$ref": "#/components/schemas/AdminKeyDTO"
+          },
+          "others": {
+            "description": "The other keys of the account",
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "$ref": "#/components/schemas/UsageDTO",
+            "description": "Requests in the last 30 days"
+          }
+        },
+        "required": [
+          "key",
+          "days",
+          "total",
+          "account_limit",
+          "others"
         ],
         "type": "object"
       },
@@ -5514,6 +5653,65 @@
         ],
         "type": "object"
       },
+      "ApiKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "last_used_at": {
+            "description": "Written at most once every five minutes",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "description": "The first characters of the key, to tell it apart",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string"
+          },
+          "suspended_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspended_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "prefix",
+          "status",
+          "suspended_reason",
+          "suspended_at",
+          "last_used_at",
+          "created"
+        ],
+        "type": "object"
+      },
       "AuthMeta": {
         "additionalProperties": false,
         "properties": {
@@ -5860,7 +6058,19 @@
           660110,
           660111,
           660112,
-          660113
+          660113,
+          670101,
+          670102,
+          680101,
+          680102,
+          680103,
+          680104,
+          680105,
+          680106,
+          680107,
+          690101,
+          690102,
+          690103
         ],
         "format": "int64",
         "type": "integer",
@@ -6038,7 +6248,19 @@
           "COMPOSITION_NOT_COMPOSED",
           "COMPOSITION_BUSY",
           "COMPOSITION_BASE_GONE",
-          "COMPOSITION_CHECKS_OFF"
+          "COMPOSITION_CHECKS_OFF",
+          "FRIEND_LINK_NOT_FOUND",
+          "FRIEND_LINK_ORDER_STALE",
+          "API_KEY_REQUIRED",
+          "API_KEY_INVALID",
+          "API_KEY_SUSPENDED",
+          "API_KEY_OWNER_BANNED",
+          "API_KEYS_CLOSED",
+          "API_KEY_LIMIT_REACHED",
+          "API_KEY_NOT_FOUND",
+          "OPEN_LOOKUP_ONE_KIND",
+          "OPEN_LOOKUP_TOO_MANY",
+          "OPEN_LOOKUP_BAD_VALUE"
         ]
       },
       "CatalogExcludedDTO": {
@@ -8105,6 +8327,55 @@
         ],
         "type": "object"
       },
+      "CreateFriendLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "^https?://",
+            "patternDescription": "an http or https address",
+            "type": "string"
+          },
+          "visible": {
+            "description": "Whether the link is shown on the site; true when left out",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "type": "object"
+      },
+      "CreateKeyInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "CreateReportInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -8168,6 +8439,29 @@
         },
         "required": [
           "amount"
+        ],
+        "type": "object"
+      },
+      "DayDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "requests": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "throttled": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "requests",
+          "throttled"
         ],
         "type": "object"
       },
@@ -10291,6 +10585,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeAdminKeyDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminKeyDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeAdminPendingDTO": {
         "additionalProperties": false,
         "properties": {
@@ -12212,6 +12539,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeFriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FriendLinkAdminDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeGameCharactersDTO": {
         "additionalProperties": false,
         "properties": {
@@ -12519,6 +12879,39 @@
           "data": {
             "format": "int64",
             "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeIssuedKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/IssuedKeyDTO"
           },
           "message": {
             "type": "string"
@@ -13050,6 +13443,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListDayDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DayDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListDownloadEventDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13177,6 +13609,84 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/FavoriteSummaryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListFriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/FriendLinkAdminDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListFriendLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/FriendLinkDTO"
             },
             "type": [
               "array",
@@ -13734,6 +14244,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeMyKeysDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MyKeysDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeOidcIdentitiesDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13743,6 +14286,72 @@
           },
           "data": {
             "$ref": "#/components/schemas/OidcIdentitiesDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeOpenLookupDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/OpenLookupDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeOpenSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/OpenSummaryDTO"
           },
           "message": {
             "type": "string"
@@ -13908,6 +14517,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageAdminGameItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminKeyDTO"
           },
           "message": {
             "type": "string"
@@ -16248,6 +16890,86 @@
         ],
         "type": "object"
       },
+      "FriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere; null when the link has none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "logo",
+          "description",
+          "visible",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "FriendLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere; null when the link has none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "logo",
+          "description"
+        ],
+        "type": "object"
+      },
       "GameCardDTO": {
         "additionalProperties": false,
         "properties": {
@@ -18021,6 +18743,23 @@
         ],
         "type": "object"
       },
+      "IssuedKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/ApiKeyDTO"
+          },
+          "secret": {
+            "description": "The whole key; it is shown only this once",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "secret"
+        ],
+        "type": "object"
+      },
       "MalwareCaseDetailDTO": {
         "additionalProperties": false,
         "properties": {
@@ -18958,6 +19697,35 @@
         ],
         "type": "object"
       },
+      "MyKeysDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the open API answers requests",
+            "type": "boolean"
+          },
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "limit": {
+            "description": "How many keys an account may have",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keys",
+          "limit",
+          "enabled"
+        ],
+        "type": "object"
+      },
       "OidcIdentitiesDTO": {
         "additionalProperties": false,
         "properties": {
@@ -19071,6 +19839,377 @@
         ],
         "type": "object"
       },
+      "OpenFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_hash": {
+            "description": "The hash taken when the file was uploaded, with hash_algorithm",
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "description": "Size in bytes",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hash_algorithm": {
+            "enum": [
+              "sha256",
+              "blake3"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sha256": {
+            "description": "SHA-256 taken while the file was checked; null until then",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "file_name",
+          "file_size",
+          "hash_algorithm",
+          "file_hash",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "OpenGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "bid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hid": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nsfw": {
+            "type": "boolean"
+          },
+          "resources": {
+            "description": "Published resources, the most recently updated first",
+            "items": {
+              "$ref": "#/components/schemas/OpenResourceDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "vid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "hid",
+          "bid",
+          "vid",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "nsfw",
+          "url",
+          "resources"
+        ],
+        "type": "object"
+      },
+      "OpenLookupDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "games": {
+            "description": "The games found, in the order of the IDs asked for",
+            "items": {
+              "$ref": "#/components/schemas/OpenGameDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "missing": {
+            "description": "The IDs asked for that match no game, as they were written",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "games",
+          "missing"
+        ],
+        "type": "object"
+      },
+      "OpenResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/OpenUserDTO"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "edition_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extras": {
+            "items": {
+              "enum": [
+                "save",
+                "bonus"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "files": {
+            "description": "The files that can be downloaded, the volumes of a set together and in their order",
+            "items": {
+              "$ref": "#/components/schemas/OpenFileDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "form": {
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "language": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patch_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "published_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translation": {
+            "description": "Where the text in a language other than Japanese comes from; null when nobody has said",
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translators": {
+            "description": "The translators credited, in the order they were given",
+            "items": {
+              "$ref": "#/components/schemas/OpenTranslatorDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The page of the resource, where it is downloaded",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "platform",
+          "language",
+          "translation",
+          "translators",
+          "patch_version",
+          "release_url",
+          "edition",
+          "edition_name",
+          "form",
+          "extras",
+          "note",
+          "downloads",
+          "creator",
+          "published_at",
+          "updated",
+          "files"
+        ],
+        "type": "object"
+      },
+      "OpenSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "throttled": {
+            "description": "Requests refused for their rate in the last 7 days",
+            "format": "int64",
+            "type": "integer"
+          },
+          "today": {
+            "description": "Requests today, counted up to ten minutes ago",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "description": "Keys used in the last 7 days",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "today",
+          "throttled",
+          "used",
+          "total",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "OpenTranslatorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "OpenUserDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "PageAdAdminDTO": {
         "additionalProperties": false,
         "properties": {
@@ -19165,6 +20304,28 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/AdminGameItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminKeyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminKeyDTO"
             },
             "type": [
               "array",
@@ -20210,6 +21371,27 @@
         },
         "required": [
           "file_name"
+        ],
+        "type": "object"
+      },
+      "ReorderFriendLinksInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "Every friend link, in the order they are shown",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 1000,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ids"
         ],
         "type": "object"
       },
@@ -21865,6 +23047,20 @@
         ],
         "type": "object"
       },
+      "SuspendKeyInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
       "TranslatorDetailDTO": {
         "additionalProperties": false,
         "properties": {
@@ -22106,6 +23302,39 @@
           "note": {
             "maxLength": 2000,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateFriendLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "logo": {
+            "description": "null removes the logo",
+            "maxLength": 500,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "^https?://",
+            "patternDescription": "an http or https address",
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -22399,6 +23628,24 @@
         },
         "required": [
           "key"
+        ],
+        "type": "object"
+      },
+      "UsageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "requests": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "throttled": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requests",
+          "throttled"
         ],
         "type": "object"
       },
@@ -23371,6 +24618,11 @@
       },
       "accessToken": {
         "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "apiKey": {
+        "description": "An API key of the form shl_…",
         "scheme": "bearer",
         "type": "http"
       }
@@ -29001,6 +30253,779 @@
         ]
       }
     },
+    "/admin/friend-links": {
+      "get": {
+        "operationId": "friendLink.admin.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List every friend link, hidden ones too, in their order",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "friendLink.admin.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFriendLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Add a friend link after the others",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
+    "/admin/friend-links/order": {
+      "put": {
+        "operationId": "friendLink.admin.reorder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderFriendLinksInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Set the order of every friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
+    "/admin/friend-links/{id}": {
+      "delete": {
+        "operationId": "friendLink.admin.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "friendLink.admin.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFriendLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/accounts/{userId}/limit": {
+      "put": {
+        "operationId": "apiKey.admin.accountLimit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountLimitInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Give an account a request limit of its own, or follow the site's again",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/keys": {
+      "get": {
+        "operationId": "apiKey.admin.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "active",
+                "suspended"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "requests",
+              "enum": [
+                "requests",
+                "used",
+                "created"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminKeyDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List every API key with its recent use",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/keys/{id}": {
+      "get": {
+        "operationId": "apiKey.admin.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminKeyDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Show an API key with its use and its account",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/keys/{id}/restore": {
+      "post": {
+        "operationId": "apiKey.admin.restore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Restore a suspended API key and tell its owner",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/keys/{id}/suspend": {
+      "post": {
+        "operationId": "apiKey.admin.suspend",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendKeyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Suspend an API key and tell its owner why",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/summary": {
+      "get": {
+        "operationId": "apiKey.admin.summary",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOpenSummaryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Sum up the use of the open API",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
+    "/admin/open/usage": {
+      "get": {
+        "operationId": "apiKey.admin.usage",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "days",
+            "schema": {
+              "default": 30,
+              "enum": [
+                7,
+                30,
+                90
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListDayDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Requests to the open API by day",
+        "tags": [
+          "api key",
+          "admin"
+        ]
+      }
+    },
     "/admin/pending": {
       "get": {
         "operationId": "adminStats.pending",
@@ -34470,6 +36495,44 @@
         ]
       }
     },
+    "/friend-links": {
+      "get": {
+        "operationId": "friendLink.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListFriendLinkDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the friend links shown on the site, in their order",
+        "tags": [
+          "friend link"
+        ]
+      }
+    },
     "/game/download-source/file-history/{historyId}/reason": {
       "patch": {
         "operationId": "download.historyReason",
@@ -37626,6 +39689,95 @@
         ]
       }
     },
+    "/open/v1/games": {
+      "get": {
+        "operationId": "open.games",
+        "parameters": [
+          {
+            "description": "Shionlib game IDs, up to 50, separated by commas",
+            "explode": false,
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "description": "Shionlib game IDs, up to 50, separated by commas",
+              "maxLength": 2000,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hikarinagi IDs, up to 50, separated by commas",
+            "explode": false,
+            "in": "query",
+            "name": "hid",
+            "schema": {
+              "description": "Hikarinagi IDs, up to 50, separated by commas",
+              "maxLength": 2000,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Bangumi subject IDs, up to 50, separated by commas",
+            "explode": false,
+            "in": "query",
+            "name": "bid",
+            "schema": {
+              "description": "Bangumi subject IDs, up to 50, separated by commas",
+              "maxLength": 2000,
+              "type": "string"
+            }
+          },
+          {
+            "description": "VNDB IDs, up to 50, separated by commas; the leading v may be left out",
+            "explode": false,
+            "in": "query",
+            "name": "vid",
+            "schema": {
+              "description": "VNDB IDs, up to 50, separated by commas; the leading v may be left out",
+              "maxLength": 2000,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOpenLookupDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "summary": "Find games by their Shionlib, Hikarinagi, Bangumi or VNDB IDs, with their resources",
+        "tags": [
+          "open"
+        ]
+      }
+    },
     "/potatovn/binding": {
       "delete": {
         "operationId": "potatovn.binding.delete",
@@ -39600,6 +41752,74 @@
         ]
       }
     },
+    "/uploads/small/friend-link/logo": {
+      "put": {
+        "operationId": "upload.friendLinkLogo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload the logo of a friend link",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
     "/user": {
       "post": {
         "operationId": "user.register",
@@ -39654,6 +41874,164 @@
         "summary": "Register an account",
         "tags": [
           "user"
+        ]
+      }
+    },
+    "/user/api-keys": {
+      "get": {
+        "operationId": "apiKey.mine",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMyKeysDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the caller's API keys",
+        "tags": [
+          "api key"
+        ]
+      },
+      "post": {
+        "operationId": "apiKey.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeIssuedKeyDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Create an API key and show it once",
+        "tags": [
+          "api key"
+        ]
+      }
+    },
+    "/user/api-keys/{id}": {
+      "delete": {
+        "operationId": "apiKey.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete one of the caller's API keys",
+        "tags": [
+          "api key"
         ]
       }
     },

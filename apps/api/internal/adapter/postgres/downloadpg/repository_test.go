@@ -401,6 +401,25 @@ func TestListGameResources(t *testing.T) {
 	}
 }
 
+func TestListGamesResourcesReadsSeveralGamesAtOnce(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator := f.db.User(t)
+	firstGame, secondGame, otherGame := f.db.Game(t), f.db.Game(t), f.db.Game(t)
+	first := f.resource(t, firstGame, creator)
+	second := f.resource(t, secondGame, creator)
+	f.resource(t, otherGame, creator)
+	f.file(t, first.ID, creator, "a.7z")
+	f.file(t, second.ID, creator, "b.7z")
+	resources, err := f.repo.ListGamesResources(ctx, []int{firstGame, secondGame})
+	if err != nil || len(resources) != 2 || resources[0].ID != first.ID || resources[1].ID != second.ID || len(resources[1].Files) != 1 {
+		t.Fatalf("the resources of both games with their files: %+v %v", resources, err)
+	}
+	if none, err := f.repo.ListGamesResources(ctx, nil); err != nil || len(none) != 0 {
+		t.Fatalf("no games, no resources: %+v %v", none, err)
+	}
+}
+
 func TestListReleasesAndUserResources(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)

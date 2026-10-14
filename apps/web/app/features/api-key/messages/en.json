@@ -1,0 +1,29 @@
+{
+  "title": "API keys",
+  "hint": "API keys only read public games and resources; they cannot sign in or change anything. See the <docs>API documentation</docs>",
+  "create": "Create an API key",
+  "limitReached": "An account can have up to {limit, number} API keys",
+  "paused": "The open API is paused; API keys cannot be used for now",
+  "empty": "No API keys",
+  "created": "Created {date}",
+  "lastUsed": "Used <time></time>",
+  "neverUsed": "Never used",
+  "suspended": "Suspended",
+  "suspendedReason": "Suspended by an administrator on {date}: {reason}",
+  "remove": "Delete \"{name}\"",
+  "removeConfirm": "Delete the API key \"{name}\"?",
+  "removeDescription": "Requests made with this key will fail at once. This cannot be undone",
+  "removeAction": "Delete",
+  "removed": "API key deleted",
+  "cancel": "Cancel",
+  "dialog": {
+    "title": "Create an API key",
+    "name": "Name",
+    "nameHint": "Up to {max, number} characters",
+    "submit": "Create",
+    "createdTitle": "API key created",
+    "warning": "The whole key cannot be shown again once this is closed. Copy it now and keep it safe",
+    "copy": "Copy the key",
+    "done": "Done"
+  }
+}

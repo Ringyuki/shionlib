@@ -14,8 +14,10 @@ export const adminPaths = {
   translators: `${adminRoot}/translators`,
   users: `${adminRoot}/users`,
   sponsors: `${adminRoot}/sponsors`,
+  friendLinks: `${adminRoot}/friend-links`,
   catalog: `${adminRoot}/catalog`,
   ai: `${adminRoot}/ai`,
+  open: `${adminRoot}/open-api`,
   settings: `${adminRoot}/settings`,
   user: (id: number) => `${adminRoot}/users/${id}`,
   report: (id: number) => `${adminRoot}/reports?id=${id}`,
@@ -24,6 +26,7 @@ export const adminPaths = {
   scanCase: (id: number) => `${adminRoot}/checks?case=${id}`,
   comment: (id: number) => `${adminRoot}/comments?id=${id}`,
   commentsBy: (userId: number) => `${adminRoot}/comments?status=ALL&author=${userId}`,
+  keysOf: (userId: number) => `${adminRoot}/open-api?user=${userId}`,
   walkthrough: (id: number) => `${adminRoot}/walkthroughs?status=HELD&id=${id}`,
 } as const
 
@@ -47,8 +50,10 @@ export type NavKey =
   | 'translators'
   | 'users'
   | 'sponsors'
+  | 'friendLinks'
   | 'catalog'
   | 'ai'
+  | 'open'
   | 'settings'
 
 export type NavEntry = {
@@ -93,6 +98,7 @@ export function navigationOf(pending: Pending): Navigation {
           entry('translators', adminPaths.translators),
           entry('users', adminPaths.users),
           entry('sponsors', adminPaths.sponsors),
+          entry('friendLinks', adminPaths.friendLinks),
         ],
       },
       {
@@ -100,6 +106,7 @@ export function navigationOf(pending: Pending): Navigation {
         entries: [
           entry('catalog', adminPaths.catalog),
           { ...entry('ai', adminPaths.ai), alert: pending.ai_alerts > 0 },
+          entry('open', adminPaths.open),
           entry('settings', adminPaths.settings),
         ],
       },

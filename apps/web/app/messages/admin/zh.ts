@@ -7,7 +7,9 @@ import adminAi from '~/features/admin-ai/messages/zh.json'
 import adminCatalog from '~/features/admin-catalog/messages/zh.json'
 import adminCheck from '~/features/admin-check/messages/zh.json'
 import adminComment from '~/features/admin-comment/messages/zh.json'
+import adminFriendLink from '~/features/admin-friend-link/messages/zh.json'
 import adminGame from '~/features/admin-game/messages/zh.json'
+import adminOpen from '~/features/admin-open/messages/zh.json'
 import adminReport from '~/features/admin-report/messages/zh.json'
 import adminSetting from '~/features/admin-setting/messages/zh.json'
 import adminSponsor from '~/features/admin-sponsor/messages/zh.json'
@@ -27,7 +29,9 @@ export const adminMessages = {
   adminCatalog,
   adminCheck,
   adminComment,
+  adminFriendLink,
   adminGame,
+  adminOpen,
   adminReport,
   adminSetting,
   adminSponsor,

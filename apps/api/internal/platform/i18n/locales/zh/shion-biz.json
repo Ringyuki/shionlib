@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "收藏夹已存在",
   "FAVORITE_ITEM_ALREADY_EXISTS": "收藏夹中已存在该游戏",
   "FAVORITE_NOT_FOUND": "收藏夹不存在",
+  "FRIEND_LINK_NOT_FOUND": "友情链接不存在",
+  "FRIEND_LINK_ORDER_STALE": "友情链接已被修改，请刷新后重试",
   "FAVORITE_ITEM_NOT_FOUND": "收藏夹中不存在该游戏",
   "FAVORITE_ITEM_NOT_OWNER": "你没有权限修改该收藏夹中的游戏",
   "FAVORITE_NOT_OWNER": "你没有权限修改该收藏夹",
@@ -179,5 +181,15 @@
   "COMPOSITION_NOT_COMPOSED": "这个资源不能更新补丁",
   "COMPOSITION_BUSY": "合成正在进行",
   "COMPOSITION_BASE_GONE": "原版资源已不存在",
-  "COMPOSITION_CHECKS_OFF": "站点未开启文件检查，暂时无法合成"
+  "COMPOSITION_CHECKS_OFF": "站点未开启文件检查，暂时无法合成",
+  "API_KEY_REQUIRED": "请在 Authorization 请求头中附上 API 密钥",
+  "API_KEY_INVALID": "API 密钥无效或已删除",
+  "API_KEY_SUSPENDED": "API 密钥已被管理员停用",
+  "API_KEY_OWNER_BANNED": "API 密钥所属的账号已被封禁",
+  "API_KEYS_CLOSED": "开放接口已暂停服务",
+  "API_KEY_LIMIT_REACHED": "API 密钥数量已达上限",
+  "API_KEY_NOT_FOUND": "API 密钥不存在",
+  "OPEN_LOOKUP_ONE_KIND": "请给出 id、hid、bid、vid 中的一种编号",
+  "OPEN_LOOKUP_TOO_MANY": "一次最多查询 {max} 个编号",
+  "OPEN_LOOKUP_BAD_VALUE": "编号格式不正确：{value}"
 }

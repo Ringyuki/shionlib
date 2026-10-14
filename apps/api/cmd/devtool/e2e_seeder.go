@@ -220,6 +220,9 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		if err := s.seedSponsorOrders(ctx, tx, users[e2eMemberIndex]); err != nil {
 			return err
 		}
+		if err := s.seedFriendLinks(ctx, tx); err != nil {
+			return err
+		}
 		result.GameIDs = graph.gameIDs
 		result.ShownGameIDs = graph.shownGameIDs
 		result.PrimaryGameID = graph.primaryGameID

@@ -50,6 +50,7 @@ func NewHandler(service *media.Service, resp *response.Builder) *Handler {
 }
 
 func (h *Handler) Register(api *httpapi.API) {
+	httpapi.Register(api, httpapi.Route{ID: "upload.friendLinkLogo", Method: http.MethodPut, Path: "/uploads/small/friend-link/logo", Summary: "Upload the logo of a friend link", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.FriendLinkLogoMaxBytes)}, h.friendLinkLogo)
 	httpapi.Register(api, httpapi.Route{ID: "upload.adImage", Method: http.MethodPut, Path: "/uploads/small/ad/image", Summary: "Upload an advertisement image", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adImage)
 }
 
@@ -59,6 +60,18 @@ func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Outp
 		return nil, err
 	}
 	key, err := h.service.StoreAdImage(ctx, actor.From(ctx).UserID, upload)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, UploadedImageDTO{Key: key}), nil
+}
+
+func (h *Handler) friendLinkLogo(ctx context.Context, in *friendLinkLogoInput) (*response.Output[UploadedImageDTO], error) {
+	upload, err := ReadUpload(in.RawBody.Data().File, media.FriendLinkLogoMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+	key, err := h.service.StoreFriendLinkLogo(ctx, actor.From(ctx).UserID, upload)
 	if err != nil {
 		return nil, err
 	}

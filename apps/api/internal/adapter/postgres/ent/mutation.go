@@ -24,6 +24,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/apikeydailyusage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -33,6 +34,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -67,6 +69,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -96,6 +99,7 @@ const (
 	TypeAIRoute                         = "AIRoute"
 	TypeAIRouteAdjustment               = "AIRouteAdjustment"
 	TypeAIScene                         = "AIScene"
+	TypeAPIKeyDailyUsage                = "APIKeyDailyUsage"
 	TypeActivity                        = "Activity"
 	TypeAd                              = "Ad"
 	TypeCatalogSourceLink               = "CatalogSourceLink"
@@ -107,6 +111,7 @@ const (
 	TypeFavorite                        = "Favorite"
 	TypeFavoriteItem                    = "FavoriteItem"
 	TypeFieldPermissionMapping          = "FieldPermissionMapping"
+	TypeFriendLink                      = "FriendLink"
 	TypeGame                            = "Game"
 	TypeGameCharacter                   = "GameCharacter"
 	TypeGameCharacterRelation           = "GameCharacterRelation"
@@ -140,6 +145,7 @@ const (
 	TypeTranslator                      = "Translator"
 	TypeTranslatorDistinction           = "TranslatorDistinction"
 	TypeUser                            = "User"
+	TypeUserAPIKey                      = "UserAPIKey"
 	TypeUserBannedRecord                = "UserBannedRecord"
 	TypeUserFieldPermission             = "UserFieldPermission"
 	TypeUserGamePvnMapping              = "UserGamePvnMapping"
@@ -12774,6 +12780,623 @@ func (m *AISceneMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AIScene edge %s", name)
+}
+
+// APIKeyDailyUsageMutation represents an operation that mutates the APIKeyDailyUsage nodes in the graph.
+type APIKeyDailyUsageMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	day           *time.Time
+	requests      *int
+	addrequests   *int
+	throttled     *int
+	addthrottled  *int
+	clearedFields map[string]struct{}
+	key           *int
+	clearedkey    bool
+	done          bool
+	oldValue      func(context.Context) (*APIKeyDailyUsage, error)
+	predicates    []predicate.APIKeyDailyUsage
+}
+
+var _ ent.Mutation = (*APIKeyDailyUsageMutation)(nil)
+
+// apikeydailyusageOption allows management of the mutation configuration using functional options.
+type apikeydailyusageOption func(*APIKeyDailyUsageMutation)
+
+// newAPIKeyDailyUsageMutation creates new mutation for the APIKeyDailyUsage entity.
+func newAPIKeyDailyUsageMutation(c config, op Op, opts ...apikeydailyusageOption) *APIKeyDailyUsageMutation {
+	m := &APIKeyDailyUsageMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAPIKeyDailyUsage,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAPIKeyDailyUsageID sets the ID field of the mutation.
+func withAPIKeyDailyUsageID(id int) apikeydailyusageOption {
+	return func(m *APIKeyDailyUsageMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *APIKeyDailyUsage
+		)
+		m.oldValue = func(ctx context.Context) (*APIKeyDailyUsage, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().APIKeyDailyUsage.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAPIKeyDailyUsage sets the old APIKeyDailyUsage of the mutation.
+func withAPIKeyDailyUsage(node *APIKeyDailyUsage) apikeydailyusageOption {
+	return func(m *APIKeyDailyUsageMutation) {
+		m.oldValue = func(context.Context) (*APIKeyDailyUsage, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m APIKeyDailyUsageMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m APIKeyDailyUsageMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of APIKeyDailyUsage entities.
+func (m *APIKeyDailyUsageMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *APIKeyDailyUsageMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *APIKeyDailyUsageMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().APIKeyDailyUsage.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetKeyID sets the "key_id" field.
+func (m *APIKeyDailyUsageMutation) SetKeyID(i int) {
+	m.key = &i
+}
+
+// KeyID returns the value of the "key_id" field in the mutation.
+func (m *APIKeyDailyUsageMutation) KeyID() (r int, exists bool) {
+	v := m.key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKeyID returns the old "key_id" field's value of the APIKeyDailyUsage entity.
+// If the APIKeyDailyUsage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APIKeyDailyUsageMutation) OldKeyID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKeyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKeyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKeyID: %w", err)
+	}
+	return oldValue.KeyID, nil
+}
+
+// ResetKeyID resets all changes to the "key_id" field.
+func (m *APIKeyDailyUsageMutation) ResetKeyID() {
+	m.key = nil
+}
+
+// SetDay sets the "day" field.
+func (m *APIKeyDailyUsageMutation) SetDay(t time.Time) {
+	m.day = &t
+}
+
+// Day returns the value of the "day" field in the mutation.
+func (m *APIKeyDailyUsageMutation) Day() (r time.Time, exists bool) {
+	v := m.day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDay returns the old "day" field's value of the APIKeyDailyUsage entity.
+// If the APIKeyDailyUsage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APIKeyDailyUsageMutation) OldDay(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDay: %w", err)
+	}
+	return oldValue.Day, nil
+}
+
+// ResetDay resets all changes to the "day" field.
+func (m *APIKeyDailyUsageMutation) ResetDay() {
+	m.day = nil
+}
+
+// SetRequests sets the "requests" field.
+func (m *APIKeyDailyUsageMutation) SetRequests(i int) {
+	m.requests = &i
+	m.addrequests = nil
+}
+
+// Requests returns the value of the "requests" field in the mutation.
+func (m *APIKeyDailyUsageMutation) Requests() (r int, exists bool) {
+	v := m.requests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequests returns the old "requests" field's value of the APIKeyDailyUsage entity.
+// If the APIKeyDailyUsage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APIKeyDailyUsageMutation) OldRequests(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequests is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequests requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequests: %w", err)
+	}
+	return oldValue.Requests, nil
+}
+
+// AddRequests adds i to the "requests" field.
+func (m *APIKeyDailyUsageMutation) AddRequests(i int) {
+	if m.addrequests != nil {
+		*m.addrequests += i
+	} else {
+		m.addrequests = &i
+	}
+}
+
+// AddedRequests returns the value that was added to the "requests" field in this mutation.
+func (m *APIKeyDailyUsageMutation) AddedRequests() (r int, exists bool) {
+	v := m.addrequests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRequests resets all changes to the "requests" field.
+func (m *APIKeyDailyUsageMutation) ResetRequests() {
+	m.requests = nil
+	m.addrequests = nil
+}
+
+// SetThrottled sets the "throttled" field.
+func (m *APIKeyDailyUsageMutation) SetThrottled(i int) {
+	m.throttled = &i
+	m.addthrottled = nil
+}
+
+// Throttled returns the value of the "throttled" field in the mutation.
+func (m *APIKeyDailyUsageMutation) Throttled() (r int, exists bool) {
+	v := m.throttled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThrottled returns the old "throttled" field's value of the APIKeyDailyUsage entity.
+// If the APIKeyDailyUsage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *APIKeyDailyUsageMutation) OldThrottled(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThrottled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThrottled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThrottled: %w", err)
+	}
+	return oldValue.Throttled, nil
+}
+
+// AddThrottled adds i to the "throttled" field.
+func (m *APIKeyDailyUsageMutation) AddThrottled(i int) {
+	if m.addthrottled != nil {
+		*m.addthrottled += i
+	} else {
+		m.addthrottled = &i
+	}
+}
+
+// AddedThrottled returns the value that was added to the "throttled" field in this mutation.
+func (m *APIKeyDailyUsageMutation) AddedThrottled() (r int, exists bool) {
+	v := m.addthrottled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetThrottled resets all changes to the "throttled" field.
+func (m *APIKeyDailyUsageMutation) ResetThrottled() {
+	m.throttled = nil
+	m.addthrottled = nil
+}
+
+// ClearKey clears the "key" edge to the UserAPIKey entity.
+func (m *APIKeyDailyUsageMutation) ClearKey() {
+	m.clearedkey = true
+	m.clearedFields[apikeydailyusage.FieldKeyID] = struct{}{}
+}
+
+// KeyCleared reports if the "key" edge to the UserAPIKey entity was cleared.
+func (m *APIKeyDailyUsageMutation) KeyCleared() bool {
+	return m.clearedkey
+}
+
+// KeyIDs returns the "key" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// KeyID instead. It exists only for internal usage by the builders.
+func (m *APIKeyDailyUsageMutation) KeyIDs() (ids []int) {
+	if id := m.key; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetKey resets all changes to the "key" edge.
+func (m *APIKeyDailyUsageMutation) ResetKey() {
+	m.key = nil
+	m.clearedkey = false
+}
+
+// Where appends a list predicates to the APIKeyDailyUsageMutation builder.
+func (m *APIKeyDailyUsageMutation) Where(ps ...predicate.APIKeyDailyUsage) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the APIKeyDailyUsageMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *APIKeyDailyUsageMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.APIKeyDailyUsage, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *APIKeyDailyUsageMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *APIKeyDailyUsageMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (APIKeyDailyUsage).
+func (m *APIKeyDailyUsageMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *APIKeyDailyUsageMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.key != nil {
+		fields = append(fields, apikeydailyusage.FieldKeyID)
+	}
+	if m.day != nil {
+		fields = append(fields, apikeydailyusage.FieldDay)
+	}
+	if m.requests != nil {
+		fields = append(fields, apikeydailyusage.FieldRequests)
+	}
+	if m.throttled != nil {
+		fields = append(fields, apikeydailyusage.FieldThrottled)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *APIKeyDailyUsageMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case apikeydailyusage.FieldKeyID:
+		return m.KeyID()
+	case apikeydailyusage.FieldDay:
+		return m.Day()
+	case apikeydailyusage.FieldRequests:
+		return m.Requests()
+	case apikeydailyusage.FieldThrottled:
+		return m.Throttled()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *APIKeyDailyUsageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case apikeydailyusage.FieldKeyID:
+		return m.OldKeyID(ctx)
+	case apikeydailyusage.FieldDay:
+		return m.OldDay(ctx)
+	case apikeydailyusage.FieldRequests:
+		return m.OldRequests(ctx)
+	case apikeydailyusage.FieldThrottled:
+		return m.OldThrottled(ctx)
+	}
+	return nil, fmt.Errorf("unknown APIKeyDailyUsage field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APIKeyDailyUsageMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case apikeydailyusage.FieldKeyID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKeyID(v)
+		return nil
+	case apikeydailyusage.FieldDay:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDay(v)
+		return nil
+	case apikeydailyusage.FieldRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequests(v)
+		return nil
+	case apikeydailyusage.FieldThrottled:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThrottled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown APIKeyDailyUsage field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *APIKeyDailyUsageMutation) AddedFields() []string {
+	var fields []string
+	if m.addrequests != nil {
+		fields = append(fields, apikeydailyusage.FieldRequests)
+	}
+	if m.addthrottled != nil {
+		fields = append(fields, apikeydailyusage.FieldThrottled)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *APIKeyDailyUsageMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case apikeydailyusage.FieldRequests:
+		return m.AddedRequests()
+	case apikeydailyusage.FieldThrottled:
+		return m.AddedThrottled()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *APIKeyDailyUsageMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case apikeydailyusage.FieldRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRequests(v)
+		return nil
+	case apikeydailyusage.FieldThrottled:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddThrottled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown APIKeyDailyUsage numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *APIKeyDailyUsageMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *APIKeyDailyUsageMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *APIKeyDailyUsageMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown APIKeyDailyUsage nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *APIKeyDailyUsageMutation) ResetField(name string) error {
+	switch name {
+	case apikeydailyusage.FieldKeyID:
+		m.ResetKeyID()
+		return nil
+	case apikeydailyusage.FieldDay:
+		m.ResetDay()
+		return nil
+	case apikeydailyusage.FieldRequests:
+		m.ResetRequests()
+		return nil
+	case apikeydailyusage.FieldThrottled:
+		m.ResetThrottled()
+		return nil
+	}
+	return fmt.Errorf("unknown APIKeyDailyUsage field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *APIKeyDailyUsageMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.key != nil {
+		edges = append(edges, apikeydailyusage.EdgeKey)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *APIKeyDailyUsageMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case apikeydailyusage.EdgeKey:
+		if id := m.key; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *APIKeyDailyUsageMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *APIKeyDailyUsageMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *APIKeyDailyUsageMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedkey {
+		edges = append(edges, apikeydailyusage.EdgeKey)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *APIKeyDailyUsageMutation) EdgeCleared(name string) bool {
+	switch name {
+	case apikeydailyusage.EdgeKey:
+		return m.clearedkey
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *APIKeyDailyUsageMutation) ClearEdge(name string) error {
+	switch name {
+	case apikeydailyusage.EdgeKey:
+		m.ClearKey()
+		return nil
+	}
+	return fmt.Errorf("unknown APIKeyDailyUsage unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *APIKeyDailyUsageMutation) ResetEdge(name string) error {
+	switch name {
+	case apikeydailyusage.EdgeKey:
+		m.ResetKey()
+		return nil
+	}
+	return fmt.Errorf("unknown APIKeyDailyUsage edge %s", name)
 }
 
 // ActivityMutation represents an operation that mutates the Activity nodes in the graph.
@@ -26295,6 +26918,774 @@ func (m *FieldPermissionMappingMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *FieldPermissionMappingMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown FieldPermissionMapping edge %s", name)
+}
+
+// FriendLinkMutation represents an operation that mutates the FriendLink nodes in the graph.
+type FriendLinkMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	url           *string
+	logo          *string
+	description   *string
+	visible       *bool
+	position      *int
+	addposition   *int
+	created       *time.Time
+	updated       *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*FriendLink, error)
+	predicates    []predicate.FriendLink
+}
+
+var _ ent.Mutation = (*FriendLinkMutation)(nil)
+
+// friendlinkOption allows management of the mutation configuration using functional options.
+type friendlinkOption func(*FriendLinkMutation)
+
+// newFriendLinkMutation creates new mutation for the FriendLink entity.
+func newFriendLinkMutation(c config, op Op, opts ...friendlinkOption) *FriendLinkMutation {
+	m := &FriendLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFriendLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFriendLinkID sets the ID field of the mutation.
+func withFriendLinkID(id int) friendlinkOption {
+	return func(m *FriendLinkMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FriendLink
+		)
+		m.oldValue = func(ctx context.Context) (*FriendLink, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FriendLink.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFriendLink sets the old FriendLink of the mutation.
+func withFriendLink(node *FriendLink) friendlinkOption {
+	return func(m *FriendLinkMutation) {
+		m.oldValue = func(context.Context) (*FriendLink, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FriendLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FriendLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of FriendLink entities.
+func (m *FriendLinkMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FriendLinkMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FriendLinkMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FriendLink.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *FriendLinkMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *FriendLinkMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *FriendLinkMutation) ResetName() {
+	m.name = nil
+}
+
+// SetURL sets the "url" field.
+func (m *FriendLinkMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *FriendLinkMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *FriendLinkMutation) ResetURL() {
+	m.url = nil
+}
+
+// SetLogo sets the "logo" field.
+func (m *FriendLinkMutation) SetLogo(s string) {
+	m.logo = &s
+}
+
+// Logo returns the value of the "logo" field in the mutation.
+func (m *FriendLinkMutation) Logo() (r string, exists bool) {
+	v := m.logo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogo returns the old "logo" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldLogo(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogo: %w", err)
+	}
+	return oldValue.Logo, nil
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (m *FriendLinkMutation) ClearLogo() {
+	m.logo = nil
+	m.clearedFields[friendlink.FieldLogo] = struct{}{}
+}
+
+// LogoCleared returns if the "logo" field was cleared in this mutation.
+func (m *FriendLinkMutation) LogoCleared() bool {
+	_, ok := m.clearedFields[friendlink.FieldLogo]
+	return ok
+}
+
+// ResetLogo resets all changes to the "logo" field.
+func (m *FriendLinkMutation) ResetLogo() {
+	m.logo = nil
+	delete(m.clearedFields, friendlink.FieldLogo)
+}
+
+// SetDescription sets the "description" field.
+func (m *FriendLinkMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *FriendLinkMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *FriendLinkMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetVisible sets the "visible" field.
+func (m *FriendLinkMutation) SetVisible(b bool) {
+	m.visible = &b
+}
+
+// Visible returns the value of the "visible" field in the mutation.
+func (m *FriendLinkMutation) Visible() (r bool, exists bool) {
+	v := m.visible
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisible returns the old "visible" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldVisible(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisible is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisible requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisible: %w", err)
+	}
+	return oldValue.Visible, nil
+}
+
+// ResetVisible resets all changes to the "visible" field.
+func (m *FriendLinkMutation) ResetVisible() {
+	m.visible = nil
+}
+
+// SetPosition sets the "position" field.
+func (m *FriendLinkMutation) SetPosition(i int) {
+	m.position = &i
+	m.addposition = nil
+}
+
+// Position returns the value of the "position" field in the mutation.
+func (m *FriendLinkMutation) Position() (r int, exists bool) {
+	v := m.position
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPosition returns the old "position" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldPosition(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPosition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
+	}
+	return oldValue.Position, nil
+}
+
+// AddPosition adds i to the "position" field.
+func (m *FriendLinkMutation) AddPosition(i int) {
+	if m.addposition != nil {
+		*m.addposition += i
+	} else {
+		m.addposition = &i
+	}
+}
+
+// AddedPosition returns the value that was added to the "position" field in this mutation.
+func (m *FriendLinkMutation) AddedPosition() (r int, exists bool) {
+	v := m.addposition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPosition resets all changes to the "position" field.
+func (m *FriendLinkMutation) ResetPosition() {
+	m.position = nil
+	m.addposition = nil
+}
+
+// SetCreated sets the "created" field.
+func (m *FriendLinkMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *FriendLinkMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *FriendLinkMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *FriendLinkMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *FriendLinkMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the FriendLink entity.
+// If the FriendLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FriendLinkMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *FriendLinkMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// Where appends a list predicates to the FriendLinkMutation builder.
+func (m *FriendLinkMutation) Where(ps ...predicate.FriendLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FriendLinkMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FriendLinkMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FriendLink, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FriendLinkMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FriendLinkMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FriendLink).
+func (m *FriendLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FriendLinkMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.name != nil {
+		fields = append(fields, friendlink.FieldName)
+	}
+	if m.url != nil {
+		fields = append(fields, friendlink.FieldURL)
+	}
+	if m.logo != nil {
+		fields = append(fields, friendlink.FieldLogo)
+	}
+	if m.description != nil {
+		fields = append(fields, friendlink.FieldDescription)
+	}
+	if m.visible != nil {
+		fields = append(fields, friendlink.FieldVisible)
+	}
+	if m.position != nil {
+		fields = append(fields, friendlink.FieldPosition)
+	}
+	if m.created != nil {
+		fields = append(fields, friendlink.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, friendlink.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FriendLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case friendlink.FieldName:
+		return m.Name()
+	case friendlink.FieldURL:
+		return m.URL()
+	case friendlink.FieldLogo:
+		return m.Logo()
+	case friendlink.FieldDescription:
+		return m.Description()
+	case friendlink.FieldVisible:
+		return m.Visible()
+	case friendlink.FieldPosition:
+		return m.Position()
+	case friendlink.FieldCreated:
+		return m.Created()
+	case friendlink.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FriendLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case friendlink.FieldName:
+		return m.OldName(ctx)
+	case friendlink.FieldURL:
+		return m.OldURL(ctx)
+	case friendlink.FieldLogo:
+		return m.OldLogo(ctx)
+	case friendlink.FieldDescription:
+		return m.OldDescription(ctx)
+	case friendlink.FieldVisible:
+		return m.OldVisible(ctx)
+	case friendlink.FieldPosition:
+		return m.OldPosition(ctx)
+	case friendlink.FieldCreated:
+		return m.OldCreated(ctx)
+	case friendlink.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown FriendLink field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FriendLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case friendlink.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case friendlink.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
+	case friendlink.FieldLogo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogo(v)
+		return nil
+	case friendlink.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case friendlink.FieldVisible:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisible(v)
+		return nil
+	case friendlink.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPosition(v)
+		return nil
+	case friendlink.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case friendlink.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FriendLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FriendLinkMutation) AddedFields() []string {
+	var fields []string
+	if m.addposition != nil {
+		fields = append(fields, friendlink.FieldPosition)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FriendLinkMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case friendlink.FieldPosition:
+		return m.AddedPosition()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FriendLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case friendlink.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPosition(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FriendLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FriendLinkMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(friendlink.FieldLogo) {
+		fields = append(fields, friendlink.FieldLogo)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FriendLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FriendLinkMutation) ClearField(name string) error {
+	switch name {
+	case friendlink.FieldLogo:
+		m.ClearLogo()
+		return nil
+	}
+	return fmt.Errorf("unknown FriendLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FriendLinkMutation) ResetField(name string) error {
+	switch name {
+	case friendlink.FieldName:
+		m.ResetName()
+		return nil
+	case friendlink.FieldURL:
+		m.ResetURL()
+		return nil
+	case friendlink.FieldLogo:
+		m.ResetLogo()
+		return nil
+	case friendlink.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case friendlink.FieldVisible:
+		m.ResetVisible()
+		return nil
+	case friendlink.FieldPosition:
+		m.ResetPosition()
+		return nil
+	case friendlink.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case friendlink.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown FriendLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FriendLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FriendLinkMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FriendLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FriendLinkMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FriendLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FriendLinkMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FriendLinkMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown FriendLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FriendLinkMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown FriendLink edge %s", name)
 }
 
 // GameMutation represents an operation that mutates the Game nodes in the graph.
@@ -64435,6 +65826,8 @@ type UserMutation struct {
 	two_factor_enabled                           *bool
 	upload_trusted                               *bool
 	sponsor_expires_at                           *time.Time
+	api_request_limit                            *int
+	addapi_request_limit                         *int
 	created                                      *time.Time
 	updated                                      *time.Time
 	clearedFields                                map[string]struct{}
@@ -64501,6 +65894,9 @@ type UserMutation struct {
 	game_pvn_mappings                            map[int]struct{}
 	removedgame_pvn_mappings                     map[int]struct{}
 	clearedgame_pvn_mappings                     bool
+	api_keys                                     map[int]struct{}
+	removedapi_keys                              map[int]struct{}
+	clearedapi_keys                              bool
 	potatovn_binding                             *int
 	clearedpotatovn_binding                      bool
 	game_upload_sessions                         map[int]struct{}
@@ -65499,6 +66895,76 @@ func (m *UserMutation) SponsorExpiresAtCleared() bool {
 func (m *UserMutation) ResetSponsorExpiresAt() {
 	m.sponsor_expires_at = nil
 	delete(m.clearedFields, user.FieldSponsorExpiresAt)
+}
+
+// SetAPIRequestLimit sets the "api_request_limit" field.
+func (m *UserMutation) SetAPIRequestLimit(i int) {
+	m.api_request_limit = &i
+	m.addapi_request_limit = nil
+}
+
+// APIRequestLimit returns the value of the "api_request_limit" field in the mutation.
+func (m *UserMutation) APIRequestLimit() (r int, exists bool) {
+	v := m.api_request_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIRequestLimit returns the old "api_request_limit" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAPIRequestLimit(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIRequestLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIRequestLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIRequestLimit: %w", err)
+	}
+	return oldValue.APIRequestLimit, nil
+}
+
+// AddAPIRequestLimit adds i to the "api_request_limit" field.
+func (m *UserMutation) AddAPIRequestLimit(i int) {
+	if m.addapi_request_limit != nil {
+		*m.addapi_request_limit += i
+	} else {
+		m.addapi_request_limit = &i
+	}
+}
+
+// AddedAPIRequestLimit returns the value that was added to the "api_request_limit" field in this mutation.
+func (m *UserMutation) AddedAPIRequestLimit() (r int, exists bool) {
+	v := m.addapi_request_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAPIRequestLimit clears the value of the "api_request_limit" field.
+func (m *UserMutation) ClearAPIRequestLimit() {
+	m.api_request_limit = nil
+	m.addapi_request_limit = nil
+	m.clearedFields[user.FieldAPIRequestLimit] = struct{}{}
+}
+
+// APIRequestLimitCleared returns if the "api_request_limit" field was cleared in this mutation.
+func (m *UserMutation) APIRequestLimitCleared() bool {
+	_, ok := m.clearedFields[user.FieldAPIRequestLimit]
+	return ok
+}
+
+// ResetAPIRequestLimit resets all changes to the "api_request_limit" field.
+func (m *UserMutation) ResetAPIRequestLimit() {
+	m.api_request_limit = nil
+	m.addapi_request_limit = nil
+	delete(m.clearedFields, user.FieldAPIRequestLimit)
 }
 
 // SetCreated sets the "created" field.
@@ -66707,6 +68173,60 @@ func (m *UserMutation) ResetGamePvnMappings() {
 	m.removedgame_pvn_mappings = nil
 }
 
+// AddAPIKeyIDs adds the "api_keys" edge to the UserAPIKey entity by ids.
+func (m *UserMutation) AddAPIKeyIDs(ids ...int) {
+	if m.api_keys == nil {
+		m.api_keys = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.api_keys[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAPIKeys clears the "api_keys" edge to the UserAPIKey entity.
+func (m *UserMutation) ClearAPIKeys() {
+	m.clearedapi_keys = true
+}
+
+// APIKeysCleared reports if the "api_keys" edge to the UserAPIKey entity was cleared.
+func (m *UserMutation) APIKeysCleared() bool {
+	return m.clearedapi_keys
+}
+
+// RemoveAPIKeyIDs removes the "api_keys" edge to the UserAPIKey entity by IDs.
+func (m *UserMutation) RemoveAPIKeyIDs(ids ...int) {
+	if m.removedapi_keys == nil {
+		m.removedapi_keys = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.api_keys, ids[i])
+		m.removedapi_keys[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAPIKeys returns the removed IDs of the "api_keys" edge to the UserAPIKey entity.
+func (m *UserMutation) RemovedAPIKeysIDs() (ids []int) {
+	for id := range m.removedapi_keys {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// APIKeysIDs returns the "api_keys" edge IDs in the mutation.
+func (m *UserMutation) APIKeysIDs() (ids []int) {
+	for id := range m.api_keys {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAPIKeys resets all changes to the "api_keys" edge.
+func (m *UserMutation) ResetAPIKeys() {
+	m.api_keys = nil
+	m.clearedapi_keys = false
+	m.removedapi_keys = nil
+}
+
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by id.
 func (m *UserMutation) SetPotatovnBindingID(id int) {
 	m.potatovn_binding = &id
@@ -67158,7 +68678,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -67216,6 +68736,9 @@ func (m *UserMutation) Fields() []string {
 	if m.sponsor_expires_at != nil {
 		fields = append(fields, user.FieldSponsorExpiresAt)
 	}
+	if m.api_request_limit != nil {
+		fields = append(fields, user.FieldAPIRequestLimit)
+	}
 	if m.created != nil {
 		fields = append(fields, user.FieldCreated)
 	}
@@ -67268,6 +68791,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UploadTrusted()
 	case user.FieldSponsorExpiresAt:
 		return m.SponsorExpiresAt()
+	case user.FieldAPIRequestLimit:
+		return m.APIRequestLimit()
 	case user.FieldCreated:
 		return m.Created()
 	case user.FieldUpdated:
@@ -67319,6 +68844,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUploadTrusted(ctx)
 	case user.FieldSponsorExpiresAt:
 		return m.OldSponsorExpiresAt(ctx)
+	case user.FieldAPIRequestLimit:
+		return m.OldAPIRequestLimit(ctx)
 	case user.FieldCreated:
 		return m.OldCreated(ctx)
 	case user.FieldUpdated:
@@ -67465,6 +68992,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSponsorExpiresAt(v)
 		return nil
+	case user.FieldAPIRequestLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIRequestLimit(v)
+		return nil
 	case user.FieldCreated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -67499,6 +69033,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addupload_injected_file_times != nil {
 		fields = append(fields, user.FieldUploadInjectedFileTimes)
 	}
+	if m.addapi_request_limit != nil {
+		fields = append(fields, user.FieldAPIRequestLimit)
+	}
 	return fields
 }
 
@@ -67515,6 +69052,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStatus()
 	case user.FieldUploadInjectedFileTimes:
 		return m.AddedUploadInjectedFileTimes()
+	case user.FieldAPIRequestLimit:
+		return m.AddedAPIRequestLimit()
 	}
 	return nil, false
 }
@@ -67552,6 +69091,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddUploadInjectedFileTimes(v)
 		return nil
+	case user.FieldAPIRequestLimit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAPIRequestLimit(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -67583,6 +69129,9 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldSponsorExpiresAt) {
 		fields = append(fields, user.FieldSponsorExpiresAt)
+	}
+	if m.FieldCleared(user.FieldAPIRequestLimit) {
+		fields = append(fields, user.FieldAPIRequestLimit)
 	}
 	return fields
 }
@@ -67621,6 +69170,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldSponsorExpiresAt:
 		m.ClearSponsorExpiresAt()
+		return nil
+	case user.FieldAPIRequestLimit:
+		m.ClearAPIRequestLimit()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -67687,6 +69239,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldSponsorExpiresAt:
 		m.ResetSponsorExpiresAt()
 		return nil
+	case user.FieldAPIRequestLimit:
+		m.ResetAPIRequestLimit()
+		return nil
 	case user.FieldCreated:
 		m.ResetCreated()
 		return nil
@@ -67699,7 +69254,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 30)
 	if m.activities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -67762,6 +69317,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.game_pvn_mappings != nil {
 		edges = append(edges, user.EdgeGamePvnMappings)
+	}
+	if m.api_keys != nil {
+		edges = append(edges, user.EdgeAPIKeys)
 	}
 	if m.potatovn_binding != nil {
 		edges = append(edges, user.EdgePotatovnBinding)
@@ -67920,6 +69478,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeAPIKeys:
+		ids := make([]ent.Value, 0, len(m.api_keys))
+		for id := range m.api_keys {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgePotatovnBinding:
 		if id := m.potatovn_binding; id != nil {
 			return []ent.Value{*id}
@@ -67972,7 +69536,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 30)
 	if m.removedactivities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -68035,6 +69599,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedgame_pvn_mappings != nil {
 		edges = append(edges, user.EdgeGamePvnMappings)
+	}
+	if m.removedapi_keys != nil {
+		edges = append(edges, user.EdgeAPIKeys)
 	}
 	if m.removedgame_upload_sessions != nil {
 		edges = append(edges, user.EdgeGameUploadSessions)
@@ -68190,6 +69757,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeAPIKeys:
+		ids := make([]ent.Value, 0, len(m.removedapi_keys))
+		for id := range m.removedapi_keys {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeGameUploadSessions:
 		ids := make([]ent.Value, 0, len(m.removedgame_upload_sessions))
 		for id := range m.removedgame_upload_sessions {
@@ -68238,7 +69811,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 30)
 	if m.clearedactivities {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -68301,6 +69874,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedgame_pvn_mappings {
 		edges = append(edges, user.EdgeGamePvnMappings)
+	}
+	if m.clearedapi_keys {
+		edges = append(edges, user.EdgeAPIKeys)
 	}
 	if m.clearedpotatovn_binding {
 		edges = append(edges, user.EdgePotatovnBinding)
@@ -68375,6 +69951,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedsponsor_orders
 	case user.EdgeGamePvnMappings:
 		return m.clearedgame_pvn_mappings
+	case user.EdgeAPIKeys:
+		return m.clearedapi_keys
 	case user.EdgePotatovnBinding:
 		return m.clearedpotatovn_binding
 	case user.EdgeGameUploadSessions:
@@ -68473,6 +70051,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeGamePvnMappings:
 		m.ResetGamePvnMappings()
 		return nil
+	case user.EdgeAPIKeys:
+		m.ResetAPIKeys()
+		return nil
 	case user.EdgePotatovnBinding:
 		m.ResetPotatovnBinding()
 		return nil
@@ -68499,6 +70080,1239 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
+}
+
+// UserAPIKeyMutation represents an operation that mutates the UserAPIKey nodes in the graph.
+type UserAPIKeyMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	name             *string
+	prefix           *string
+	secret_hash      *string
+	status           *int
+	addstatus        *int
+	suspended_reason *string
+	suspended_at     *time.Time
+	suspended_by     *int
+	addsuspended_by  *int
+	last_used_at     *time.Time
+	last_used_ip     *string
+	created          *time.Time
+	updated          *time.Time
+	clearedFields    map[string]struct{}
+	user             *int
+	cleareduser      bool
+	usages           map[int]struct{}
+	removedusages    map[int]struct{}
+	clearedusages    bool
+	done             bool
+	oldValue         func(context.Context) (*UserAPIKey, error)
+	predicates       []predicate.UserAPIKey
+}
+
+var _ ent.Mutation = (*UserAPIKeyMutation)(nil)
+
+// userapikeyOption allows management of the mutation configuration using functional options.
+type userapikeyOption func(*UserAPIKeyMutation)
+
+// newUserAPIKeyMutation creates new mutation for the UserAPIKey entity.
+func newUserAPIKeyMutation(c config, op Op, opts ...userapikeyOption) *UserAPIKeyMutation {
+	m := &UserAPIKeyMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUserAPIKey,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserAPIKeyID sets the ID field of the mutation.
+func withUserAPIKeyID(id int) userapikeyOption {
+	return func(m *UserAPIKeyMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *UserAPIKey
+		)
+		m.oldValue = func(ctx context.Context) (*UserAPIKey, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().UserAPIKey.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUserAPIKey sets the old UserAPIKey of the mutation.
+func withUserAPIKey(node *UserAPIKey) userapikeyOption {
+	return func(m *UserAPIKeyMutation) {
+		m.oldValue = func(context.Context) (*UserAPIKey, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UserAPIKeyMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UserAPIKeyMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of UserAPIKey entities.
+func (m *UserAPIKeyMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UserAPIKeyMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UserAPIKeyMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().UserAPIKey.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *UserAPIKeyMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *UserAPIKeyMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *UserAPIKeyMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetName sets the "name" field.
+func (m *UserAPIKeyMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *UserAPIKeyMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *UserAPIKeyMutation) ResetName() {
+	m.name = nil
+}
+
+// SetPrefix sets the "prefix" field.
+func (m *UserAPIKeyMutation) SetPrefix(s string) {
+	m.prefix = &s
+}
+
+// Prefix returns the value of the "prefix" field in the mutation.
+func (m *UserAPIKeyMutation) Prefix() (r string, exists bool) {
+	v := m.prefix
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrefix returns the old "prefix" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldPrefix(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrefix is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrefix requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrefix: %w", err)
+	}
+	return oldValue.Prefix, nil
+}
+
+// ResetPrefix resets all changes to the "prefix" field.
+func (m *UserAPIKeyMutation) ResetPrefix() {
+	m.prefix = nil
+}
+
+// SetSecretHash sets the "secret_hash" field.
+func (m *UserAPIKeyMutation) SetSecretHash(s string) {
+	m.secret_hash = &s
+}
+
+// SecretHash returns the value of the "secret_hash" field in the mutation.
+func (m *UserAPIKeyMutation) SecretHash() (r string, exists bool) {
+	v := m.secret_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecretHash returns the old "secret_hash" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldSecretHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecretHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecretHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecretHash: %w", err)
+	}
+	return oldValue.SecretHash, nil
+}
+
+// ResetSecretHash resets all changes to the "secret_hash" field.
+func (m *UserAPIKeyMutation) ResetSecretHash() {
+	m.secret_hash = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *UserAPIKeyMutation) SetStatus(i int) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *UserAPIKeyMutation) Status() (r int, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldStatus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *UserAPIKeyMutation) AddStatus(i int) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *UserAPIKeyMutation) AddedStatus() (r int, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *UserAPIKeyMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
+// SetSuspendedReason sets the "suspended_reason" field.
+func (m *UserAPIKeyMutation) SetSuspendedReason(s string) {
+	m.suspended_reason = &s
+}
+
+// SuspendedReason returns the value of the "suspended_reason" field in the mutation.
+func (m *UserAPIKeyMutation) SuspendedReason() (r string, exists bool) {
+	v := m.suspended_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuspendedReason returns the old "suspended_reason" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldSuspendedReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuspendedReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuspendedReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuspendedReason: %w", err)
+	}
+	return oldValue.SuspendedReason, nil
+}
+
+// ClearSuspendedReason clears the value of the "suspended_reason" field.
+func (m *UserAPIKeyMutation) ClearSuspendedReason() {
+	m.suspended_reason = nil
+	m.clearedFields[userapikey.FieldSuspendedReason] = struct{}{}
+}
+
+// SuspendedReasonCleared returns if the "suspended_reason" field was cleared in this mutation.
+func (m *UserAPIKeyMutation) SuspendedReasonCleared() bool {
+	_, ok := m.clearedFields[userapikey.FieldSuspendedReason]
+	return ok
+}
+
+// ResetSuspendedReason resets all changes to the "suspended_reason" field.
+func (m *UserAPIKeyMutation) ResetSuspendedReason() {
+	m.suspended_reason = nil
+	delete(m.clearedFields, userapikey.FieldSuspendedReason)
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (m *UserAPIKeyMutation) SetSuspendedAt(t time.Time) {
+	m.suspended_at = &t
+}
+
+// SuspendedAt returns the value of the "suspended_at" field in the mutation.
+func (m *UserAPIKeyMutation) SuspendedAt() (r time.Time, exists bool) {
+	v := m.suspended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuspendedAt returns the old "suspended_at" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldSuspendedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuspendedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuspendedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuspendedAt: %w", err)
+	}
+	return oldValue.SuspendedAt, nil
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (m *UserAPIKeyMutation) ClearSuspendedAt() {
+	m.suspended_at = nil
+	m.clearedFields[userapikey.FieldSuspendedAt] = struct{}{}
+}
+
+// SuspendedAtCleared returns if the "suspended_at" field was cleared in this mutation.
+func (m *UserAPIKeyMutation) SuspendedAtCleared() bool {
+	_, ok := m.clearedFields[userapikey.FieldSuspendedAt]
+	return ok
+}
+
+// ResetSuspendedAt resets all changes to the "suspended_at" field.
+func (m *UserAPIKeyMutation) ResetSuspendedAt() {
+	m.suspended_at = nil
+	delete(m.clearedFields, userapikey.FieldSuspendedAt)
+}
+
+// SetSuspendedBy sets the "suspended_by" field.
+func (m *UserAPIKeyMutation) SetSuspendedBy(i int) {
+	m.suspended_by = &i
+	m.addsuspended_by = nil
+}
+
+// SuspendedBy returns the value of the "suspended_by" field in the mutation.
+func (m *UserAPIKeyMutation) SuspendedBy() (r int, exists bool) {
+	v := m.suspended_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuspendedBy returns the old "suspended_by" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldSuspendedBy(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuspendedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuspendedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuspendedBy: %w", err)
+	}
+	return oldValue.SuspendedBy, nil
+}
+
+// AddSuspendedBy adds i to the "suspended_by" field.
+func (m *UserAPIKeyMutation) AddSuspendedBy(i int) {
+	if m.addsuspended_by != nil {
+		*m.addsuspended_by += i
+	} else {
+		m.addsuspended_by = &i
+	}
+}
+
+// AddedSuspendedBy returns the value that was added to the "suspended_by" field in this mutation.
+func (m *UserAPIKeyMutation) AddedSuspendedBy() (r int, exists bool) {
+	v := m.addsuspended_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSuspendedBy clears the value of the "suspended_by" field.
+func (m *UserAPIKeyMutation) ClearSuspendedBy() {
+	m.suspended_by = nil
+	m.addsuspended_by = nil
+	m.clearedFields[userapikey.FieldSuspendedBy] = struct{}{}
+}
+
+// SuspendedByCleared returns if the "suspended_by" field was cleared in this mutation.
+func (m *UserAPIKeyMutation) SuspendedByCleared() bool {
+	_, ok := m.clearedFields[userapikey.FieldSuspendedBy]
+	return ok
+}
+
+// ResetSuspendedBy resets all changes to the "suspended_by" field.
+func (m *UserAPIKeyMutation) ResetSuspendedBy() {
+	m.suspended_by = nil
+	m.addsuspended_by = nil
+	delete(m.clearedFields, userapikey.FieldSuspendedBy)
+}
+
+// SetLastUsedAt sets the "last_used_at" field.
+func (m *UserAPIKeyMutation) SetLastUsedAt(t time.Time) {
+	m.last_used_at = &t
+}
+
+// LastUsedAt returns the value of the "last_used_at" field in the mutation.
+func (m *UserAPIKeyMutation) LastUsedAt() (r time.Time, exists bool) {
+	v := m.last_used_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedAt returns the old "last_used_at" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldLastUsedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
+	}
+	return oldValue.LastUsedAt, nil
+}
+
+// ClearLastUsedAt clears the value of the "last_used_at" field.
+func (m *UserAPIKeyMutation) ClearLastUsedAt() {
+	m.last_used_at = nil
+	m.clearedFields[userapikey.FieldLastUsedAt] = struct{}{}
+}
+
+// LastUsedAtCleared returns if the "last_used_at" field was cleared in this mutation.
+func (m *UserAPIKeyMutation) LastUsedAtCleared() bool {
+	_, ok := m.clearedFields[userapikey.FieldLastUsedAt]
+	return ok
+}
+
+// ResetLastUsedAt resets all changes to the "last_used_at" field.
+func (m *UserAPIKeyMutation) ResetLastUsedAt() {
+	m.last_used_at = nil
+	delete(m.clearedFields, userapikey.FieldLastUsedAt)
+}
+
+// SetLastUsedIP sets the "last_used_ip" field.
+func (m *UserAPIKeyMutation) SetLastUsedIP(s string) {
+	m.last_used_ip = &s
+}
+
+// LastUsedIP returns the value of the "last_used_ip" field in the mutation.
+func (m *UserAPIKeyMutation) LastUsedIP() (r string, exists bool) {
+	v := m.last_used_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedIP returns the old "last_used_ip" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldLastUsedIP(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedIP: %w", err)
+	}
+	return oldValue.LastUsedIP, nil
+}
+
+// ClearLastUsedIP clears the value of the "last_used_ip" field.
+func (m *UserAPIKeyMutation) ClearLastUsedIP() {
+	m.last_used_ip = nil
+	m.clearedFields[userapikey.FieldLastUsedIP] = struct{}{}
+}
+
+// LastUsedIPCleared returns if the "last_used_ip" field was cleared in this mutation.
+func (m *UserAPIKeyMutation) LastUsedIPCleared() bool {
+	_, ok := m.clearedFields[userapikey.FieldLastUsedIP]
+	return ok
+}
+
+// ResetLastUsedIP resets all changes to the "last_used_ip" field.
+func (m *UserAPIKeyMutation) ResetLastUsedIP() {
+	m.last_used_ip = nil
+	delete(m.clearedFields, userapikey.FieldLastUsedIP)
+}
+
+// SetCreated sets the "created" field.
+func (m *UserAPIKeyMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *UserAPIKeyMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *UserAPIKeyMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *UserAPIKeyMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *UserAPIKeyMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the UserAPIKey entity.
+// If the UserAPIKey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserAPIKeyMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *UserAPIKeyMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *UserAPIKeyMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[userapikey.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *UserAPIKeyMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *UserAPIKeyMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *UserAPIKeyMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// AddUsageIDs adds the "usages" edge to the APIKeyDailyUsage entity by ids.
+func (m *UserAPIKeyMutation) AddUsageIDs(ids ...int) {
+	if m.usages == nil {
+		m.usages = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.usages[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsages clears the "usages" edge to the APIKeyDailyUsage entity.
+func (m *UserAPIKeyMutation) ClearUsages() {
+	m.clearedusages = true
+}
+
+// UsagesCleared reports if the "usages" edge to the APIKeyDailyUsage entity was cleared.
+func (m *UserAPIKeyMutation) UsagesCleared() bool {
+	return m.clearedusages
+}
+
+// RemoveUsageIDs removes the "usages" edge to the APIKeyDailyUsage entity by IDs.
+func (m *UserAPIKeyMutation) RemoveUsageIDs(ids ...int) {
+	if m.removedusages == nil {
+		m.removedusages = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.usages, ids[i])
+		m.removedusages[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsages returns the removed IDs of the "usages" edge to the APIKeyDailyUsage entity.
+func (m *UserAPIKeyMutation) RemovedUsagesIDs() (ids []int) {
+	for id := range m.removedusages {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsagesIDs returns the "usages" edge IDs in the mutation.
+func (m *UserAPIKeyMutation) UsagesIDs() (ids []int) {
+	for id := range m.usages {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsages resets all changes to the "usages" edge.
+func (m *UserAPIKeyMutation) ResetUsages() {
+	m.usages = nil
+	m.clearedusages = false
+	m.removedusages = nil
+}
+
+// Where appends a list predicates to the UserAPIKeyMutation builder.
+func (m *UserAPIKeyMutation) Where(ps ...predicate.UserAPIKey) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UserAPIKeyMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserAPIKeyMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.UserAPIKey, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UserAPIKeyMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserAPIKeyMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (UserAPIKey).
+func (m *UserAPIKeyMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UserAPIKeyMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.user != nil {
+		fields = append(fields, userapikey.FieldUserID)
+	}
+	if m.name != nil {
+		fields = append(fields, userapikey.FieldName)
+	}
+	if m.prefix != nil {
+		fields = append(fields, userapikey.FieldPrefix)
+	}
+	if m.secret_hash != nil {
+		fields = append(fields, userapikey.FieldSecretHash)
+	}
+	if m.status != nil {
+		fields = append(fields, userapikey.FieldStatus)
+	}
+	if m.suspended_reason != nil {
+		fields = append(fields, userapikey.FieldSuspendedReason)
+	}
+	if m.suspended_at != nil {
+		fields = append(fields, userapikey.FieldSuspendedAt)
+	}
+	if m.suspended_by != nil {
+		fields = append(fields, userapikey.FieldSuspendedBy)
+	}
+	if m.last_used_at != nil {
+		fields = append(fields, userapikey.FieldLastUsedAt)
+	}
+	if m.last_used_ip != nil {
+		fields = append(fields, userapikey.FieldLastUsedIP)
+	}
+	if m.created != nil {
+		fields = append(fields, userapikey.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, userapikey.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UserAPIKeyMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case userapikey.FieldUserID:
+		return m.UserID()
+	case userapikey.FieldName:
+		return m.Name()
+	case userapikey.FieldPrefix:
+		return m.Prefix()
+	case userapikey.FieldSecretHash:
+		return m.SecretHash()
+	case userapikey.FieldStatus:
+		return m.Status()
+	case userapikey.FieldSuspendedReason:
+		return m.SuspendedReason()
+	case userapikey.FieldSuspendedAt:
+		return m.SuspendedAt()
+	case userapikey.FieldSuspendedBy:
+		return m.SuspendedBy()
+	case userapikey.FieldLastUsedAt:
+		return m.LastUsedAt()
+	case userapikey.FieldLastUsedIP:
+		return m.LastUsedIP()
+	case userapikey.FieldCreated:
+		return m.Created()
+	case userapikey.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UserAPIKeyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case userapikey.FieldUserID:
+		return m.OldUserID(ctx)
+	case userapikey.FieldName:
+		return m.OldName(ctx)
+	case userapikey.FieldPrefix:
+		return m.OldPrefix(ctx)
+	case userapikey.FieldSecretHash:
+		return m.OldSecretHash(ctx)
+	case userapikey.FieldStatus:
+		return m.OldStatus(ctx)
+	case userapikey.FieldSuspendedReason:
+		return m.OldSuspendedReason(ctx)
+	case userapikey.FieldSuspendedAt:
+		return m.OldSuspendedAt(ctx)
+	case userapikey.FieldSuspendedBy:
+		return m.OldSuspendedBy(ctx)
+	case userapikey.FieldLastUsedAt:
+		return m.OldLastUsedAt(ctx)
+	case userapikey.FieldLastUsedIP:
+		return m.OldLastUsedIP(ctx)
+	case userapikey.FieldCreated:
+		return m.OldCreated(ctx)
+	case userapikey.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown UserAPIKey field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserAPIKeyMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case userapikey.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case userapikey.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case userapikey.FieldPrefix:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrefix(v)
+		return nil
+	case userapikey.FieldSecretHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecretHash(v)
+		return nil
+	case userapikey.FieldStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case userapikey.FieldSuspendedReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuspendedReason(v)
+		return nil
+	case userapikey.FieldSuspendedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuspendedAt(v)
+		return nil
+	case userapikey.FieldSuspendedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuspendedBy(v)
+		return nil
+	case userapikey.FieldLastUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedAt(v)
+		return nil
+	case userapikey.FieldLastUsedIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedIP(v)
+		return nil
+	case userapikey.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case userapikey.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UserAPIKeyMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, userapikey.FieldStatus)
+	}
+	if m.addsuspended_by != nil {
+		fields = append(fields, userapikey.FieldSuspendedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UserAPIKeyMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case userapikey.FieldStatus:
+		return m.AddedStatus()
+	case userapikey.FieldSuspendedBy:
+		return m.AddedSuspendedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserAPIKeyMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case userapikey.FieldStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	case userapikey.FieldSuspendedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSuspendedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UserAPIKeyMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(userapikey.FieldSuspendedReason) {
+		fields = append(fields, userapikey.FieldSuspendedReason)
+	}
+	if m.FieldCleared(userapikey.FieldSuspendedAt) {
+		fields = append(fields, userapikey.FieldSuspendedAt)
+	}
+	if m.FieldCleared(userapikey.FieldSuspendedBy) {
+		fields = append(fields, userapikey.FieldSuspendedBy)
+	}
+	if m.FieldCleared(userapikey.FieldLastUsedAt) {
+		fields = append(fields, userapikey.FieldLastUsedAt)
+	}
+	if m.FieldCleared(userapikey.FieldLastUsedIP) {
+		fields = append(fields, userapikey.FieldLastUsedIP)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UserAPIKeyMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UserAPIKeyMutation) ClearField(name string) error {
+	switch name {
+	case userapikey.FieldSuspendedReason:
+		m.ClearSuspendedReason()
+		return nil
+	case userapikey.FieldSuspendedAt:
+		m.ClearSuspendedAt()
+		return nil
+	case userapikey.FieldSuspendedBy:
+		m.ClearSuspendedBy()
+		return nil
+	case userapikey.FieldLastUsedAt:
+		m.ClearLastUsedAt()
+		return nil
+	case userapikey.FieldLastUsedIP:
+		m.ClearLastUsedIP()
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UserAPIKeyMutation) ResetField(name string) error {
+	switch name {
+	case userapikey.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case userapikey.FieldName:
+		m.ResetName()
+		return nil
+	case userapikey.FieldPrefix:
+		m.ResetPrefix()
+		return nil
+	case userapikey.FieldSecretHash:
+		m.ResetSecretHash()
+		return nil
+	case userapikey.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case userapikey.FieldSuspendedReason:
+		m.ResetSuspendedReason()
+		return nil
+	case userapikey.FieldSuspendedAt:
+		m.ResetSuspendedAt()
+		return nil
+	case userapikey.FieldSuspendedBy:
+		m.ResetSuspendedBy()
+		return nil
+	case userapikey.FieldLastUsedAt:
+		m.ResetLastUsedAt()
+		return nil
+	case userapikey.FieldLastUsedIP:
+		m.ResetLastUsedIP()
+		return nil
+	case userapikey.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case userapikey.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UserAPIKeyMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.user != nil {
+		edges = append(edges, userapikey.EdgeUser)
+	}
+	if m.usages != nil {
+		edges = append(edges, userapikey.EdgeUsages)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UserAPIKeyMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case userapikey.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case userapikey.EdgeUsages:
+		ids := make([]ent.Value, 0, len(m.usages))
+		for id := range m.usages {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UserAPIKeyMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedusages != nil {
+		edges = append(edges, userapikey.EdgeUsages)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UserAPIKeyMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case userapikey.EdgeUsages:
+		ids := make([]ent.Value, 0, len(m.removedusages))
+		for id := range m.removedusages {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UserAPIKeyMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareduser {
+		edges = append(edges, userapikey.EdgeUser)
+	}
+	if m.clearedusages {
+		edges = append(edges, userapikey.EdgeUsages)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UserAPIKeyMutation) EdgeCleared(name string) bool {
+	switch name {
+	case userapikey.EdgeUser:
+		return m.cleareduser
+	case userapikey.EdgeUsages:
+		return m.clearedusages
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UserAPIKeyMutation) ClearEdge(name string) error {
+	switch name {
+	case userapikey.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UserAPIKeyMutation) ResetEdge(name string) error {
+	switch name {
+	case userapikey.EdgeUser:
+		m.ResetUser()
+		return nil
+	case userapikey.EdgeUsages:
+		m.ResetUsages()
+		return nil
+	}
+	return fmt.Errorf("unknown UserAPIKey edge %s", name)
 }
 
 // UserBannedRecordMutation represents an operation that mutates the UserBannedRecord nodes in the graph.

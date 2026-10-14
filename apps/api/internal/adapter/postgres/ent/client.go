@@ -27,6 +27,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/apikeydailyusage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -36,6 +37,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -69,6 +71,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -105,6 +108,8 @@ type Client struct {
 	AIRouteAdjustment *AIRouteAdjustmentClient
 	// AIScene is the client for interacting with the AIScene builders.
 	AIScene *AISceneClient
+	// APIKeyDailyUsage is the client for interacting with the APIKeyDailyUsage builders.
+	APIKeyDailyUsage *APIKeyDailyUsageClient
 	// Activity is the client for interacting with the Activity builders.
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
@@ -127,6 +132,8 @@ type Client struct {
 	FavoriteItem *FavoriteItemClient
 	// FieldPermissionMapping is the client for interacting with the FieldPermissionMapping builders.
 	FieldPermissionMapping *FieldPermissionMappingClient
+	// FriendLink is the client for interacting with the FriendLink builders.
+	FriendLink *FriendLinkClient
 	// Game is the client for interacting with the Game builders.
 	Game *GameClient
 	// GameCharacter is the client for interacting with the GameCharacter builders.
@@ -193,6 +200,8 @@ type Client struct {
 	TranslatorDistinction *TranslatorDistinctionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserAPIKey is the client for interacting with the UserAPIKey builders.
+	UserAPIKey *UserAPIKeyClient
 	// UserBannedRecord is the client for interacting with the UserBannedRecord builders.
 	UserBannedRecord *UserBannedRecordClient
 	// UserFieldPermission is the client for interacting with the UserFieldPermission builders.
@@ -228,6 +237,7 @@ func (c *Client) init() {
 	c.AIRoute = NewAIRouteClient(c.config)
 	c.AIRouteAdjustment = NewAIRouteAdjustmentClient(c.config)
 	c.AIScene = NewAISceneClient(c.config)
+	c.APIKeyDailyUsage = NewAPIKeyDailyUsageClient(c.config)
 	c.Activity = NewActivityClient(c.config)
 	c.Ad = NewAdClient(c.config)
 	c.CatalogSourceLink = NewCatalogSourceLinkClient(c.config)
@@ -239,6 +249,7 @@ func (c *Client) init() {
 	c.Favorite = NewFavoriteClient(c.config)
 	c.FavoriteItem = NewFavoriteItemClient(c.config)
 	c.FieldPermissionMapping = NewFieldPermissionMappingClient(c.config)
+	c.FriendLink = NewFriendLinkClient(c.config)
 	c.Game = NewGameClient(c.config)
 	c.GameCharacter = NewGameCharacterClient(c.config)
 	c.GameCharacterRelation = NewGameCharacterRelationClient(c.config)
@@ -272,6 +283,7 @@ func (c *Client) init() {
 	c.Translator = NewTranslatorClient(c.config)
 	c.TranslatorDistinction = NewTranslatorDistinctionClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserAPIKey = NewUserAPIKeyClient(c.config)
 	c.UserBannedRecord = NewUserBannedRecordClient(c.config)
 	c.UserFieldPermission = NewUserFieldPermissionClient(c.config)
 	c.UserGamePvnMapping = NewUserGamePvnMappingClient(c.config)
@@ -381,6 +393,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AIRoute:                         NewAIRouteClient(cfg),
 		AIRouteAdjustment:               NewAIRouteAdjustmentClient(cfg),
 		AIScene:                         NewAISceneClient(cfg),
+		APIKeyDailyUsage:                NewAPIKeyDailyUsageClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
@@ -392,6 +405,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
 		FieldPermissionMapping:          NewFieldPermissionMappingClient(cfg),
+		FriendLink:                      NewFriendLinkClient(cfg),
 		Game:                            NewGameClient(cfg),
 		GameCharacter:                   NewGameCharacterClient(cfg),
 		GameCharacterRelation:           NewGameCharacterRelationClient(cfg),
@@ -425,6 +439,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Translator:                      NewTranslatorClient(cfg),
 		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
 		User:                            NewUserClient(cfg),
+		UserAPIKey:                      NewUserAPIKeyClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
 		UserFieldPermission:             NewUserFieldPermissionClient(cfg),
 		UserGamePvnMapping:              NewUserGamePvnMappingClient(cfg),
@@ -461,6 +476,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AIRoute:                         NewAIRouteClient(cfg),
 		AIRouteAdjustment:               NewAIRouteAdjustmentClient(cfg),
 		AIScene:                         NewAISceneClient(cfg),
+		APIKeyDailyUsage:                NewAPIKeyDailyUsageClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
@@ -472,6 +488,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
 		FieldPermissionMapping:          NewFieldPermissionMappingClient(cfg),
+		FriendLink:                      NewFriendLinkClient(cfg),
 		Game:                            NewGameClient(cfg),
 		GameCharacter:                   NewGameCharacterClient(cfg),
 		GameCharacterRelation:           NewGameCharacterRelationClient(cfg),
@@ -505,6 +522,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Translator:                      NewTranslatorClient(cfg),
 		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
 		User:                            NewUserClient(cfg),
+		UserAPIKey:                      NewUserAPIKeyClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
 		UserFieldPermission:             NewUserFieldPermissionClient(cfg),
 		UserGamePvnMapping:              NewUserGamePvnMappingClient(cfg),
@@ -543,9 +561,10 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
-		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
-		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
-		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.AIRouteAdjustment, c.AIScene, c.APIKeyDailyUsage, c.Activity, c.Ad,
+		c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment, c.CommentLike,
+		c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.FieldPermissionMapping, c.FriendLink, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
@@ -554,9 +573,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
 		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.TranslatorDistinction, c.User, c.UserAPIKey, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -568,9 +587,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
-		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
-		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
-		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.AIRouteAdjustment, c.AIScene, c.APIKeyDailyUsage, c.Activity, c.Ad,
+		c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment, c.CommentLike,
+		c.Composition, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.FieldPermissionMapping, c.FriendLink, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
@@ -579,9 +599,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
 		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.TranslatorDistinction, c.User, c.UserAPIKey, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -610,6 +630,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AIRouteAdjustment.mutate(ctx, m)
 	case *AISceneMutation:
 		return c.AIScene.mutate(ctx, m)
+	case *APIKeyDailyUsageMutation:
+		return c.APIKeyDailyUsage.mutate(ctx, m)
 	case *ActivityMutation:
 		return c.Activity.mutate(ctx, m)
 	case *AdMutation:
@@ -632,6 +654,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.FavoriteItem.mutate(ctx, m)
 	case *FieldPermissionMappingMutation:
 		return c.FieldPermissionMapping.mutate(ctx, m)
+	case *FriendLinkMutation:
+		return c.FriendLink.mutate(ctx, m)
 	case *GameMutation:
 		return c.Game.mutate(ctx, m)
 	case *GameCharacterMutation:
@@ -698,6 +722,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TranslatorDistinction.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *UserAPIKeyMutation:
+		return c.UserAPIKey.mutate(ctx, m)
 	case *UserBannedRecordMutation:
 		return c.UserBannedRecord.mutate(ctx, m)
 	case *UserFieldPermissionMutation:
@@ -2428,6 +2454,155 @@ func (c *AISceneClient) mutate(ctx context.Context, m *AISceneMutation) (Value, 
 		return (&AISceneDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AIScene mutation op: %q", m.Op())
+	}
+}
+
+// APIKeyDailyUsageClient is a client for the APIKeyDailyUsage schema.
+type APIKeyDailyUsageClient struct {
+	config
+}
+
+// NewAPIKeyDailyUsageClient returns a client for the APIKeyDailyUsage from the given config.
+func NewAPIKeyDailyUsageClient(c config) *APIKeyDailyUsageClient {
+	return &APIKeyDailyUsageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `apikeydailyusage.Hooks(f(g(h())))`.
+func (c *APIKeyDailyUsageClient) Use(hooks ...Hook) {
+	c.hooks.APIKeyDailyUsage = append(c.hooks.APIKeyDailyUsage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `apikeydailyusage.Intercept(f(g(h())))`.
+func (c *APIKeyDailyUsageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.APIKeyDailyUsage = append(c.inters.APIKeyDailyUsage, interceptors...)
+}
+
+// Create returns a builder for creating a APIKeyDailyUsage entity.
+func (c *APIKeyDailyUsageClient) Create() *APIKeyDailyUsageCreate {
+	mutation := newAPIKeyDailyUsageMutation(c.config, OpCreate)
+	return &APIKeyDailyUsageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of APIKeyDailyUsage entities.
+func (c *APIKeyDailyUsageClient) CreateBulk(builders ...*APIKeyDailyUsageCreate) *APIKeyDailyUsageCreateBulk {
+	return &APIKeyDailyUsageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *APIKeyDailyUsageClient) MapCreateBulk(slice any, setFunc func(*APIKeyDailyUsageCreate, int)) *APIKeyDailyUsageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &APIKeyDailyUsageCreateBulk{err: fmt.Errorf("calling to APIKeyDailyUsageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*APIKeyDailyUsageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &APIKeyDailyUsageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for APIKeyDailyUsage.
+func (c *APIKeyDailyUsageClient) Update() *APIKeyDailyUsageUpdate {
+	mutation := newAPIKeyDailyUsageMutation(c.config, OpUpdate)
+	return &APIKeyDailyUsageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *APIKeyDailyUsageClient) UpdateOne(_m *APIKeyDailyUsage) *APIKeyDailyUsageUpdateOne {
+	mutation := newAPIKeyDailyUsageMutation(c.config, OpUpdateOne, withAPIKeyDailyUsage(_m))
+	return &APIKeyDailyUsageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *APIKeyDailyUsageClient) UpdateOneID(id int) *APIKeyDailyUsageUpdateOne {
+	mutation := newAPIKeyDailyUsageMutation(c.config, OpUpdateOne, withAPIKeyDailyUsageID(id))
+	return &APIKeyDailyUsageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for APIKeyDailyUsage.
+func (c *APIKeyDailyUsageClient) Delete() *APIKeyDailyUsageDelete {
+	mutation := newAPIKeyDailyUsageMutation(c.config, OpDelete)
+	return &APIKeyDailyUsageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *APIKeyDailyUsageClient) DeleteOne(_m *APIKeyDailyUsage) *APIKeyDailyUsageDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *APIKeyDailyUsageClient) DeleteOneID(id int) *APIKeyDailyUsageDeleteOne {
+	builder := c.Delete().Where(apikeydailyusage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &APIKeyDailyUsageDeleteOne{builder}
+}
+
+// Query returns a query builder for APIKeyDailyUsage.
+func (c *APIKeyDailyUsageClient) Query() *APIKeyDailyUsageQuery {
+	return &APIKeyDailyUsageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAPIKeyDailyUsage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a APIKeyDailyUsage entity by its id.
+func (c *APIKeyDailyUsageClient) Get(ctx context.Context, id int) (*APIKeyDailyUsage, error) {
+	return c.Query().Where(apikeydailyusage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *APIKeyDailyUsageClient) GetX(ctx context.Context, id int) *APIKeyDailyUsage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryKey queries the key edge of a APIKeyDailyUsage.
+func (c *APIKeyDailyUsageClient) QueryKey(_m *APIKeyDailyUsage) *UserAPIKeyQuery {
+	query := (&UserAPIKeyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(apikeydailyusage.Table, apikeydailyusage.FieldID, id),
+			sqlgraph.To(userapikey.Table, userapikey.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, apikeydailyusage.KeyTable, apikeydailyusage.KeyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *APIKeyDailyUsageClient) Hooks() []Hook {
+	return c.hooks.APIKeyDailyUsage
+}
+
+// Interceptors returns the client interceptors.
+func (c *APIKeyDailyUsageClient) Interceptors() []Interceptor {
+	return c.inters.APIKeyDailyUsage
+}
+
+func (c *APIKeyDailyUsageClient) mutate(ctx context.Context, m *APIKeyDailyUsageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&APIKeyDailyUsageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&APIKeyDailyUsageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&APIKeyDailyUsageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&APIKeyDailyUsageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown APIKeyDailyUsage mutation op: %q", m.Op())
 	}
 }
 
@@ -4338,6 +4513,139 @@ func (c *FieldPermissionMappingClient) mutate(ctx context.Context, m *FieldPermi
 		return (&FieldPermissionMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown FieldPermissionMapping mutation op: %q", m.Op())
+	}
+}
+
+// FriendLinkClient is a client for the FriendLink schema.
+type FriendLinkClient struct {
+	config
+}
+
+// NewFriendLinkClient returns a client for the FriendLink from the given config.
+func NewFriendLinkClient(c config) *FriendLinkClient {
+	return &FriendLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `friendlink.Hooks(f(g(h())))`.
+func (c *FriendLinkClient) Use(hooks ...Hook) {
+	c.hooks.FriendLink = append(c.hooks.FriendLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `friendlink.Intercept(f(g(h())))`.
+func (c *FriendLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FriendLink = append(c.inters.FriendLink, interceptors...)
+}
+
+// Create returns a builder for creating a FriendLink entity.
+func (c *FriendLinkClient) Create() *FriendLinkCreate {
+	mutation := newFriendLinkMutation(c.config, OpCreate)
+	return &FriendLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FriendLink entities.
+func (c *FriendLinkClient) CreateBulk(builders ...*FriendLinkCreate) *FriendLinkCreateBulk {
+	return &FriendLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FriendLinkClient) MapCreateBulk(slice any, setFunc func(*FriendLinkCreate, int)) *FriendLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FriendLinkCreateBulk{err: fmt.Errorf("calling to FriendLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FriendLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FriendLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FriendLink.
+func (c *FriendLinkClient) Update() *FriendLinkUpdate {
+	mutation := newFriendLinkMutation(c.config, OpUpdate)
+	return &FriendLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FriendLinkClient) UpdateOne(_m *FriendLink) *FriendLinkUpdateOne {
+	mutation := newFriendLinkMutation(c.config, OpUpdateOne, withFriendLink(_m))
+	return &FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FriendLinkClient) UpdateOneID(id int) *FriendLinkUpdateOne {
+	mutation := newFriendLinkMutation(c.config, OpUpdateOne, withFriendLinkID(id))
+	return &FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FriendLink.
+func (c *FriendLinkClient) Delete() *FriendLinkDelete {
+	mutation := newFriendLinkMutation(c.config, OpDelete)
+	return &FriendLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FriendLinkClient) DeleteOne(_m *FriendLink) *FriendLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FriendLinkClient) DeleteOneID(id int) *FriendLinkDeleteOne {
+	builder := c.Delete().Where(friendlink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FriendLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for FriendLink.
+func (c *FriendLinkClient) Query() *FriendLinkQuery {
+	return &FriendLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFriendLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FriendLink entity by its id.
+func (c *FriendLinkClient) Get(ctx context.Context, id int) (*FriendLink, error) {
+	return c.Query().Where(friendlink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FriendLinkClient) GetX(ctx context.Context, id int) *FriendLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *FriendLinkClient) Hooks() []Hook {
+	return c.hooks.FriendLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *FriendLinkClient) Interceptors() []Interceptor {
+	return c.inters.FriendLink
+}
+
+func (c *FriendLinkClient) mutate(ctx context.Context, m *FriendLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FriendLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FriendLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FriendLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FriendLink mutation op: %q", m.Op())
 	}
 }
 
@@ -10384,6 +10692,22 @@ func (c *UserClient) QueryGamePvnMappings(_m *User) *UserGamePvnMappingQuery {
 	return query
 }
 
+// QueryAPIKeys queries the api_keys edge of a User.
+func (c *UserClient) QueryAPIKeys(_m *User) *UserAPIKeyQuery {
+	query := (&UserAPIKeyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userapikey.Table, userapikey.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.APIKeysTable, user.APIKeysColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPotatovnBinding queries the potatovn_binding edge of a User.
 func (c *UserClient) QueryPotatovnBinding(_m *User) *UserPvnBindingQuery {
 	query := (&UserPvnBindingClient{config: c.config}).Query()
@@ -10550,6 +10874,171 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
+// UserAPIKeyClient is a client for the UserAPIKey schema.
+type UserAPIKeyClient struct {
+	config
+}
+
+// NewUserAPIKeyClient returns a client for the UserAPIKey from the given config.
+func NewUserAPIKeyClient(c config) *UserAPIKeyClient {
+	return &UserAPIKeyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userapikey.Hooks(f(g(h())))`.
+func (c *UserAPIKeyClient) Use(hooks ...Hook) {
+	c.hooks.UserAPIKey = append(c.hooks.UserAPIKey, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userapikey.Intercept(f(g(h())))`.
+func (c *UserAPIKeyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserAPIKey = append(c.inters.UserAPIKey, interceptors...)
+}
+
+// Create returns a builder for creating a UserAPIKey entity.
+func (c *UserAPIKeyClient) Create() *UserAPIKeyCreate {
+	mutation := newUserAPIKeyMutation(c.config, OpCreate)
+	return &UserAPIKeyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserAPIKey entities.
+func (c *UserAPIKeyClient) CreateBulk(builders ...*UserAPIKeyCreate) *UserAPIKeyCreateBulk {
+	return &UserAPIKeyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserAPIKeyClient) MapCreateBulk(slice any, setFunc func(*UserAPIKeyCreate, int)) *UserAPIKeyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserAPIKeyCreateBulk{err: fmt.Errorf("calling to UserAPIKeyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserAPIKeyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserAPIKeyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserAPIKey.
+func (c *UserAPIKeyClient) Update() *UserAPIKeyUpdate {
+	mutation := newUserAPIKeyMutation(c.config, OpUpdate)
+	return &UserAPIKeyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserAPIKeyClient) UpdateOne(_m *UserAPIKey) *UserAPIKeyUpdateOne {
+	mutation := newUserAPIKeyMutation(c.config, OpUpdateOne, withUserAPIKey(_m))
+	return &UserAPIKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserAPIKeyClient) UpdateOneID(id int) *UserAPIKeyUpdateOne {
+	mutation := newUserAPIKeyMutation(c.config, OpUpdateOne, withUserAPIKeyID(id))
+	return &UserAPIKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserAPIKey.
+func (c *UserAPIKeyClient) Delete() *UserAPIKeyDelete {
+	mutation := newUserAPIKeyMutation(c.config, OpDelete)
+	return &UserAPIKeyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserAPIKeyClient) DeleteOne(_m *UserAPIKey) *UserAPIKeyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserAPIKeyClient) DeleteOneID(id int) *UserAPIKeyDeleteOne {
+	builder := c.Delete().Where(userapikey.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserAPIKeyDeleteOne{builder}
+}
+
+// Query returns a query builder for UserAPIKey.
+func (c *UserAPIKeyClient) Query() *UserAPIKeyQuery {
+	return &UserAPIKeyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserAPIKey},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserAPIKey entity by its id.
+func (c *UserAPIKeyClient) Get(ctx context.Context, id int) (*UserAPIKey, error) {
+	return c.Query().Where(userapikey.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserAPIKeyClient) GetX(ctx context.Context, id int) *UserAPIKey {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UserAPIKey.
+func (c *UserAPIKeyClient) QueryUser(_m *UserAPIKey) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userapikey.Table, userapikey.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userapikey.UserTable, userapikey.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUsages queries the usages edge of a UserAPIKey.
+func (c *UserAPIKeyClient) QueryUsages(_m *UserAPIKey) *APIKeyDailyUsageQuery {
+	query := (&APIKeyDailyUsageClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userapikey.Table, userapikey.FieldID, id),
+			sqlgraph.To(apikeydailyusage.Table, apikeydailyusage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, userapikey.UsagesTable, userapikey.UsagesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserAPIKeyClient) Hooks() []Hook {
+	return c.hooks.UserAPIKey
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserAPIKeyClient) Interceptors() []Interceptor {
+	return c.inters.UserAPIKey
+}
+
+func (c *UserAPIKeyClient) mutate(ctx context.Context, m *UserAPIKeyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserAPIKeyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserAPIKeyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserAPIKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserAPIKeyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UserAPIKey mutation op: %q", m.Op())
 	}
 }
 
@@ -11712,33 +12201,35 @@ func (c *WalkthroughClient) mutate(ctx context.Context, m *WalkthroughMutation) 
 type (
 	hooks struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
-		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
-		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
-		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
-		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
-		GameDownloadResourceFile, GameDownloadResourceFileHistory,
-		GameDownloadResourceReport, GameDownloadResourceTranslator, GameImage,
-		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
-		SponsorOrder, Tag, Translator, TranslatorDistinction, User, UserBannedRecord,
+		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene,
+		APIKeyDailyUsage, Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment,
+		CommentLike, Composition, EditRecord, Favorite, FavoriteItem,
+		FieldPermissionMapping, FriendLink, Game, GameCharacter, GameCharacterRelation,
+		GameCover, GameDeveloper, GameDeveloperRelation, GameDownloadResource,
+		GameDownloadResourceEvent, GameDownloadResourceFile,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport,
+		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
+		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
+		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
+		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
+		Translator, TranslatorDistinction, User, UserAPIKey, UserBannedRecord,
 		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
 		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
-		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
-		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
-		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
-		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
-		GameDownloadResourceFile, GameDownloadResourceFileHistory,
-		GameDownloadResourceReport, GameDownloadResourceTranslator, GameImage,
-		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
-		SponsorOrder, Tag, Translator, TranslatorDistinction, User, UserBannedRecord,
+		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene,
+		APIKeyDailyUsage, Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment,
+		CommentLike, Composition, EditRecord, Favorite, FavoriteItem,
+		FieldPermissionMapping, FriendLink, Game, GameCharacter, GameCharacterRelation,
+		GameCover, GameDeveloper, GameDeveloperRelation, GameDownloadResource,
+		GameDownloadResourceEvent, GameDownloadResourceFile,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport,
+		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
+		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
+		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
+		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
+		Translator, TranslatorDistinction, User, UserAPIKey, UserBannedRecord,
 		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
 		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
 	}

@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/apikeydailyusage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -25,6 +26,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -58,6 +60,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userfieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/usergamepvnmapping"
@@ -405,6 +408,16 @@ func init() {
 	aiscene.DefaultUpdated = aisceneDescUpdated.Default.(func() time.Time)
 	// aiscene.UpdateDefaultUpdated holds the default value on update for the updated field.
 	aiscene.UpdateDefaultUpdated = aisceneDescUpdated.UpdateDefault.(func() time.Time)
+	apikeydailyusageFields := schema.APIKeyDailyUsage{}.Fields()
+	_ = apikeydailyusageFields
+	// apikeydailyusageDescRequests is the schema descriptor for requests field.
+	apikeydailyusageDescRequests := apikeydailyusageFields[3].Descriptor()
+	// apikeydailyusage.DefaultRequests holds the default value on creation for the requests field.
+	apikeydailyusage.DefaultRequests = apikeydailyusageDescRequests.Default.(int)
+	// apikeydailyusageDescThrottled is the schema descriptor for throttled field.
+	apikeydailyusageDescThrottled := apikeydailyusageFields[4].Descriptor()
+	// apikeydailyusage.DefaultThrottled holds the default value on creation for the throttled field.
+	apikeydailyusage.DefaultThrottled = apikeydailyusageDescThrottled.Default.(int)
 	activityFields := schema.Activity{}.Fields()
 	_ = activityFields
 	// activityDescFileStatus is the schema descriptor for file_status field.
@@ -685,6 +698,44 @@ func init() {
 	fieldpermissionmapping.DefaultUpdated = fieldpermissionmappingDescUpdated.Default.(func() time.Time)
 	// fieldpermissionmapping.UpdateDefaultUpdated holds the default value on update for the updated field.
 	fieldpermissionmapping.UpdateDefaultUpdated = fieldpermissionmappingDescUpdated.UpdateDefault.(func() time.Time)
+	friendlinkFields := schema.FriendLink{}.Fields()
+	_ = friendlinkFields
+	// friendlinkDescName is the schema descriptor for name field.
+	friendlinkDescName := friendlinkFields[1].Descriptor()
+	// friendlink.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	friendlink.NameValidator = friendlinkDescName.Validators[0].(func(string) error)
+	// friendlinkDescURL is the schema descriptor for url field.
+	friendlinkDescURL := friendlinkFields[2].Descriptor()
+	// friendlink.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	friendlink.URLValidator = friendlinkDescURL.Validators[0].(func(string) error)
+	// friendlinkDescLogo is the schema descriptor for logo field.
+	friendlinkDescLogo := friendlinkFields[3].Descriptor()
+	// friendlink.LogoValidator is a validator for the "logo" field. It is called by the builders before save.
+	friendlink.LogoValidator = friendlinkDescLogo.Validators[0].(func(string) error)
+	// friendlinkDescDescription is the schema descriptor for description field.
+	friendlinkDescDescription := friendlinkFields[4].Descriptor()
+	// friendlink.DefaultDescription holds the default value on creation for the description field.
+	friendlink.DefaultDescription = friendlinkDescDescription.Default.(string)
+	// friendlink.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	friendlink.DescriptionValidator = friendlinkDescDescription.Validators[0].(func(string) error)
+	// friendlinkDescVisible is the schema descriptor for visible field.
+	friendlinkDescVisible := friendlinkFields[5].Descriptor()
+	// friendlink.DefaultVisible holds the default value on creation for the visible field.
+	friendlink.DefaultVisible = friendlinkDescVisible.Default.(bool)
+	// friendlinkDescPosition is the schema descriptor for position field.
+	friendlinkDescPosition := friendlinkFields[6].Descriptor()
+	// friendlink.DefaultPosition holds the default value on creation for the position field.
+	friendlink.DefaultPosition = friendlinkDescPosition.Default.(int)
+	// friendlinkDescCreated is the schema descriptor for created field.
+	friendlinkDescCreated := friendlinkFields[7].Descriptor()
+	// friendlink.DefaultCreated holds the default value on creation for the created field.
+	friendlink.DefaultCreated = friendlinkDescCreated.Default.(func() time.Time)
+	// friendlinkDescUpdated is the schema descriptor for updated field.
+	friendlinkDescUpdated := friendlinkFields[8].Descriptor()
+	// friendlink.DefaultUpdated holds the default value on creation for the updated field.
+	friendlink.DefaultUpdated = friendlinkDescUpdated.Default.(func() time.Time)
+	// friendlink.UpdateDefaultUpdated holds the default value on update for the updated field.
+	friendlink.UpdateDefaultUpdated = friendlinkDescUpdated.UpdateDefault.(func() time.Time)
 	gameFields := schema.Game{}.Fields()
 	_ = gameFields
 	// gameDescTitleJp is the schema descriptor for title_jp field.
@@ -1492,15 +1543,47 @@ func init() {
 	// user.DefaultUploadTrusted holds the default value on creation for the upload_trusted field.
 	user.DefaultUploadTrusted = userDescUploadTrusted.Default.(bool)
 	// userDescCreated is the schema descriptor for created field.
-	userDescCreated := userFields[20].Descriptor()
+	userDescCreated := userFields[21].Descriptor()
 	// user.DefaultCreated holds the default value on creation for the created field.
 	user.DefaultCreated = userDescCreated.Default.(func() time.Time)
 	// userDescUpdated is the schema descriptor for updated field.
-	userDescUpdated := userFields[21].Descriptor()
+	userDescUpdated := userFields[22].Descriptor()
 	// user.DefaultUpdated holds the default value on creation for the updated field.
 	user.DefaultUpdated = userDescUpdated.Default.(func() time.Time)
 	// user.UpdateDefaultUpdated holds the default value on update for the updated field.
 	user.UpdateDefaultUpdated = userDescUpdated.UpdateDefault.(func() time.Time)
+	userapikeyFields := schema.UserAPIKey{}.Fields()
+	_ = userapikeyFields
+	// userapikeyDescName is the schema descriptor for name field.
+	userapikeyDescName := userapikeyFields[2].Descriptor()
+	// userapikey.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	userapikey.NameValidator = userapikeyDescName.Validators[0].(func(string) error)
+	// userapikeyDescPrefix is the schema descriptor for prefix field.
+	userapikeyDescPrefix := userapikeyFields[3].Descriptor()
+	// userapikey.PrefixValidator is a validator for the "prefix" field. It is called by the builders before save.
+	userapikey.PrefixValidator = userapikeyDescPrefix.Validators[0].(func(string) error)
+	// userapikeyDescSecretHash is the schema descriptor for secret_hash field.
+	userapikeyDescSecretHash := userapikeyFields[4].Descriptor()
+	// userapikey.SecretHashValidator is a validator for the "secret_hash" field. It is called by the builders before save.
+	userapikey.SecretHashValidator = userapikeyDescSecretHash.Validators[0].(func(string) error)
+	// userapikeyDescStatus is the schema descriptor for status field.
+	userapikeyDescStatus := userapikeyFields[5].Descriptor()
+	// userapikey.DefaultStatus holds the default value on creation for the status field.
+	userapikey.DefaultStatus = userapikeyDescStatus.Default.(int)
+	// userapikeyDescSuspendedReason is the schema descriptor for suspended_reason field.
+	userapikeyDescSuspendedReason := userapikeyFields[6].Descriptor()
+	// userapikey.SuspendedReasonValidator is a validator for the "suspended_reason" field. It is called by the builders before save.
+	userapikey.SuspendedReasonValidator = userapikeyDescSuspendedReason.Validators[0].(func(string) error)
+	// userapikeyDescCreated is the schema descriptor for created field.
+	userapikeyDescCreated := userapikeyFields[11].Descriptor()
+	// userapikey.DefaultCreated holds the default value on creation for the created field.
+	userapikey.DefaultCreated = userapikeyDescCreated.Default.(func() time.Time)
+	// userapikeyDescUpdated is the schema descriptor for updated field.
+	userapikeyDescUpdated := userapikeyFields[12].Descriptor()
+	// userapikey.DefaultUpdated holds the default value on creation for the updated field.
+	userapikey.DefaultUpdated = userapikeyDescUpdated.Default.(func() time.Time)
+	// userapikey.UpdateDefaultUpdated holds the default value on update for the updated field.
+	userapikey.UpdateDefaultUpdated = userapikeyDescUpdated.UpdateDefault.(func() time.Time)
 	userbannedrecordFields := schema.UserBannedRecord{}.Fields()
 	_ = userbannedrecordFields
 	// userbannedrecordDescBannedAt is the schema descriptor for banned_at field.

@@ -36,6 +36,10 @@ func (s *Service) StoreAdImage(ctx context.Context, uploaderID int, file *Upload
 	return s.save(ctx, adImage(uploaderID), file)
 }
 
+func (s *Service) StoreFriendLinkLogo(ctx context.Context, uploaderID int, file *Upload) (string, error) {
+	return s.save(ctx, friendLinkLogo(uploaderID), file)
+}
+
 func (s *Service) save(ctx context.Context, k kind, file *Upload) (string, error) {
 	if err := Validate(file, k.maxBytes); err != nil {
 		return "", err

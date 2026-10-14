@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "favorite already exists",
   "FAVORITE_ITEM_ALREADY_EXISTS": "favorite already contains this game",
   "FAVORITE_NOT_FOUND": "favorite not found",
+  "FRIEND_LINK_NOT_FOUND": "friend link not found",
+  "FRIEND_LINK_ORDER_STALE": "friend links have changed; refresh and try again",
   "FAVORITE_ITEM_NOT_FOUND": "this game is not in the favorite",
   "FAVORITE_ITEM_NOT_OWNER": "you don't have permission to modify this game in the favorite",
   "FAVORITE_NOT_OWNER": "you don't have permission to modify this favorite",
@@ -179,5 +181,15 @@
   "COMPOSITION_NOT_COMPOSED": "the patch of this resource cannot be updated",
   "COMPOSITION_BUSY": "the composition is in progress",
   "COMPOSITION_BASE_GONE": "the original resource no longer exists",
-  "COMPOSITION_CHECKS_OFF": "file checks are switched off, nothing can be composed for now"
+  "COMPOSITION_CHECKS_OFF": "file checks are switched off, nothing can be composed for now",
+  "API_KEY_REQUIRED": "put an API key in the Authorization header",
+  "API_KEY_INVALID": "the API key is not valid or was deleted",
+  "API_KEY_SUSPENDED": "the API key was suspended by an administrator",
+  "API_KEY_OWNER_BANNED": "the account of the API key is banned",
+  "API_KEYS_CLOSED": "the open API is paused",
+  "API_KEY_LIMIT_REACHED": "no more API keys can be created",
+  "API_KEY_NOT_FOUND": "API key not found",
+  "OPEN_LOOKUP_ONE_KIND": "give one kind of ID: id, hid, bid or vid",
+  "OPEN_LOOKUP_TOO_MANY": "at most {max} IDs can be looked up at once",
+  "OPEN_LOOKUP_BAD_VALUE": "not a valid ID: {value}"
 }

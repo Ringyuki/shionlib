@@ -38,7 +38,7 @@ export async function loadUsers(
 
 async function loadRecords(api: ApiClient, id: number): Promise<Records> {
   const one = { page: 1, pageSize: 1 }
-  const [filed, against, held] = await Promise.all([
+  const [filed, against, held, keys] = await Promise.all([
     api.get('/admin/content/download-resource-reports', {
       params: { query: { ...one, reporter_id: id } },
     }),
@@ -48,11 +48,14 @@ async function loadRecords(api: ApiClient, id: number): Promise<Records> {
     api.get('/admin/content/malware-scan-cases', {
       params: { query: { ...one, uploader_id: id, status: 'PENDING' } },
     }),
+    api.get('/admin/open/keys', { params: { query: { page: 1, pageSize: 50, user: id } } }),
   ])
   return {
     reportsFiled: filed.meta.totalItems,
     reportsAgainst: against.meta.totalItems,
     heldFiles: held.meta.totalItems,
+    apiKeys: keys.meta.totalItems,
+    apiRequests: (keys.items ?? []).reduce((sum, key) => sum + key.recent.requests, 0),
   }
 }
 
