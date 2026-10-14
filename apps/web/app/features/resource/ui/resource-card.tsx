@@ -58,12 +58,12 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
         />
       </Stack>
       <Grid className={cn(listColumns.span, 'pointer-events-none relative gap-y-2 p-4')}>
-        <Grid className="col-span-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <Grid className="col-span-full grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <ResourceTags resource={resource} size="lg" />
           <Inline
             gap="md"
             align="center"
-            className="col-span-2 row-start-2 gap-y-1 sm:col-span-1 sm:col-start-2 sm:row-start-1 [&_svg]:size-3.5 [&_svg]:text-faint"
+            className="col-span-2 row-start-2 min-h-7 gap-y-1 sm:col-span-1 sm:col-start-2 sm:row-start-1 [&_svg]:size-3.5 [&_svg]:text-faint"
           >
             <Inline gap="xs" align="center" wrap={false}>
               <Avatar

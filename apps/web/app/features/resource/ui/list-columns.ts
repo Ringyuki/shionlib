@@ -5,5 +5,4 @@ export const listColumns = {
   size: 'justify-self-end whitespace-nowrap max-sm:hidden sm:col-start-2',
   hash: 'max-sm:hidden sm:col-start-3',
   action: 'col-start-2 justify-self-end sm:col-start-4',
-  wideAction: 'col-start-2 justify-self-end sm:col-span-2 sm:col-start-3',
 } as const

@@ -26,12 +26,12 @@ export function MoyuCard({ entry }: { entry: MoyuEntry }) {
         />
       </Stack>
       <Grid className={cn(listColumns.span, 'pointer-events-none relative gap-y-2 p-4')}>
-        <Grid className="col-span-full grid-cols-1 items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <Grid className="col-span-full grid-cols-1 items-start gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto]">
           <MoyuTags entry={entry} />
           <Inline
             gap="md"
             align="center"
-            className="gap-y-1 sm:pe-11 [&_svg]:size-3.5 [&_svg]:text-faint"
+            className="min-h-7 gap-y-1 [&_svg]:size-3.5 [&_svg]:text-faint"
           >
             {entry.publisher !== null && (
               <Inline gap="xs" align="center" wrap={false}>
@@ -61,8 +61,8 @@ export function MoyuCard({ entry }: { entry: MoyuEntry }) {
             </Inline>
           </Inline>
         </Grid>
-        <Grid className={cn(listColumns.span, 'min-h-11 items-center py-1')}>
-          <Inline gap="xs" align="start" wrap={false} className={listColumns.name}>
+        <Inline gap="lg" align="center" wrap={false} className="col-span-full min-h-11 py-1">
+          <Inline gap="xs" align="start" wrap={false} className="min-w-0 flex-1">
             <Link2 aria-hidden className="mt-0.5 size-4 shrink-0 text-faint" />
             <Stack gap="none" className="min-w-0">
               <Text size="sm" className="break-words">
@@ -73,7 +73,7 @@ export function MoyuCard({ entry }: { entry: MoyuEntry }) {
               </Text>
             </Stack>
           </Inline>
-          <Text as="span" size="sm" tone="muted" className={listColumns.size}>
+          <Text as="span" size="sm" tone="muted" className="whitespace-nowrap max-sm:hidden">
             {size}
           </Text>
           <Button
@@ -81,14 +81,14 @@ export function MoyuCard({ entry }: { entry: MoyuEntry }) {
             size="sm"
             variant="outline"
             tone="neutral"
-            className={cn(listColumns.wideAction, 'pointer-events-auto')}
+            className="pointer-events-auto shrink-0"
           >
             <Link href={entry.url} target="_blank" rel="noreferrer" tabIndex={-1} aria-hidden>
               {t('moyu.go')}
               <ExternalLink aria-hidden />
             </Link>
           </Button>
-        </Grid>
+        </Inline>
       </Grid>
     </Card>
   )
