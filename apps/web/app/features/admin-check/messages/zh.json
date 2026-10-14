@@ -26,7 +26,7 @@
     "ADMIN_DELETE": "管理员删除",
     "TIMEOUT_AUTO_DELETE": "超时自动删除"
   },
-  "reviewed": "{decision, select, ALLOW {文件已放行} other {文件已删除}}",
+  "reviewed": "{decision, select, ALLOW {{count, plural, =1 {文件已放行} other {# 个文件已放行}}} other {{count, plural, =1 {文件已删除} other {# 个文件已删除}}}}",
   "issue": {
     "decision": "请选择复核结果"
   },
@@ -36,7 +36,7 @@
     "empty": "没有等待复核的文件"
   },
   "quick": {
-    "title": "{decision, select, ALLOW {确定要放行「{name}」吗？} other {确定要删除「{name}」吗？}}",
+    "title": "{decision, select, ALLOW {{count, plural, =1 {确定要放行「{name}」吗？} other {确定要放行选中的 # 个文件吗？}}} other {{count, plural, =1 {确定要删除「{name}」吗？} other {确定要删除选中的 # 个文件吗？}}}}",
     "description": "{decision, select, ALLOW {判定为误报，资源恢复公开，文件带有「可能存在病毒」标记} other {确认含有病毒，资源下架并清除文件，上传者记一次违规}}"
   },
   "stalled": {
@@ -46,9 +46,9 @@
     "attempts": "已尝试 {count, number} 次{known, select, true {，最近一次在 <time></time>} other {}}",
     "recheck": "重新检查",
     "remove": "移除",
-    "confirm": "{action, select, recheck {确定要重新检查「{name}」吗？} other {确定要移除「{name}」吗？}}",
+    "confirm": "{action, select, recheck {{count, plural, =1 {确定要重新检查「{name}」吗？} other {确定要重新检查选中的 # 个文件吗？}}} other {{count, plural, =1 {确定要移除「{name}」吗？} other {确定要移除选中的 # 个文件吗？}}}}",
     "confirmHint": "{action, select, recheck {失败次数清零，文件及其同组的分卷重新排队检查} other {文件及其同组的分卷判为未通过并清除，无法恢复}}",
-    "done": "{action, select, recheck {已重新开始检查} other {文件已移除}}"
+    "done": "{action, select, recheck {{count, plural, =1 {已重新开始检查} other {# 个文件已重新开始检查}}} other {{count, plural, =1 {文件已移除} other {# 个文件已移除}}}}"
   },
   "records": {
     "title": "复核记录",

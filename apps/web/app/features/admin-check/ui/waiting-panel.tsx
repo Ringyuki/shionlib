@@ -6,36 +6,59 @@ import { Deadline, RecordTable, UserRef, type RecordColumn } from '~/features/ad
 import { Button } from '~/shared/ui/button'
 import { useLast } from '~/shared/ui/use-last'
 import type { Decision, ScanCase } from '../admin-check'
-import { useCaseReview } from '../use-case-review'
-import { Detections, FileCell, RowActions } from './check-cells'
+import { useQuickReview } from '../use-quick-review'
+import { BulkBar } from './bulk-bar'
+import { Detections, FileCell, fileWidth, RowActions, userWidth } from './check-cells'
 
 type WaitingPanelProps = {
   cases: ScanCase[]
   onOpen: (scanCase: ScanCase) => void
 }
 
-type Asked = { scanCase: ScanCase; decision: Decision }
+type Asked = { ids: number[]; name: string; decision: Decision }
 
 export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
   const t = useTranslations('adminCheck')
   const shared = useTranslations('admin')
+  const [selected, setSelected] = useState<number[]>([])
   const [asked, setAsked] = useState<Asked>()
   const shown = useLast(asked)
-  const review = useCaseReview()
+  const review = useQuickReview()
+  const chosen = selected.filter(id => cases.some(scanCase => scanCase.id === id))
   const columns: RecordColumn[] = [
-    { key: 'file', label: t('column.file'), fill: true },
+    { key: 'file', label: t('column.file'), fill: true, minWidth: fileWidth },
     { key: 'found', label: t('column.found'), wide: true },
-    { key: 'uploader', label: t('column.uploader'), wide: true },
+    { key: 'uploader', label: t('column.uploader'), wide: true, minWidth: userWidth },
     { key: 'scanned', label: t('column.scanned'), wide: true },
     { key: 'deadline', label: t('column.deadline'), wide: true },
-    { key: 'actions', label: t('column.actions'), wide: true, align: 'end' },
+    { key: 'actions', label: t('column.actions'), wide: true, align: 'end', pin: 'end' },
   ]
+  const ask = (decision: Decision) =>
+    setAsked({
+      ids: chosen,
+      name: cases.find(scanCase => scanCase.id === chosen[0])?.file_name ?? '',
+      decision,
+    })
+  const decide = (scanCase: ScanCase, decision: Decision) =>
+    setAsked({ ids: [scanCase.id], name: scanCase.file_name, decision })
   return (
     <Panel
       title={t('waiting.title')}
       description={t('waiting.description')}
       count={cases.length}
       padded={false}
+      actions={
+        chosen.length > 0 && (
+          <BulkBar count={chosen.length} onClear={() => setSelected([])}>
+            <Button size="sm" variant="outline" tone="neutral" onClick={() => ask('ALLOW')}>
+              {t('decision.ALLOW')}
+            </Button>
+            <Button size="sm" variant="outline" tone="danger" onClick={() => ask('DELETE')}>
+              {t('decision.DELETE')}
+            </Button>
+          </BulkBar>
+        )
+      }
     >
       <RecordTable
         label={t('waiting.title')}
@@ -45,6 +68,10 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
         empty={t('waiting.empty')}
         emptyIcon={<ShieldCheck />}
         onOpen={onOpen}
+        selected={chosen}
+        onSelectedChange={keys =>
+          setSelected(cases.map(scanCase => scanCase.id).filter(id => keys.includes(id)))
+        }
         renderCell={(scanCase, column) => {
           switch (column) {
             case 'file':
@@ -57,7 +84,7 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
                 />
               )
             case 'found':
-              return <Detections names={scanCase.detected_viruses ?? []} />
+              return <Detections names={scanCase.detected_viruses ?? []} wrap={false} />
             case 'uploader':
               return <UserRef user={scanCase.uploader} />
             case 'scanned':
@@ -73,7 +100,7 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
                     size="sm"
                     variant="outline"
                     tone="neutral"
-                    onClick={() => setAsked({ scanCase, decision: 'ALLOW' })}
+                    onClick={() => decide(scanCase, 'ALLOW')}
                   >
                     {t('decision.ALLOW')}
                   </Button>
@@ -81,7 +108,7 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
                     size="sm"
                     variant="outline"
                     tone="danger"
-                    onClick={() => setAsked({ scanCase, decision: 'DELETE' })}
+                    onClick={() => decide(scanCase, 'DELETE')}
                   >
                     {t('decision.DELETE')}
                   </Button>
@@ -93,7 +120,8 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
       <AlertDialog
         title={t('quick.title', {
           decision: shown?.decision ?? 'ALLOW',
-          name: shown?.scanCase.file_name ?? '',
+          count: shown?.ids.length ?? 1,
+          name: shown?.name ?? '',
         })}
         description={t('quick.description', { decision: shown?.decision ?? 'ALLOW' })}
         confirmText={t(`decision.${shown?.decision ?? 'ALLOW'}`)}
@@ -109,13 +137,9 @@ export function WaitingPanel({ cases, onOpen }: WaitingPanelProps) {
           if (asked === undefined) {
             return
           }
-          await review.confirm({
-            id: asked.scanCase.id,
-            decision: asked.decision,
-            note: '',
-            notify: true,
-          })
-          toast.success(t('reviewed', { decision: asked.decision }))
+          await review.confirm({ ids: asked.ids, decision: asked.decision })
+          setSelected(current => current.filter(id => !asked.ids.includes(id)))
+          toast.success(t('reviewed', { decision: asked.decision, count: asked.ids.length }))
         }}
       />
     </Panel>

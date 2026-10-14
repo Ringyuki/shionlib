@@ -3,8 +3,13 @@ import { adminPaths, pageSize } from '~/features/admin'
 import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
 import { searchWith } from './admin-check'
-import { caseReviewCommand, filterFrom, stalledCommand } from './admin-check.schema'
-import { changeStalled, loadChecks, reviewCase } from './admin-check.use-cases'
+import {
+  caseReviewCommand,
+  filterFrom,
+  quickReviewCommand,
+  stalledCommand,
+} from './admin-check.schema'
+import { changeStalled, loadChecks, reviewCase, reviewCases } from './admin-check.use-cases'
 
 export async function checksLoader(args: LoaderFunctionArgs) {
   const filter = filterFrom(args.url.searchParams, requestedPage(args.url))
@@ -24,6 +29,11 @@ export function formerChecksLoader(args: LoaderFunctionArgs) {
 export async function reviewCaseAction(args: ActionFunctionArgs) {
   const review = await readCommand(args, caseReviewCommand)
   return routeAction(args, api => reviewCase(api, review))
+}
+
+export async function quickReviewAction(args: ActionFunctionArgs) {
+  const review = await readCommand(args, quickReviewCommand)
+  return routeAction(args, api => reviewCases(api, review))
 }
 
 export async function stalledAction(args: ActionFunctionArgs) {

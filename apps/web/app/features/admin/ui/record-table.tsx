@@ -10,6 +10,8 @@ export type RecordColumn = {
   fill?: boolean
   className?: string
   align?: 'start' | 'end'
+  minWidth?: number
+  pin?: 'start' | 'end'
 }
 
 type RecordTableProps<Row extends object> = {
@@ -81,6 +83,8 @@ export function RecordTable<Row extends object>({
     key: column.key,
     label: column.label,
     align: column.align,
+    minWidth: column.minWidth,
+    pin: column.pin,
     headerClass: classes[index]?.header,
     cellClass: classes[index]?.cell,
   }))

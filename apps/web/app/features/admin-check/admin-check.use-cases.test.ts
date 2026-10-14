@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { CaseDetail, Filter } from './admin-check'
-import { changeStalled, loadChecks, reviewCase } from './admin-check.use-cases'
+import { changeStalled, loadChecks, reviewCase, reviewCases } from './admin-check.use-cases'
 
 const meta = { currentPage: 1, itemCount: 0, itemsPerPage: 20, totalItems: 2, totalPages: 1 }
 
@@ -99,16 +99,56 @@ describe('reviewCase', () => {
   })
 })
 
+describe('reviewCases', () => {
+  it('decides each chosen case in turn and tells each uploader', async () => {
+    const fake = fakeApi().on('patch', '/admin/content/malware-scan-cases/{id}/review', detail)
+    await reviewCases(fake.api, { ids: [3, 8], decision: 'DELETE' })
+    expect(fake.requests.map(request => new URL(request.url).pathname)).toEqual([
+      '/admin/content/malware-scan-cases/3/review',
+      '/admin/content/malware-scan-cases/8/review',
+    ])
+    const bodies = await Promise.all(fake.requests.map(request => request.json()))
+    expect(bodies).toEqual([
+      { decision: 'DELETE', notify_uploader: true },
+      { decision: 'DELETE', notify_uploader: true },
+    ])
+  })
+})
+
+const paths = (requests: readonly Request[]) =>
+  requests.map(request => [request.method, new URL(request.url).pathname])
+
 describe('changeStalled', () => {
-  it('checks a paused file again or removes it', async () => {
+  it('checks each chosen file again or removes it, one after another', async () => {
     const fake = fakeApi()
       .on('post', '/admin/content/stalled-checks/{file_id}/recheck', undefined)
       .on('delete', '/admin/content/stalled-checks/{file_id}', undefined)
-    await changeStalled(fake.api, { fileId: 5, action: 'recheck' })
-    await changeStalled(fake.api, { fileId: 5, action: 'remove' })
-    expect(fake.requests.map(request => [request.method, new URL(request.url).pathname])).toEqual([
+    await changeStalled(fake.api, { fileIds: [5, 6], action: 'recheck' })
+    await changeStalled(fake.api, { fileIds: [5], action: 'remove' })
+    expect(paths(fake.requests)).toEqual([
       ['POST', '/admin/content/stalled-checks/5/recheck'],
+      ['POST', '/admin/content/stalled-checks/6/recheck'],
       ['DELETE', '/admin/content/stalled-checks/5'],
     ])
+  })
+
+  it('passes over a file that went with an earlier volume of its set', async () => {
+    const fake = fakeApi().fail('delete', '/admin/content/stalled-checks/{file_id}', 404, {
+      code: 440208,
+      message: 'not stalled',
+    })
+    await expect(changeStalled(fake.api, { fileIds: [5, 6], action: 'remove' })).resolves.toBeNull()
+    expect(paths(fake.requests)).toHaveLength(2)
+  })
+
+  it('stops at any other failure', async () => {
+    const fake = fakeApi().fail('post', '/admin/content/stalled-checks/{file_id}/recheck', 500, {
+      code: 500,
+      message: 'down',
+    })
+    await expect(
+      changeStalled(fake.api, { fileIds: [5, 6], action: 'recheck' }),
+    ).rejects.toMatchObject({ status: 500 })
+    expect(paths(fake.requests)).toHaveLength(1)
   })
 })

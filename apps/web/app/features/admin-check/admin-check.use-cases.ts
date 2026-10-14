@@ -10,7 +10,7 @@ import {
   type ScanCase,
   type Stalled,
 } from './admin-check'
-import type { CaseReview, StalledChange } from './admin-check.schema'
+import type { CaseReview, QuickReview, StalledChange } from './admin-check.schema'
 
 export type Listing = {
   filter: Filter
@@ -110,12 +110,31 @@ export function reviewCase(api: ApiClient, review: CaseReview): Promise<CaseDeta
   })
 }
 
-export async function changeStalled(api: ApiClient, change: StalledChange): Promise<null> {
-  const params = { path: { file_id: change.fileId } }
-  if (change.action === 'recheck') {
+export async function reviewCases(api: ApiClient, review: QuickReview): Promise<null> {
+  for (const id of review.ids) {
+    await reviewCase(api, { id, decision: review.decision, note: '', notify: true })
+  }
+  return null
+}
+
+async function changeOneStalled(api: ApiClient, fileId: number, action: StalledChange['action']) {
+  const params = { path: { file_id: fileId } }
+  if (action === 'recheck') {
     await api.post('/admin/content/stalled-checks/{file_id}/recheck', { params })
   } else {
     await api.delete('/admin/content/stalled-checks/{file_id}', { params })
+  }
+}
+
+export async function changeStalled(api: ApiClient, change: StalledChange): Promise<null> {
+  for (const fileId of change.fileIds) {
+    try {
+      await changeOneStalled(api, fileId, change.action)
+    } catch (error) {
+      if (!(error instanceof ApiError && error.is('GAME_DOWNLOAD_RESOURCE_CHECK_NOT_STALLED'))) {
+        throw error
+      }
+    }
   }
   return null
 }

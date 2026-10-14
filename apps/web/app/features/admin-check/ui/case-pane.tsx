@@ -55,7 +55,7 @@ export function CasePane({ opened, onClose }: CasePaneProps) {
                     const outcome = await review.run({ ...values, decision, id: shown.detail.id })
                     if (outcome.ok) {
                       onClose()
-                      toast.success(t('reviewed', { decision }))
+                      toast.success(t('reviewed', { decision, count: 1 }))
                     }
                   }}
                 >
