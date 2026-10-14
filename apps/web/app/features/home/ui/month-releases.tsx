@@ -66,9 +66,10 @@ export function MonthReleases({ month, block }: { month: number; block: Block<Ga
           slidesToScroll="auto"
           gap="md"
           itemClass="basis-36 sm:basis-40"
+          viewportClass="rounded-lg"
           label={title}
         >
-          {({ item }) => <GameTile game={item} dated="day" />}
+          {({ item }) => <GameTile game={item} dated="day" flat />}
         </Carousel>
       )}
     </Stack>

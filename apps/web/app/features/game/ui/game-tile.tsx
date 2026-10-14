@@ -1,4 +1,4 @@
-import { Card, Inline, Stack, Tag, Text } from '@hina-ui/react'
+import { Card, cn, Inline, Stack, Tag, Text } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
@@ -10,9 +10,10 @@ type GameTileProps = {
   game: GameSummary
   dated: 'day' | 'year'
   note?: ReactNode
+  flat?: boolean
 }
 
-export function GameTile({ game, dated, note }: GameTileProps) {
+export function GameTile({ game, dated, note, flat = false }: GameTileProps) {
   const t = useTranslations('game')
   const labels = useMessages().game
   const locale = useLocale()
@@ -29,7 +30,10 @@ export function GameTile({ game, dated, note }: GameTileProps) {
         )
 
   return (
-    <Card padded={false} className="hn-interactive h-full overflow-hidden">
+    <Card
+      padded={false}
+      className={cn('hn-interactive h-full overflow-hidden', flat && 'shadow-none')}
+    >
       <Link to={gamePath(locale, game.id)} prefetch="intent" className="block h-full">
         <GameCover game={game} />
         <Stack gap="xs" className="p-2">
