@@ -30,6 +30,7 @@ const pathsOf: Readonly<Record<Section, (entry: SitemapEntry) => string>> = {
 export const privatePaths = [
   '/api/',
   '/resources/',
+  '/out/',
   '/*/search',
   '/*/upload',
   '/*/user/uploads',

@@ -1,3 +1,4 @@
+import adminAd from '~/features/admin-ad/messages/zh.json'
 import adminAiModel from '~/features/admin-ai-model/messages/zh.json'
 import adminAiPlayground from '~/features/admin-ai-playground/messages/zh.json'
 import adminAiProvider from '~/features/admin-ai-provider/messages/zh.json'
@@ -20,6 +21,7 @@ import admin from '~/features/admin/messages/zh.json'
 
 export const adminMessages = {
   admin,
+  adminAd,
   adminAi,
   adminAiModel,
   adminAiPlayground,

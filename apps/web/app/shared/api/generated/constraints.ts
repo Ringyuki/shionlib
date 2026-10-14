@@ -9,6 +9,147 @@ export const constraints = {
       "maximum": 1000000
     }
   },
+  "AdClickInputBody": {
+    "slot": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "home",
+        "game",
+        "resource",
+        "download",
+        "sidebar"
+      ]
+    }
+  },
+  "AdDraftInput": {
+    "banner": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "banner_adult": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
+    },
+    "end_at": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "format": "date-time"
+    },
+    "languages": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 3,
+      "itemEnum": [
+        "zh",
+        "en",
+        "ja"
+      ]
+    },
+    "link": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^https?://"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "side_adult": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
+    },
+    "side_icon": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "side_image": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "slots": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 5,
+      "itemEnum": [
+        "home",
+        "game",
+        "resource",
+        "download",
+        "sidebar"
+      ]
+    },
+    "start_at": {
+      "type": "string",
+      "required": false,
+      "nullable": true,
+      "format": "date-time"
+    },
+    "weight": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1,
+      "maximum": 10
+    }
+  },
+  "AdViewInput": {
+    "ad_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
+    },
+    "slot": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "home",
+        "game",
+        "resource",
+        "download",
+        "sidebar"
+      ]
+    }
+  },
+  "AdViewsInputBody": {
+    "views": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 50
+    }
+  },
   "AddDownloadFilesInputBody": {
     "files": {
       "type": "array",
@@ -1016,79 +1157,6 @@ export const constraints = {
       "nullable": false,
       "format": "int64",
       "minimum": 1
-    }
-  },
-  "CreateAdInputBody": {
-    "aspect": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "maxLength": 20
-    },
-    "enabled": {
-      "type": "boolean",
-      "required": false,
-      "nullable": false
-    },
-    "end_at": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "format": "date-time"
-    },
-    "exclude_locales": {
-      "type": "array",
-      "required": false,
-      "nullable": true
-    },
-    "image_en": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "image_ja": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "image_zh": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "link": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "name": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "maxLength": 100
-    },
-    "placement": {
-      "type": "array",
-      "required": true,
-      "nullable": true
-    },
-    "sort": {
-      "type": "integer",
-      "required": false,
-      "nullable": false,
-      "format": "int64",
-      "minimum": -2147483648,
-      "maximum": 2147483647
-    },
-    "start_at": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "format": "date-time"
     }
   },
   "CreateCommentInputBody": {
@@ -2227,79 +2295,6 @@ export const constraints = {
       "nullable": false,
       "minLength": 1,
       "maxLength": 200
-    }
-  },
-  "UpdateAdInputBody": {
-    "aspect": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 20
-    },
-    "enabled": {
-      "type": "boolean",
-      "required": false,
-      "nullable": false
-    },
-    "end_at": {
-      "type": "string",
-      "required": false,
-      "nullable": true,
-      "format": "date-time"
-    },
-    "exclude_locales": {
-      "type": "array",
-      "required": false,
-      "nullable": true
-    },
-    "image_en": {
-      "type": "string",
-      "required": false,
-      "nullable": true,
-      "maxLength": 500
-    },
-    "image_ja": {
-      "type": "string",
-      "required": false,
-      "nullable": true,
-      "maxLength": 500
-    },
-    "image_zh": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "link": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 500
-    },
-    "name": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 100
-    },
-    "placement": {
-      "type": "array",
-      "required": false,
-      "nullable": true
-    },
-    "sort": {
-      "type": "integer",
-      "required": false,
-      "nullable": false,
-      "format": "int64",
-      "minimum": -2147483648,
-      "maximum": 2147483647
-    },
-    "start_at": {
-      "type": "string",
-      "required": false,
-      "nullable": true,
-      "format": "date-time"
     }
   },
   "UpdateBioInputBody": {

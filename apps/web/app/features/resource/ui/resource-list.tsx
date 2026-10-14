@@ -1,6 +1,6 @@
 import { Empty, Grid, Link, Stack, Text } from '@hina-ui/react'
 import { ExternalLink, Upload } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { DownloadArea } from '~/features/download'
@@ -21,9 +21,16 @@ type ResourceListProps = {
   resources: readonly Resource[]
   entries: readonly MoyuEntry[]
   viewer: ResourceViewer | null
+  downloadBanner?: ReactNode
 }
 
-export function ResourceList({ game, resources, entries, viewer }: ResourceListProps) {
+export function ResourceList({
+  game,
+  resources,
+  entries,
+  viewer,
+  downloadBanner,
+}: ResourceListProps) {
   const t = useTranslations('resource')
   const locale = useLocale()
   const listing = useResourceListing(resources, entries)
@@ -46,6 +53,7 @@ export function ResourceList({ game, resources, entries, viewer }: ResourceListP
   return (
     <DownloadArea
       game={{ title: gameTitle(game, locale), b_id: game.b_id, v_id: game.v_id, h_id: game.h_id }}
+      banner={downloadBanner}
     >
       <Stack gap="md">
         {listing.tools && (

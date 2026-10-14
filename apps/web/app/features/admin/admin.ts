@@ -13,6 +13,8 @@ export const adminPaths = {
   games: `${adminRoot}/games`,
   translators: `${adminRoot}/translators`,
   users: `${adminRoot}/users`,
+  ads: `${adminRoot}/ads`,
+  adSlots: `${adminRoot}/ads/slots`,
   sponsors: `${adminRoot}/sponsors`,
   friendLinks: `${adminRoot}/friend-links`,
   catalog: `${adminRoot}/catalog`,
@@ -49,6 +51,7 @@ export type NavKey =
   | 'games'
   | 'translators'
   | 'users'
+  | 'ads'
   | 'sponsors'
   | 'friendLinks'
   | 'catalog'
@@ -97,6 +100,7 @@ export function navigationOf(pending: Pending): Navigation {
           entry('games', adminPaths.games),
           entry('translators', adminPaths.translators),
           entry('users', adminPaths.users),
+          entry('ads', adminPaths.ads),
           entry('sponsors', adminPaths.sponsors),
           entry('friendLinks', adminPaths.friendLinks),
         ],

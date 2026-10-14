@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { LibraryPage } from '~/features/library'
 import type { Route } from './+types/library'
 import { pageMeta } from '~/shared/seo/seo'
+
+export const handle = adPage
 
 export { libraryLoader as loader } from '~/features/library/library.server'
 

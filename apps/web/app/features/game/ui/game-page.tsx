@@ -16,6 +16,7 @@ type GamePageProps = {
   scores: Promise<Scores>
   resources: ResourceSummary
   favorite: ReactNode
+  banner: ReactNode
   children: ReactNode
 }
 
@@ -27,6 +28,7 @@ export function GamePage({
   scores,
   resources,
   favorite,
+  banner,
   children,
 }: GamePageProps) {
   const locale = useLocale()
@@ -49,6 +51,7 @@ export function GamePage({
             resources={resources}
             favorite={favorite}
           />
+          {banner}
           {tabs}
         </Stack>
       )}

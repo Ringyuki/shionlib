@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { SearchResultsView } from '~/features/search'
 import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/search'
+
+export const handle = adPage
 
 export { searchResultsLoader as loader } from '~/features/search/search.server'
 

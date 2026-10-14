@@ -1,0 +1,167 @@
+{
+  "title": "广告",
+  "add": "新建广告",
+  "tabs": {
+    "label": "广告",
+    "ads": "广告",
+    "slots": "广告位"
+  },
+  "figure": {
+    "running": "投放中",
+    "views": "近 7 天展示",
+    "clicks": "近 7 天点击",
+    "rate": "点击率 {rate}",
+    "state": "广告功能",
+    "on": "已开启",
+    "off": "已关闭",
+    "onNext": "在<settings>设置</settings>中关闭",
+    "offNext": "在<settings>设置</settings>中开启"
+  },
+  "filter": {
+    "status": "状态",
+    "all": "全部",
+    "slot": "广告位",
+    "allSlots": "全部广告位"
+  },
+  "status": {
+    "running": "投放中",
+    "scheduled": "未开始",
+    "ended": "已结束",
+    "disabled": "已停用"
+  },
+  "slot": {
+    "home": "首页",
+    "game": "游戏页",
+    "resource": "资源页",
+    "download": "下载验证",
+    "sidebar": "侧栏"
+  },
+  "language": {
+    "zh": "中文",
+    "ja": "日文",
+    "en": "英文"
+  },
+  "column": {
+    "ad": "广告",
+    "slots": "广告位",
+    "languages": "语言",
+    "schedule": "投放时间",
+    "status": "状态",
+    "views": "展示（7 天）",
+    "clicks": "点击（7 天）"
+  },
+  "mark": {
+    "adultBanner": "成人横幅",
+    "side": "侧栏图",
+    "adultSide": "成人侧栏图"
+  },
+  "noSlots": "未选择广告位",
+  "schedule": {
+    "always": "长期",
+    "from": "{start} 起",
+    "until": "至 {end}",
+    "between": "{start} 至 {end}"
+  },
+  "empty": "{filtered, select, true {没有符合条件的广告} other {暂无广告}}",
+  "noImage": "未设置图片",
+  "menu": {
+    "label": "{name}的操作",
+    "edit": "编辑",
+    "disable": "停用",
+    "enable": "启用",
+    "remove": "删除"
+  },
+  "toggled": "{enabled, select, true {已启用} other {已停用}}",
+  "pane": {
+    "banner": "横幅",
+    "side": "侧栏图",
+    "placement": "投放",
+    "link": "链接",
+    "slots": "广告位",
+    "languages": "语言",
+    "adult": "含成人内容",
+    "weight": "权重",
+    "schedule": "投放时间",
+    "notSet": "未设置",
+    "yes": "是",
+    "no": "否",
+    "report": "效果",
+    "range": "时间范围",
+    "days": "近 {days} 天",
+    "views": "展示",
+    "clicks": "点击",
+    "rate": "点击率",
+    "chart": "近 {days} 天每日展示",
+    "slot": "广告位",
+    "noRate": "—",
+    "noData": "暂无数据"
+  },
+  "remove": {
+    "title": "确定要删除「{name}」吗？",
+    "description": "这条广告的展示和点击统计将一并删除",
+    "confirm": "删除",
+    "done": "已删除"
+  },
+  "dialog": {
+    "create": "新建广告",
+    "edit": "编辑广告",
+    "name": "名称",
+    "link": "链接",
+    "banner": "横幅",
+    "bannerHint": "宽高比 6:1，不小于 1200 × 200 像素；含成人内容的图片只向显示成人内容的访客显示",
+    "side": "侧栏图",
+    "sideHint": "透明背景的 PNG 或 WebP，高度不小于 80 像素，另附收起侧栏时显示的方形图标",
+    "pickBanner": "上传横幅",
+    "replace": "更换图片",
+    "removeImage": "移除",
+    "pickSide": "上传侧栏图",
+    "replaceSide": "更换侧栏图",
+    "pickIcon": "上传方形图标",
+    "replaceIcon": "更换方形图标",
+    "adult": "含成人内容",
+    "slots": "广告位",
+    "needsBanner": "{slot}（需要横幅）",
+    "needsSide": "{slot}（需要侧栏图）",
+    "languages": "投放语言",
+    "weight": "权重",
+    "weightHint": "{min} 至 {max}，数值越大，在同一广告位中出现得越多",
+    "schedule": "投放时间",
+    "start": "开始时间",
+    "end": "结束时间",
+    "to": "至",
+    "scheduleHint": "留空表示立即开始、长期投放",
+    "enabled": "启用",
+    "submitCreate": "创建",
+    "submitEdit": "保存",
+    "unsupported": "不支持该图片格式"
+  },
+  "created": "已创建",
+  "saved": "已保存",
+  "slots": {
+    "slot": "广告位",
+    "place": "位置",
+    "material": "素材",
+    "shown": "每次显示",
+    "running": "投放中的广告",
+    "views": "展示（7 天）",
+    "clicks": "点击（7 天）",
+    "none": "无",
+    "total": "共 {count} 个广告位"
+  },
+  "place": {
+    "home": "首页顶部，「最近更新的资源」上方",
+    "game": "游戏头部与标签之间",
+    "resource": "资源头部与标签之间",
+    "download": "点击下载后的人机验证浮层，进度条下方",
+    "sidebar": "侧栏导航之后；手机在导航抽屉中"
+  },
+  "material": {
+    "banner": "横幅 6:1",
+    "side": "侧栏图"
+  },
+  "shown": {
+    "wide": "宽屏 {count} 条，窄屏 1 条",
+    "single": "{count} 条",
+    "side": "最多 {count} 条"
+  }
+}

@@ -15,12 +15,13 @@ type SiteShellProps = {
   sidebar: SidebarMode
   unread: number
   area?: ShellArea<ReactNode>
+  sidebarEnd?: (rail: boolean) => ReactNode
   children: ReactNode
 }
 
 export const mainScrollKey = 'main'
 
-export function SiteShell({ viewer, sidebar, unread, area, children }: SiteShellProps) {
+export function SiteShell({ viewer, sidebar, unread, area, sidebarEnd, children }: SiteShellProps) {
   const locale = useLocale()
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
@@ -43,6 +44,7 @@ export function SiteShell({ viewer, sidebar, unread, area, children }: SiteShell
             area={area}
             viewer={viewer}
             mode={state.mode}
+            end={sidebarEnd}
             onClose={state.closeMobile}
           />
         }

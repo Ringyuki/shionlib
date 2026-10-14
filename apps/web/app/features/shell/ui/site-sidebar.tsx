@@ -15,10 +15,11 @@ type SiteSidebarProps = {
   area: ShellArea<ReactNode> | undefined
   viewer: Schema<'UserMeDTO'> | null
   mode: SidebarMode
+  end?: (rail: boolean) => ReactNode
   onClose: () => void
 }
 
-export function SiteSidebar({ sections, area, viewer, mode, onClose }: SiteSidebarProps) {
+export function SiteSidebar({ sections, area, viewer, mode, end, onClose }: SiteSidebarProps) {
   const t = useTranslations('shell')
   const locale = useLocale()
   const desktop = useDesktop()
@@ -74,6 +75,11 @@ export function SiteSidebar({ sections, area, viewer, mode, onClose }: SiteSideb
               ))
             : area.navigation(rail)}
         </Stack>
+        {area === undefined && end !== undefined && (
+          <Stack gap="none" className={cn('pb-4', desktop && 'px-3')}>
+            {end(rail)}
+          </Stack>
+        )}
       </ScrollArea>
       <Stack gap="none" className={cn('border-line shrink-0 border-t py-2', desktop && 'px-3')}>
         <AccountMenu viewer={viewer} rail={rail} />

@@ -1,6 +1,9 @@
+import { adPage } from '~/features/ad'
 import { TranslatorPage, translatorHead } from '~/features/translator'
 import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/translator'
+
+export const handle = adPage
 
 export { translatorLoader as loader } from '~/features/translator/translator.server'
 

@@ -17,17 +17,51 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/ad/placement/{placement}": {
+    "/ad/slots": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Ads shown in a placement; empty for sponsors */
-        get: operations["ad.placement"];
+        /** The ads a page shows in its slots, chosen for the viewer; empty for sponsors and when ads are off */
+        get: operations["ad.slots"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ad/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Count the ads a visitor saw */
+        post: operations["ad.views"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ad/{id}/click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Count a click on an ad and return where it leads */
+        post: operations["ad.click"];
         delete?: never;
         options?: never;
         head?: never;
@@ -41,11 +75,45 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List ads */
+        /** List ads with their counts of the last seven days */
         get: operations["ad.admin.list"];
         put?: never;
         /** Create an ad */
         post: operations["ad.admin.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/ad/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many ads run, their counts of the last seven days and whether ads are on */
+        get: operations["ad.admin.overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/ad/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every slot with the ads running in it and its counts of the last seven days */
+        get: operations["ad.admin.slots"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -61,14 +129,31 @@ export type paths = {
         };
         /** Get an ad */
         get: operations["ad.admin.get"];
-        put?: never;
+        /** Replace every field of an ad */
+        put: operations["ad.admin.replace"];
         post?: never;
-        /** Delete an ad */
+        /** Delete an ad and its counts */
         delete: operations["ad.admin.delete"];
         options?: never;
         head?: never;
-        /** Update an ad */
-        patch: operations["ad.admin.update"];
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/ad/{id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily and per-slot counts of an ad */
+        get: operations["ad.admin.report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/admin/ai/catalog": {
@@ -3870,7 +3955,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/uploads/small/ad/image": {
+    "/uploads/small/ad/banner": {
         parameters: {
             query?: never;
             header?: never;
@@ -3878,8 +3963,42 @@ export type paths = {
             cookie?: never;
         };
         get?: never;
-        /** Upload an advertisement image */
-        put: operations["upload.adImage"];
+        /** Upload the 6:1 banner of an ad */
+        put: operations["upload.adBanner"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/uploads/small/ad/side-icon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upload the square icon an ad shows in the collapsed sidebar */
+        put: operations["upload.adSideIcon"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/uploads/small/ad/side-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upload the sidebar image of an ad */
+        put: operations["upload.adSideImage"];
         post?: never;
         delete?: never;
         options?: never;
@@ -4446,38 +4565,120 @@ export type components = {
             /** Format: int64 */
             id: number;
         };
-        AdAdminDTO: {
-            aspect: string;
-            /** Format: date-time */
-            created: string;
-            enabled: boolean;
-            /** Format: date-time */
-            end_at: string | null;
-            exclude_locales: string[] | null;
+        AdClickDTO: {
+            link: string;
+        };
+        AdClickInputBody: {
+            /**
+             * @description The slot the ad was clicked in
+             * @enum {string}
+             */
+            slot: "home" | "game" | "resource" | "download" | "sidebar";
+        };
+        AdCountsDTO: {
             /** Format: int64 */
-            id: number;
-            image_en: string | null;
-            image_ja: string | null;
-            image_zh: string;
+            clicks: number;
+            /** Format: int64 */
+            views: number;
+        };
+        AdDayDTO: {
+            /** Format: int64 */
+            clicks: number;
+            /** Format: date */
+            day: string;
+            /** Format: int64 */
+            views: number;
+        };
+        AdDraftInput: {
+            /** @description Key of the 6:1 banner in the image bucket */
+            banner?: string | null;
+            /** @description The banner is shown only to viewers who see adult content */
+            banner_adult: boolean;
+            enabled: boolean;
+            /**
+             * Format: date-time
+             * @description Omitted or null runs without end
+             */
+            end_at?: string | null;
+            languages: ("zh" | "en" | "ja")[] | null;
             link: string;
             name: string;
-            placement: string[] | null;
+            /** @description The sidebar image is shown only to viewers who see adult content */
+            side_adult: boolean;
+            /** @description Key of the square icon the collapsed sidebar shows */
+            side_icon?: string | null;
+            /** @description Key of the sidebar image; set together with side_icon */
+            side_image?: string | null;
+            slots: ("home" | "game" | "resource" | "download" | "sidebar")[] | null;
+            /**
+             * Format: date-time
+             * @description Omitted or null starts at once
+             */
+            start_at?: string | null;
             /** Format: int64 */
-            sort: number;
-            /** Format: date-time */
-            start_at: string | null;
-            /** Format: date-time */
-            updated: string;
+            weight: number;
         };
-        AdItemDTO: {
-            aspect: string;
-            exclude_locales: string[] | null;
+        AdNamedDTO: {
             /** Format: int64 */
             id: number;
-            image_en: string | null;
-            image_ja: string | null;
-            image_zh: string;
-            link: string;
+            name: string;
+        };
+        AdOverviewDTO: {
+            /** @description Whether the ad.enabled setting is on */
+            enabled: boolean;
+            /** Format: int64 */
+            running: number;
+            week: components["schemas"]["AdCountsDTO"];
+        };
+        AdPlacedDTO: {
+            ads: components["schemas"]["AdShownDTO"][] | null;
+            /** @enum {string} */
+            slot: "home" | "game" | "resource" | "download" | "sidebar";
+        };
+        AdReportDTO: {
+            days: components["schemas"]["AdDayDTO"][] | null;
+            slots: components["schemas"]["AdSlotCountsDTO"][] | null;
+            total: components["schemas"]["AdCountsDTO"];
+        };
+        AdShownDTO: {
+            /** @description Key of the square icon; only in the sidebar slot */
+            icon: string | null;
+            /** Format: int64 */
+            id: number;
+            /** @description Key of the banner, or of the sidebar image in the sidebar slot */
+            image: string;
+            name: string;
+        };
+        AdSlotCountsDTO: {
+            /** Format: int64 */
+            clicks: number;
+            /** @enum {string} */
+            slot: "home" | "game" | "resource" | "download" | "sidebar";
+            /** Format: int64 */
+            views: number;
+        };
+        AdSlotSummaryDTO: {
+            /** @enum {string} */
+            material: "banner" | "side";
+            running: components["schemas"]["AdNamedDTO"][] | null;
+            /**
+             * Format: int64
+             * @description At most this many ads at once
+             */
+            shown: number;
+            /** @enum {string} */
+            slot: "home" | "game" | "resource" | "download" | "sidebar";
+            week: components["schemas"]["AdCountsDTO"];
+        };
+        AdViewInput: {
+            /** Format: int64 */
+            ad_id: number;
+            /** @enum {string} */
+            slot: "home" | "game" | "resource" | "download" | "sidebar";
+        };
+        AdViewsInputBody: {
+            /** @description Each ad seen, once per page view */
+            views: components["schemas"]["AdViewInput"][] | null;
         };
         AddDownloadFilesInputBody: {
             files: components["schemas"]["DownloadFileUploadInput"][] | null;
@@ -4486,6 +4687,34 @@ export type components = {
             /** Format: int64 */
             game_id: number;
             note?: string;
+        };
+        AdminAdDTO: {
+            banner: string | null;
+            banner_adult: boolean;
+            /** Format: date-time */
+            created: string;
+            enabled: boolean;
+            /** Format: date-time */
+            end_at: string | null;
+            /** Format: int64 */
+            id: number;
+            languages: ("zh" | "en" | "ja")[] | null;
+            link: string;
+            name: string;
+            side_adult: boolean;
+            side_icon: string | null;
+            side_image: string | null;
+            slots: ("home" | "game" | "resource" | "download" | "sidebar")[] | null;
+            /** Format: date-time */
+            start_at: string | null;
+            /** @enum {string} */
+            status: "running" | "scheduled" | "ended" | "disabled";
+            /** Format: date-time */
+            updated: string;
+            /** @description Counts of the last seven days; zero outside the list */
+            week: components["schemas"]["AdCountsDTO"];
+            /** Format: int64 */
+            weight: number;
         };
         AdminCharacterItemDTO: {
             /** Format: date-time */
@@ -6012,7 +6241,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -6549,23 +6778,6 @@ export type components = {
              * @description A completed upload of the caller that is not part of a resource
              */
             upload_session_id: number;
-        };
-        CreateAdInputBody: {
-            aspect: string;
-            enabled?: boolean;
-            /** Format: date-time */
-            end_at?: string;
-            exclude_locales?: string[] | null;
-            image_en?: string;
-            image_ja?: string;
-            image_zh: string;
-            link: string;
-            name: string;
-            placement: string[] | null;
-            /** Format: int64 */
-            sort?: number;
-            /** Format: date-time */
-            start_at?: string;
         };
         CreateCommentInputBody: {
             content: components["schemas"]["RichTextDocument"];
@@ -7149,10 +7361,40 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopeAdAdminDTO: {
+        EnvelopeAdClickDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["AdAdminDTO"];
+            data: components["schemas"]["AdClickDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdOverviewDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdOverviewDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdReportDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdReportDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdminAdDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminAdDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7900,10 +8142,20 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopeListAdItemDTO: {
+        EnvelopeListAdPlacedDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["AdItemDTO"][] | null;
+            data: components["schemas"]["AdPlacedDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListAdSlotSummaryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdSlotSummaryDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -8300,10 +8552,10 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopePageAdAdminDTO: {
+        EnvelopePageAdminAdDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["PageAdAdminDTO"];
+            data: components["schemas"]["PageAdminAdDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -9959,8 +10211,8 @@ export type components = {
             id: number;
             name: string;
         };
-        PageAdAdminDTO: {
-            items: components["schemas"]["AdAdminDTO"][] | null;
+        PageAdminAdDTO: {
+            items: components["schemas"]["AdminAdDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageAdminCharacterItemDTO: {
@@ -10768,31 +11020,6 @@ export type components = {
             /** Format: int64 */
             works_count: number;
         };
-        UpdateAdInputBody: {
-            aspect?: string;
-            enabled?: boolean;
-            /**
-             * Format: date-time
-             * @description null clears the end
-             */
-            end_at?: string | null;
-            exclude_locales?: string[] | null;
-            /** @description null clears the image */
-            image_en?: string | null;
-            /** @description null clears the image */
-            image_ja?: string | null;
-            image_zh?: string;
-            link?: string;
-            name?: string;
-            placement?: string[] | null;
-            /** Format: int64 */
-            sort?: number;
-            /**
-             * Format: date-time
-             * @description null clears the start
-             */
-            start_at?: string | null;
-        };
         UpdateBioInputBody: {
             bio: string;
         };
@@ -11240,13 +11467,16 @@ export interface operations {
             };
         };
     };
-    "ad.placement": {
+    "ad.slots": {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                placement: string;
+            query: {
+                /** @description The slots on the page, one parameter per slot */
+                slot: ("home" | "game" | "resource" | "download" | "sidebar")[] | null;
+                /** @description Language of the page */
+                locale?: "zh" | "en" | "ja";
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -11258,7 +11488,77 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeListAdItemDTO"];
+                    "application/json": components["schemas"]["EnvelopeListAdPlacedDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ad.views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdViewsInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ad.click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdClickInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdClickDTO"];
                 };
             };
             /** @description Error */
@@ -11279,10 +11579,8 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                placement?: string;
-                enabled?: "true" | "false";
-                sortBy?: "id" | "sort" | "created" | "updated";
-                sortOrder?: "asc" | "desc";
+                status?: "running" | "scheduled" | "ended" | "disabled";
+                slot?: "home" | "game" | "resource" | "download" | "sidebar";
             };
             header?: never;
             path?: never;
@@ -11297,7 +11595,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopePageAdAdminDTO"];
+                    "application/json": components["schemas"]["EnvelopePageAdminAdDTO"];
                 };
             };
             /** @description Error */
@@ -11320,7 +11618,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateAdInputBody"];
+                "application/json": components["schemas"]["AdDraftInput"];
             };
         };
         responses: {
@@ -11331,7 +11629,67 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeAdAdminDTO"];
+                    "application/json": components["schemas"]["EnvelopeAdminAdDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ad.admin.overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdOverviewDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ad.admin.slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListAdSlotSummaryDTO"];
                 };
             };
             /** @description Error */
@@ -11363,7 +11721,43 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeAdAdminDTO"];
+                    "application/json": components["schemas"]["EnvelopeAdminAdDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "ad.admin.replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdDraftInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminAdDTO"];
                 };
             };
             /** @description Error */
@@ -11409,20 +11803,18 @@ export interface operations {
             };
         };
     };
-    "ad.admin.update": {
+    "ad.admin.report": {
         parameters: {
-            query?: never;
+            query?: {
+                days?: 7 | 30;
+            };
             header?: never;
             path: {
                 id: number;
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateAdInputBody"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -11431,7 +11823,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeAdAdminDTO"];
+                    "application/json": components["schemas"]["EnvelopeAdReportDTO"];
                 };
             };
             /** @description Error */
@@ -20266,7 +20658,81 @@ export interface operations {
             };
         };
     };
-    "upload.adImage": {
+    "upload.adBanner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "upload.adSideIcon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "upload.adSideImage": {
         parameters: {
             query?: never;
             header?: never;
