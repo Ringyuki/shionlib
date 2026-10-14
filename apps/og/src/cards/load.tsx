@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { config, type Locale } from '@/config'
+import type { Locale } from '@/config'
 import { NotFoundError } from '@/services/backend'
 import {
   fetchCharacter,
@@ -130,6 +130,6 @@ export async function homeCard(locale: Locale): Promise<Card> {
   const view = homeView(hot)
   return drawn(
     view.shelf.map(cover => cover.src),
-    loaded => <HomeCard view={view} locale={locale} loaded={loaded} host={config.SITE_HOST} />,
+    loaded => <HomeCard view={view} locale={locale} loaded={loaded} />,
   )
 }

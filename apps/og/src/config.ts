@@ -5,7 +5,6 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'staging', 'production', 'test']).default('development'),
   BACKEND_INTERNAL_URL: z.string().url().default('http://localhost:5000'),
   SHIONLIB_IMAGE_BED_URL: z.string().url().default('https://t.shionlib.com'),
-  SITE_HOST: z.string().default('shionlib.com'),
   OG_DESIGN_VERSION: z.string().default('2'),
   OG_CACHE_DISABLED: z
     .enum(['true', 'false', '1', '0'])

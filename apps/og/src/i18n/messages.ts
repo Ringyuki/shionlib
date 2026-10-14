@@ -10,6 +10,7 @@ export type Labels = {
   walkthroughLanguage: Record<string, string>
   docsCategory: Record<string, string>
   docs: string
+  slogan: readonly string[]
   walkthrough: string
   sponsor: string
   admin: string
@@ -52,6 +53,7 @@ const labels: Record<Locale, Labels> = {
     walkthroughLanguage: { zh: '中文', 'zh-hant': '繁体中文', jp: '日语', en: '英语' },
     docsCategory: { guides: '指南', about: '关于', dev: '开发' },
     docs: '文档',
+    slogan: ['免费、开源、零门槛的', '视觉小说/Galgame 档案库'],
     walkthrough: '攻略',
     sponsor: '赞助者',
     admin: '管理员',
@@ -90,6 +92,7 @@ const labels: Record<Locale, Labels> = {
     },
     docsCategory: { guides: 'Guides', about: 'About', dev: 'Development' },
     docs: 'Docs',
+    slogan: ['Free, open-source, zero-threshold', 'visual novel/Galgame archive'],
     walkthrough: 'Walkthrough',
     sponsor: 'Sponsor',
     admin: 'Admin',
@@ -118,6 +121,7 @@ const labels: Record<Locale, Labels> = {
     walkthroughLanguage: { zh: '中国語', 'zh-hant': '繁体字中国語', jp: '日本語', en: '英語' },
     docsCategory: { guides: 'ガイド', about: 'このサイトについて', dev: '開発' },
     docs: 'ドキュメント',
+    slogan: ['無料・オープンソース・気軽に使える', 'ビジュアルノベル／ギャルゲー アーカイブ'],
     walkthrough: '攻略',
     sponsor: 'スポンサー',
     admin: '管理者',
