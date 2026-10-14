@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 import type { FormKit } from '~/shared/form/form-kit'
+import { blankDocument } from '~/shared/richtext/rich-text'
+import { richDocument } from '~/shared/richtext/rich-text.schema'
 import { infoValuesFrom } from './resource-info'
 import { infoCommand, infoFields, infoRules, type InfoIssue } from './resource-info.schema'
 import {
@@ -38,7 +40,7 @@ export const editCommand = v.object({
   platform: platforms,
   language: languages,
   simulator,
-  note: v.string(),
+  note: richDocument,
   ...infoCommand,
 })
 
@@ -103,7 +105,7 @@ export function editForm(kit: FormKit, issue: ResourceIssueMessage) {
       platform: platformField(issue),
       language: languageField(issue),
       simulator,
-      note: kit.text('EditDownloadSourceBodyInput', 'note'),
+      note: kit.richText('EditDownloadSourceBodyInput', 'note'),
       ...infoFields(field => kit.text('EditDownloadSourceBodyInput', field)),
     }),
     infoRules(issue, false),
@@ -124,7 +126,7 @@ export function uploadForm(kit: FormKit, issue: ResourceIssueMessage) {
       platform: platformField(issue),
       language: languageField(issue),
       simulator,
-      note: kit.text('DownloadSourceBodyInput', 'note'),
+      note: kit.richText('DownloadSourceBodyInput', 'note'),
       ...infoFields(field => kit.text('DownloadSourceBodyInput', field)),
       files: filesField(issue),
     }),
@@ -169,7 +171,7 @@ export function editValuesFrom(resource: Editable): EditValues {
     platform: platformOptions.filter(option => platform.includes(option)),
     language: languageOptions.filter(option => language.includes(option)),
     simulator: simulatorOptions.find(option => option === resource.simulator) ?? '',
-    note: resource.note ?? '',
+    note: resource.note ?? blankDocument,
     ...infoValuesFrom(resource),
   }
 }

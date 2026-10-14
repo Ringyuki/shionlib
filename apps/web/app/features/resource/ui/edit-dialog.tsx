@@ -47,12 +47,15 @@ export function EditDialog({ resource, game, open, onOpenChange }: EditDialogPro
             }
           }}
         >
-          <ResourceFields
-            values={values}
-            complete={false}
-            named={named}
-            onValuesChange={setValues}
-          />
+          {({ errors }) => (
+            <ResourceFields
+              values={values}
+              complete={false}
+              named={named}
+              errors={errors}
+              onValuesChange={setValues}
+            />
+          )}
         </Form>
       )}
       renderFooter={({ close, submitting }) => (

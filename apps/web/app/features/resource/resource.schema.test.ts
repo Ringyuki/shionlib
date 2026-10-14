@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { firstIssueMessage, parseOptional } from '~/shared/form/check'
 import { createFormKit } from '~/shared/form/form-kit'
+import { blankDocument, documentOfText } from '~/shared/richtext/rich-text'
 import { blankInfo } from './resource-info'
 import {
   editCommand,
@@ -20,7 +21,7 @@ const edit: EditValues = {
   platform: ['win'],
   language: ['zh'],
   simulator: '',
-  note: '',
+  note: blankDocument,
   ...blankInfo,
 }
 
@@ -50,6 +51,8 @@ describe('uploadForm', () => {
     expect(problem({ ...machine, releaseUrl: 'moyu.moe/patch/1' })).toBe('releaseUrl')
     expect(problem({ ...machine, patchVersion: 'v'.repeat(33) })).toBe('maxLength')
     expect(problem({ ...machine, editionName: '版'.repeat(65) })).toBe('maxLength')
+    expect(problem({ ...machine, note: documentOfText('说'.repeat(255)) })).toBeUndefined()
+    expect(problem({ ...machine, note: documentOfText('说'.repeat(256)) })).toBe('maxLength')
   })
 })
 
@@ -81,7 +84,7 @@ describe('editValuesFrom', () => {
         platform: ['win', 'amiga'],
         language: ['zh'],
         simulator: null,
-        note: null,
+        note: documentOfText('含特典'),
         translation: 'machine',
         translators: [],
         patch_version: 'v2.8',
@@ -94,6 +97,7 @@ describe('editValuesFrom', () => {
       }),
     ).toEqual({
       ...edit,
+      note: documentOfText('含特典'),
       translation: 'machine',
       patchVersion: 'v2.8',
       form: 'portable',

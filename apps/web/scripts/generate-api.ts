@@ -35,6 +35,7 @@ type JsonSchema = {
   properties?: Record<string, JsonSchema>
   required?: string[]
   $ref?: string
+  'x-max-text-length'?: number
 }
 
 type Operation = {
@@ -98,6 +99,9 @@ function fieldConstraint(field: JsonSchema, required: boolean) {
   }
   if (field.items?.enum !== undefined) {
     constraint.itemEnum = field.items.enum
+  }
+  if (field['x-max-text-length'] !== undefined) {
+    constraint.maxTextLength = field['x-max-text-length']
   }
   if (field.properties !== undefined) {
     constraint.fields = fieldConstraints(field)

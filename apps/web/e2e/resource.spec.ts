@@ -30,16 +30,20 @@ test.describe('as the uploader', () => {
   test.use({ storageState: sessionFile('owner') })
   test.describe.configure({ mode: 'serial' })
 
-  test('edits the note with the BBCode editor and previews it', async ({ page }) => {
+  test('edits the note in the editor', async ({ page }) => {
     await openAction(page, '编辑资源')
     const dialog = page.getByRole('dialog', { name: '编辑资源' })
     const note = dialog.getByRole('textbox', { name: '说明' })
-    await note.fill('Edited by E2E')
-    await note.selectText()
-    await dialog.getByRole('button', { name: '粗体' }).click()
-    await expect(note).toHaveValue('[b]Edited by E2E[/b]')
-    await dialog.getByRole('button', { name: '预览' }).click()
-    await expect(dialog.locator('strong', { hasText: 'Edited by E2E' })).toBeVisible()
+    await expect(note).toHaveText('Seeded reportable resource for E2E report flow.')
+    await note.click()
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.type('Edited by E2E')
+    await page.keyboard.press('ControlOrMeta+A')
+    await dialog
+      .getByRole('toolbar', { name: '格式' })
+      .getByRole('button', { name: '粗体' })
+      .click()
+    await expect(note.locator('strong')).toHaveText('Edited by E2E')
     await dialog.getByRole('button', { name: '保存' }).click()
     await expectNotice(page, '资源已更新')
     await expect(page.locator('#resource-1 strong', { hasText: 'Edited by E2E' })).toBeVisible()

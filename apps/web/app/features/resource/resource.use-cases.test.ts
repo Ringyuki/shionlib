@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { ApiData } from '~/shared/api/types'
+import { documentOfText } from '~/shared/richtext/rich-text'
 import { blankInfo } from './resource-info'
 import {
   editResource,
@@ -20,7 +21,6 @@ const detail: ApiData<'/game/download-source/{id}', 'get'> = {
     platform: ['win'],
     language: ['jp'],
     simulator: null,
-    note: null,
     downloads: 571,
     creator: { id: 9, name: 'ringyuki', avatar: null, is_sponsor: false },
     published_at: '2026-09-25T02:25:43Z',
@@ -124,7 +124,7 @@ describe('editResource', () => {
       platform: ['win'],
       language: ['zh'],
       simulator: 'KRKR',
-      note: ' 附带特典 ',
+      note: documentOfText('附带特典'),
       ...blankInfo,
       translation: 'group',
       translators: ['绿茶汉化组'],
@@ -136,7 +136,7 @@ describe('editResource', () => {
     await expect(request?.json()).resolves.toEqual({
       platform: ['win'],
       language: ['zh'],
-      note: '附带特典',
+      note: documentOfText('附带特典'),
       translation: 'group',
       translators: ['绿茶汉化组'],
       patch_version: 'v1.1',
@@ -144,6 +144,21 @@ describe('editResource', () => {
       extras: [],
       canonical_name: true,
     })
+  })
+})
+
+describe('editResource without a note', () => {
+  it('leaves the note out, which clears it', async () => {
+    const fake = fakeApi().on('patch', '/game/download-source/{id}', undefined)
+    await editResource(fake.api, {
+      resourceId: 31,
+      platform: ['win'],
+      language: ['jp'],
+      simulator: '',
+      note: documentOfText(''),
+      ...blankInfo,
+    })
+    await expect(fake.requests[0]?.json()).resolves.not.toHaveProperty('note')
   })
 })
 

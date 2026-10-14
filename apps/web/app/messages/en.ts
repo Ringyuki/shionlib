@@ -25,7 +25,6 @@ import translator from '~/features/translator/messages/en.json'
 import upload from '~/features/upload/messages/en.json'
 import uploader from '~/features/uploader/messages/en.json'
 import walkthrough from '~/features/walkthrough/messages/en.json'
-import bbcode from './bbcode/en.json'
 import editor from './editor/en.json'
 import form from './form/en.json'
 import picture from './picture/en.json'
@@ -37,7 +36,6 @@ export const messages: Messages = {
   apiKey,
   activity,
   auth,
-  bbcode,
   character,
   comment,
   developer,

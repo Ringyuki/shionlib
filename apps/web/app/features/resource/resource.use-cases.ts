@@ -3,7 +3,7 @@ import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import type { ComposeMode, WizardStep } from './resource-composition'
 import { loadComposer, loadLineage } from './resource-composition.use-cases'
-import { needsSimulator } from './resource'
+import { needsSimulator, writtenNote } from './resource'
 import { resourceInfo } from './resource-info'
 import { nameBody, type NameQuery } from './resource-name'
 import type { ResourcePage } from './resource-page'
@@ -71,12 +71,13 @@ export async function reportResource(api: ApiClient, report: ResourceReport) {
 export async function editResource(api: ApiClient, edit: ResourceEdit) {
   const simulator =
     needsSimulator(edit.platform) && edit.simulator !== '' ? edit.simulator : undefined
+  const note = writtenNote(edit.note)
   await api.patch('/game/download-source/{id}', {
     params: { path: { id: edit.resourceId } },
     body: {
       platform: edit.platform,
       language: edit.language,
-      note: edit.note.trim(),
+      ...(note === undefined ? {} : { note }),
       ...(simulator === undefined ? {} : { simulator }),
       ...resourceInfo(edit, edit.language),
     },

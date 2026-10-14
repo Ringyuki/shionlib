@@ -6736,9 +6736,10 @@ export type components = {
             file_size: number;
             s3_file_key: string;
         };
-        DownloadMigrateResourceInputBody: {
+        DownloadMigrateResourceBodyInput: {
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
-            note?: string;
+            /** @description Paragraphs with bold, links and spoilers; left out or blank for no note */
+            note?: components["schemas"]["RichTextDocument"];
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
             /** @enum {string} */
             simulator?: "KRKR" | "ONS" | "ARTEMIS" | "OTHER";
@@ -6797,7 +6798,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             language: string[] | null;
-            note: string | null;
+            /** @description Paragraphs with bold, links and spoilers; left out when the resource has no note */
+            note?: components["schemas"]["RichTextDocument"];
             platform: string[] | null;
             /** Format: date-time */
             published_at: string | null;
@@ -6853,7 +6855,8 @@ export type components = {
             language: string[] | null;
             /** @description File names of the volumes that the sets still waiting for their check lack, as their siblings are named; empty when nothing is missing */
             missing_volumes: string[] | null;
-            note: string | null;
+            /** @description Paragraphs with bold, links and spoilers; left out when the resource has no note */
+            note?: components["schemas"]["RichTextDocument"];
             patch_version: string | null;
             platform: string[] | null;
             /**
@@ -6907,7 +6910,8 @@ export type components = {
              */
             form: "disc" | "installer" | "portable";
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
-            note?: string;
+            /** @description Paragraphs with bold, links and spoilers; left out or blank for no note */
+            note?: components["schemas"]["RichTextDocument"];
             patch_version?: string;
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
             /** @description The page the translation was released on */
@@ -6941,7 +6945,8 @@ export type components = {
             id: number;
             language: string[] | null;
             more_than_one_file: boolean;
-            note: string | null;
+            /** @description Paragraphs with bold, links and spoilers; left out when the resource has no note */
+            note?: components["schemas"]["RichTextDocument"];
             platform: string[] | null;
             /** Format: date-time */
             published_at: string | null;
@@ -7003,7 +7008,8 @@ export type components = {
              */
             form?: "disc" | "installer" | "portable";
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
-            note?: string;
+            /** @description Paragraphs with bold, links and spoilers; left out or blank for no note */
+            note?: components["schemas"]["RichTextDocument"];
             patch_version?: string;
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
             /** @description The page the translation was released on */
@@ -9761,7 +9767,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             language: string[] | null;
-            note: string | null;
+            /** @description The uploader's note: paragraphs with bold, links and spoilers; left out when there is none */
+            note?: components["schemas"]["RichTextDocument"];
             patch_version: string | null;
             platform: string[] | null;
             /** Format: date-time */
@@ -10260,7 +10267,7 @@ export type components = {
             /** @enum {string} */
             verdict: "VALID" | "INVALID";
         };
-        /** @description A rich text document: what the editor stores for a comment and for the note of a walkthrough */
+        /** @description A rich text document: what the editor stores for a comment, the note of a walkthrough and the note of a resource */
         RichTextDocument: {
             content: components["schemas"]["RichTextNode"][];
             /** @enum {string} */
@@ -17361,7 +17368,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DownloadMigrateResourceInputBody"];
+                "application/json": components["schemas"]["DownloadMigrateResourceBodyInput"];
             };
         };
         responses: {

@@ -43,7 +43,6 @@ const resource = (
   platform: ['win'],
   language: ['jp'],
   simulator: null,
-  note: null,
   downloads: 0,
   creator: { id: 7, name: 'mikan', avatar: null, is_sponsor: false },
   published_at: '2026-01-01T00:00:00Z',

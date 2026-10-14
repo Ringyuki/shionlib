@@ -49,6 +49,30 @@ export function isBlank(document: RichDocument): boolean {
   return plainText(document).trim() === ''
 }
 
+function nodeLength(node: RichNode): number {
+  return (node.content ?? []).reduce(
+    (length, child) => length + nodeLength(child),
+    node.text?.length ?? 0,
+  )
+}
+
+export function textLength(document: RichDocument): number {
+  return document.content.reduce((length, node) => length + nodeLength(node), 0)
+}
+
+export function documentOfText(text: string): RichDocument {
+  const content = text
+    .split(lineEnd)
+    .flatMap<RichNode>((line, index) => [
+      ...(index === 0 ? [] : [{ type: 'hard_break' as const }]),
+      ...(line === '' ? [] : [{ type: 'text' as const, text: line }]),
+    ])
+  return {
+    type: 'doc',
+    content: [content.length === 0 ? { type: 'paragraph' } : { type: 'paragraph', content }],
+  }
+}
+
 export type InlineRun = { key: string | undefined; nodes: RichNode[] }
 
 export function inlineRuns(

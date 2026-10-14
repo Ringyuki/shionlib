@@ -79,7 +79,6 @@ curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
             "edition_name": null,
             "form": "portable",
             "extras": [],
-            "note": null,
             "downloads": 237,
             "creator": { "id": 1, "name": "ringyuki" },
             "published_at": "2026-01-04T16:36:08.028Z",
@@ -122,25 +121,25 @@ curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
 
 ### 资源
 
-| 字段                     | 说明                                                                                      |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| `id`                     | 资源 ID                                                                                   |
-| `url`                    | 资源页面的地址，下载在这个页面上进行                                                      |
-| `platform`               | 平台：`win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                   |
-| `language`               | 语言：`jp` `zh` `zh-hant` `en`                                                            |
-| `translation`            | 翻译：`none` 无、`official` 官方翻译、`group` 汉化组、`machine` 机器翻译；未注明时为 null |
-| `translators`            | 汉化组，每项含 `id` 和 `name`，按署名的顺序排列                                           |
-| `patch_version`          | 补丁版本                                                                                  |
-| `release_url`            | 汉化的发布页面                                                                            |
-| `edition`                | 发行版本：`download` 下载版、`package` 光盘版、`steam` Steam 版                           |
-| `edition_name`           | 版本名称                                                                                  |
-| `form`                   | 形态：`disc` 光盘映像、`installer` 安装程序、`portable` 免安装                            |
-| `extras`                 | 附带内容：`save` 全CG存档、`bonus` 特典                                                   |
-| `note`                   | 说明                                                                                      |
-| `downloads`              | 下载次数                                                                                  |
-| `creator`                | 上传者，含 `id` 和 `name`                                                                 |
-| `published_at` `updated` | 发布时间、最近更新时间                                                                    |
-| `files`                  | 可以下载的文件，同一组分卷排在一起并按顺序排列                                            |
+| 字段                     | 说明                                                                                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                     | 资源 ID                                                                                                                                                                                   |
+| `url`                    | 资源页面的地址，下载在这个页面上进行                                                                                                                                                      |
+| `platform`               | 平台：`win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                                                                                                                   |
+| `language`               | 语言：`jp` `zh` `zh-hant` `en`                                                                                                                                                            |
+| `translation`            | 翻译：`none` 无、`official` 官方翻译、`group` 汉化组、`machine` 机器翻译；未注明时为 null                                                                                                 |
+| `translators`            | 汉化组，每项含 `id` 和 `name`，按署名的顺序排列                                                                                                                                           |
+| `patch_version`          | 补丁版本                                                                                                                                                                                  |
+| `release_url`            | 汉化的发布页面                                                                                                                                                                            |
+| `edition`                | 发行版本：`download` 下载版、`package` 光盘版、`steam` Steam 版                                                                                                                           |
+| `edition_name`           | 版本名称                                                                                                                                                                                  |
+| `form`                   | 形态：`disc` 光盘映像、`installer` 安装程序、`portable` 免安装                                                                                                                            |
+| `extras`                 | 附带内容：`save` 全CG存档、`bonus` 特典                                                                                                                                                   |
+| `note`                   | 说明，富文本文档：段落（`paragraph`）中是文字（`text`）和换行（`hard_break`），文字可带粗体（`bold`）、链接（`link`，地址在 `attrs.href`）和剧透（`spoiler`）标记；没有说明时不返回此字段 |
+| `downloads`              | 下载次数                                                                                                                                                                                  |
+| `creator`                | 上传者，含 `id` 和 `name`                                                                                                                                                                 |
+| `published_at` `updated` | 发布时间、最近更新时间                                                                                                                                                                    |
+| `files`                  | 可以下载的文件，同一组分卷排在一起并按顺序排列                                                                                                                                            |
 
 ### 文件
 

@@ -1,27 +1,33 @@
-import { FormField, Select } from '@hina-ui/react'
+import { FormField, Select, type FormErrors } from '@hina-ui/react'
 import { useMessages, useTranslations } from 'use-intl'
 import { PlatformIcon } from '~/features/game'
-import { lengthOf } from '~/shared/form/form-kit'
 import { labelOf } from '~/shared/i18n/labels'
-import { BBCodeEditor } from '~/shared/ui/bbcode-editor'
 import { ChoiceChips } from '~/shared/ui/choice-chips'
 import { languageOptions, needsSimulator, platformOptions, simulatorOptions } from '../resource'
 import { translated } from '../resource-info'
 import type { EditValues } from '../resource.schema'
 import { InfoFields } from './info-fields'
 import { NameField } from './name-field'
+import { NoteField } from './note-field'
 import { TranslationFields } from './translation-fields'
 
 type ResourceFieldsProps = {
   values: EditValues
   complete: boolean
   named: Named | undefined
+  errors: FormErrors
   onValuesChange: (values: EditValues) => void
 }
 
 type Named = { gameId: number; resourceId?: number; fileName: string }
 
-export function ResourceFields({ values, complete, named, onValuesChange }: ResourceFieldsProps) {
+export function ResourceFields({
+  values,
+  complete,
+  named,
+  errors,
+  onValuesChange,
+}: ResourceFieldsProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const change = (patch: Partial<EditValues>) => onValuesChange({ ...values, ...patch })
@@ -69,13 +75,11 @@ export function ResourceFields({ values, complete, named, onValuesChange }: Reso
         <TranslationFields values={values} required={complete} onChange={change} />
       )}
       <InfoFields values={values} complete={complete} onChange={change} />
-      <FormField
-        name="note"
-        label={t('note')}
-        description={t('noteHint', lengthOf('EditDownloadSourceBodyInput', 'note'))}
-      >
-        <BBCodeEditor value={values.note} onValueChange={note => change({ note })} />
-      </FormField>
+      <NoteField
+        value={values.note}
+        refused={errors.note !== undefined}
+        onValueChange={note => change({ note })}
+      />
       {named !== undefined && (
         <NameField
           query={{ ...values, ...named }}

@@ -1243,7 +1243,7 @@ export const constraints = {
       "minLength": 1
     }
   },
-  "DownloadMigrateResourceInputBody": {
+  "DownloadMigrateResourceBodyInput": {
     "language": {
       "type": "array",
       "required": true,
@@ -1257,10 +1257,10 @@ export const constraints = {
       ]
     },
     "note": {
-      "type": "string",
+      "type": "unknown",
       "required": false,
       "nullable": false,
-      "maxLength": 255
+      "maxTextLength": 255
     },
     "platform": {
       "type": "array",
@@ -1370,10 +1370,10 @@ export const constraints = {
       ]
     },
     "note": {
-      "type": "string",
+      "type": "unknown",
       "required": false,
       "nullable": false,
-      "maxLength": 255
+      "maxTextLength": 255
     },
     "patch_version": {
       "type": "string",
@@ -1561,10 +1561,10 @@ export const constraints = {
       ]
     },
     "note": {
-      "type": "string",
+      "type": "unknown",
       "required": false,
       "nullable": false,
-      "maxLength": 255
+      "maxTextLength": 255
     },
     "patch_version": {
       "type": "string",
