@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -21,6 +23,8 @@ const (
 	extractTimeout  = 30 * time.Minute
 	outputLimit     = 64 << 20
 	utcTimes        = "TZ=UTC"
+	entryDirMode    = 0o750
+	entryFileMode   = 0o600
 )
 
 type Tool struct {
@@ -57,6 +61,22 @@ func (t *Tool) Extract(ctx context.Context, path, destination string, selection 
 	return t.run(ctx, extractTimeout, append(args, path)...)
 }
 
+func (t *Tool) ExtractEntry(ctx context.Context, path, entry, destination, name string) (scan.ToolRun, error) {
+	target := filepath.Clean(filepath.Join(destination, filepath.FromSlash(name)))
+	if err := os.MkdirAll(filepath.Dir(target), entryDirMode); err != nil {
+		return scan.ToolRun{}, fmt.Errorf("prepare %s: %w", target, err)
+	}
+	out, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, entryFileMode)
+	if err != nil {
+		return scan.ToolRun{}, fmt.Errorf("create %s: %w", target, err)
+	}
+	run, err := t.runTo(ctx, extractTimeout, out, "x", "-so", "-bd", "-bb0", "-p-", "-ssc-", "--", path, entry)
+	if closeErr := out.Close(); err == nil && closeErr != nil {
+		err = fmt.Errorf("close %s: %w", target, closeErr)
+	}
+	return run, err
+}
+
 func (t *Tool) current() string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -76,16 +96,16 @@ func (t *Tool) fallBack(from string) bool {
 }
 
 func (t *Tool) run(ctx context.Context, timeout time.Duration, args ...string) (scan.ToolRun, error) {
-	binary := t.current()
-	run, err := execute(ctx, timeout, binary, args)
-	if err != nil && errors.Is(err, exec.ErrNotFound) && t.fallBack(binary) {
-		run, err = execute(ctx, timeout, t.current(), args)
-	}
-	return run, err
+	return t.runTo(ctx, timeout, nil, args...)
 }
 
-func execute(ctx context.Context, timeout time.Duration, binary string, args []string) (scan.ToolRun, error) {
-	return executeIn(ctx, timeout, binary, "", nil, args)
+func (t *Tool) runTo(ctx context.Context, timeout time.Duration, out io.Writer, args ...string) (scan.ToolRun, error) {
+	binary := t.current()
+	run, err := executeIn(ctx, timeout, binary, "", out, args)
+	if err != nil && errors.Is(err, exec.ErrNotFound) && t.fallBack(binary) {
+		run, err = executeIn(ctx, timeout, t.current(), "", out, args)
+	}
+	return run, err
 }
 
 func executeIn(ctx context.Context, timeout time.Duration, binary, dir string, watch io.Writer, args []string) (scan.ToolRun, error) {

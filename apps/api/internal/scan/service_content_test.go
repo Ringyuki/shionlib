@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -354,7 +355,7 @@ func TestContentsFailWhenTheUploadedArchiveCannotBeExtracted(t *testing.T) {
 	f := newFixture(true)
 	f.stock(spooled, "7z", file("game.exe", 10), file("bonus.zip", 10))
 	f.tool.Extracts = map[string]scan.ToolRun{spooled: {Failed: true, ExitCode: 2, Stdout: "7-Zip (z) 26.02\nExtracting archive: game.part\nSub items Errors: 1", Stderr: "ERROR: Cannot open output file : errno=36 : File name too long : game.exe\n", Message: "exit status 2"}}
-	if _, err := f.read(t); err == nil || err.Error() != "extract executables: ERROR: Cannot open output file : errno=36 : File name too long : game.exe\nexit status 2" {
+	if _, err := f.read(t); err == nil || err.Error() != "extract contents: ERROR: Cannot open output file : errno=36 : File name too long : game.exe\nexit status 2" {
 		t.Fatalf("the failure is told in the words of the tool, without what it printed before: %v", err)
 	}
 	nested := newFixture(true)
@@ -370,5 +371,32 @@ func TestContentsFailWhenTheUploadedArchiveCannotBeExtracted(t *testing.T) {
 	slices.Sort(scanned)
 	if !slices.Equal(scanned, []string{"bonus.zip", "bonus.zip/setup.exe", "game.exe"}) || entryNamed(contents.Draft, "setup.exe").Name == "" {
 		t.Fatalf("a nested archive whose extraction fails is still listed and scanned, whole and in what came out: %v %v", scanned, tree(contents.Draft))
+	}
+}
+
+func TestContentsTakeEntriesWhoseNamesAreTooLongForTheDiskUnderShortNames(t *testing.T) {
+	long := strings.Repeat("長", 90)
+	f := newFixture(true)
+	f.stock(spooled, "7z", file("game.exe", 10), file(long+".exe", 10), file("bonus/"+long+".zip", 10))
+	f.stock(work+"/contents/.shionlib-apart/2.zip", "zip", file("setup.exe", 5))
+	contents, err := f.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scanned := targetNames(contents)
+	slices.Sort(scanned)
+	want := []string{"bonus/" + long + ".zip", "bonus/" + long + ".zip/setup.exe", "game.exe", long + ".exe"}
+	if !slices.Equal(scanned, want) {
+		t.Fatalf("entries with long names are read and scanned under the names the archive gives them: %v", scanned)
+	}
+	separated := []string{long + ".exe -> .shionlib-apart/1.exe", "bonus/" + long + ".zip -> .shionlib-apart/2.zip"}
+	if !slices.Equal(f.tool.Separated, separated) || !slices.Contains(f.tool.Selections[0].Skip, long+".exe") || !slices.Contains(f.tool.Selections[0].Skip, "bonus/"+long+".zip") {
+		t.Fatalf("long names leave the batch and are taken one by one: %v %v", f.tool.Separated, f.tool.Selections[0].Skip)
+	}
+	failing := newFixture(true)
+	failing.stock(spooled, "7z", file(long+".exe", 10))
+	failing.tool.EntryRuns = map[string]scan.ToolRun{long + ".exe": {Failed: true, ExitCode: 2, Message: "exit status 2"}}
+	if _, err := failing.read(t); err == nil || err.Error() != "extract contents: exit status 2" {
+		t.Fatalf("an entry taken alone that cannot be extracted fails the reading like the batch: %v", err)
 	}
 }

@@ -2,8 +2,10 @@ package sevenzip_test
 
 import (
 	"archive/zip"
+	"bytes"
 	"crypto/rand"
 	"errors"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -446,5 +448,57 @@ func TestContentsMarkANestedArchiveThatAsksForAPassword(t *testing.T) {
 		if entry.Kind == inspection.KindArchive && (!entry.Encrypted || !entry.Unreadable) {
 			t.Fatalf("unexpected nested archive %+v", entry)
 		}
+	}
+}
+
+func unicodeZip(t *testing.T, files map[string]string) []byte {
+	t.Helper()
+	var out bytes.Buffer
+	writer := zip.NewWriter(&out)
+	names := slices.Sorted(maps.Keys(files))
+	for _, name := range names {
+		entry, err := writer.Create(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := entry.Write([]byte(files[name])); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return out.Bytes()
+}
+
+func TestContentsOfARealArchiveTakeNamesTooLongForTheDisk(t *testing.T) {
+	binary := installedBinary(t)
+	dir := t.TempDir()
+	long := strings.Repeat("特典", 130)
+	inner := unicodeZip(t, map[string]string{"voice.exe": "MZ voice"})
+	target := filepath.Join(dir, "game.zip")
+	if err := os.WriteFile(target, unicodeZip(t, map[string]string{
+		"Game/game.exe":         "MZ game",
+		"Game/" + long + ".exe": "MZ long",
+		"Game/" + long + ".zip": string(inner),
+	}), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	contents, _ := readContents(t, binary, dir, target)
+	scanned := map[string]string{}
+	for _, target := range contents.Targets {
+		scanned[target.Name] = content(t, target.Path)
+	}
+	want := map[string]string{
+		"Game/game.exe":                   "MZ game",
+		"Game/" + long + ".exe":           "MZ long",
+		"Game/" + long + ".zip/voice.exe": "MZ voice",
+		"Game/" + long + ".zip":           string(inner),
+	}
+	if !maps.Equal(scanned, want) {
+		t.Fatalf("entries whose names the disk cannot hold are read under their own names: %v", slices.Sorted(maps.Keys(scanned)))
+	}
+	if got := paths(contents.Draft); !slices.Contains(got, "file Game/"+long+".zip/voice.exe") {
+		t.Fatalf("the nested archive with a long name is listed: %v", got)
 	}
 }
