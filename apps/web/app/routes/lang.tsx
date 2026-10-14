@@ -10,7 +10,7 @@ import {
 import { IntlProvider } from 'use-intl'
 import { loadMessages } from '~/messages'
 import type { Locale } from '~/shared/i18n/locale'
-import { isLocale, localizedLocation } from '~/shared/i18n/locale.schema'
+import { isLocale, localizedLocation, localizedRedirectStatus } from '~/shared/i18n/locale.schema'
 import { siteTimeZone } from '~/shared/i18n/site-time'
 import { KeptData } from '~/shared/route/kept-data'
 import { ErrorPage } from '~/shared/ui/error-page'
@@ -21,7 +21,8 @@ const uiMessages = { zh: zhCN, en: enUS, ja: jaJP } satisfies Record<Locale, typ
 export const middleware: Route.MiddlewareFunction[] = [
   ({ params, request, url }) => {
     if (!isLocale(params.lang)) {
-      throw redirect(localizedLocation(request.headers.get('cookie') ?? '', url))
+      const cookie = request.headers.get('cookie') ?? ''
+      throw redirect(localizedLocation(cookie, url), localizedRedirectStatus(cookie, url))
     }
   },
 ]

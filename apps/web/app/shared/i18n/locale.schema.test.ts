@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { chosenLocale, htmlLang, localizedLocation, switchLocale } from './locale.schema'
+import {
+  chosenLocale,
+  htmlLang,
+  localizedLocation,
+  localizedRedirectStatus,
+  switchLocale,
+} from './locale.schema'
 
 describe('chosenLocale', () => {
   it('takes the locale cookie', () => {
@@ -21,6 +27,15 @@ describe('localizedLocation', () => {
 
   it('follows the locale cookie', () => {
     expect(localizedLocation('shionlib_locale=en', new URL('https://shionlib.com/'))).toBe('/en')
+  })
+})
+
+describe('localizedRedirectStatus', () => {
+  it('moves an old address for good unless a language was chosen or it is the home page', () => {
+    const old = new URL('https://shionlib.com/game/962')
+    expect(localizedRedirectStatus('', old)).toBe(301)
+    expect(localizedRedirectStatus('shionlib_locale=en', old)).toBe(302)
+    expect(localizedRedirectStatus('', new URL('https://shionlib.com/'))).toBe(302)
   })
 })
 

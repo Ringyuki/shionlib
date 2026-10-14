@@ -88,5 +88,12 @@
     "remark": "{line, number} 行目の補足は {max, number} 文字以内で入力してください",
     "tooManySteps": "1 つのルートに入れられる手順は {max, number} 個までです",
     "tooManyCharacters": "キャラクターは {max, number} 人まで選択できます"
+  },
+  "seo": {
+    "titled": "{game} 攻略",
+    "by": "{title}（{author}）",
+    "lead": "{author}による『{game}』の攻略です。ルートは {count, number} 本、{date}に更新されました。",
+    "language": "言語は{language}です。",
+    "routes": "ルート：{names}。"
   }
 }

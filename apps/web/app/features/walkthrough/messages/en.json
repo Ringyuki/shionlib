@@ -88,5 +88,12 @@
     "remark": "The remark on line {line, number} cannot be longer than {max, number} characters",
     "tooManySteps": "A route cannot have more than {max, number} steps",
     "tooManyCharacters": "Choose at most {max, number} characters"
+  },
+  "seo": {
+    "titled": "{game} walkthrough",
+    "by": "{title} by {author}",
+    "lead": "A walkthrough of {game} by {author} with {count, plural, one {# route} other {# routes}}, updated on {date}. ",
+    "language": "Written in {language}. ",
+    "routes": "Routes: {names}. "
   }
 }

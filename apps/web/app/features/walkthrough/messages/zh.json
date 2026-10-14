@@ -88,5 +88,12 @@
     "remark": "第 {line, number} 行的附注不能超过 {max, number} 个字",
     "tooManySteps": "一条线路不能超过 {max, number} 步",
     "tooManyCharacters": "最多选择 {max, number} 个角色"
+  },
+  "seo": {
+    "titled": "{game} 攻略",
+    "by": "{title}（{author}）",
+    "lead": "{author} 编写的《{game}》攻略，共 {count, number} 条线路，更新于 {date}。",
+    "language": "语言为{language}。",
+    "routes": "线路包括 {names}。"
   }
 }

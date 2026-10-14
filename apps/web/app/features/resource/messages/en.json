@@ -427,5 +427,12 @@
     },
     "confirm": "OK",
     "stepsLabel": "Composition progress"
+  },
+  "seo": {
+    "download": "{words} download",
+    "lead": "A resource of {title} for {platforms} in {languages}. ",
+    "translators": "Translated by {names}. ",
+    "form": "{form}. ",
+    "files": "{count, plural, one {# file} other {# files}}, {size}. "
   }
 }

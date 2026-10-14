@@ -1,11 +1,12 @@
 import { LibraryPage } from '~/features/library'
 import type { Route } from './+types/library'
+import { pageMeta } from '~/shared/seo/seo'
 
 export { libraryLoader as loader } from '~/features/library/library.server'
 
-export function meta({ matches }: Route.MetaArgs) {
-  const [, lang] = matches
-  return [{ title: `${lang.loaderData.messages.library.title} | Shionlib` }]
+export function meta(args: Route.MetaArgs) {
+  const [, lang] = args.matches
+  return pageMeta(args, { title: lang.loaderData.messages.library.title })
 }
 
 export default function Library({ loaderData, matches }: Route.ComponentProps) {

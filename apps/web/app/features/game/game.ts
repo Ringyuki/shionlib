@@ -1,7 +1,6 @@
 import { constraints } from '~/shared/api/generated/constraints'
 import type { ApiQuery, Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
-import { bbcodePlainText } from '~/shared/markup/bbcode'
 import type { GameOrder } from './game-order'
 
 type Titled = Pick<Schema<'GameHeaderDTO'>, 'title_zh' | 'title_jp' | 'title_en'>
@@ -66,7 +65,8 @@ export type WorksOf = { developer: number } | { character: number } | { translat
 
 export const worksPageSize = 36
 
-export type GameImage = Pick<Cover, 'url' | 'dims' | 'sexual' | 'violence'>
+export type GameImage = Pick<Cover, 'url' | 'dims' | 'sexual' | 'violence'> &
+  Partial<Pick<Cover, 'masked'>>
 
 export const gameTabs = ['resources', 'info', 'characters', 'comments', 'walkthrough'] as const
 
@@ -164,13 +164,6 @@ export function coverRatio(cover: GameImage | undefined): number {
     return coverRatios.fallback
   }
   return Math.min(coverRatios.widest, Math.max(coverRatios.narrowest, size.width / size.height))
-}
-
-const descriptionLength = 160
-
-export function gameDescription(game: Introduced, locale: Locale): string {
-  const intro = bbcodePlainText(preferredIntro(game, locale)).replace(/\s+/g, ' ').trim()
-  return intro.length <= descriptionLength ? intro : `${intro.slice(0, descriptionLength - 1)}…`
 }
 
 export function plainPictures<Picture extends Rated>(

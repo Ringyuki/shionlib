@@ -12,5 +12,8 @@
   "noWorks": "暂未收录这个汉化组的作品",
   "fieldLabel": "汉化组",
   "fieldPlaceholder": "输入名称搜索或新建",
-  "create": "新建“{name}”"
+  "create": "新建“{name}”",
+  "seo": {
+    "lead": "{name} 共翻译了 {count, number} 部作品，包括 {known}。"
+  }
 }

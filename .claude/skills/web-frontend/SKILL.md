@@ -42,6 +42,9 @@ app/
     <name>.schema.ts           valibot: command schemas, form schemas, input guards (references/forms.md)
     <name>.use-cases.ts        use-cases: (api: ApiClient, input) => Promise<result>
     <name>.server.ts           loaders/actions reused by several routes (resource routes)
+    <name>.seo.ts              the head of the feature's pages (title, description, share image, structured data) as a
+                               PageHead for pageMeta; pure TypeScript that may use use-intl/core (createTranslator,
+                               createFormatter)
     use-<purpose>.ts           hooks: fetchers, optimistic state, client integration
     <name>-<role>.ts           long-lived client work in plain TypeScript (features/upload): pure state and rules
                                (<name>-state.ts, <name>-restore.ts), classes that own requests, workers and timers
@@ -66,6 +69,7 @@ app/
     richtext/                  rich text documents (what comments and the note of a walkthrough store): model, guards, text; no editor
     editor/                    the rich text editor on Tiptap: plugins, profiles, a session per editor, parts built from hina-ui (ui/);
                                its engine (engine/) is loaded on demand
+    seo/                       pageMeta (the only builder of head tags), PageHead, share image addresses, schema.org data
     i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
 mdx/                           build-time options for MDX: frontmatter, GFM tables and the `sections` plugin (heading anchors and the table of contents)
 ```
@@ -93,6 +97,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST pass stored image keys straight to hina-ui `Image` (`<Image src={developer.logo}>`): `root.tsx` mounts `ImageResolverProvider` with `imageResolver(IMAGE_BASE_URL)`. Other consumers (an `Avatar` `src`) call hina-ui's `useImageResolver()`. A picture cut to a face comes from the image processor through `useFaceImage()` (`~/shared/ui/use-face-image`); no other file builds a processor address (`references/ui.md`).
 - MUST show a game's cover or screenshot through `GameCover` or `GamePicture` (`~/features/game`), in every feature: they are the only place that knows whether the viewer sees adult pictures (`useShowsExplicit()` from `~/features/viewer`) and what a masked picture is (`references/ui.md`). The address of such a picture is never given to `Image` by hand (lint).
 - MUST read browser-visible configuration (`IMAGE_BASE_URL`, `IMAGE_BUCKET_URL`, `IMAGE_PROCESSOR_URL`, `CAP_ENDPOINT`, `HIKARINAGI_SITE_URL`) through `usePublicConfig()` (`~/shared/config/public-config`), filled by the root loader from `readServerEnv().publicConfig`; never read `process.env` or `import.meta.env` in features.
+- MUST build the `meta` of every page route with `pageMeta(args, head)` from `~/shared/seo`, and only with it: the `head` comes from the feature's `<name>.seo.ts`, a private page passes `indexable: false`, and `pageMeta` alone decides robots, canonical, Open Graph and X tags (only `zh` pages are indexed). A route never returns head tags of its own (lint; `references/ui.md`, Search engines and sharing).
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST keep files short: at most 150 non-blank lines for `.tsx`, 200 for other `.ts`, 300 for tests (lint enforces). When a file grows past that, split it by responsibility (a section, a field group, a hook that builds data), never by cutting it into arbitrary parts; stylesheets follow the same idea, one concern per file (`theme.css` accent roles, `platform.css` platform colours).
 - MUST add Playwright specs in `apps/web/e2e` for every user flow a phase ports, and run them with `pnpm test:e2e:web` before finishing the phase (`references/testing.md`).
@@ -166,6 +171,8 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A file of the API in the browser (an image `src`)?   | a resource route answered with `routeFile(args, api => api.file(path, init))` (`references/data.md`)                                                                                             |
 | A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |
 | Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |
+| Title, description, share image or structured data of a page? | a `PageHead` from the feature's `<name>.seo.ts`, given to `pageMeta(args, head)` in the route's `meta` (`~/shared/seo`); share images through `shareImage` (`references/ui.md`, Search engines and sharing) |
+| robots.txt, the sitemap, the IndexNow key file?     | `features/indexing`, answered by resource routes at the root that `app/routes.ts` declares before `:lang`; the API gives the sitemap's entries, the web writes the XML |
 | Catalog data on a page (game, character, developer)? | `CatalogAttribution` from `~/shared/ui/catalog-attribution` with the entry's `h_id`; it is required by Hikarinagi's terms                          |
 | A document a user writes (comments, a walkthrough's note)? | a rich text document, the API's `RichTextDocument`: `useRichEditor({ profile, value, onValueChange, placeholder })` from `~/shared/editor` gives a handle; the caller lays out the parts around it (`EditorSurface`, `EditorToolbar`, and always `EditorOverlays`); `RichText` (`~/shared/ui/rich-text`) shows it (`references/ui.md`) |
 | Text or emptiness of a document?                     | `plainText`, `publicText`, `isBlank`, `sameDocument` from `~/shared/richtext/rich-text`; `richDocument` (`rich-text.schema.ts`) in command and form schemas |
@@ -193,7 +200,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 - references/architecture.md — layers, dependency rules, naming, the lint rules that enforce them
 - references/data.md — request tool, generated contract, loaders, actions, fetchers, errors, sessions
-- references/ui.md — hina-ui, accent customisation, shell and sidebar, brand, images, messages and locales, SEO metadata
+- references/ui.md — hina-ui, accent customisation, shell and sidebar, brand, images, messages and locales, search engines and sharing
 - references/forms.md — valibot schemas, generated API constraints, form kit, command parsing, input guards
 - references/testing.md — test levels and fakes
 - recipes/add-feature.md, add-route.md, add-mutation.md, add-form.md, add-doc.md

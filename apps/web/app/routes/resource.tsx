@@ -1,9 +1,8 @@
 import { Outlet } from 'react-router'
-import { gameTitle } from '~/features/game'
-import { headlineOf, loadResourcePage, ResourcePage } from '~/features/resource'
-import { isLocale } from '~/shared/i18n/locale.schema'
+import { loadResourcePage, ResourcePage, resourceHead } from '~/features/resource'
 import { idParam } from '~/shared/route/params'
 import { routeLoader } from '~/shared/route/route.server'
+import { pageMeta } from '~/shared/seo/seo'
 import type { Route } from './+types/resource'
 
 export { keptThroughSearch as shouldRevalidate } from '~/shared/route/revalidation'
@@ -13,12 +12,9 @@ export function loader(args: Route.LoaderArgs) {
   return routeLoader(args, api => loadResourcePage(api, id))
 }
 
-export function meta({ loaderData, params }: Route.MetaArgs) {
-  if (loaderData === undefined || !isLocale(params.lang)) {
-    return []
-  }
-  const { name } = headlineOf(loaderData.resource.files ?? [])
-  return [{ title: `${name} | ${gameTitle(loaderData.game, params.lang)} | Shionlib` }]
+export function meta(args: Route.MetaArgs) {
+  const [, lang] = args.matches
+  return pageMeta(args, args.loaderData && resourceHead(args.loaderData, lang.loaderData))
 }
 
 export default function ResourceRoute({ loaderData, matches }: Route.ComponentProps) {

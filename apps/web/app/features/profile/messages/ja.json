@@ -62,5 +62,8 @@
       "confirm": "変更を破棄",
       "cancel": "編集を続ける"
     }
+  },
+  "seo": {
+    "lead": "{name}が Shionlib で公開したリソースは {count, number} 件です。"
   }
 }

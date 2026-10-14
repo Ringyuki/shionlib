@@ -12,5 +12,10 @@
   "retry": "Try again",
   "noResources": "No resources yet",
   "upload": "Upload a resource",
-  "noReleases": "No releases listed for this month yet"
+  "noReleases": "No releases listed for this month yet",
+  "seo": {
+    "title": "Shionlib - Galgame downloads",
+    "alternateName": "书音的图书馆",
+    "description": "Shionlib keeps the records and walkthroughs of galgames and offers downloads of the games and their translated releases."
+  }
 }

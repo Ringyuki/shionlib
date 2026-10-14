@@ -427,5 +427,12 @@
     },
     "confirm": "OK",
     "stepsLabel": "合成の進行状況"
+  },
+  "seo": {
+    "download": "{words} ダウンロード",
+    "lead": "『{title}』の{platforms}向け、{languages}のリソースです。",
+    "translators": "翻訳は {names}。",
+    "form": "形式は{form}。",
+    "files": "ファイル {count, number} 件、{size}。"
   }
 }

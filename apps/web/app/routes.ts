@@ -87,6 +87,9 @@ export default [
   route('resources/account/identity-remove', 'routes/resources.account.identity-remove.ts'),
   route('resources/account/potato-bind', 'routes/resources.account.potato-bind.ts'),
   route('resources/account/potato-unbind', 'routes/resources.account.potato-unbind.ts'),
+  route('robots.txt', 'routes/robots.ts'),
+  route('sitemap.xml', 'routes/sitemap.ts'),
+  route('indexnow.txt', 'routes/indexnow.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
     route('register', 'routes/auth-redirect.ts', { id: 'register' }),

@@ -8,7 +8,7 @@ Mandatory context for every coding turn in this repository.
 - `apps/backend` — legacy NestJS backend; read-only reference for behavior while modules are ported.
 - `apps/web` — the new web client (React Router framework mode, `@hina-ui/react`). Rules: `.claude/skills/web-frontend/SKILL.md`.
 - `apps/frontend` — legacy Next.js client, replaced by a rewrite in `apps/web`. Not a template for code, UI or texts; only a checklist of features and of public URLs that must keep working.
-- `apps/og`, `apps/download-worker` — edge services. `apps/og` reads public game, character and developer data from the API at `BACKEND_INTERNAL_URL` (`/game/:id`, `/character/:id`, `/developer/:id`); `apps/download-worker` opens the download tickets the API seals, with the secret both share (`FILE_DOWNLOAD_TICKET_SECRET` on the API, `TICKET_SECRET` on the worker).
+- `apps/og`, `apps/download-worker` — edge services. `apps/og` draws the share images the web's page heads point at (game, resource, walkthrough, character, developer, translator, user, docs, default), reading public data from the API at `BACKEND_INTERNAL_URL` as a guest; `apps/download-worker` opens the download tickets the API seals, with the secret both share (`FILE_DOWNLOAD_TICKET_SECRET` on the API, `TICKET_SECRET` on the worker).
 
 ## Hard rules
 

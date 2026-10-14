@@ -12,5 +12,8 @@
   "noWorks": "このグループの作品はまだ登録されていません",
   "fieldLabel": "翻訳グループ",
   "fieldPlaceholder": "名前を入力して検索または追加",
-  "create": "「{name}」を追加"
+  "create": "「{name}」を追加",
+  "seo": {
+    "lead": "{name}が翻訳した作品は {count, number} 本あり、{known}などが含まれます。"
+  }
 }

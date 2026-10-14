@@ -3081,6 +3081,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/indexing/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The IndexNow key the site file serves */
+        get: operations["indexing.key"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/inspection/entry/{entry_id}/image": {
         parameters: {
             query?: never;
@@ -3471,6 +3488,40 @@ export type paths = {
         };
         /** Read the settings the site shows to visitors */
         get: operations["setting.public"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sitemap/sections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sections of the sitemap and how many pages each has */
+        get: operations["sitemap.sections"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sitemap/{section}/{page}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Entries of one sitemap page */
+        get: operations["sitemap.entries"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7798,6 +7849,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeIndexingKeyDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["IndexingKeyDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeInitUploadDTO: {
             /** Format: int64 */
             code: number;
@@ -8103,6 +8164,26 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["SettingDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListSitemapEntryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SitemapEntryDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListSitemapSectionDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SitemapSectionDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -9065,6 +9146,8 @@ export type components = {
             dims: number[] | null;
             /** @enum {string} */
             language: "jp" | "en" | "zh" | "unknown";
+            /** @description The picture was blurred for a viewer who does not see adult pictures; url is the blurred copy */
+            masked: boolean;
             /** Format: int64 */
             sexual: number;
             /** @enum {string} */
@@ -9274,6 +9357,10 @@ export type components = {
         HoldUploadsInputBody: {
             /** @description Sessions this client has in its queue */
             upload_session_ids: number[] | null;
+        };
+        IndexingKeyDTO: {
+            /** @description What /indexnow.txt answers, so search engines accept the addresses the site pushes */
+            key: string;
         };
         InitUploadDTO: {
             /** Format: int64 */
@@ -10485,6 +10572,26 @@ export type components = {
         SettingUpdateInputBody: {
             /** @description The new value as JSON: a number for int, bytes, float and duration (seconds), a boolean for flag, a string for text */
             value: unknown;
+        };
+        SitemapEntryDTO: {
+            /**
+             * Format: int64
+             * @description The game a resource or walkthrough belongs to
+             */
+            game_id?: number;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: date-time
+             * @description When what the page shows last changed; absent when it is not known
+             */
+            modified?: string;
+        };
+        SitemapSectionDTO: {
+            /** Format: int64 */
+            pages: number;
+            /** @enum {string} */
+            section: "game" | "resource" | "walkthrough" | "developer" | "character" | "translator";
         };
         SponsorOrderCreatedDTO: {
             /** @description Pass as ?token= to GET /sponsor/order/{id} to refresh an order without signing in */
@@ -18475,6 +18582,36 @@ export interface operations {
             };
         };
     };
+    "indexing.key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeIndexingKeyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "inspection.image": {
         parameters: {
             query?: never;
@@ -19355,6 +19492,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopePublicSettingsDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "sitemap.sections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListSitemapSectionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "sitemap.entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Kind of page the entries lead to */
+                section: "game" | "resource" | "walkthrough" | "developer" | "character" | "translator";
+                /** @description 1-based page of at most 50,000 entries */
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListSitemapEntryDTO"];
                 };
             };
             /** @description Error */

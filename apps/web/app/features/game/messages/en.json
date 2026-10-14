@@ -98,5 +98,12 @@
     "hot": "Hottest",
     "views": "Most viewed",
     "downloads": "Most downloaded"
+  },
+  "seo": {
+    "titled": "{title} / {original}",
+    "madeOn": "{title} by {developers} was released on {date}. ",
+    "made": "{title} is by {developers}. ",
+    "released": "{title} was released on {date}. ",
+    "resources": "{count, plural, one {# resource} other {# resources}} for {platforms} in {languages}. "
   }
 }

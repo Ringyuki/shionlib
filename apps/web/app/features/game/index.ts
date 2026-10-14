@@ -1,6 +1,5 @@
 export {
   developerNames,
-  gameDescription,
   gamePath,
   gameTitle,
   isExplicit,
@@ -45,3 +44,4 @@ export { GamePicture } from './ui/game-picture'
 export { GameRow } from './ui/game-row'
 export { GameTile } from './ui/game-tile'
 export { OrderSelect } from './ui/order-select'
+export { gameHead } from './game.seo'

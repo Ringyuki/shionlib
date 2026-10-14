@@ -427,5 +427,12 @@
     },
     "confirm": "确定",
     "stepsLabel": "合成进度"
+  },
+  "seo": {
+    "download": "{words} 下载",
+    "lead": "《{title}》的资源，平台为 {platforms}，语言为{languages}。",
+    "translators": "由 {names} 翻译。",
+    "form": "形态为{form}。",
+    "files": "共 {count, number} 个文件，{size}。"
   }
 }

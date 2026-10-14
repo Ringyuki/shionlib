@@ -45,6 +45,7 @@ export const sections = [
   { key: 'catalog', groups: ['catalog'] },
   { key: 'ai', groups: ['ai'] },
   { key: 'open', groups: ['open'] },
+  { key: 'indexing', groups: ['indexing'] },
   { key: 'credentials', groups: ['oidc', 'bangumi', 'payment'] },
 ] as const
 

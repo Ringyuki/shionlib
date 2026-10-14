@@ -12,5 +12,10 @@
   "retry": "重试",
   "noResources": "暂无资源",
   "upload": "上传资源",
-  "noReleases": "本月暂未收录新作"
+  "noReleases": "本月暂未收录新作",
+  "seo": {
+    "title": "Shionlib 书音的图书馆 - Galgame 资源下载",
+    "alternateName": "书音的图书馆",
+    "description": "Shionlib（书音的图书馆）收录 Galgame 的游戏资料和攻略，提供游戏本体及汉化版的下载。"
+  }
 }

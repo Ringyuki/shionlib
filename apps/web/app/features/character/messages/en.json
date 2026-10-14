@@ -33,5 +33,11 @@
       "side": "Side characters",
       "appears": "Appearances"
     }
+  },
+  "seo": {
+    "named": "{name} ({original})",
+    "titled": "{name} - {game}",
+    "lead": "{name} is a character in {game}. ",
+    "voiced": "{name} is a character in {game}, voiced by {actor}. "
   }
 }

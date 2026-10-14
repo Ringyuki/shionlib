@@ -11,5 +11,9 @@
   "extra": "その他の情報",
   "worksTitle": "作品（{count, number}）",
   "worksLabel": "作品",
-  "noWorks": "このブランドの作品はまだ登録されていません"
+  "noWorks": "このブランドの作品はまだ登録されていません",
+  "seo": {
+    "lead": "{name}の作品は {count, number} 本あり、{known}などが含まれます。",
+    "aliased": "{name}（{aliases}）の作品は {count, number} 本あり、{known}などが含まれます。"
+  }
 }
