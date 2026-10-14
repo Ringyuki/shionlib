@@ -56,6 +56,8 @@ type Tx struct {
 	FavoriteItem *FavoriteItemClient
 	// FieldPermissionMapping is the client for interacting with the FieldPermissionMapping builders.
 	FieldPermissionMapping *FieldPermissionMappingClient
+	// FriendLink is the client for interacting with the FriendLink builders.
+	FriendLink *FriendLinkClient
 	// Game is the client for interacting with the Game builders.
 	Game *GameClient
 	// GameCharacter is the client for interacting with the GameCharacter builders.
@@ -288,6 +290,7 @@ func (tx *Tx) init() {
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.FavoriteItem = NewFavoriteItemClient(tx.config)
 	tx.FieldPermissionMapping = NewFieldPermissionMappingClient(tx.config)
+	tx.FriendLink = NewFriendLinkClient(tx.config)
 	tx.Game = NewGameClient(tx.config)
 	tx.GameCharacter = NewGameCharacterClient(tx.config)
 	tx.GameCharacterRelation = NewGameCharacterRelationClient(tx.config)

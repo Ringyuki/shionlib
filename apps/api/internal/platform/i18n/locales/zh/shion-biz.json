@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "收藏夹已存在",
   "FAVORITE_ITEM_ALREADY_EXISTS": "收藏夹中已存在该游戏",
   "FAVORITE_NOT_FOUND": "收藏夹不存在",
+  "FRIEND_LINK_NOT_FOUND": "友情链接不存在",
+  "FRIEND_LINK_ORDER_STALE": "友情链接已被修改，请刷新后重试",
   "FAVORITE_ITEM_NOT_FOUND": "收藏夹中不存在该游戏",
   "FAVORITE_ITEM_NOT_OWNER": "你没有权限修改该收藏夹中的游戏",
   "FAVORITE_NOT_OWNER": "你没有权限修改该收藏夹",

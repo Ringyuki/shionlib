@@ -261,6 +261,18 @@ func (f FieldPermissionMappingFunc) Mutate(ctx context.Context, m ent.Mutation) 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FieldPermissionMappingMutation", m)
 }
 
+// The FriendLinkFunc type is an adapter to allow the use of ordinary
+// function as FriendLink mutator.
+type FriendLinkFunc func(context.Context, *ent.FriendLinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FriendLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FriendLinkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FriendLinkMutation", m)
+}
+
 // The GameFunc type is an adapter to allow the use of ordinary
 // function as Game mutator.
 type GameFunc func(context.Context, *ent.GameMutation) (ent.Value, error)

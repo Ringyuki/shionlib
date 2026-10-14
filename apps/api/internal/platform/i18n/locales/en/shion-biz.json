@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "favorite already exists",
   "FAVORITE_ITEM_ALREADY_EXISTS": "favorite already contains this game",
   "FAVORITE_NOT_FOUND": "favorite not found",
+  "FRIEND_LINK_NOT_FOUND": "friend link not found",
+  "FRIEND_LINK_ORDER_STALE": "friend links have changed; refresh and try again",
   "FAVORITE_ITEM_NOT_FOUND": "this game is not in the favorite",
   "FAVORITE_ITEM_NOT_OWNER": "you don't have permission to modify this game in the favorite",
   "FAVORITE_NOT_OWNER": "you don't have permission to modify this favorite",

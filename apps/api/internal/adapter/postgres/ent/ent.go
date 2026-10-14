@@ -33,6 +33,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -154,6 +155,7 @@ func checkColumn(t, c string) error {
 			favorite.Table:                        favorite.ValidColumn,
 			favoriteitem.Table:                    favoriteitem.ValidColumn,
 			fieldpermissionmapping.Table:          fieldpermissionmapping.ValidColumn,
+			friendlink.Table:                      friendlink.ValidColumn,
 			game.Table:                            game.ValidColumn,
 			gamecharacter.Table:                   gamecharacter.ValidColumn,
 			gamecharacterrelation.Table:           gamecharacterrelation.ValidColumn,

@@ -36,6 +36,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -127,6 +128,8 @@ type Client struct {
 	FavoriteItem *FavoriteItemClient
 	// FieldPermissionMapping is the client for interacting with the FieldPermissionMapping builders.
 	FieldPermissionMapping *FieldPermissionMappingClient
+	// FriendLink is the client for interacting with the FriendLink builders.
+	FriendLink *FriendLinkClient
 	// Game is the client for interacting with the Game builders.
 	Game *GameClient
 	// GameCharacter is the client for interacting with the GameCharacter builders.
@@ -239,6 +242,7 @@ func (c *Client) init() {
 	c.Favorite = NewFavoriteClient(c.config)
 	c.FavoriteItem = NewFavoriteItemClient(c.config)
 	c.FieldPermissionMapping = NewFieldPermissionMappingClient(c.config)
+	c.FriendLink = NewFriendLinkClient(c.config)
 	c.Game = NewGameClient(c.config)
 	c.GameCharacter = NewGameCharacterClient(c.config)
 	c.GameCharacterRelation = NewGameCharacterRelationClient(c.config)
@@ -392,6 +396,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
 		FieldPermissionMapping:          NewFieldPermissionMappingClient(cfg),
+		FriendLink:                      NewFriendLinkClient(cfg),
 		Game:                            NewGameClient(cfg),
 		GameCharacter:                   NewGameCharacterClient(cfg),
 		GameCharacterRelation:           NewGameCharacterRelationClient(cfg),
@@ -472,6 +477,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
 		FieldPermissionMapping:          NewFieldPermissionMappingClient(cfg),
+		FriendLink:                      NewFriendLinkClient(cfg),
 		Game:                            NewGameClient(cfg),
 		GameCharacter:                   NewGameCharacterClient(cfg),
 		GameCharacterRelation:           NewGameCharacterRelationClient(cfg),
@@ -545,9 +551,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
 		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
-		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
-		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceEvent,
+		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.FriendLink, c.Game,
+		c.GameCharacter, c.GameCharacterRelation, c.GameCover, c.GameDeveloper,
+		c.GameDeveloperRelation, c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
 		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
@@ -570,9 +576,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
 		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
-		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
-		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceEvent,
+		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.FriendLink, c.Game,
+		c.GameCharacter, c.GameCharacterRelation, c.GameCover, c.GameDeveloper,
+		c.GameDeveloperRelation, c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
 		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
@@ -632,6 +638,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.FavoriteItem.mutate(ctx, m)
 	case *FieldPermissionMappingMutation:
 		return c.FieldPermissionMapping.mutate(ctx, m)
+	case *FriendLinkMutation:
+		return c.FriendLink.mutate(ctx, m)
 	case *GameMutation:
 		return c.Game.mutate(ctx, m)
 	case *GameCharacterMutation:
@@ -4338,6 +4346,139 @@ func (c *FieldPermissionMappingClient) mutate(ctx context.Context, m *FieldPermi
 		return (&FieldPermissionMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown FieldPermissionMapping mutation op: %q", m.Op())
+	}
+}
+
+// FriendLinkClient is a client for the FriendLink schema.
+type FriendLinkClient struct {
+	config
+}
+
+// NewFriendLinkClient returns a client for the FriendLink from the given config.
+func NewFriendLinkClient(c config) *FriendLinkClient {
+	return &FriendLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `friendlink.Hooks(f(g(h())))`.
+func (c *FriendLinkClient) Use(hooks ...Hook) {
+	c.hooks.FriendLink = append(c.hooks.FriendLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `friendlink.Intercept(f(g(h())))`.
+func (c *FriendLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FriendLink = append(c.inters.FriendLink, interceptors...)
+}
+
+// Create returns a builder for creating a FriendLink entity.
+func (c *FriendLinkClient) Create() *FriendLinkCreate {
+	mutation := newFriendLinkMutation(c.config, OpCreate)
+	return &FriendLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FriendLink entities.
+func (c *FriendLinkClient) CreateBulk(builders ...*FriendLinkCreate) *FriendLinkCreateBulk {
+	return &FriendLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FriendLinkClient) MapCreateBulk(slice any, setFunc func(*FriendLinkCreate, int)) *FriendLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FriendLinkCreateBulk{err: fmt.Errorf("calling to FriendLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FriendLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FriendLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FriendLink.
+func (c *FriendLinkClient) Update() *FriendLinkUpdate {
+	mutation := newFriendLinkMutation(c.config, OpUpdate)
+	return &FriendLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FriendLinkClient) UpdateOne(_m *FriendLink) *FriendLinkUpdateOne {
+	mutation := newFriendLinkMutation(c.config, OpUpdateOne, withFriendLink(_m))
+	return &FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FriendLinkClient) UpdateOneID(id int) *FriendLinkUpdateOne {
+	mutation := newFriendLinkMutation(c.config, OpUpdateOne, withFriendLinkID(id))
+	return &FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FriendLink.
+func (c *FriendLinkClient) Delete() *FriendLinkDelete {
+	mutation := newFriendLinkMutation(c.config, OpDelete)
+	return &FriendLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FriendLinkClient) DeleteOne(_m *FriendLink) *FriendLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FriendLinkClient) DeleteOneID(id int) *FriendLinkDeleteOne {
+	builder := c.Delete().Where(friendlink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FriendLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for FriendLink.
+func (c *FriendLinkClient) Query() *FriendLinkQuery {
+	return &FriendLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFriendLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FriendLink entity by its id.
+func (c *FriendLinkClient) Get(ctx context.Context, id int) (*FriendLink, error) {
+	return c.Query().Where(friendlink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FriendLinkClient) GetX(ctx context.Context, id int) *FriendLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *FriendLinkClient) Hooks() []Hook {
+	return c.hooks.FriendLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *FriendLinkClient) Interceptors() []Interceptor {
+	return c.inters.FriendLink
+}
+
+func (c *FriendLinkClient) mutate(ctx context.Context, m *FriendLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FriendLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FriendLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FriendLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FriendLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FriendLink mutation op: %q", m.Op())
 	}
 }
 
@@ -11714,7 +11855,7 @@ type (
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
 		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, FriendLink, Game,
 		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
 		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
 		GameDownloadResourceFile, GameDownloadResourceFileHistory,
@@ -11730,7 +11871,7 @@ type (
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
 		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, FriendLink, Game,
 		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
 		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
 		GameDownloadResourceFile, GameDownloadResourceFileHistory,

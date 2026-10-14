@@ -63,6 +63,8 @@
   "FAVORITE_ALREADY_EXISTS": "お気に入りがすでに存在します",
   "FAVORITE_ITEM_ALREADY_EXISTS": "お気に入りにすでにこのゲームが存在します",
   "FAVORITE_NOT_FOUND": "お気に入りが見つかりません",
+  "FRIEND_LINK_NOT_FOUND": "相互リンクが見つかりません",
+  "FRIEND_LINK_ORDER_STALE": "相互リンクが変更されました。再読み込みしてからやり直してください",
   "FAVORITE_ITEM_NOT_FOUND": "このゲームはお気に入りに存在しません",
   "FAVORITE_ITEM_NOT_OWNER": "あなたはこのゲームをお気に入りから変更する権限がありません",
   "FAVORITE_NOT_OWNER": "あなたはこのお気に入りを変更する権限がありません",

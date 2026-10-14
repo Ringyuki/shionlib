@@ -25,6 +25,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
@@ -685,6 +686,44 @@ func init() {
 	fieldpermissionmapping.DefaultUpdated = fieldpermissionmappingDescUpdated.Default.(func() time.Time)
 	// fieldpermissionmapping.UpdateDefaultUpdated holds the default value on update for the updated field.
 	fieldpermissionmapping.UpdateDefaultUpdated = fieldpermissionmappingDescUpdated.UpdateDefault.(func() time.Time)
+	friendlinkFields := schema.FriendLink{}.Fields()
+	_ = friendlinkFields
+	// friendlinkDescName is the schema descriptor for name field.
+	friendlinkDescName := friendlinkFields[1].Descriptor()
+	// friendlink.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	friendlink.NameValidator = friendlinkDescName.Validators[0].(func(string) error)
+	// friendlinkDescURL is the schema descriptor for url field.
+	friendlinkDescURL := friendlinkFields[2].Descriptor()
+	// friendlink.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	friendlink.URLValidator = friendlinkDescURL.Validators[0].(func(string) error)
+	// friendlinkDescLogo is the schema descriptor for logo field.
+	friendlinkDescLogo := friendlinkFields[3].Descriptor()
+	// friendlink.LogoValidator is a validator for the "logo" field. It is called by the builders before save.
+	friendlink.LogoValidator = friendlinkDescLogo.Validators[0].(func(string) error)
+	// friendlinkDescDescription is the schema descriptor for description field.
+	friendlinkDescDescription := friendlinkFields[4].Descriptor()
+	// friendlink.DefaultDescription holds the default value on creation for the description field.
+	friendlink.DefaultDescription = friendlinkDescDescription.Default.(string)
+	// friendlink.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	friendlink.DescriptionValidator = friendlinkDescDescription.Validators[0].(func(string) error)
+	// friendlinkDescVisible is the schema descriptor for visible field.
+	friendlinkDescVisible := friendlinkFields[5].Descriptor()
+	// friendlink.DefaultVisible holds the default value on creation for the visible field.
+	friendlink.DefaultVisible = friendlinkDescVisible.Default.(bool)
+	// friendlinkDescPosition is the schema descriptor for position field.
+	friendlinkDescPosition := friendlinkFields[6].Descriptor()
+	// friendlink.DefaultPosition holds the default value on creation for the position field.
+	friendlink.DefaultPosition = friendlinkDescPosition.Default.(int)
+	// friendlinkDescCreated is the schema descriptor for created field.
+	friendlinkDescCreated := friendlinkFields[7].Descriptor()
+	// friendlink.DefaultCreated holds the default value on creation for the created field.
+	friendlink.DefaultCreated = friendlinkDescCreated.Default.(func() time.Time)
+	// friendlinkDescUpdated is the schema descriptor for updated field.
+	friendlinkDescUpdated := friendlinkFields[8].Descriptor()
+	// friendlink.DefaultUpdated holds the default value on creation for the updated field.
+	friendlink.DefaultUpdated = friendlinkDescUpdated.Default.(func() time.Time)
+	// friendlink.UpdateDefaultUpdated holds the default value on update for the updated field.
+	friendlink.UpdateDefaultUpdated = friendlinkDescUpdated.UpdateDefault.(func() time.Time)
 	gameFields := schema.Game{}.Fields()
 	_ = gameFields
 	// gameDescTitleJp is the schema descriptor for title_jp field.

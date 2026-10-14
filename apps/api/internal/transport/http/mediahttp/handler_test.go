@@ -44,6 +44,11 @@ func setup(t *testing.T) (*apitest.Server, *bucket) {
 
 func upload(t *testing.T, field, contentType string, size int) apitest.Request {
 	t.Helper()
+	return uploadTo(t, "/uploads/small/ad/image", field, contentType, size)
+}
+
+func uploadTo(t *testing.T, path, field, contentType string, size int) apitest.Request {
+	t.Helper()
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 	header := textproto.MIMEHeader{}
@@ -59,7 +64,7 @@ func upload(t *testing.T, field, contentType string, size int) apitest.Request {
 	if err := writer.Close(); err != nil {
 		t.Fatal(err)
 	}
-	return apitest.Request{Method: http.MethodPut, Path: "/uploads/small/ad/image", Body: body.String(), Header: map[string]string{"Content-Type": writer.FormDataContentType()}}
+	return apitest.Request{Method: http.MethodPut, Path: path, Body: body.String(), Header: map[string]string{"Content-Type": writer.FormDataContentType()}}
 }
 
 func as(req apitest.Request, who actor.Actor) apitest.Request {
@@ -85,5 +90,16 @@ func TestAdImageUploadRejectsBadFiles(t *testing.T) {
 	server.Expect(server.Do(as(upload(t, "file", "image/webp", media.AdImageMaxBytes+1), admin)), http.StatusRequestEntityTooLarge, http.StatusRequestEntityTooLarge)
 	if len(store.keys) != 0 {
 		t.Fatalf("rejected uploads must not be stored: %v", store.keys)
+	}
+}
+
+func TestFriendLinkLogoUploadIsForAdmins(t *testing.T) {
+	server, store := setup(t)
+	logo := func() apitest.Request { return uploadTo(t, "/uploads/small/friend-link/logo", "file", "image/png", 10) }
+	server.Expect(server.Do(as(logo(), member)), http.StatusForbidden, http.StatusForbidden)
+	resp := server.Do(as(logo(), admin))
+	server.Expect(resp, http.StatusOK, 0)
+	if string(resp.Data) != `{"key":"friend-link/logo/uuid.webp"}` || len(store.keys) != 1 {
+		t.Fatalf("friend link logo %s stored %v", resp.Data, store.keys)
 	}
 }

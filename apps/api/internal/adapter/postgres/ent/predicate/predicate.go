@@ -69,6 +69,9 @@ type FavoriteItem func(*sql.Selector)
 // FieldPermissionMapping is the predicate function for fieldpermissionmapping builders.
 type FieldPermissionMapping func(*sql.Selector)
 
+// FriendLink is the predicate function for friendlink builders.
+type FriendLink func(*sql.Selector)
+
 // Game is the predicate function for game builders.
 type Game func(*sql.Selector)
 

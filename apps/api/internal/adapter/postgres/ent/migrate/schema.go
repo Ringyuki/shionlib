@@ -962,6 +962,31 @@ var (
 			},
 		},
 	}
+	// FriendLinksColumns holds the columns for the "friend_links" table.
+	FriendLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 50, SchemaType: map[string]string{"postgres": "character varying(50)"}},
+		{Name: "url", Type: field.TypeString, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "logo", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "description", Type: field.TypeString, Size: 200, Default: "", SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "visible", Type: field.TypeBool, Default: true},
+		{Name: "position", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// FriendLinksTable holds the schema information for the "friend_links" table.
+	FriendLinksTable = &schema.Table{
+		Name:       "friend_links",
+		Columns:    FriendLinksColumns,
+		PrimaryKey: []*schema.Column{FriendLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "friend_links_position_idx",
+				Unique:  false,
+				Columns: []*schema.Column{FriendLinksColumns[6]},
+			},
+		},
+	}
 	// GamesColumns holds the columns for the "games" table.
 	GamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2870,6 +2895,7 @@ var (
 		FavoritesTable,
 		FavoriteItemsTable,
 		FieldPermissionMappingsTable,
+		FriendLinksTable,
 		GamesTable,
 		GameCharactersTable,
 		GameCharacterRelationsTable,
@@ -3009,6 +3035,9 @@ func init() {
 	}
 	FieldPermissionMappingsTable.Annotation = &entsql.Annotation{
 		Table: "field_permission_mappings",
+	}
+	FriendLinksTable.Annotation = &entsql.Annotation{
+		Table: "friend_links",
 	}
 	GamesTable.ForeignKeys[0].RefTable = UsersTable
 	GamesTable.Annotation = &entsql.Annotation{

@@ -13,6 +13,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/pgdump"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/adpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/analysispg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/friendlinkpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/moyupg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/potatovnpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/sponsorpg"
@@ -21,6 +22,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/analysis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/backup"
+	"github.com/Ringyuki/shionlib/apps/api/internal/friendlink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
@@ -28,6 +30,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/adhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/analysishttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/friendlinkhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/moyuhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/potatovnhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/sponsorhttp"
@@ -92,6 +95,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 	modules.Handlers = append(modules.Handlers,
 		sponsorhttp.NewHandler(sponsorService, shared.Builder),
 		adhttp.NewHandler(adService, shared.Builder),
+		friendlinkhttp.NewHandler(friendlink.NewService(friendlinkpg.NewRepository(shared.Ent), shared.Transactor), shared.Builder),
 		moyuhttp.NewHandler(moyuService, shared.Builder),
 		potatovnhttp.NewHandler(pvnService, shared.Builder),
 		analysishttp.NewHandler(analysisService, shared.Builder),

@@ -5860,7 +5860,9 @@
           660110,
           660111,
           660112,
-          660113
+          660113,
+          670101,
+          670102
         ],
         "format": "int64",
         "type": "integer",
@@ -6038,7 +6040,9 @@
           "COMPOSITION_NOT_COMPOSED",
           "COMPOSITION_BUSY",
           "COMPOSITION_BASE_GONE",
-          "COMPOSITION_CHECKS_OFF"
+          "COMPOSITION_CHECKS_OFF",
+          "FRIEND_LINK_NOT_FOUND",
+          "FRIEND_LINK_ORDER_STALE"
         ]
       },
       "CatalogExcludedDTO": {
@@ -8102,6 +8106,41 @@
         "required": [
           "name",
           "is_private"
+        ],
+        "type": "object"
+      },
+      "CreateFriendLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "^https?://",
+            "patternDescription": "an http or https address",
+            "type": "string"
+          },
+          "visible": {
+            "description": "Whether the link is shown on the site; true when left out",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "url"
         ],
         "type": "object"
       },
@@ -12212,6 +12251,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeFriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FriendLinkAdminDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeGameCharactersDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13177,6 +13249,84 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/FavoriteSummaryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListFriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/FriendLinkAdminDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListFriendLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/FriendLinkDTO"
             },
             "type": [
               "array",
@@ -16245,6 +16395,86 @@
         },
         "required": [
           "email"
+        ],
+        "type": "object"
+      },
+      "FriendLinkAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere; null when the link has none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "logo",
+          "description",
+          "visible",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "FriendLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "description": "A key in the image bucket, or an address of an image elsewhere; null when the link has none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "logo",
+          "description"
         ],
         "type": "object"
       },
@@ -20213,6 +20443,27 @@
         ],
         "type": "object"
       },
+      "ReorderFriendLinksInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "Every friend link, in the order they are shown",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 1000,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
       "ReportCreatedDTO": {
         "additionalProperties": false,
         "properties": {
@@ -22106,6 +22357,39 @@
           "note": {
             "maxLength": 2000,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateFriendLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "logo": {
+            "description": "null removes the logo",
+            "maxLength": 500,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 500,
+            "minLength": 1,
+            "pattern": "^https?://",
+            "patternDescription": "an http or https address",
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -29001,6 +29285,291 @@
         ]
       }
     },
+    "/admin/friend-links": {
+      "get": {
+        "operationId": "friendLink.admin.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List every friend link, hidden ones too, in their order",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "friendLink.admin.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFriendLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Add a friend link after the others",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
+    "/admin/friend-links/order": {
+      "put": {
+        "operationId": "friendLink.admin.reorder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderFriendLinksInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Set the order of every friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
+    "/admin/friend-links/{id}": {
+      "delete": {
+        "operationId": "friendLink.admin.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "friendLink.admin.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFriendLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFriendLinkAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a friend link",
+        "tags": [
+          "friend link",
+          "admin"
+        ]
+      }
+    },
     "/admin/pending": {
       "get": {
         "operationId": "adminStats.pending",
@@ -34470,6 +35039,44 @@
         ]
       }
     },
+    "/friend-links": {
+      "get": {
+        "operationId": "friendLink.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListFriendLinkDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the friend links shown on the site, in their order",
+        "tags": [
+          "friend link"
+        ]
+      }
+    },
     "/game/download-source/file-history/{historyId}/reason": {
       "patch": {
         "operationId": "download.historyReason",
@@ -39595,6 +40202,74 @@
           }
         ],
         "summary": "Upload an advertisement image",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/small/friend-link/logo": {
+      "put": {
+        "operationId": "upload.friendLinkLogo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload the logo of a friend link",
         "tags": [
           "upload"
         ]

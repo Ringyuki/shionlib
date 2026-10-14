@@ -61,7 +61,11 @@ func TestStoreUsesLegacyKeysBoundsAndMetadata(t *testing.T) {
 	if err != nil || key != "ad/image/uuid.webp" || p.bounds != (media.Bounds{}) {
 		t.Fatalf("ad: %s %v %+v", key, err, p.bounds)
 	}
-	if s.objects[0].metadata["user_id"] != "7" || s.objects[2].metadata["user_id"] != "7" || s.objects[3].metadata["uploader_id"] != "2" || s.objects[0].contentType != "image/webp" || s.objects[0].data != "webp:raw" {
+	key, err = service.StoreFriendLinkLogo(ctx, 3, upload)
+	if err != nil || key != "friend-link/logo/uuid.webp" || p.bounds != (media.Bounds{MaxWidth: 256, MaxHeight: 256}) {
+		t.Fatalf("friend link logo: %s %v %+v", key, err, p.bounds)
+	}
+	if s.objects[0].metadata["user_id"] != "7" || s.objects[2].metadata["user_id"] != "7" || s.objects[3].metadata["uploader_id"] != "2" || s.objects[4].metadata["uploader_id"] != "3" || s.objects[0].contentType != "image/webp" || s.objects[0].data != "webp:raw" {
 		t.Fatalf("unexpected objects %+v", s.objects)
 	}
 }

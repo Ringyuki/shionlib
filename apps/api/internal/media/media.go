@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	ProfileImageMaxBytes = 5 << 20
-	AdImageMaxBytes      = 15 << 20
+	ProfileImageMaxBytes   = 5 << 20
+	AdImageMaxBytes        = 15 << 20
+	FriendLinkLogoMaxBytes = 5 << 20
 )
 
 var acceptedContentTypes = []string{"image/jpeg", "image/png", "image/webp", "image/avif"}
@@ -88,6 +89,15 @@ func adImage(uploaderID int) kind {
 	return kind{
 		maxBytes: AdImageMaxBytes,
 		key:      func(id string) string { return "ad/image/" + id },
+		metadata: map[string]string{"uploader_id": strconv.Itoa(uploaderID)},
+	}
+}
+
+func friendLinkLogo(uploaderID int) kind {
+	return kind{
+		maxBytes: FriendLinkLogoMaxBytes,
+		bounds:   Bounds{MaxWidth: 256, MaxHeight: 256},
+		key:      func(id string) string { return "friend-link/logo/" + id },
 		metadata: map[string]string{"uploader_id": strconv.Itoa(uploaderID)},
 	}
 }
