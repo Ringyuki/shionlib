@@ -8,7 +8,8 @@
     "security": "Security",
     "connections": "Connected accounts",
     "download": "Downloads",
-    "site": "Preferences"
+    "site": "Preferences",
+    "api-keys": "API keys"
   },
   "site": {
     "language": "Language",

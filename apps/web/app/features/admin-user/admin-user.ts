@@ -15,6 +15,8 @@ export type Records = {
   reportsFiled: number
   reportsAgainst: number
   heldFiles: number
+  apiKeys: number
+  apiRequests: number
 }
 
 export type Opened = {

@@ -80,6 +80,22 @@ describe('loadUsers', () => {
   })
 })
 
+function keyUsed(requests: number) {
+  return {
+    id: requests,
+    name: 'key',
+    prefix: 'shl_abcdefgh',
+    status: 'active' as const,
+    suspended_reason: null,
+    suspended_at: null,
+    last_used_at: null,
+    last_used_ip: null,
+    created: '2026-10-14T00:00:00Z',
+    owner: { id: 7, name: 'kotori', avatar: null, is_sponsor: false },
+    recent: { requests, throttled: 0 },
+  }
+}
+
 describe('loadUser', () => {
   it('reads the user with live sessions, the tiers and the related counts', async () => {
     const fake = fakeApi()
@@ -88,12 +104,13 @@ describe('loadUser', () => {
       .on('get', '/admin/upload-tiers', { tiers: null, in_flight_limit: 30 })
       .on('get', '/admin/content/download-resource-reports', { items: null, meta: meta(4) })
       .on('get', '/admin/content/malware-scan-cases', { items: null, meta: meta(1) })
+      .on('get', '/admin/open/keys', { items: [keyUsed(40), keyUsed(2)], meta: meta(2) })
     const opened = await loadUser(fake.api, 7)
     expect(opened).toMatchObject({
       detail: { name: 'kotori' },
       sessions: [],
       liveSessions: 3,
-      records: { reportsFiled: 4, reportsAgainst: 4, heldFiles: 1 },
+      records: { reportsFiled: 4, reportsAgainst: 4, heldFiles: 1, apiKeys: 2, apiRequests: 42 },
     })
     const asked = urls(fake.requests)
     expect(

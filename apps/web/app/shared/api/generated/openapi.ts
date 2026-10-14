@@ -1189,6 +1189,125 @@ export type paths = {
         patch: operations["friendLink.admin.update"];
         trace?: never;
     };
+    "/admin/open/accounts/{userId}/limit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Give an account a request limit of its own, or follow the site's again */
+        put: operations["apiKey.admin.accountLimit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every API key with its recent use */
+        get: operations["apiKey.admin.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Show an API key with its use and its account */
+        get: operations["apiKey.admin.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/keys/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore a suspended API key and tell its owner */
+        post: operations["apiKey.admin.restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/keys/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspend an API key and tell its owner why */
+        post: operations["apiKey.admin.suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sum up the use of the open API */
+        get: operations["apiKey.admin.summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/open/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Requests to the open API by day */
+        get: operations["apiKey.admin.usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/pending": {
         parameters: {
             query?: never;
@@ -3186,6 +3305,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/open/v1/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find games by their Shionlib, Hikarinagi, Bangumi or VNDB IDs, with their resources */
+        get: operations["open.games"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/potatovn/binding": {
         parameters: {
             query?: never;
@@ -3717,6 +3853,41 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/user/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the caller's API keys */
+        get: operations["apiKey.mine"];
+        put?: never;
+        /** Create an API key and show it once */
+        post: operations["apiKey.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete one of the caller's API keys */
+        delete: operations["apiKey.delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/check-name": {
         parameters: {
             query?: never;
@@ -4149,6 +4320,10 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        AccountLimitInputBody: {
+            /** @description Requests a window for every key of the account; null follows the site's limit */
+            limit: number | null;
+        };
         ActivityCommentDTO: {
             /** Format: int64 */
             id: number;
@@ -4497,6 +4672,39 @@ export type components = {
              * @enum {integer}
              */
             status: 1 | 2;
+        };
+        AdminKeyDTO: {
+            /** Format: date-time */
+            created: string;
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            last_used_at: string | null;
+            last_used_ip: string | null;
+            name: string;
+            owner: components["schemas"]["UserSummaryDTO"];
+            prefix: string;
+            /** @description Requests in the last 7 days */
+            recent: components["schemas"]["UsageDTO"];
+            /** @enum {string} */
+            status: "active" | "suspended";
+            /** Format: date-time */
+            suspended_at: string | null;
+            suspended_reason: string | null;
+        };
+        AdminKeyDetailDTO: {
+            /**
+             * Format: int64
+             * @description The account's own limit; null when it follows the site's
+             */
+            account_limit: number | null;
+            /** @description The last 30 days, oldest first */
+            days: components["schemas"]["DayDTO"][] | null;
+            key: components["schemas"]["AdminKeyDTO"];
+            /** @description The other keys of the account */
+            others: components["schemas"]["ApiKeyDTO"][] | null;
+            /** @description Requests in the last 30 days */
+            total: components["schemas"]["UsageDTO"];
         };
         AdminPendingDTO: {
             /**
@@ -5650,6 +5858,25 @@ export type components = {
             /** Format: int64 */
             totalDownloads: number;
         };
+        ApiKeyDTO: {
+            /** Format: date-time */
+            created: string;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: date-time
+             * @description Written at most once every five minutes
+             */
+            last_used_at: string | null;
+            name: string;
+            /** @description The first characters of the key, to tell it apart */
+            prefix: string;
+            /** @enum {string} */
+            status: "active" | "suspended";
+            /** Format: date-time */
+            suspended_at: string | null;
+            suspended_reason: string | null;
+        };
         AuthMeta: {
             optionalTokenReason: string;
             optionalTokenStale: boolean;
@@ -5717,7 +5944,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -6272,6 +6499,9 @@ export type components = {
             /** @description Whether the link is shown on the site; true when left out */
             visible?: boolean;
         };
+        CreateKeyInputBody: {
+            name: string;
+        };
         CreateReportInputBody: {
             detail?: string;
             /** @enum {string} */
@@ -6291,6 +6521,14 @@ export type components = {
             isPrivate?: boolean;
             message?: string;
             name?: string;
+        };
+        DayDTO: {
+            /** Format: date */
+            day: string;
+            /** Format: int64 */
+            requests: number;
+            /** Format: int64 */
+            throttled: number;
         };
         DeletedCharacterDTO: {
             /** Format: int64 */
@@ -6842,6 +7080,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AdminGameScalarDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdminKeyDetailDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminKeyDetailDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7539,6 +7787,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeIssuedKeyDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["IssuedKeyDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListAdItemDTO: {
             /** Format: int64 */
             code: number;
@@ -7663,6 +7921,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["CompositionDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListDayDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["DayDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7869,10 +8137,40 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeMyKeysDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["MyKeysDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeOidcIdentitiesDTO: {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["OidcIdentitiesDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeOpenLookupDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["OpenLookupDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeOpenSummaryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["OpenSummaryDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7923,6 +8221,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageAdminGameItemDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageAdminKeyDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageAdminKeyDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -9108,6 +9416,11 @@ export type components = {
             /** Format: int64 */
             seconds: number;
         };
+        IssuedKeyDTO: {
+            key: components["schemas"]["ApiKeyDTO"];
+            /** @description The whole key; it is shown only this once */
+            secret: string;
+        };
         MalwareCaseDetailDTO: {
             /** Format: date-time */
             created: string;
@@ -9353,6 +9666,16 @@ export type components = {
             avatar: string | null;
             name: string;
         };
+        MyKeysDTO: {
+            /** @description Whether the open API answers requests */
+            enabled: boolean;
+            keys: components["schemas"]["ApiKeyDTO"][] | null;
+            /**
+             * Format: int64
+             * @description How many keys an account may have
+             */
+            limit: number;
+        };
         OidcIdentitiesDTO: {
             can_unlink: boolean;
             items: components["schemas"]["OidcIdentityDTO"][] | null;
@@ -9386,6 +9709,106 @@ export type components = {
             upload_session_id: number;
             uploaded_chunks: number[] | null;
         };
+        OpenFileDTO: {
+            /** @description The hash taken when the file was uploaded, with hash_algorithm */
+            file_hash: string;
+            file_name: string;
+            /**
+             * Format: int64
+             * @description Size in bytes
+             */
+            file_size: number;
+            /** @enum {string} */
+            hash_algorithm: "sha256" | "blake3";
+            /** Format: int64 */
+            id: number;
+            /** @description SHA-256 taken while the file was checked; null until then */
+            sha256: string | null;
+        };
+        OpenGameDTO: {
+            bid: string | null;
+            /** Format: int64 */
+            hid: number | null;
+            /** Format: int64 */
+            id: number;
+            nsfw: boolean;
+            /** @description Published resources, the most recently updated first */
+            resources: components["schemas"]["OpenResourceDTO"][] | null;
+            title_en: string;
+            title_jp: string;
+            title_zh: string;
+            url: string;
+            vid: string | null;
+        };
+        OpenLookupDTO: {
+            /** @description The games found, in the order of the IDs asked for */
+            games: components["schemas"]["OpenGameDTO"][] | null;
+            /** @description The IDs asked for that match no game, as they were written */
+            missing: string[] | null;
+        };
+        OpenResourceDTO: {
+            creator: components["schemas"]["OpenUserDTO"];
+            /** Format: int64 */
+            downloads: number;
+            /** @enum {string|null} */
+            edition: "download" | "package" | "steam" | null;
+            edition_name: string | null;
+            extras: ("save" | "bonus")[] | null;
+            /** @description The files that can be downloaded, the volumes of a set together and in their order */
+            files: components["schemas"]["OpenFileDTO"][] | null;
+            /** @enum {string|null} */
+            form: "disc" | "installer" | "portable" | null;
+            /** Format: int64 */
+            id: number;
+            language: string[] | null;
+            note: string | null;
+            patch_version: string | null;
+            platform: string[] | null;
+            /** Format: date-time */
+            published_at: string | null;
+            release_url: string | null;
+            /**
+             * @description Where the text in a language other than Japanese comes from; null when nobody has said
+             * @enum {string|null}
+             */
+            translation: "none" | "official" | "group" | "machine" | null;
+            /** @description The translators credited, in the order they were given */
+            translators: components["schemas"]["OpenTranslatorDTO"][] | null;
+            /** Format: date-time */
+            updated: string;
+            /** @description The page of the resource, where it is downloaded */
+            url: string;
+        };
+        OpenSummaryDTO: {
+            enabled: boolean;
+            /**
+             * Format: int64
+             * @description Requests refused for their rate in the last 7 days
+             */
+            throttled: number;
+            /**
+             * Format: int64
+             * @description Requests today, counted up to ten minutes ago
+             */
+            today: number;
+            /** Format: int64 */
+            total: number;
+            /**
+             * Format: int64
+             * @description Keys used in the last 7 days
+             */
+            used: number;
+        };
+        OpenTranslatorDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
+        OpenUserDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
         PageAdAdminDTO: {
             items: components["schemas"]["AdAdminDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
@@ -9404,6 +9827,10 @@ export type components = {
         };
         PageAdminGameItemDTO: {
             items: components["schemas"]["AdminGameItemDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageAdminKeyDTO: {
+            items: components["schemas"]["AdminKeyDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageAdminTranslatorItemDTO: {
@@ -10126,6 +10553,9 @@ export type components = {
             Size: number;
             StorageClass?: string;
         };
+        SuspendKeyInputBody: {
+            reason: string;
+        };
         TranslatorDetailDTO: {
             aliases: string[] | null;
             homepage: string | null;
@@ -10289,6 +10719,12 @@ export type components = {
         };
         UploadedImageDTO: {
             key: string;
+        };
+        UsageDTO: {
+            /** Format: int64 */
+            requests: number;
+            /** Format: int64 */
+            throttled: number;
         };
         UserBioDTO: {
             bio: string;
@@ -13443,6 +13879,243 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeFriendLinkAdminDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.accountLimit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountLimitInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.list": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+                status?: "active" | "suspended";
+                q?: string;
+                user?: number;
+                sort?: "requests" | "used" | "created";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageAdminKeyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminKeyDetailDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuspendKeyInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeOpenSummaryDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.admin.usage": {
+        parameters: {
+            query?: {
+                days?: 7 | 30 | 90;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListDayDTO"];
                 };
             };
             /** @description Error */
@@ -18137,6 +18810,45 @@ export interface operations {
             };
         };
     };
+    "open.games": {
+        parameters: {
+            query?: {
+                /** @description Shionlib game IDs, up to 50, separated by commas */
+                id?: string;
+                /** @description Hikarinagi IDs, up to 50, separated by commas */
+                hid?: string;
+                /** @description Bangumi subject IDs, up to 50, separated by commas */
+                bid?: string;
+                /** @description VNDB IDs, up to 50, separated by commas; the leading v may be left out */
+                vid?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeOpenLookupDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "potatovn.binding.get": {
         parameters: {
             query?: never;
@@ -19317,6 +20029,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeRegisteredUserDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeMyKeysDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateKeyInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeIssuedKeyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "apiKey.delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
                 };
             };
             /** @description Error */

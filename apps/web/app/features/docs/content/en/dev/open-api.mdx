@@ -1,0 +1,176 @@
+---
+title: Open API
+description: 'Look up the resources of games by their Shionlib, Hikarinagi, Bangumi or VNDB IDs with an API key.'
+date: 2026-10-14
+order: 2
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Getting an API key
+
+1. Open **Settings** → **API keys** (or go to `/user/settings/api-keys`)
+2. Click **Create an API key** and give it a name
+3. Copy the key shown. It cannot be shown again once the dialog is closed; if you lose it, delete it and create a new one
+
+An account can have up to 10 API keys. API keys only work for the open API; they cannot sign in or call the other endpoints of the site.
+
+> Keep API keys on a server or on your own devices. Do not put them in public web pages or repositories.
+
+## Sending a request
+
+Put the API key in the `Authorization` header as a `Bearer` token:
+
+```bash
+curl -H "Authorization: Bearer $SHIONLIB_API_KEY" \
+  "https://shionlib.com/api/open/v1/games?vid=v1141"
+```
+
+The API accepts requests from any origin and does not read cookies.
+
+## Query parameters
+
+Give one of four kinds of ID:
+
+| Parameter | ID                                       | Example |
+| --------- | ---------------------------------------- | ------- |
+| `id`      | Shionlib game ID                         | `1947`  |
+| `hid`     | Hikarinagi ID                            | `2303`  |
+| `bid`     | Bangumi subject ID                       | `7868`  |
+| `vid`     | VNDB ID; the leading `v` may be left out | `v1141` |
+
+- Up to 50 IDs can be looked up at once, separated by commas, such as `bid=7868,15004`
+- One ID can belong to several games, such as an original and its remake sharing a VNDB ID; all of them are returned
+- Only public games and published resources are returned, with the files that can be downloaded; adult games are returned too and marked by `nsfw`
+
+## Response
+
+```json
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "games": [
+      {
+        "id": 1947,
+        "hid": 2303,
+        "bid": "7868",
+        "vid": "v1141",
+        "title_jp": "俺たちに翼はない",
+        "title_zh": "我们没有翅膀",
+        "title_en": "",
+        "nsfw": false,
+        "url": "https://shionlib.com/game/1947",
+        "resources": [
+          {
+            "id": 3443,
+            "url": "https://shionlib.com/resource/3443",
+            "platform": ["win"],
+            "language": ["zh"],
+            "translation": "group",
+            "translators": [{ "id": 447, "name": "新米日文游戏中文化技术交流小组" }],
+            "patch_version": null,
+            "release_url": null,
+            "edition": null,
+            "edition_name": null,
+            "form": "portable",
+            "extras": [],
+            "note": null,
+            "downloads": 237,
+            "creator": { "id": 1, "name": "ringyuki" },
+            "published_at": "2026-01-04T16:36:08.028Z",
+            "updated": "2026-03-21T06:21:10.994Z",
+            "files": [
+              {
+                "id": 3434,
+                "file_name": "[Navel] 俺たちに翼はない.7z",
+                "file_size": 2468559932,
+                "hash_algorithm": "blake3",
+                "file_hash": "11985d4448c7fd28…",
+                "sha256": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "missing": []
+  },
+  "requestId": "0f6c2a8e-6c1f-4f3e-9d0a-2b7d1c9e5a41",
+  "timestamp": "2026-10-14T03:12:45.120Z"
+}
+```
+
+`data.games` follows the order of the IDs asked for, and several games of one ID are ordered by their ID; `data.missing` lists the IDs that match no game, as they were written. Page addresses carry no language and lead to the language the visitor chose.
+
+### Game
+
+| Field                            | Type            | Description                                                        |
+| -------------------------------- | --------------- | ------------------------------------------------------------------ |
+| `id`                             | integer         | Shionlib game ID                                                   |
+| `hid`                            | integer or null | Hikarinagi ID                                                      |
+| `bid`                            | string or null  | Bangumi subject ID                                                 |
+| `vid`                            | string or null  | VNDB ID                                                            |
+| `title_jp` `title_zh` `title_en` | string          | Japanese, Chinese and English titles; empty when there is none     |
+| `nsfw`                           | boolean         | Whether the game is adult content                                  |
+| `url`                            | string          | The page of the game                                               |
+| `resources`                      | array           | Published resources, the most recently updated first; may be empty |
+
+### Resource
+
+| Field                    | Description                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `id`                     | Resource ID                                                                                      |
+| `url`                    | The page of the resource, where it is downloaded                                                 |
+| `platform`               | Platforms: `win` `mac` `lin` `and` `ios` `ps3` `ps4` `psv` `psp` `swi` `dvd`                     |
+| `language`               | Languages: `jp` `zh` `zh-hant` `en`                                                              |
+| `translation`            | Translation: `none`, `official`, `group` (a translation group) or `machine`; null when not given |
+| `translators`            | Translation groups with their `id` and `name`, in the order credited                             |
+| `patch_version`          | Version of the patch                                                                             |
+| `release_url`            | The page the translation was released on                                                         |
+| `edition`                | Edition: `download`, `package` or `steam`                                                        |
+| `edition_name`           | Name of the edition                                                                              |
+| `form`                   | Form: `disc` (disc image), `installer` or `portable`                                             |
+| `extras`                 | Extras: `save` (complete save) and `bonus`                                                       |
+| `note`                   | Note                                                                                             |
+| `downloads`              | Number of downloads                                                                              |
+| `creator`                | Uploader, with `id` and `name`                                                                   |
+| `published_at` `updated` | When it was published and last updated                                                           |
+| `files`                  | Files that can be downloaded, the volumes of a set together and in their order                   |
+
+### File
+
+| Field                        | Description                                                       |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `id`                         | File ID                                                           |
+| `file_name`                  | File name                                                         |
+| `file_size`                  | Size in bytes                                                     |
+| `hash_algorithm` `file_hash` | The hash taken at upload and its algorithm (`blake3` or `sha256`) |
+| `sha256`                     | SHA-256 taken while the file was checked; null until then         |
+
+## Errors
+
+On an error `code` is a business code, `message` explains it in the language of `Accept-Language`, and `data` is null.
+
+| Status | Meaning                                                                       |
+| ------ | ----------------------------------------------------------------------------- |
+| 401    | No API key was given, or the key is not valid or was deleted                  |
+| 403    | The key was suspended by an administrator, or its account is banned           |
+| 422    | Wrong parameters: no ID, several kinds of ID, more than 50, or a malformed ID |
+| 429    | Too many requests; wait the seconds given in `Retry-After` and try again      |
+| 503    | The open API is paused                                                        |
+
+## Rate limits
+
+All API keys of an account share one request limit, 60 a minute by default. Every response carries these headers:
+
+| Header                  | Meaning                              |
+| ----------------------- | ------------------------------------ |
+| `X-RateLimit-Limit`     | Requests allowed in a window         |
+| `X-RateLimit-Remaining` | Requests left in the current window  |
+| `X-RateLimit-Reset`     | Seconds until the count starts again |
+
+## OpenAPI document
+
+The OpenAPI document of the open API is at `https://shionlib.com/api/open/v1/openapi.json`, which can be used to generate client code.

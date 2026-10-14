@@ -8,6 +8,7 @@ import {
   Gamepad2,
   Heart,
   House,
+  KeyRound,
   Link,
   MessageCircle,
   RefreshCw,
@@ -34,6 +35,7 @@ const icons: Record<NavKey, LucideIcon> = {
   friendLinks: Link,
   catalog: RefreshCw,
   ai: Sparkles,
+  open: KeyRound,
   settings: Settings,
 }
 

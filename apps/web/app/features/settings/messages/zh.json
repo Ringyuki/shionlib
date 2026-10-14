@@ -8,7 +8,8 @@
     "security": "账号安全",
     "connections": "关联账号",
     "download": "下载",
-    "site": "站点偏好"
+    "site": "站点偏好",
+    "api-keys": "API 密钥"
   },
   "site": {
     "language": "界面语言",

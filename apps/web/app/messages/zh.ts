@@ -1,4 +1,5 @@
 import account from '~/features/account/messages/zh.json'
+import apiKey from '~/features/api-key/messages/zh.json'
 import activity from '~/features/activity/messages/zh.json'
 import auth from '~/features/auth/messages/zh.json'
 import character from '~/features/character/messages/zh.json'
@@ -32,6 +33,7 @@ import site from './site/zh.json'
 
 export const messages = {
   account,
+  apiKey,
   activity,
   auth,
   bbcode,

@@ -8,7 +8,8 @@
     "security": "セキュリティ",
     "connections": "連携アカウント",
     "download": "ダウンロード",
-    "site": "サイトの設定"
+    "site": "サイトの設定",
+    "api-keys": "API キー"
   },
   "site": {
     "language": "表示言語",
