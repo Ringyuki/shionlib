@@ -1,4 +1,7 @@
-import { config, IMAGE_CACHE_MAX, LOCALES } from '@/config'
+import { config, IMAGE_CACHE_MAX, IMAGE_CACHE_TTL_MS, LOCALES } from '@/config'
+import { etagOf } from '@/utils/etag'
+
+export type CachedImage = { image: Buffer; etag: string; at: number }
 
 class Lru<V> extends Map<string, V> {
   constructor(private readonly max: number) {
@@ -25,20 +28,39 @@ class Lru<V> extends Map<string, V> {
   }
 }
 
-const cache = new Lru<Buffer>(IMAGE_CACHE_MAX)
+const cache = new Lru<CachedImage>(IMAGE_CACHE_MAX)
 
 function toKey(type: string, id: string, locale: string): string {
   return `${type}:${id}:${locale}`
 }
 
-export function getCachedImage(type: string, id: string, locale: string): Buffer | null {
+export function getCachedImage(
+  type: string,
+  id: string,
+  locale: string,
+  now = Date.now(),
+): CachedImage | null {
   if (config.OG_CACHE_DISABLED) return null
-  return cache.get(toKey(type, id, locale)) ?? null
+  const key = toKey(type, id, locale)
+  const entry = cache.get(key)
+  if (entry === undefined) return null
+  if (now - entry.at >= IMAGE_CACHE_TTL_MS) {
+    cache.delete(key)
+    return null
+  }
+  return entry
 }
 
-export function setCachedImage(type: string, id: string, locale: string, buffer: Buffer): void {
-  if (config.OG_CACHE_DISABLED) return
-  cache.set(toKey(type, id, locale), buffer)
+export function setCachedImage(
+  type: string,
+  id: string,
+  locale: string,
+  image: Buffer,
+  now = Date.now(),
+): CachedImage {
+  const entry = { image, etag: etagOf(image), at: now }
+  if (!config.OG_CACHE_DISABLED) cache.set(toKey(type, id, locale), entry)
+  return entry
 }
 
 export function invalidateCache(type: string, id: string): void {
