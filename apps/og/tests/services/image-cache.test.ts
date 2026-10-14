@@ -1,16 +1,18 @@
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'bun:test'
 
 process.env.BACKEND_INTERNAL_URL = 'http://test-backend:5000'
 process.env.OG_CACHE_DISABLED = 'false'
 
 const { getCachedImage, setCachedImage, invalidateCache } =
   await import('../../src/services/image-cache')
-const { config, IMAGE_CACHE_MAX, LOCALES } = await import('../../src/config')
+const { config, IMAGE_CACHE_MAX, IMAGE_CACHE_TTL_MS, LOCALES } = await import('../../src/config')
+const { etagOf } = await import('../../src/utils/etag')
 
 const buf = (n: number): Buffer => Buffer.from([n & 0xff])
+const now = 1_000_000
 
 function fill(count: number, offset = 0): void {
-  for (let i = 0; i < count; i++) setCachedImage('game', String(offset + i), 'zh', buf(i))
+  for (let i = 0; i < count; i++) setCachedImage('game', String(offset + i), 'zh', buf(i), now)
 }
 
 describe('image cache', () => {
@@ -19,68 +21,45 @@ describe('image cache', () => {
     for (let i = 0; i < IMAGE_CACHE_MAX * 2; i++) invalidateCache('game', String(i))
   })
 
-  it('returns null for a key that was never written', () => {
-    expect(getCachedImage('game', '1', 'zh')).toBeNull()
+  it('keeps an image with the tag of its bytes, per type, id and locale', () => {
+    expect(getCachedImage('game', '1', 'zh', now)).toBeNull()
+    const entry = setCachedImage('game', '1', 'zh', buf(7), now)
+    expect(entry.etag).toBe(etagOf(buf(7)))
+    expect(getCachedImage('game', '1', 'zh', now)?.image).toEqual(buf(7))
+    expect(getCachedImage('game', '1', 'en', now)).toBeNull()
+    expect(getCachedImage('character', '1', 'zh', now)).toBeNull()
   })
 
-  it('round-trips a buffer', () => {
-    setCachedImage('game', '1', 'zh', buf(7))
-    expect(getCachedImage('game', '1', 'zh')).toEqual(buf(7))
+  it('forgets an image once it is an hour old, so changed data is drawn again', () => {
+    setCachedImage('game', '1', 'zh', buf(1), now)
+    expect(getCachedImage('game', '1', 'zh', now + IMAGE_CACHE_TTL_MS - 1)).not.toBeNull()
+    expect(getCachedImage('game', '1', 'zh', now + IMAGE_CACHE_TTL_MS)).toBeNull()
+    expect(getCachedImage('game', '1', 'zh', now)).toBeNull()
   })
 
-  it('keys separately per type, id and locale', () => {
-    setCachedImage('game', '1', 'zh', buf(1))
-    expect(getCachedImage('game', '1', 'en')).toBeNull()
-    expect(getCachedImage('character', '1', 'zh')).toBeNull()
-  })
-
-  it('evicts the oldest entry once past IMAGE_CACHE_MAX', () => {
+  it('evicts the least recently read entry past IMAGE_CACHE_MAX', () => {
     fill(IMAGE_CACHE_MAX)
-    setCachedImage('game', String(IMAGE_CACHE_MAX), 'zh', buf(0))
-
-    expect(getCachedImage('game', '0', 'zh')).toBeNull()
-    expect(getCachedImage('game', '1', 'zh')).not.toBeNull()
-    expect(getCachedImage('game', String(IMAGE_CACHE_MAX), 'zh')).not.toBeNull()
-  })
-
-  it('never grows past IMAGE_CACHE_MAX entries', () => {
-    fill(IMAGE_CACHE_MAX * 2)
-
+    getCachedImage('game', '0', 'zh', now)
+    setCachedImage('game', String(IMAGE_CACHE_MAX), 'zh', buf(0), now)
+    expect(getCachedImage('game', '0', 'zh', now)).not.toBeNull()
+    expect(getCachedImage('game', '1', 'zh', now)).toBeNull()
     let held = 0
-    for (let i = 0; i < IMAGE_CACHE_MAX * 2; i++) {
-      if (getCachedImage('game', String(i), 'zh') !== null) held++
+    for (let i = 0; i <= IMAGE_CACHE_MAX; i++) {
+      if (getCachedImage('game', String(i), 'zh', now) !== null) held++
     }
     expect(held).toBe(IMAGE_CACHE_MAX)
   })
 
-  it('reading an entry protects it from the next eviction', () => {
-    fill(IMAGE_CACHE_MAX)
-
-    getCachedImage('game', '0', 'zh')
-    setCachedImage('game', String(IMAGE_CACHE_MAX), 'zh', buf(0))
-
-    expect(getCachedImage('game', '0', 'zh')).not.toBeNull()
-    expect(getCachedImage('game', '1', 'zh')).toBeNull()
-  })
-
   it('invalidateCache drops every locale for an id', () => {
-    for (const locale of LOCALES) setCachedImage('game', '1', locale, buf(1))
-
+    for (const locale of LOCALES) setCachedImage('game', '1', locale, buf(1), now)
     invalidateCache('game', '1')
-
-    for (const locale of LOCALES) {
-      expect(getCachedImage('game', '1', locale)).toBeNull()
-    }
+    for (const locale of LOCALES) expect(getCachedImage('game', '1', locale, now)).toBeNull()
   })
 
-  it('neither reads nor writes while OG_CACHE_DISABLED', () => {
-    setCachedImage('game', '1', 'zh', buf(1))
+  it('still tags but neither keeps nor reads while OG_CACHE_DISABLED', () => {
     config.OG_CACHE_DISABLED = true
-
-    expect(getCachedImage('game', '1', 'zh')).toBeNull()
-
-    setCachedImage('game', '2', 'zh', buf(2))
+    expect(setCachedImage('game', '2', 'zh', buf(2), now).etag).toBe(etagOf(buf(2)))
     config.OG_CACHE_DISABLED = false
-    expect(getCachedImage('game', '2', 'zh')).toBeNull()
+    expect(getCachedImage('game', '2', 'zh', now)).toBeNull()
   })
 })

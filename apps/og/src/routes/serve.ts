@@ -4,9 +4,9 @@ import { z } from 'zod'
 import { config, OG_H, OG_W } from '@/config'
 import type { Card } from '@/cards/load'
 import { BackendError, NotFoundError } from '@/services/backend'
-import { getCachedImage, setCachedImage } from '@/services/image-cache'
+import { getCachedImage, setCachedImage, type CachedImage } from '@/services/image-cache'
 import { getRenderer } from '@/services/renderer'
-import { isETagMatch, makeETag } from '@/utils/etag'
+import { isETagMatch } from '@/utils/etag'
 
 export const localeSchema = z.enum(['zh', 'en', 'ja']).catch('zh')
 
@@ -15,8 +15,12 @@ export const idSchema = z.coerce.number().int().positive()
 const webp = 'image/webp'
 
 const cachedHeaders = {
-  'cache-control': 'public, max-age=604800, stale-while-revalidate=86400',
+  'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
 } as const
+
+const missingHeaders = { 'cache-control': 'public, max-age=300' } as const
+
+const failedHeaders = { 'cache-control': 'no-store' } as const
 
 const uncachedHeaders = {
   'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -41,28 +45,27 @@ export async function serveOgImage(
 ): Promise<Response> {
   const { type, id, locale } = opts
   const caching = !config.OG_CACHE_DISABLED
-  const etag = await makeETag(type, id, locale)
-  const headers = caching ? { ...cachedHeaders, etag } : uncachedHeaders
-  if (caching && isETagMatch(etag, c.req.header('if-none-match') ?? null)) {
+  let entry: CachedImage | null = getCachedImage(type, id, locale)
+  if (entry === null) {
+    try {
+      entry = setCachedImage(type, id, locale, await renderCard(await opts.card()))
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        return c.json({ error: 'Not found' }, 404, caching ? missingHeaders : uncachedHeaders)
+      }
+      if (err instanceof BackendError) {
+        return c.json({ error: err.message }, err.status >= 500 ? 502 : 400, failedHeaders)
+      }
+      console.error(`[og] render failed for ${type}/${id}:`, err)
+      return c.json({ error: 'Render failed' }, 500, failedHeaders)
+    }
+  }
+  if (!caching) {
+    return new Response(entry.image, { headers: { ...uncachedHeaders, 'content-type': webp } })
+  }
+  const headers = { ...cachedHeaders, etag: entry.etag }
+  if (isETagMatch(entry.etag, c.req.header('if-none-match') ?? null)) {
     return new Response(null, { status: 304, headers })
   }
-  const cached = getCachedImage(type, id, locale)
-  if (cached) {
-    return new Response(cached, { headers: { ...headers, 'content-type': webp } })
-  }
-  let buffer: Buffer
-  try {
-    buffer = await renderCard(await opts.card())
-  } catch (err) {
-    if (err instanceof NotFoundError) {
-      return c.json({ error: 'Not found' }, 404)
-    }
-    if (err instanceof BackendError) {
-      return c.json({ error: err.message }, err.status >= 500 ? 502 : 400)
-    }
-    console.error(`[og] render failed for ${type}/${id}:`, err)
-    return c.json({ error: 'Render failed' }, 500)
-  }
-  setCachedImage(type, id, locale, buffer)
-  return new Response(buffer, { headers: { ...headers, 'content-type': webp } })
+  return new Response(entry.image, { headers: { ...headers, 'content-type': webp } })
 }
