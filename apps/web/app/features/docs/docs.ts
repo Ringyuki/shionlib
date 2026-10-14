@@ -1,3 +1,4 @@
+import type { Schema } from '~/shared/api/types'
 import { locales, type Locale } from '~/shared/i18n/locale'
 
 export const categories = ['guides', 'about', 'dev'] as const
@@ -9,11 +10,7 @@ export type DocRef = {
   name: string
 }
 
-export type DocAuthor = {
-  id: number | undefined
-  name: string
-  avatar: string | undefined
-}
+export type DocAuthor = Pick<Schema<'UserProfileDTO'>, 'id' | 'name' | 'avatar'>
 
 export type Doc = DocRef & {
   title: string
@@ -21,7 +18,7 @@ export type Doc = DocRef & {
   banner: string | undefined
   date: string
   order: number | undefined
-  author: DocAuthor | undefined
+  authorIds: number[]
 }
 
 export type DocLink = DocRef & {

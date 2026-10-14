@@ -14,13 +14,11 @@ banner: 'https://images.yurari.moe/…'
 description: '一两句话的摘要，显示在标题下方和文档列表中，也用作页面描述。'
 date: 2026-02-27
 order: 1
-author_uid: 1
-author_name: 'ringyuki'
-author_avatar: 'https://t.shionlib.com/user/1/avatar/….webp'
+authors: [1, 3625]
 ---
 ```
 
-`title` and `date` are required. The document appears in the list and in the previous and next links by itself. `order` is its place among the documents of its category, the smaller first: give a new document the number of the place it should be read at and move the later ones up in the three languages; without `order` it comes after the ordered ones, the newest first. `banner` is the cover, a 16:9 picture, shown small in the list and beside the title.
+`title` and `date` are required. The document appears in the list and in the previous and next links by itself. `order` is its place among the documents of its category, the smaller first: give a new document the number of the place it should be read at and move the later ones up in the three languages; without `order` it comes after the ordered ones, the newest first. `banner` is the cover, a 16:9 picture, shown small in the list and beside the title. `authors` lists the user ids of everyone who wrote or edited the document, the first author first, each once: the page reads their names and avatars from the API each time it is opened, so a head names nothing else about them (the head is a strict object: a key it does not know fails `docs.server.test.ts` and keeps the server from starting). Someone who edits a document adds their id at the end, in the three languages; an id that is no longer a user is left out of the page.
 
 ## Writing
 

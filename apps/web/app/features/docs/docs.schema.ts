@@ -14,15 +14,19 @@ const day = v.pipe(
   v.isoDate(),
 )
 
-const head = v.object({
+const head = v.strictObject({
   title: v.pipe(v.string(), v.minLength(1)),
   description: v.optional(v.string(), ''),
   banner: v.optional(v.string()),
   date: day,
   order: v.optional(v.pipe(v.number(), v.finite())),
-  author_uid: v.optional(v.number()),
-  author_name: v.optional(v.string()),
-  author_avatar: v.optional(v.string()),
+  authors: v.optional(
+    v.pipe(
+      v.array(v.pipe(v.number(), v.integer(), v.minValue(1))),
+      v.check(ids => new Set(ids).size === ids.length),
+    ),
+    [],
+  ),
 })
 
 export function docFrom(ref: DocRef, value: unknown): Doc | undefined {
@@ -38,10 +42,7 @@ export function docFrom(ref: DocRef, value: unknown): Doc | undefined {
     banner: output.banner,
     date: output.date,
     order: output.order,
-    author:
-      output.author_name === undefined
-        ? undefined
-        : { id: output.author_uid, name: output.author_name, avatar: output.author_avatar },
+    authorIds: output.authors,
   }
 }
 

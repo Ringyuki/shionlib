@@ -12,9 +12,7 @@ describe('docFrom', () => {
         description: '了解 Shionlib 下载系统',
         date: '2026-02-27',
         order: 1,
-        author_uid: 1,
-        author_name: 'ringyuki',
-        author_avatar: 'https://t.shionlib.com/user/1/avatar/a.webp',
+        authors: [1, 3625],
       }),
     ).toEqual({
       category: 'guides',
@@ -24,7 +22,7 @@ describe('docFrom', () => {
       description: '了解 Shionlib 下载系统',
       date: '2026-02-27',
       order: 1,
-      author: { id: 1, name: 'ringyuki', avatar: 'https://t.shionlib.com/user/1/avatar/a.webp' },
+      authorIds: [1, 3625],
     })
   })
 
@@ -37,7 +35,7 @@ describe('docFrom', () => {
       description: '',
       date: '2025-10-28',
       order: undefined,
-      author: undefined,
+      authorIds: [],
     })
   })
 
@@ -46,6 +44,17 @@ describe('docFrom', () => {
     expect(docFrom(ref, { title: 'Title', date: 'soon' })).toBeUndefined()
     expect(docFrom(ref, { title: 'Title', date: '2026-02-27', order: 'first' })).toBeUndefined()
     expect(docFrom(ref, undefined)).toBeUndefined()
+  })
+
+  it('takes the authors by their ids alone, as the page reads the rest from the site', () => {
+    const head = { title: 'Title', date: '2026-02-27', authors: [1] }
+    expect(docFrom(ref, { ...head, author_uid: 1 })).toBeUndefined()
+    expect(docFrom(ref, { ...head, author_name: 'ringyuki' })).toBeUndefined()
+    expect(docFrom(ref, { ...head, author_avatar: 'user/1/avatar/a.webp' })).toBeUndefined()
+    expect(docFrom(ref, { ...head, authors: [0] })).toBeUndefined()
+    expect(docFrom(ref, { ...head, authors: [1.5] })).toBeUndefined()
+    expect(docFrom(ref, { ...head, authors: [1, 1] })).toBeUndefined()
+    expect(docFrom(ref, { ...head, authors: 1 })).toBeUndefined()
   })
 })
 
