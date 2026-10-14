@@ -3666,6 +3666,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/uploads/failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record why an upload or the resource made from it failed in the browser */
+        post: operations["upload.failure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/uploads/large/hold": {
         parameters: {
             query?: never;
@@ -6109,6 +6126,25 @@ export type components = {
         };
         CheckUserNameInputBody: {
             name: string;
+        };
+        ClientErrorInput: {
+            /**
+             * Format: int64
+             * @description Business code of the answer
+             */
+            code?: number;
+            message: string;
+            /** @description Name of the error in the browser: ApiError for an answer of the API or of a proxy in front of it, NotReadableError when the file could not be read, TypeError for a failed connection */
+            name: string;
+            /** @description Cloudflare's Ray ID of the answer */
+            ray?: string;
+            /** @description The API's request id; absent when the answer did not come from the API */
+            request_id?: string;
+            /**
+             * Format: int64
+             * @description HTTP status of the answer
+             */
+            status?: number;
         };
         CodeRequestedDTO: {
             uuid: string;
@@ -8694,6 +8730,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeUploadFailureDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["UploadFailureDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeUploadHoldDTO: {
             /** Format: int64 */
             code: number;
@@ -8845,6 +8891,16 @@ export type components = {
             requestId: string;
             /** Format: date-time */
             timestamp: string;
+        };
+        FailureAttemptInput: {
+            /** Format: date-time */
+            at: string;
+            error: components["schemas"]["ClientErrorInput"];
+            /**
+             * @description What the browser waited for before trying again
+             * @enum {string}
+             */
+            wait: "network" | "busy" | "in_flight" | "signed_out";
         };
         FavoriteDTO: {
             description: string | null;
@@ -10124,6 +10180,31 @@ export type components = {
             id: number;
             note: string | null;
         };
+        ReportFailureInputBody: {
+            /** @description The last tries that failed and were retried before this failure, oldest first */
+            attempts?: components["schemas"]["FailureAttemptInput"][] | null;
+            /** Format: int64 */
+            chunk?: number;
+            error: components["schemas"]["ClientErrorInput"];
+            file_name: string;
+            /** Format: int64 */
+            file_size: number;
+            /**
+             * @description What the browser concluded and showed
+             * @enum {string}
+             */
+            reason: "different_file" | "changed_file" | "unreadable" | "expired" | "rejected";
+            /**
+             * Format: int64
+             * @description The upload session, when one was opened
+             */
+            session_id?: number;
+            /**
+             * @description Opening the session, reading the file, sending a chunk, completing the session, or creating the resource from the finished uploads
+             * @enum {string}
+             */
+            stage: "open" | "read" | "chunk" | "complete" | "submit";
+        };
         ReportFalseStepDTO: {
             /** Format: int64 */
             ban_days: number;
@@ -10673,6 +10754,13 @@ export type components = {
         };
         UploadCompleteDTO: {
             ok: boolean;
+        };
+        UploadFailureDTO: {
+            /**
+             * Format: int64
+             * @description The record of the failure
+             */
+            id: number;
         };
         UploadHoldDTO: {
             /** @description Sessions another client holds */
@@ -19642,6 +19730,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeTranslatorDetailDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "upload.failure": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identifies the browser that uploaded */
+                "X-Upload-Client"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportFailureInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadFailureDTO"];
                 };
             };
             /** @description Error */

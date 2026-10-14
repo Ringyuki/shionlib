@@ -56,4 +56,21 @@ describe('uploadChunk', () => {
     expect(error).toBeInstanceOf(ApiError)
     expect(error).toMatchObject({ status: 409, code: 480108 })
   })
+
+  it('keeps the Ray ID of a page a proxy answered with', async () => {
+    install({
+      status: 403,
+      text: '<html>Attention Required! | Cloudflare</html>',
+      headers: { 'cf-ray': 'a4a581a96a8ce353-NRT', 'content-type': 'text/html' },
+    })
+    const error = await uploadChunk({
+      id: 1,
+      index: 0,
+      client: 'this-browser',
+      content: new Blob(['x']),
+      sha256: 'x',
+    }).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ status: 403, code: 403, ray: 'a4a581a96a8ce353-NRT' })
+    expect(error instanceof ApiError && error.failure.requestId).toBe('')
+  })
 })

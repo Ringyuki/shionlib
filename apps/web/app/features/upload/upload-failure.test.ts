@@ -2,13 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { BusinessCode } from '~/shared/api/generated/business-codes'
 import type { BusinessCodeName } from '~/shared/api/types'
+import { FileReadError } from './file-hasher'
 import {
   backoff,
   decide,
   HeldElsewhere,
+  locate,
   retrying,
   stalledConnection,
   stopped,
+  UploadFailure,
 } from './upload-failure'
 
 function apiError(status: number, name: BusinessCodeName, retryAfter?: number) {
@@ -72,6 +75,39 @@ describe('decide', () => {
       kind: 'fail',
       reason: 'rejected',
     })
+  })
+
+  it('keeps no empty message for an answer that had none', () => {
+    const page = new ApiError(403, {
+      code: 403,
+      message: '',
+      data: { errors: null },
+      requestId: '',
+      timestamp: '',
+    })
+    expect(decide(page, 0, 0)).toEqual({ kind: 'fail', reason: 'rejected' })
+  })
+})
+
+describe('locate', () => {
+  it('turns a file the browser cannot read into its own failure', () => {
+    const located = locate(new FileReadError('NotReadableError', 'gone'), 'chunk', 3)
+    expect(located).toBeInstanceOf(UploadFailure)
+    expect(located instanceof UploadFailure && located.originOf('open')).toEqual({
+      reason: 'unreadable',
+      error: { name: 'NotReadableError', message: 'gone' },
+      stage: 'read',
+      chunk: 3,
+    })
+  })
+
+  it('keeps the first place a failure was seen and lets other errors through', () => {
+    const failure = new UploadFailure('expired', undefined, { name: 'ApiError', message: '' })
+    const placed = failure.at('chunk', 2).at('open')
+    expect(placed.originOf('complete')).toMatchObject({ stage: 'chunk', chunk: 2 })
+    expect(failure.originOf('complete')).toMatchObject({ stage: 'complete' })
+    const stop = stopped()
+    expect(locate(stop, 'open')).toBe(stop)
   })
 })
 

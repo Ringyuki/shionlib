@@ -4,6 +4,7 @@ import type { Schema } from '~/shared/api/types'
 import type { FileIdentity, Picture, Upload, UploadSession, UploadTarget } from './upload'
 import { renewalsPerHold } from './upload'
 import { retrying } from './upload-failure'
+import type { FailureReport } from './upload-report'
 import { restoreState, savedSessions } from './upload-restore'
 import type { SavedState } from './upload.schema'
 
@@ -82,6 +83,10 @@ export async function completeSession(
     params: { path: { id: session }, header: by(client) },
     body: { file_sha256: digest },
   })
+}
+
+export async function reportFailure(api: ApiClient, client: string, report: FailureReport) {
+  await api.post('/uploads/failures', { params: { header: by(client) }, body: report })
 }
 
 export async function discardSession(api: ApiClient, client: string, session: number) {

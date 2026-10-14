@@ -669,6 +669,18 @@ func (f TranslatorDistinctionFunc) Mutate(ctx context.Context, m ent.Mutation) (
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TranslatorDistinctionMutation", m)
 }
 
+// The UploadFailureFunc type is an adapter to allow the use of ordinary
+// function as UploadFailure mutator.
+type UploadFailureFunc func(context.Context, *ent.UploadFailureMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UploadFailureFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UploadFailureMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UploadFailureMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

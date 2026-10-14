@@ -128,6 +128,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.complete", Method: http.MethodPatch, Path: "/uploads/large/{id}/complete", Summary: "Verify and complete an upload session", Tags: tags, Access: httpapi.AccessUser}, h.complete)
 	httpapi.Register(api, httpapi.Route{ID: "upload.hold", Method: http.MethodPost, Path: "/uploads/large/hold", Summary: "Hold the sessions in this client's queue, so that no other client writes, completes or aborts them", Tags: tags, Access: httpapi.AccessUser}, h.hold)
 	httpapi.Register(api, httpapi.Route{ID: "upload.abort", Method: http.MethodDelete, Path: "/uploads/large/{id}", Summary: "Abort an upload, or discard a finished upload not yet in a resource", Tags: tags, Access: httpapi.AccessUser}, h.abort)
+	httpapi.Register(api, httpapi.Route{ID: "upload.failure", Method: http.MethodPost, Path: "/uploads/failures", Summary: "Record why an upload or the resource made from it failed in the browser", Tags: tags, Access: httpapi.AccessUser}, h.reportFailure)
 	httpapi.Register(api, httpapi.Route{ID: "upload.quota", Method: http.MethodGet, Path: "/uploads/quota", Summary: "Read the caller's upload tier and limits", Tags: tags, Access: httpapi.AccessUser}, h.getQuota)
 	h.registerChunk(api)
 }

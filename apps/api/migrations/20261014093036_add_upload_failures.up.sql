@@ -1,0 +1,6 @@
+-- create "upload_failures" table
+CREATE TABLE "upload_failures" ("id" serial NOT NULL, "stage" character varying(16) NOT NULL, "reason" character varying(32) NOT NULL, "error_name" character varying(100) NOT NULL, "error_message" text NOT NULL, "status" integer NULL, "code" integer NULL, "request_id" character varying(100) NULL, "ray" character varying(100) NULL, "chunk" integer NULL, "file_name" text NOT NULL, "file_size" bigint NOT NULL, "attempts" jsonb NOT NULL DEFAULT '[]', "client" character varying(64) NOT NULL, "ip" text NOT NULL, "user_agent" text NOT NULL, "created" timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "session_id" integer NULL, "user_id" integer NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "upload_failures_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "game_upload_sessions" ("id") ON UPDATE CASCADE ON DELETE SET NULL, CONSTRAINT "upload_failures_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE CASCADE ON DELETE CASCADE);
+-- create index "upload_failures_created_idx" to table: "upload_failures"
+CREATE INDEX "upload_failures_created_idx" ON "upload_failures" ("created");
+-- create index "upload_failures_user_id_idx" to table: "upload_failures"
+CREATE INDEX "upload_failures_user_id_idx" ON "upload_failures" ("user_id");

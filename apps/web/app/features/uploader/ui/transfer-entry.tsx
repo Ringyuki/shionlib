@@ -7,6 +7,7 @@ import { Button } from '~/shared/ui/button'
 import type { Transfer } from '../uploader'
 import { usePace } from '../use-pace'
 import { EntryShell } from './entry-shell'
+import { FailureNote } from './failure-note'
 import { Fact } from './fact'
 import { ReselectDialog } from './reselect'
 import { StageTag } from './stage-tag'
@@ -43,8 +44,11 @@ export function TransferEntry({ transfer }: { transfer: Transfer }) {
         notice={
           <Alert tone="danger" open={phase.name === 'failed'} className="col-span-2">
             <Inline gap="sm" align="center" justify="between">
-              <Text size="sm">
-                {(phase.name === 'failed' ? phase.message : undefined) ?? t('submitFailed')}
+              <Text as="div" size="sm">
+                <FailureNote
+                  text={(phase.name === 'failed' ? phase.message : undefined) ?? t('submitFailed')}
+                  error={phase.name === 'failed' ? phase.error : undefined}
+                />
               </Text>
               <Button
                 size="sm"

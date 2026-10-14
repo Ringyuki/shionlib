@@ -1,13 +1,14 @@
 import type { ApiClient } from '~/shared/api/client'
 import type { ChunkUpload } from '~/shared/api/chunk'
 import { FileHasher, type HashWorker } from './file-hasher'
-import type { Upload, UploadSession } from './upload'
+import type { Upload, UploadSession, WaitReason } from './upload'
 import { uploadedBytes } from './upload'
-import { retrying, type Waiting } from './upload-failure'
+import { locate, retrying, type Waiting } from './upload-failure'
+import { remembered, type FailureAttempt, type FailureReport } from './upload-report'
 import { UploadRunner, type RunnerEvent } from './upload-runner'
 import type { Slots } from './upload-slots'
 import type { UploadEvent } from './upload-state'
-import { completeSession, openSession, uploadedChunks } from './upload.use-cases'
+import { completeSession, openSession, reportFailure, uploadedChunks } from './upload.use-cases'
 import type { SavedState } from './upload.schema'
 
 export type UploadDeps = {
@@ -27,6 +28,7 @@ export type TransferContext = {
   deps: UploadDeps
   slots: Slots
   hashers: Map<string, FileHasher>
+  attempts: Map<string, FailureAttempt[]>
   dispatch: (event: UploadEvent) => void
 }
 
@@ -41,14 +43,22 @@ export async function transfer(
   const fresh = upload.session === undefined
   const session =
     upload.session ??
-    (await retrying(signal, () => openSession(deps.api, deps.client, upload.file), waiting))
+    (await retrying(signal, () => openSession(deps.api, deps.client, upload.file), waiting).catch(
+      (error: unknown) => {
+        throw locate(error, 'open')
+      },
+    ))
   if (fresh) {
     dispatch({ type: 'sessionOpened', upload: upload.id, session, sent: 0 })
   }
   return deps.lock(`shionlib-upload-${session.id}`, async () => {
     const stored = fresh
       ? []
-      : await retrying(signal, () => uploadedChunks(deps.api, session.id), waiting)
+      : await retrying(signal, () => uploadedChunks(deps.api, session.id), waiting).catch(
+          (error: unknown) => {
+            throw locate(error, 'open')
+          },
+        )
     const sent = uploadedBytes(session, file.size, stored)
     dispatch({ type: 'sessionOpened', upload: upload.id, session, sent })
     const runner = new UploadRunner({
@@ -60,7 +70,12 @@ export async function transfer(
       client: deps.client,
       send: deps.send,
       complete: digest => completeSession(deps.api, deps.client, session.id, digest),
-      report: event => dispatch(eventOf(upload.id, event)),
+      report: event => {
+        if (event.type === 'waiting') {
+          note(context, upload.id, event.reason, event.error)
+        }
+        dispatch(eventOf(upload.id, event))
+      },
       now: deps.now,
       random: deps.random,
     })
@@ -78,9 +93,17 @@ function hasherFor(context: TransferContext, id: string, file: File, session: Up
   return hasher
 }
 
+function note(context: TransferContext, upload: string, reason: WaitReason, error: unknown) {
+  const known = context.attempts.get(upload) ?? []
+  context.attempts.set(upload, remembered(known, reason, error, context.deps.now()))
+}
+
 function waitingFor(context: TransferContext, upload: string): Waiting {
   return {
-    wait: reason => context.dispatch({ type: 'waiting', upload, reason }),
+    wait: (reason, error) => {
+      note(context, upload, reason, error)
+      context.dispatch({ type: 'waiting', upload, reason })
+    },
     resume: () => context.dispatch({ type: 'started', upload }),
     random: context.deps.random,
   }
@@ -95,4 +118,16 @@ function eventOf(upload: string, event: RunnerEvent): UploadEvent {
     case 'running':
       return { type: 'started', upload }
   }
+}
+
+const reportTries = 3
+
+const reportDelay = 5_000
+
+export function sendReport(deps: UploadDeps, report: FailureReport, tries = 0) {
+  reportFailure(deps.api, deps.client, report).catch(() => {
+    if (tries + 1 < reportTries) {
+      deps.later(() => sendReport(deps, report, tries + 1), reportDelay * 2 ** tries)
+    }
+  })
 }

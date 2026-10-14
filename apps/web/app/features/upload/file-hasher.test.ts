@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FileHasher, type HashWorker } from './file-hasher'
+import { FileHasher, FileReadError, type HashWorker } from './file-hasher'
 import { hashFile } from './upload-hash'
 import type { HashReport } from './upload.schema'
 
@@ -33,13 +33,21 @@ describe('FileHasher', () => {
     const hasher = new FileHasher(
       scripted([
         { kind: 'chunk', index: 0, sha256: 'a' },
-        { kind: 'error', message: 'unreadable' },
+        {
+          kind: 'error',
+          name: 'NotReadableError',
+          message: 'The requested file could not be read',
+        },
       ]),
       new Blob(['x']),
       4,
     )
     await expect(hasher.chunkDigest(0)).resolves.toBe('a')
-    await expect(hasher.fileDigest()).rejects.toThrow('unreadable')
+    await expect(hasher.fileDigest()).rejects.toThrow(FileReadError)
+    await expect(hasher.chunkDigest(1)).rejects.toMatchObject({
+      name: 'NotReadableError',
+      message: 'The requested file could not be read',
+    })
   })
 
   it('stops the worker and the waiters when disposed', async () => {

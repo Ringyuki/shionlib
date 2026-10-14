@@ -90,7 +90,7 @@ export function hashJobFrom(data: unknown): HashJob {
 const hashReport = v.variant('kind', [
   v.object({ kind: v.literal('chunk'), index: size, sha256: v.string() }),
   v.object({ kind: v.literal('file'), blake3: v.string() }),
-  v.object({ kind: v.literal('error'), message: v.string() }),
+  v.object({ kind: v.literal('error'), name: v.optional(v.string()), message: v.string() }),
 ])
 
 export type HashReport = v.InferOutput<typeof hashReport>

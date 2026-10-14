@@ -68,7 +68,7 @@ describe('UploadRunner', () => {
     await vi.advanceTimersByTimeAsync(1_000)
     await running
     expect(events.filter(event => event.type !== 'progress')).toEqual([
-      { type: 'waiting', reason: 'network' },
+      { type: 'waiting', reason: 'network', error: new TypeError('offline') },
       { type: 'running' },
     ])
     expect(complete).toHaveBeenCalledOnce()

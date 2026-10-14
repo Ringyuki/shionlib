@@ -27,6 +27,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -672,6 +673,21 @@ func (_c *UserCreate) AddAPIKeys(v ...*UserAPIKey) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAPIKeyIDs(ids...)
+}
+
+// AddUploadFailureIDs adds the "upload_failures" edge to the UploadFailure entity by IDs.
+func (_c *UserCreate) AddUploadFailureIDs(ids ...int) *UserCreate {
+	_c.mutation.AddUploadFailureIDs(ids...)
+	return _c
+}
+
+// AddUploadFailures adds the "upload_failures" edges to the UploadFailure entity.
+func (_c *UserCreate) AddUploadFailures(v ...*UploadFailure) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddUploadFailureIDs(ids...)
 }
 
 // SetPotatovnBindingID sets the "potatovn_binding" edge to the UserPvnBinding entity by ID.
@@ -1403,6 +1419,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userapikey.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UploadFailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UploadFailuresTable,
+			Columns: []string{user.UploadFailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

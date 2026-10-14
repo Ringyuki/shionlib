@@ -17,7 +17,7 @@ const sizeOf = (body: unknown) =>
     ? body.total_size
     : 0
 
-export function fakeServer(ongoing: OngoingUpload[] = []) {
+export function fakeServer(ongoing: OngoingUpload[] = [], refused: Record<string, Response> = {}) {
   const calls: Call[] = []
   let next = 1
   const reply = (data: unknown) => Response.json({ code: 0, message: 'ok', data })
@@ -32,6 +32,8 @@ export function fakeServer(ongoing: OngoingUpload[] = []) {
         body,
         client: sent.headers.get('X-Upload-Client'),
       })
+      const refusal = refused[path]
+      if (refusal !== undefined) return refusal.clone()
       if (path === '/uploads/large/ongoing') return reply(ongoing)
       if (path === '/uploads/large/hold') return reply({ held: [], elsewhere: [], ttl_seconds: 80 })
       if (path === '/uploads/large/init') {

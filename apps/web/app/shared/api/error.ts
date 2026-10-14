@@ -6,13 +6,15 @@ export class ApiError extends Error {
   readonly status: number
   readonly failure: ApiFailure
   readonly retryAfter: number | undefined
+  readonly ray: string | undefined
 
-  constructor(status: number, failure: ApiFailure, retryAfter?: number) {
+  constructor(status: number, failure: ApiFailure, retryAfter?: number, ray?: string) {
     super(failure.message)
     this.name = 'ApiError'
     this.status = status
     this.failure = failure
     this.retryAfter = retryAfter
+    this.ray = ray
   }
 
   get code(): number {
@@ -28,6 +30,7 @@ export class ApiError extends Error {
       response.status,
       isFailure(body) ? body : syntheticFailure(response),
       retryAfterFrom(response.headers.get('retry-after')),
+      response.headers.get('cf-ray') ?? undefined,
     )
   }
 }

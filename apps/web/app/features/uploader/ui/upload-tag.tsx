@@ -2,6 +2,7 @@ import { Tag, Text, Tooltip } from '@hina-ui/react'
 import { CircleHelp } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { progress, type Upload } from '~/features/upload'
+import { FailureNote } from './failure-note'
 import { Reselect } from './reselect'
 
 const tags = {
@@ -34,13 +35,13 @@ export function UploadTag({ upload, onReselect }: { upload: Upload; onReselect: 
     )
   }
   const hint =
-    phase.name === 'waiting'
-      ? t(`wait.${phase.reason}`)
-      : phase.name === 'failed'
-        ? (phase.message ?? t(`failure.${phase.reason}`))
-        : phase.name === 'heldElsewhere'
-          ? t('elsewhere.file')
-          : undefined
+    phase.name === 'waiting' ? (
+      t(`wait.${phase.reason}`)
+    ) : phase.name === 'failed' ? (
+      <FailureNote text={phase.message ?? t(`failure.${phase.reason}`)} error={phase.error} />
+    ) : phase.name === 'heldElsewhere' ? (
+      t('elsewhere.file')
+    ) : undefined
   return (
     <Tag size="sm" className="shrink-0" {...tags[phase.name]}>
       {phase.name === 'heldElsewhere' ? percent : t(`state.${phase.name}`)}

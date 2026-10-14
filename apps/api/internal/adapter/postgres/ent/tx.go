@@ -124,6 +124,8 @@ type Tx struct {
 	Translator *TranslatorClient
 	// TranslatorDistinction is the client for interacting with the TranslatorDistinction builders.
 	TranslatorDistinction *TranslatorDistinctionClient
+	// UploadFailure is the client for interacting with the UploadFailure builders.
+	UploadFailure *UploadFailureClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserAPIKey is the client for interacting with the UserAPIKey builders.
@@ -328,6 +330,7 @@ func (tx *Tx) init() {
 	tx.Tag = NewTagClient(tx.config)
 	tx.Translator = NewTranslatorClient(tx.config)
 	tx.TranslatorDistinction = NewTranslatorDistinctionClient(tx.config)
+	tx.UploadFailure = NewUploadFailureClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserAPIKey = NewUserAPIKeyClient(tx.config)
 	tx.UserBannedRecord = NewUserBannedRecordClient(tx.config)

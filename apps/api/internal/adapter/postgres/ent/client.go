@@ -70,6 +70,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -198,6 +199,8 @@ type Client struct {
 	Translator *TranslatorClient
 	// TranslatorDistinction is the client for interacting with the TranslatorDistinction builders.
 	TranslatorDistinction *TranslatorDistinctionClient
+	// UploadFailure is the client for interacting with the UploadFailure builders.
+	UploadFailure *UploadFailureClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserAPIKey is the client for interacting with the UserAPIKey builders.
@@ -282,6 +285,7 @@ func (c *Client) init() {
 	c.Tag = NewTagClient(c.config)
 	c.Translator = NewTranslatorClient(c.config)
 	c.TranslatorDistinction = NewTranslatorDistinctionClient(c.config)
+	c.UploadFailure = NewUploadFailureClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserAPIKey = NewUserAPIKeyClient(c.config)
 	c.UserBannedRecord = NewUserBannedRecordClient(c.config)
@@ -438,6 +442,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Tag:                             NewTagClient(cfg),
 		Translator:                      NewTranslatorClient(cfg),
 		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
+		UploadFailure:                   NewUploadFailureClient(cfg),
 		User:                            NewUserClient(cfg),
 		UserAPIKey:                      NewUserAPIKeyClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
@@ -521,6 +526,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Tag:                             NewTagClient(cfg),
 		Translator:                      NewTranslatorClient(cfg),
 		TranslatorDistinction:           NewTranslatorDistinctionClient(cfg),
+		UploadFailure:                   NewUploadFailureClient(cfg),
 		User:                            NewUserClient(cfg),
 		UserAPIKey:                      NewUserAPIKeyClient(cfg),
 		UserBannedRecord:                NewUserBannedRecordClient(cfg),
@@ -573,9 +579,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
 		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.User, c.UserAPIKey, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.TranslatorDistinction, c.UploadFailure, c.User, c.UserAPIKey,
+		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
+		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -599,9 +605,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
 		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.User, c.UserAPIKey, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.TranslatorDistinction, c.UploadFailure, c.User, c.UserAPIKey,
+		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
+		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -720,6 +726,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Translator.mutate(ctx, m)
 	case *TranslatorDistinctionMutation:
 		return c.TranslatorDistinction.mutate(ctx, m)
+	case *UploadFailureMutation:
+		return c.UploadFailure.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserAPIKeyMutation:
@@ -8025,6 +8033,22 @@ func (c *GameUploadSessionClient) QueryCreator(_m *GameUploadSession) *UserQuery
 	return query
 }
 
+// QueryFailures queries the failures edge of a GameUploadSession.
+func (c *GameUploadSessionClient) QueryFailures(_m *GameUploadSession) *UploadFailureQuery {
+	query := (&UploadFailureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, id),
+			sqlgraph.To(uploadfailure.Table, uploadfailure.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gameuploadsession.FailuresTable, gameuploadsession.FailuresColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *GameUploadSessionClient) Hooks() []Hook {
 	return c.hooks.GameUploadSession
@@ -10248,6 +10272,171 @@ func (c *TranslatorDistinctionClient) mutate(ctx context.Context, m *TranslatorD
 	}
 }
 
+// UploadFailureClient is a client for the UploadFailure schema.
+type UploadFailureClient struct {
+	config
+}
+
+// NewUploadFailureClient returns a client for the UploadFailure from the given config.
+func NewUploadFailureClient(c config) *UploadFailureClient {
+	return &UploadFailureClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `uploadfailure.Hooks(f(g(h())))`.
+func (c *UploadFailureClient) Use(hooks ...Hook) {
+	c.hooks.UploadFailure = append(c.hooks.UploadFailure, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `uploadfailure.Intercept(f(g(h())))`.
+func (c *UploadFailureClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UploadFailure = append(c.inters.UploadFailure, interceptors...)
+}
+
+// Create returns a builder for creating a UploadFailure entity.
+func (c *UploadFailureClient) Create() *UploadFailureCreate {
+	mutation := newUploadFailureMutation(c.config, OpCreate)
+	return &UploadFailureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UploadFailure entities.
+func (c *UploadFailureClient) CreateBulk(builders ...*UploadFailureCreate) *UploadFailureCreateBulk {
+	return &UploadFailureCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UploadFailureClient) MapCreateBulk(slice any, setFunc func(*UploadFailureCreate, int)) *UploadFailureCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UploadFailureCreateBulk{err: fmt.Errorf("calling to UploadFailureClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UploadFailureCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UploadFailureCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UploadFailure.
+func (c *UploadFailureClient) Update() *UploadFailureUpdate {
+	mutation := newUploadFailureMutation(c.config, OpUpdate)
+	return &UploadFailureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UploadFailureClient) UpdateOne(_m *UploadFailure) *UploadFailureUpdateOne {
+	mutation := newUploadFailureMutation(c.config, OpUpdateOne, withUploadFailure(_m))
+	return &UploadFailureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UploadFailureClient) UpdateOneID(id int) *UploadFailureUpdateOne {
+	mutation := newUploadFailureMutation(c.config, OpUpdateOne, withUploadFailureID(id))
+	return &UploadFailureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UploadFailure.
+func (c *UploadFailureClient) Delete() *UploadFailureDelete {
+	mutation := newUploadFailureMutation(c.config, OpDelete)
+	return &UploadFailureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UploadFailureClient) DeleteOne(_m *UploadFailure) *UploadFailureDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UploadFailureClient) DeleteOneID(id int) *UploadFailureDeleteOne {
+	builder := c.Delete().Where(uploadfailure.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UploadFailureDeleteOne{builder}
+}
+
+// Query returns a query builder for UploadFailure.
+func (c *UploadFailureClient) Query() *UploadFailureQuery {
+	return &UploadFailureQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUploadFailure},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UploadFailure entity by its id.
+func (c *UploadFailureClient) Get(ctx context.Context, id int) (*UploadFailure, error) {
+	return c.Query().Where(uploadfailure.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UploadFailureClient) GetX(ctx context.Context, id int) *UploadFailure {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UploadFailure.
+func (c *UploadFailureClient) QueryUser(_m *UploadFailure) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(uploadfailure.Table, uploadfailure.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, uploadfailure.UserTable, uploadfailure.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySession queries the session edge of a UploadFailure.
+func (c *UploadFailureClient) QuerySession(_m *UploadFailure) *GameUploadSessionQuery {
+	query := (&GameUploadSessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(uploadfailure.Table, uploadfailure.FieldID, id),
+			sqlgraph.To(gameuploadsession.Table, gameuploadsession.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, uploadfailure.SessionTable, uploadfailure.SessionColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UploadFailureClient) Hooks() []Hook {
+	return c.hooks.UploadFailure
+}
+
+// Interceptors returns the client interceptors.
+func (c *UploadFailureClient) Interceptors() []Interceptor {
+	return c.inters.UploadFailure
+}
+
+func (c *UploadFailureClient) mutate(ctx context.Context, m *UploadFailureMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UploadFailureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UploadFailureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UploadFailureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UploadFailureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UploadFailure mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -10701,6 +10890,22 @@ func (c *UserClient) QueryAPIKeys(_m *User) *UserAPIKeyQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(userapikey.Table, userapikey.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.APIKeysTable, user.APIKeysColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUploadFailures queries the upload_failures edge of a User.
+func (c *UserClient) QueryUploadFailures(_m *User) *UploadFailureQuery {
+	query := (&UploadFailureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(uploadfailure.Table, uploadfailure.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UploadFailuresTable, user.UploadFailuresColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -12212,8 +12417,8 @@ type (
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
 		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
 		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, User, UserAPIKey, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		Translator, TranslatorDistinction, UploadFailure, User, UserAPIKey,
+		UserBannedRecord, UserFieldPermission, UserGamePvnMapping, UserLoginSession,
 		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
@@ -12229,8 +12434,8 @@ type (
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
 		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
 		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, User, UserAPIKey, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		Translator, TranslatorDistinction, UploadFailure, User, UserAPIKey,
+		UserBannedRecord, UserFieldPermission, UserGamePvnMapping, UserLoginSession,
 		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
 	}
 )

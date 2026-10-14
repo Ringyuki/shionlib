@@ -67,6 +67,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/translatordistinction"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userapikey"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -191,6 +192,7 @@ func checkColumn(t, c string) error {
 			tag.Table:                             tag.ValidColumn,
 			translator.Table:                      translator.ValidColumn,
 			translatordistinction.Table:           translatordistinction.ValidColumn,
+			uploadfailure.Table:                   uploadfailure.ValidColumn,
 			user.Table:                            user.ValidColumn,
 			userapikey.Table:                      userapikey.ValidColumn,
 			userbannedrecord.Table:                userbannedrecord.ValidColumn,

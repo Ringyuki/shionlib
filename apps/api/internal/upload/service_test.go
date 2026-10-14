@@ -474,3 +474,57 @@ func TestASessionIsHeldByTheClientThatUploadsIt(t *testing.T) {
 		t.Fatalf("the holder completes: %v", err)
 	}
 }
+
+func TestReportFailureRecordsWhatTheBrowserSaw(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	session := f.repo.Seed(upload.Session{Status: upload.StatusUploading, TotalChunks: 3, CreatorID: uploader.UserID, ExpiresAt: now.Add(time.Hour)})
+	attempts := make([]upload.FailureAttempt, upload.MaxFailureAttempts+2)
+	for i := range attempts {
+		attempts[i] = upload.FailureAttempt{At: now.Add(time.Duration(i) * time.Second), Wait: "network", Error: upload.ClientError{Name: "TypeError", Message: "Network request failed"}}
+	}
+	report := upload.FailureReport{
+		SessionID: &session.ID,
+		Stage:     upload.FailureSending,
+		Reason:    "rejected",
+		Error:     upload.ClientError{Name: "ApiError", Message: "Forbidden", Status: ptr(403), Ray: ptr("a4a581a96a8ce353-NRT")},
+		Chunk:     ptr(0),
+		FileName:  "game.zip",
+		FileSize:  12,
+		Attempts:  attempts,
+		Client:    "client-1",
+		IP:        "2409:8a10::1",
+		UserAgent: "browser",
+	}
+
+	id, err := f.service.ReportFailure(ctx, uploader, report)
+	if err != nil || id != 1 {
+		t.Fatalf("recorded %d %v", id, err)
+	}
+	got := f.repo.Failures[0]
+	if got.UserID != uploader.UserID || !got.At.Equal(now) || *got.Report.SessionID != session.ID || *got.Report.Error.Ray != "a4a581a96a8ce353-NRT" {
+		t.Fatalf("record %+v", got)
+	}
+	if kept := got.Report.Attempts; len(kept) != upload.MaxFailureAttempts || !kept[0].At.Equal(now.Add(2*time.Second)) {
+		t.Fatalf("only the last attempts are kept: %d from %v", len(kept), kept[0].At)
+	}
+
+	expectCode(t, second(f.service.ReportFailure(ctx, stranger, report)), upload.ErrSessionNotOwner)
+
+	gone := report
+	gone.SessionID = ptr(404)
+	if _, err := f.service.ReportFailure(ctx, uploader, gone); err != nil || f.repo.Failures[1].Report.SessionID != nil {
+		t.Fatalf("a session that is gone is left out of the record: %v %+v", err, f.repo.Failures[1].Report.SessionID)
+	}
+
+	unopened := report
+	unopened.SessionID = nil
+	unopened.Stage = upload.FailureReading
+	if _, err := f.service.ReportFailure(ctx, uploader, unopened); err != nil || len(f.repo.Failures) != 3 {
+		t.Fatalf("a failure before any session is recorded: %v", err)
+	}
+}
+
+func second[A, B any](_ A, b B) B {
+	return b
+}

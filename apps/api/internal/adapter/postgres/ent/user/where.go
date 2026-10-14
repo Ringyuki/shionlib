@@ -1671,6 +1671,29 @@ func HasAPIKeysWith(preds ...predicate.UserAPIKey) predicate.User {
 	})
 }
 
+// HasUploadFailures applies the HasEdge predicate on the "upload_failures" edge.
+func HasUploadFailures() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UploadFailuresTable, UploadFailuresColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUploadFailuresWith applies the HasEdge predicate on the "upload_failures" edge with a given conditions (other predicates).
+func HasUploadFailuresWith(preds ...predicate.UploadFailure) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newUploadFailuresStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasPotatovnBinding applies the HasEdge predicate on the "potatovn_binding" edge.
 func HasPotatovnBinding() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

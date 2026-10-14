@@ -1,4 +1,5 @@
 import type { Schema } from '~/shared/api/types'
+import type { ErrorReport } from './upload-report'
 
 export type Allowance = Schema<'AllowanceDTO'>
 
@@ -34,7 +35,7 @@ export type UploadSession = { id: number; chunkSize: number; totalChunks: number
 
 export type WaitReason = 'network' | 'busy' | 'inFlight' | 'signedOut' | 'otherTab'
 
-export type FailureReason = 'differentFile' | 'changedFile' | 'expired' | 'rejected'
+export type FailureReason = 'differentFile' | 'changedFile' | 'unreadable' | 'expired' | 'rejected'
 
 export type UploadPhase =
   | { name: 'queued' }
@@ -44,7 +45,7 @@ export type UploadPhase =
   | { name: 'paused' }
   | { name: 'heldElsewhere' }
   | { name: 'done' }
-  | { name: 'failed'; reason: FailureReason; message?: string }
+  | { name: 'failed'; reason: FailureReason; message?: string; error?: ErrorReport }
 
 export type Upload = {
   id: string
@@ -61,7 +62,7 @@ export type SubmissionPhase =
   | { name: 'uploading' }
   | { name: 'submitting' }
   | { name: 'submitted' }
-  | { name: 'failed'; message?: string }
+  | { name: 'failed'; message?: string; error?: ErrorReport }
 
 export type Submission = { id: string; target: UploadTarget; label: string; phase: SubmissionPhase }
 

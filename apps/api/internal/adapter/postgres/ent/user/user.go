@@ -103,6 +103,8 @@ const (
 	EdgeGamePvnMappings = "game_pvn_mappings"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
 	EdgeAPIKeys = "api_keys"
+	// EdgeUploadFailures holds the string denoting the upload_failures edge name in mutations.
+	EdgeUploadFailures = "upload_failures"
 	// EdgePotatovnBinding holds the string denoting the potatovn_binding edge name in mutations.
 	EdgePotatovnBinding = "potatovn_binding"
 	// EdgeGameUploadSessions holds the string denoting the game_upload_sessions edge name in mutations.
@@ -275,6 +277,13 @@ const (
 	APIKeysInverseTable = "user_api_keys"
 	// APIKeysColumn is the table column denoting the api_keys relation/edge.
 	APIKeysColumn = "user_id"
+	// UploadFailuresTable is the table that holds the upload_failures relation/edge.
+	UploadFailuresTable = "upload_failures"
+	// UploadFailuresInverseTable is the table name for the UploadFailure entity.
+	// It exists in this package in order to avoid circular dependency with the "uploadfailure" package.
+	UploadFailuresInverseTable = "upload_failures"
+	// UploadFailuresColumn is the table column denoting the upload_failures relation/edge.
+	UploadFailuresColumn = "user_id"
 	// PotatovnBindingTable is the table that holds the potatovn_binding relation/edge.
 	PotatovnBindingTable = "user_pvn_bindings"
 	// PotatovnBindingInverseTable is the table name for the UserPvnBinding entity.
@@ -867,6 +876,20 @@ func ByAPIKeys(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByUploadFailuresCount orders the results by upload_failures count.
+func ByUploadFailuresCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUploadFailuresStep(), opts...)
+	}
+}
+
+// ByUploadFailures orders the results by upload_failures terms.
+func ByUploadFailures(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUploadFailuresStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByPotatovnBindingField orders the results by potatovn_binding field.
 func ByPotatovnBindingField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1137,6 +1160,13 @@ func newAPIKeysStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(APIKeysInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, APIKeysTable, APIKeysColumn),
+	)
+}
+func newUploadFailuresStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UploadFailuresInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UploadFailuresTable, UploadFailuresColumn),
 	)
 }
 func newPotatovnBindingStep() *sqlgraph.Step {

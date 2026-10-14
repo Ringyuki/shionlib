@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/uploadfailure"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -271,6 +272,21 @@ func (_u *GameUploadSessionUpdate) SetCreator(v *User) *GameUploadSessionUpdate 
 	return _u.SetCreatorID(v.ID)
 }
 
+// AddFailureIDs adds the "failures" edge to the UploadFailure entity by IDs.
+func (_u *GameUploadSessionUpdate) AddFailureIDs(ids ...int) *GameUploadSessionUpdate {
+	_u.mutation.AddFailureIDs(ids...)
+	return _u
+}
+
+// AddFailures adds the "failures" edges to the UploadFailure entity.
+func (_u *GameUploadSessionUpdate) AddFailures(v ...*UploadFailure) *GameUploadSessionUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddFailureIDs(ids...)
+}
+
 // Mutation returns the GameUploadSessionMutation object of the builder.
 func (_u *GameUploadSessionUpdate) Mutation() *GameUploadSessionMutation {
 	return _u.mutation
@@ -307,6 +323,27 @@ func (_u *GameUploadSessionUpdate) RemoveGameUploadChunks(v ...*GameUploadChunk)
 func (_u *GameUploadSessionUpdate) ClearCreator() *GameUploadSessionUpdate {
 	_u.mutation.ClearCreator()
 	return _u
+}
+
+// ClearFailures clears all "failures" edges to the UploadFailure entity.
+func (_u *GameUploadSessionUpdate) ClearFailures() *GameUploadSessionUpdate {
+	_u.mutation.ClearFailures()
+	return _u
+}
+
+// RemoveFailureIDs removes the "failures" edge to UploadFailure entities by IDs.
+func (_u *GameUploadSessionUpdate) RemoveFailureIDs(ids ...int) *GameUploadSessionUpdate {
+	_u.mutation.RemoveFailureIDs(ids...)
+	return _u
+}
+
+// RemoveFailures removes "failures" edges to UploadFailure entities.
+func (_u *GameUploadSessionUpdate) RemoveFailures(v ...*UploadFailure) *GameUploadSessionUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveFailureIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -528,6 +565,51 @@ func (_u *GameUploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedFailuresIDs(); len(nodes) > 0 && !_u.mutation.FailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -795,6 +877,21 @@ func (_u *GameUploadSessionUpdateOne) SetCreator(v *User) *GameUploadSessionUpda
 	return _u.SetCreatorID(v.ID)
 }
 
+// AddFailureIDs adds the "failures" edge to the UploadFailure entity by IDs.
+func (_u *GameUploadSessionUpdateOne) AddFailureIDs(ids ...int) *GameUploadSessionUpdateOne {
+	_u.mutation.AddFailureIDs(ids...)
+	return _u
+}
+
+// AddFailures adds the "failures" edges to the UploadFailure entity.
+func (_u *GameUploadSessionUpdateOne) AddFailures(v ...*UploadFailure) *GameUploadSessionUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddFailureIDs(ids...)
+}
+
 // Mutation returns the GameUploadSessionMutation object of the builder.
 func (_u *GameUploadSessionUpdateOne) Mutation() *GameUploadSessionMutation {
 	return _u.mutation
@@ -831,6 +928,27 @@ func (_u *GameUploadSessionUpdateOne) RemoveGameUploadChunks(v ...*GameUploadChu
 func (_u *GameUploadSessionUpdateOne) ClearCreator() *GameUploadSessionUpdateOne {
 	_u.mutation.ClearCreator()
 	return _u
+}
+
+// ClearFailures clears all "failures" edges to the UploadFailure entity.
+func (_u *GameUploadSessionUpdateOne) ClearFailures() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearFailures()
+	return _u
+}
+
+// RemoveFailureIDs removes the "failures" edge to UploadFailure entities by IDs.
+func (_u *GameUploadSessionUpdateOne) RemoveFailureIDs(ids ...int) *GameUploadSessionUpdateOne {
+	_u.mutation.RemoveFailureIDs(ids...)
+	return _u
+}
+
+// RemoveFailures removes "failures" edges to UploadFailure entities.
+func (_u *GameUploadSessionUpdateOne) RemoveFailures(v ...*UploadFailure) *GameUploadSessionUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveFailureIDs(ids...)
 }
 
 // Where appends a list predicates to the GameUploadSessionUpdate builder.
@@ -1082,6 +1200,51 @@ func (_u *GameUploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *GameU
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedFailuresIDs(); len(nodes) > 0 && !_u.mutation.FailuresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FailuresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gameuploadsession.FailuresTable,
+			Columns: []string{gameuploadsession.FailuresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(uploadfailure.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

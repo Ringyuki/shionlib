@@ -21,6 +21,7 @@ type Repository interface {
 	ReferencedPaths(ctx context.Context, paths []string) (map[string]bool, error)
 	PendingBytes(ctx context.Context, now time.Time) (int64, error)
 	LockAdmission(ctx context.Context) error
+	RecordFailure(ctx context.Context, userID int, report FailureReport, at time.Time) (int, error)
 }
 
 type Holds interface {

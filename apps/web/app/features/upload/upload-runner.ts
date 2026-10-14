@@ -1,12 +1,12 @@
 import type { ChunkUpload } from '~/shared/api/chunk'
 import type { UploadSession, WaitReason } from './upload'
 import { chunkLength, stallTimeout } from './upload'
-import { retrying, stalledConnection, type Waiting } from './upload-failure'
+import { locate, retrying, stalledConnection, type Waiting } from './upload-failure'
 import type { Slots } from './upload-slots'
 
 export type RunnerEvent =
   | { type: 'progress'; sent: number; speed: number }
-  | { type: 'waiting'; reason: WaitReason }
+  | { type: 'waiting'; reason: WaitReason; error: unknown }
   | { type: 'running' }
 
 export type RunnerDeps = {
@@ -69,12 +69,20 @@ export class UploadRunner {
     if (first !== undefined) {
       throw first
     }
-    const digest = await this.deps.hasher.fileDigest()
-    await retrying(scope, () => this.deps.complete(digest), this.waiting())
+    const digest = await this.deps.hasher.fileDigest().catch((error: unknown) => {
+      throw locate(error, 'read')
+    })
+    await retrying(scope, () => this.deps.complete(digest), this.waiting()).catch(
+      (error: unknown) => {
+        throw locate(error, 'complete')
+      },
+    )
   }
 
   private async sendChunk(index: number, scope: AbortSignal) {
-    const sha256 = await this.deps.hasher.chunkDigest(index)
+    const sha256 = await this.deps.hasher.chunkDigest(index).catch((error: unknown) => {
+      throw locate(error, 'read', index)
+    })
     const start = index * this.deps.session.chunkSize
     const content = this.deps.file.slice(start, start + this.lengthOf(index))
     await retrying(
@@ -107,12 +115,14 @@ export class UploadRunner {
         }
       },
       this.waiting(),
-    )
+    ).catch((error: unknown) => {
+      throw locate(error, 'chunk', index)
+    })
   }
 
   private waiting(): Waiting {
     return {
-      wait: reason => this.deps.report({ type: 'waiting', reason }),
+      wait: (reason, error) => this.deps.report({ type: 'waiting', reason, error }),
       resume: () => this.deps.report({ type: 'running' }),
       random: this.deps.random,
     }

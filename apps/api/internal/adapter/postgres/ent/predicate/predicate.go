@@ -171,6 +171,9 @@ type Translator func(*sql.Selector)
 // TranslatorDistinction is the predicate function for translatordistinction builders.
 type TranslatorDistinction func(*sql.Selector)
 
+// UploadFailure is the predicate function for uploadfailure builders.
+type UploadFailure func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 

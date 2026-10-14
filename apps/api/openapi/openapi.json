@@ -6883,6 +6883,47 @@
         ],
         "type": "object"
       },
+      "ClientErrorInput": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Business code of the answer",
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the error in the browser: ApiError for an answer of the API or of a proxy in front of it, NotReadableError when the file could not be read, TypeError for a failed connection",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "ray": {
+            "description": "Cloudflare's Ray ID of the answer",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "request_id": {
+            "description": "The API's request id; absent when the answer did not come from the API",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "status": {
+            "description": "HTTP status of the answer",
+            "format": "int64",
+            "maximum": 999,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "message"
+        ],
+        "type": "object"
+      },
       "CodeRequestedDTO": {
         "additionalProperties": false,
         "properties": {
@@ -16057,6 +16098,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeUploadFailureDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadFailureDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeUploadHoldDTO": {
         "additionalProperties": false,
         "properties": {
@@ -16584,6 +16658,34 @@
           "data",
           "requestId",
           "timestamp"
+        ],
+        "type": "object"
+      },
+      "FailureAttemptInput": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ClientErrorInput"
+          },
+          "wait": {
+            "description": "What the browser waited for before trying again",
+            "enum": [
+              "network",
+              "busy",
+              "in_flight",
+              "signed_out"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "wait",
+          "error"
         ],
         "type": "object"
       },
@@ -21547,6 +21649,75 @@
         ],
         "type": "object"
       },
+      "ReportFailureInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts": {
+            "description": "The last tries that failed and were retried before this failure, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/FailureAttemptInput"
+            },
+            "maxItems": 10,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "chunk": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ClientErrorInput"
+          },
+          "file_name": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "description": "What the browser concluded and showed",
+            "enum": [
+              "different_file",
+              "changed_file",
+              "unreadable",
+              "expired",
+              "rejected"
+            ],
+            "type": "string"
+          },
+          "session_id": {
+            "description": "The upload session, when one was opened",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "stage": {
+            "description": "Opening the session, reading the file, sending a chunk, completing the session, or creating the resource from the finished uploads",
+            "enum": [
+              "open",
+              "read",
+              "chunk",
+              "complete",
+              "submit"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage",
+          "reason",
+          "error",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
+      },
       "ReportFalseStepDTO": {
         "additionalProperties": false,
         "properties": {
@@ -23448,6 +23619,20 @@
         },
         "required": [
           "ok"
+        ],
+        "type": "object"
+      },
+      "UploadFailureDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The record of the failure",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -41135,6 +41320,75 @@
         "summary": "Get a translator",
         "tags": [
           "translator"
+        ]
+      }
+    },
+    "/uploads/failures": {
+      "post": {
+        "operationId": "upload.failure",
+        "parameters": [
+          {
+            "description": "Identifies the browser that uploaded",
+            "in": "header",
+            "name": "X-Upload-Client",
+            "schema": {
+              "description": "Identifies the browser that uploaded",
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9-]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportFailureInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadFailureDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Record why an upload or the resource made from it failed in the browser",
+        "tags": [
+          "upload"
         ]
       }
     },

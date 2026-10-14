@@ -19,6 +19,7 @@ export {
   type UploadTarget,
 } from './upload'
 export type { PickedFile } from './upload-manager'
+export type { ErrorReport } from './upload-report'
 export { uploadsOf } from './upload-state'
 export { UploadIndicator } from './ui/upload-indicator'
 export { UploadProvider } from './ui/upload-provider'
