@@ -4,7 +4,7 @@ test('opens a character from the cast of a game and lists where it appears', asy
   await page.goto('/zh/game/1/characters')
   await page.getByRole('link', { name: /和泉妃爱/ }).click()
   await expect(page).toHaveURL(/\/zh\/character\/1$/)
-  await expect(page).toHaveTitle('和泉妃爱 | Shionlib')
+  await expect(page).toHaveTitle('和泉妃爱（和泉妃愛） - 常轨脱离Creative Re:Re:call - Shionlib')
   await expect(page.getByRole('heading', { name: '和泉妃爱', level: 1 })).toBeVisible()
   const header = page.getByRole('main').locator('header')
   await expect(header.getByText('和泉妃愛', { exact: true })).toBeVisible()

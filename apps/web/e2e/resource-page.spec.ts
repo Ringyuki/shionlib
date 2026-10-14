@@ -38,7 +38,7 @@ test('opens a resource from its game and reads its tabs', async ({ page }) => {
       position: { x: 24, y: 24 },
     })
   await expect(page).toHaveURL(/\/zh\/resource\/1$/)
-  await expect(page).toHaveTitle(`${fileName} | 常轨脱离Creative Re:Re:call | Shionlib`)
+  await expect(page).toHaveTitle('常轨脱离Creative Re:Re:call Windows 英文 下载 - Shionlib')
   await expect(page.getByRole('heading', { level: 1, name: fileName })).toBeVisible()
   const back = page.getByRole('link', { name: '常轨脱离Creative Re:Re:call' })
   await expect(back).toHaveAttribute('href', '/zh/game/1')

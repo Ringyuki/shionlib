@@ -40,7 +40,7 @@ test.describe('as an administrator', () => {
     await page.getByRole('menuitem', { name: '管理后台' }).click()
     await expect(page).toHaveURL(/\/zh\/admin$/)
     await expect(page.getByRole('heading', { name: '概览', level: 1 })).toBeVisible()
-    await expect(page).toHaveTitle('概览 | Shionlib')
+    await expect(page).toHaveTitle('概览 - Shionlib')
     const navigation = adminNavigation(page)
     await expect(navigation.getByRole('link', { name: '概览' })).toHaveAttribute(
       'aria-current',
