@@ -24,6 +24,7 @@ type MemoryRepository struct {
 	retryAt   map[int]time.Time
 	reasons   map[int]string
 	cases     map[int]scan.Case
+	findings  map[int][]scan.Finding
 	nextCase  int
 	Strikes   map[int]int
 	Admins    []scan.Admin
@@ -60,6 +61,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		retryAt:   map[int]time.Time{},
 		reasons:   map[int]string{},
 		cases:     map[int]scan.Case{},
+		findings:  map[int][]scan.Finding{},
 		Strikes:   map[int]int{},
 		Names:     map[int]string{},
 		Titles:    map[int]scan.GameTitles{},
@@ -297,7 +299,32 @@ func (r *MemoryRepository) CreateCase(_ context.Context, in scan.NewCase) (scan.
 		Updated:        r.now(),
 	}
 	r.cases[created.ID] = created
+	r.findings[created.ID] = slices.Clone(in.Findings)
 	return created, nil
+}
+
+func (r *MemoryRepository) Findings(caseID int) []scan.Finding {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return slices.Clone(r.findings[caseID])
+}
+
+func (r *MemoryRepository) Verdicts(_ context.Context, sha256 string) ([]scan.Verdict, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var verdicts []scan.Verdict
+	for id, found := range r.findings {
+		source := r.cases[id].DecisionSource
+		if source == nil {
+			continue
+		}
+		for _, finding := range found {
+			if finding.SHA256 == sha256 {
+				verdicts = append(verdicts, scan.Verdict{Signature: finding.Signature, Source: *source})
+			}
+		}
+	}
+	return verdicts, nil
 }
 
 func (r *MemoryRepository) LockCase(_ context.Context, id int) (scan.Target, error) {

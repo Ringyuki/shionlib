@@ -2163,6 +2163,40 @@ var (
 			},
 		},
 	}
+	// MalwareScanDetectionsColumns holds the columns for the "malware_scan_detections" table.
+	MalwareScanDetectionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "path", Type: field.TypeString, Size: 2147483647},
+		{Name: "sha256", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "signature", Type: field.TypeString, Size: 2147483647},
+		{Name: "case_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// MalwareScanDetectionsTable holds the schema information for the "malware_scan_detections" table.
+	MalwareScanDetectionsTable = &schema.Table{
+		Name:       "malware_scan_detections",
+		Columns:    MalwareScanDetectionsColumns,
+		PrimaryKey: []*schema.Column{MalwareScanDetectionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "malware_scan_detections_case_id_fkey",
+				Columns:    []*schema.Column{MalwareScanDetectionsColumns[4]},
+				RefColumns: []*schema.Column{MalwareScanCasesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "malware_scan_detections_case_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{MalwareScanDetectionsColumns[4]},
+			},
+			{
+				Name:    "malware_scan_detections_sha256_signature_idx",
+				Unique:  false,
+				Columns: []*schema.Column{MalwareScanDetectionsColumns[2], MalwareScanDetectionsColumns[3]},
+			},
+		},
+	}
 	// MessagesColumns holds the columns for the "messages" table.
 	MessagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -3045,6 +3079,7 @@ var (
 		FileInspectionsTable,
 		FileInspectionEntriesTable,
 		MalwareScanCasesTable,
+		MalwareScanDetectionsTable,
 		MessagesTable,
 		ModerationEventsTable,
 		OidcIdentitiesTable,
@@ -3273,6 +3308,10 @@ func init() {
 	MalwareScanCasesTable.ForeignKeys[4].RefTable = UsersTable
 	MalwareScanCasesTable.Annotation = &entsql.Annotation{
 		Table: "malware_scan_cases",
+	}
+	MalwareScanDetectionsTable.ForeignKeys[0].RefTable = MalwareScanCasesTable
+	MalwareScanDetectionsTable.Annotation = &entsql.Annotation{
+		Table: "malware_scan_detections",
 	}
 	MessagesTable.ForeignKeys[0].RefTable = CommentsTable
 	MessagesTable.ForeignKeys[1].RefTable = GamesTable

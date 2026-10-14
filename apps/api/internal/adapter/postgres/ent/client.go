@@ -59,6 +59,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescandetection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
@@ -177,6 +178,8 @@ type Client struct {
 	InspectionEntry *InspectionEntryClient
 	// MalwareScanCase is the client for interacting with the MalwareScanCase builders.
 	MalwareScanCase *MalwareScanCaseClient
+	// MalwareScanDetection is the client for interacting with the MalwareScanDetection builders.
+	MalwareScanDetection *MalwareScanDetectionClient
 	// Message is the client for interacting with the Message builders.
 	Message *MessageClient
 	// ModerationEvent is the client for interacting with the ModerationEvent builders.
@@ -274,6 +277,7 @@ func (c *Client) init() {
 	c.Inspection = NewInspectionClient(c.config)
 	c.InspectionEntry = NewInspectionEntryClient(c.config)
 	c.MalwareScanCase = NewMalwareScanCaseClient(c.config)
+	c.MalwareScanDetection = NewMalwareScanDetectionClient(c.config)
 	c.Message = NewMessageClient(c.config)
 	c.ModerationEvent = NewModerationEventClient(c.config)
 	c.OidcIdentity = NewOidcIdentityClient(c.config)
@@ -431,6 +435,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Inspection:                      NewInspectionClient(cfg),
 		InspectionEntry:                 NewInspectionEntryClient(cfg),
 		MalwareScanCase:                 NewMalwareScanCaseClient(cfg),
+		MalwareScanDetection:            NewMalwareScanDetectionClient(cfg),
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
@@ -515,6 +520,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Inspection:                      NewInspectionClient(cfg),
 		InspectionEntry:                 NewInspectionEntryClient(cfg),
 		MalwareScanCase:                 NewMalwareScanCaseClient(cfg),
+		MalwareScanDetection:            NewMalwareScanDetectionClient(cfg),
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
@@ -577,11 +583,12 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
-		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.UploadFailure, c.User, c.UserAPIKey,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.MalwareScanDetection, c.Message, c.ModerationEvent, c.OidcIdentity,
+		c.RoleFieldPermission, c.Setting, c.SettingChange, c.SiteDailyStat,
+		c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction, c.UploadFailure,
+		c.User, c.UserAPIKey, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -603,11 +610,12 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameDownloadResourceReport, c.GameDownloadResourceTranslator, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
-		c.SettingChange, c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator,
-		c.TranslatorDistinction, c.UploadFailure, c.User, c.UserAPIKey,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.MalwareScanDetection, c.Message, c.ModerationEvent, c.OidcIdentity,
+		c.RoleFieldPermission, c.Setting, c.SettingChange, c.SiteDailyStat,
+		c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction, c.UploadFailure,
+		c.User, c.UserAPIKey, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -704,6 +712,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.InspectionEntry.mutate(ctx, m)
 	case *MalwareScanCaseMutation:
 		return c.MalwareScanCase.mutate(ctx, m)
+	case *MalwareScanDetectionMutation:
+		return c.MalwareScanDetection.mutate(ctx, m)
 	case *MessageMutation:
 		return c.Message.mutate(ctx, m)
 	case *ModerationEventMutation:
@@ -8592,6 +8602,22 @@ func (c *MalwareScanCaseClient) QueryReviewer(_m *MalwareScanCase) *UserQuery {
 	return query
 }
 
+// QueryDetections queries the detections edge of a MalwareScanCase.
+func (c *MalwareScanCaseClient) QueryDetections(_m *MalwareScanCase) *MalwareScanDetectionQuery {
+	query := (&MalwareScanDetectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(malwarescancase.Table, malwarescancase.FieldID, id),
+			sqlgraph.To(malwarescandetection.Table, malwarescandetection.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, malwarescancase.DetectionsTable, malwarescancase.DetectionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MalwareScanCaseClient) Hooks() []Hook {
 	return c.hooks.MalwareScanCase
@@ -8614,6 +8640,155 @@ func (c *MalwareScanCaseClient) mutate(ctx context.Context, m *MalwareScanCaseMu
 		return (&MalwareScanCaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown MalwareScanCase mutation op: %q", m.Op())
+	}
+}
+
+// MalwareScanDetectionClient is a client for the MalwareScanDetection schema.
+type MalwareScanDetectionClient struct {
+	config
+}
+
+// NewMalwareScanDetectionClient returns a client for the MalwareScanDetection from the given config.
+func NewMalwareScanDetectionClient(c config) *MalwareScanDetectionClient {
+	return &MalwareScanDetectionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `malwarescandetection.Hooks(f(g(h())))`.
+func (c *MalwareScanDetectionClient) Use(hooks ...Hook) {
+	c.hooks.MalwareScanDetection = append(c.hooks.MalwareScanDetection, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `malwarescandetection.Intercept(f(g(h())))`.
+func (c *MalwareScanDetectionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MalwareScanDetection = append(c.inters.MalwareScanDetection, interceptors...)
+}
+
+// Create returns a builder for creating a MalwareScanDetection entity.
+func (c *MalwareScanDetectionClient) Create() *MalwareScanDetectionCreate {
+	mutation := newMalwareScanDetectionMutation(c.config, OpCreate)
+	return &MalwareScanDetectionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MalwareScanDetection entities.
+func (c *MalwareScanDetectionClient) CreateBulk(builders ...*MalwareScanDetectionCreate) *MalwareScanDetectionCreateBulk {
+	return &MalwareScanDetectionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MalwareScanDetectionClient) MapCreateBulk(slice any, setFunc func(*MalwareScanDetectionCreate, int)) *MalwareScanDetectionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MalwareScanDetectionCreateBulk{err: fmt.Errorf("calling to MalwareScanDetectionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MalwareScanDetectionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MalwareScanDetectionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MalwareScanDetection.
+func (c *MalwareScanDetectionClient) Update() *MalwareScanDetectionUpdate {
+	mutation := newMalwareScanDetectionMutation(c.config, OpUpdate)
+	return &MalwareScanDetectionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MalwareScanDetectionClient) UpdateOne(_m *MalwareScanDetection) *MalwareScanDetectionUpdateOne {
+	mutation := newMalwareScanDetectionMutation(c.config, OpUpdateOne, withMalwareScanDetection(_m))
+	return &MalwareScanDetectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MalwareScanDetectionClient) UpdateOneID(id int) *MalwareScanDetectionUpdateOne {
+	mutation := newMalwareScanDetectionMutation(c.config, OpUpdateOne, withMalwareScanDetectionID(id))
+	return &MalwareScanDetectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MalwareScanDetection.
+func (c *MalwareScanDetectionClient) Delete() *MalwareScanDetectionDelete {
+	mutation := newMalwareScanDetectionMutation(c.config, OpDelete)
+	return &MalwareScanDetectionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MalwareScanDetectionClient) DeleteOne(_m *MalwareScanDetection) *MalwareScanDetectionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MalwareScanDetectionClient) DeleteOneID(id int) *MalwareScanDetectionDeleteOne {
+	builder := c.Delete().Where(malwarescandetection.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MalwareScanDetectionDeleteOne{builder}
+}
+
+// Query returns a query builder for MalwareScanDetection.
+func (c *MalwareScanDetectionClient) Query() *MalwareScanDetectionQuery {
+	return &MalwareScanDetectionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMalwareScanDetection},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MalwareScanDetection entity by its id.
+func (c *MalwareScanDetectionClient) Get(ctx context.Context, id int) (*MalwareScanDetection, error) {
+	return c.Query().Where(malwarescandetection.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MalwareScanDetectionClient) GetX(ctx context.Context, id int) *MalwareScanDetection {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCase queries the case edge of a MalwareScanDetection.
+func (c *MalwareScanDetectionClient) QueryCase(_m *MalwareScanDetection) *MalwareScanCaseQuery {
+	query := (&MalwareScanCaseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(malwarescandetection.Table, malwarescandetection.FieldID, id),
+			sqlgraph.To(malwarescancase.Table, malwarescancase.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, malwarescandetection.CaseTable, malwarescandetection.CaseColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MalwareScanDetectionClient) Hooks() []Hook {
+	return c.hooks.MalwareScanDetection
+}
+
+// Interceptors returns the client interceptors.
+func (c *MalwareScanDetectionClient) Interceptors() []Interceptor {
+	return c.inters.MalwareScanDetection
+}
+
+func (c *MalwareScanDetectionClient) mutate(ctx context.Context, m *MalwareScanDetectionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MalwareScanDetectionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MalwareScanDetectionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MalwareScanDetectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MalwareScanDetectionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MalwareScanDetection mutation op: %q", m.Op())
 	}
 }
 
@@ -12415,11 +12590,12 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport,
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
-		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
-		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, UploadFailure, User, UserAPIKey,
-		UserBannedRecord, UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
+		InspectionEntry, MalwareScanCase, MalwareScanDetection, Message,
+		ModerationEvent, OidcIdentity, RoleFieldPermission, Setting, SettingChange,
+		SiteDailyStat, SponsorOrder, Tag, Translator, TranslatorDistinction,
+		UploadFailure, User, UserAPIKey, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -12432,11 +12608,12 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport,
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
-		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
-		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, UploadFailure, User, UserAPIKey,
-		UserBannedRecord, UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
+		InspectionEntry, MalwareScanCase, MalwareScanDetection, Message,
+		ModerationEvent, OidcIdentity, RoleFieldPermission, Setting, SettingChange,
+		SiteDailyStat, SponsorOrder, Tag, Translator, TranslatorDistinction,
+		UploadFailure, User, UserAPIKey, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		Walkthrough []ent.Interceptor
 	}
 )
 

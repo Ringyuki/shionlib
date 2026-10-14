@@ -537,6 +537,18 @@ func (f MalwareScanCaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MalwareScanCaseMutation", m)
 }
 
+// The MalwareScanDetectionFunc type is an adapter to allow the use of ordinary
+// function as MalwareScanDetection mutator.
+type MalwareScanDetectionFunc func(context.Context, *ent.MalwareScanDetectionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MalwareScanDetectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MalwareScanDetectionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MalwareScanDetectionMutation", m)
+}
+
 // The MessageFunc type is an adapter to allow the use of ordinary
 // function as Message mutator.
 type MessageFunc func(context.Context, *ent.MessageMutation) (ent.Value, error)

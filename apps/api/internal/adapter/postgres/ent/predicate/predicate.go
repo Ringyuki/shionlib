@@ -138,6 +138,9 @@ type InspectionEntry func(*sql.Selector)
 // MalwareScanCase is the predicate function for malwarescancase builders.
 type MalwareScanCase func(*sql.Selector)
 
+// MalwareScanDetection is the predicate function for malwarescandetection builders.
+type MalwareScanDetection func(*sql.Selector)
+
 // Message is the predicate function for message builders.
 type Message func(*sql.Selector)
 

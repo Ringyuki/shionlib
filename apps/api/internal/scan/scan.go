@@ -158,6 +158,31 @@ type NewCase struct {
 	FileSize       int64
 	FileHash       string
 	HashAlgorithm  string
+	Findings       []Finding
+}
+
+type Finding struct {
+	Path      string
+	SHA256    string
+	Signature string
+}
+
+type Verdict struct {
+	Signature string
+	Source    DecisionSource
+}
+
+func Trusted(verdicts []Verdict) []string {
+	var released, deleted []string
+	for _, verdict := range verdicts {
+		switch verdict.Source {
+		case SourceAdminAllow:
+			released = append(released, verdict.Signature)
+		case SourceAdminDelete:
+			deleted = append(deleted, verdict.Signature)
+		}
+	}
+	return slices.DeleteFunc(released, func(signature string) bool { return slices.Contains(deleted, signature) })
 }
 
 type CaseFile struct {

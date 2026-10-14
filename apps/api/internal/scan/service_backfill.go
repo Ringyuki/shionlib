@@ -172,7 +172,7 @@ func (s *BackfillService) inspect(ctx context.Context, unit Unit) (BackfillOutco
 	outcome := BackfillInspected
 	if found.report.Infected {
 		outcome = BackfillHeld
-		err = checks.quarantine(ctx, unit, found.report, result, storedUnchanged)
+		err = checks.quarantine(ctx, unit, found, result, storedUnchanged)
 	} else {
 		err = checks.withUnchanged(ctx, unit, storedUnchanged, func(ctx context.Context, current []PendingFile) error {
 			return checks.attachTo(ctx, current, result)

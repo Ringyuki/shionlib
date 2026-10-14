@@ -25,6 +25,7 @@ type Repository interface {
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error
 	SetInspection(ctx context.Context, fileID, inspectionID int, sha256 string) error
 	CreateCase(ctx context.Context, in NewCase) (Case, error)
+	Verdicts(ctx context.Context, sha256 string) ([]Verdict, error)
 	LockCase(ctx context.Context, id int) (Target, error)
 	ResolveCase(ctx context.Context, id int, resolution Resolution) error
 	ExpiredCases(ctx context.Context, now time.Time, limit int) ([]int, error)

@@ -297,7 +297,7 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 		}
 	}
 	if found.report.Infected {
-		err = s.quarantine(ctx, unit, found.report, result, awaitingSameUpload)
+		err = s.quarantine(ctx, unit, found, result, awaitingSameUpload)
 	} else {
 		err = s.approve(ctx, unit, result)
 	}
@@ -345,20 +345,16 @@ func (s *Service) stage(ctx context.Context, unit Unit, workspace string) (strin
 }
 
 func (s *Service) scanTargets(ctx context.Context, unit Unit, entry string, targets []ScanTarget) ([]EntryReport, error) {
-	var entries []EntryReport
 	if whole := unit.Entry(); !unit.Set() && Executable(whole.Name) && whole.Size <= s.scanner.MaxSize() {
-		report, err := s.scanFile(ctx, whole.Name, entry)
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, EntryReport{Name: whole.Name, Report: report})
+		targets = append([]ScanTarget{{Name: whole.Name, Path: entry}}, targets...)
 	}
+	entries := make([]EntryReport, 0, len(targets))
 	for _, target := range targets {
-		report, err := s.scanFile(ctx, target.Name, target.Path)
+		report, err := s.scanTarget(ctx, target)
 		if err != nil {
 			return nil, err
 		}
-		entries = append(entries, EntryReport{Name: target.Name, Report: report})
+		entries = append(entries, report)
 	}
 	return entries, nil
 }
@@ -369,6 +365,7 @@ func (s *Service) record(ctx context.Context, unit Unit, archive Archive, conten
 		return checked{}, err
 	}
 	now := s.now()
+	held, cleared := Detections(reports), ClearedDetections(reports)
 	draft := contents.Draft
 	draft.ResourceID = unit.Entry().ResourceID
 	draft.Status = inspection.StatusPlain
@@ -391,8 +388,11 @@ func (s *Service) record(ctx context.Context, unit Unit, archive Archive, conten
 		Scanned:      Executables(reports),
 		Skipped:      contents.Skipped,
 		Limit:        s.scanner.MaxSize(),
-		Detections:   Detections(reports),
+		Detections:   append(held, cleared...),
 		At:           &now,
+	}
+	if len(held) == 0 && len(cleared) > 0 {
+		draft.Scan.ClearedAt = &now
 	}
 	recorded, err := s.inspections.Record(ctx, draft)
 	if err != nil {
@@ -458,6 +458,23 @@ func (s *Service) digest(ctx context.Context, path string) (string, error) {
 		return "", fmt.Errorf("digest %s: %w", filepath.Base(path), err)
 	}
 	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+func (s *Service) scanTarget(ctx context.Context, target ScanTarget) (EntryReport, error) {
+	report, err := s.scanFile(ctx, target.Name, target.Path)
+	if err != nil || !report.Infected {
+		return EntryReport{Name: target.Name, Report: report}, err
+	}
+	digest, err := s.digest(ctx, target.Path)
+	if err != nil {
+		return EntryReport{}, err
+	}
+	verdicts, err := s.repo.Verdicts(ctx, digest)
+	if err != nil {
+		return EntryReport{}, err
+	}
+	cleared := append(signatureList(IgnoredSignatures.Read(s.settings)), Trusted(verdicts)...)
+	return Screen(EntryReport{Name: target.Name, Report: report, SHA256: digest}, cleared), nil
 }
 
 func (s *Service) scanFile(ctx context.Context, name, path string) (Report, error) {
@@ -569,7 +586,8 @@ func (s *Service) approve(ctx context.Context, unit Unit, result checked) error 
 	return nil
 }
 
-func (s *Service) quarantine(ctx context.Context, unit Unit, report Report, result checked, unchanged func(now, seen PendingFile) bool) error {
+func (s *Service) quarantine(ctx context.Context, unit Unit, found examined, result checked, unchanged func(now, seen PendingFile) bool) error {
+	report := found.report
 	viruses := NormalizeViruses(report.Viruses)
 	deadline := s.now().Add(ReviewTimeout.Read(s.settings))
 	var created *Case
@@ -603,6 +621,7 @@ func (s *Service) quarantine(ctx context.Context, unit Unit, report Report, resu
 			FileSize:       size,
 			FileHash:       entry.Hash,
 			HashAlgorithm:  entry.HashAlgorithm,
+			Findings:       Findings(found.reports),
 		})
 		if err != nil {
 			return err

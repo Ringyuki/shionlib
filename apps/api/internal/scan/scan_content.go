@@ -96,13 +96,62 @@ func Detections(entries []EntryReport) []inspection.Detection {
 	return detections
 }
 
+func ClearedDetections(entries []EntryReport) []inspection.Detection {
+	detections := []inspection.Detection{}
+	for _, entry := range entries {
+		for _, virus := range entry.Cleared {
+			detections = append(detections, inspection.Detection{Path: entry.Name, Signature: virus})
+		}
+	}
+	return detections
+}
+
+func Findings(entries []EntryReport) []Finding {
+	findings := []Finding{}
+	for _, entry := range entries {
+		if !entry.Report.Infected {
+			continue
+		}
+		for _, virus := range NormalizeViruses(entry.Report.Viruses) {
+			findings = append(findings, Finding{Path: entry.Name, SHA256: entry.SHA256, Signature: virus})
+		}
+	}
+	return findings
+}
+
+func signatureList(text string) []string {
+	var names []string
+	for line := range strings.Lines(text) {
+		if name := strings.TrimSpace(line); name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
+func Screen(entry EntryReport, cleared []string) EntryReport {
+	held := []string{}
+	for _, virus := range NormalizeViruses(entry.Report.Viruses) {
+		if slices.Contains(cleared, virus) {
+			entry.Cleared = append(entry.Cleared, virus)
+			continue
+		}
+		held = append(held, virus)
+	}
+	entry.Report.Viruses = held
+	entry.Report.Infected = len(held) > 0
+	return entry
+}
+
 func extension(name string) string {
 	return strings.TrimPrefix(strings.ToLower(path.Ext(name)), ".")
 }
 
 type EntryReport struct {
-	Name   string
-	Report Report
+	Name    string
+	Report  Report
+	SHA256  string
+	Cleared []string
 }
 
 func MergeReports(entries []EntryReport) (Report, error) {
