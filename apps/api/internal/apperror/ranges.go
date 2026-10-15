@@ -45,6 +45,7 @@ var Ranges = []Range{
 	{Prefix: 670, Owner: "internal/friendlink", Domain: "friendlink"},
 	{Prefix: 680, Owner: "internal/apikey", Domain: "API key"},
 	{Prefix: 690, Owner: "internal/open", Domain: "open API lookup"},
+	{Prefix: 700, Owner: "internal/search", Domain: "search by image"},
 }
 
 func OwnerOf(code int) (Range, bool) {

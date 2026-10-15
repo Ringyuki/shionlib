@@ -121,6 +121,9 @@
   "WALKTHROUGH_EMPTY": "攻略须有说明或至少一条线路",
   "WALKTHROUGH_ROUTE_INCOMPLETE": "每条线路须有名称和至少一步",
   "WALKTHROUGH_ALREADY_WRITTEN": "你已为该游戏编写过攻略",
+  "WALKTHROUGH_FORMAT_QUOTA_EXHAUSTED": "今天的整理次数已用完",
+  "WALKTHROUGH_FORMAT_FAILED": "整理失败，请稍后再试",
+  "WALKTHROUGH_FORMAT_TASK_NOT_FOUND": "整理任务不存在或已过期",
   "SPONSOR_ORDER_NOT_FOUND": "赞助订单不存在",
   "SPONSOR_ORDER_ALREADY_PAID": "该订单已支付",
   "SPONSOR_ORDER_EXPIRED": "该订单已过期",
@@ -199,5 +202,10 @@
   "API_KEY_NOT_FOUND": "API 密钥不存在",
   "OPEN_LOOKUP_ONE_KIND": "请给出 id、hid、bid、vid 中的一种编号",
   "OPEN_LOOKUP_TOO_MANY": "一次最多查询 {max} 个编号",
-  "OPEN_LOOKUP_BAD_VALUE": "编号格式不正确：{value}"
+  "OPEN_LOOKUP_BAD_VALUE": "编号格式不正确：{value}",
+  "SEARCH_IMAGE_MISSING": "请选择一张图片",
+  "SEARCH_IMAGE_TOO_LARGE": "图片不能超过 {max} MB",
+  "SEARCH_IMAGE_UNSUPPORTED": "不支持该图片格式，请使用 JPG、PNG、WebP 或 GIF",
+  "SEARCH_IMAGE_BUSY": "识图服务繁忙，请稍后再试",
+  "SEARCH_IMAGE_FAILED": "识图失败，请稍后再试"
 }

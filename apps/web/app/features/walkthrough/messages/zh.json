@@ -95,5 +95,21 @@
     "lead": "{author} 编写的《{game}》攻略，共 {count, number} 条线路，更新于 {date}。",
     "language": "语言为{language}。",
     "routes": "线路包括 {names}。"
+  },
+  "format": {
+    "open": "从文本整理",
+    "title": "从文本整理",
+    "description": "由 AI 把已有的攻略文本整理成说明和线路，整理后仍可修改",
+    "source": "攻略原文",
+    "count": "{count} / {max}",
+    "placement": "整理结果",
+    "append": "接在现有线路之后",
+    "replace": "替换现有说明和线路",
+    "start": "开始整理",
+    "working": "正在整理…",
+    "elapsed": "已用时 {time}",
+    "hint": "通常需要 30 秒到 2 分钟",
+    "done": "已整理出 {count, number} 条线路，发布前请逐条核对",
+    "undo": "撤销"
   }
 }

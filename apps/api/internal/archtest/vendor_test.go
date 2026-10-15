@@ -11,11 +11,12 @@ import (
 
 var sealedVendors = map[string][]string{
 	"idatariver": {"internal/adapter/idatariver/", "internal/bootstrap/", "cmd/devtool/"},
+	"animetrace": {"internal/adapter/animetrace/", "internal/bootstrap/"},
 }
 
 var unscannedForVendors = []string{"internal/archtest/", "migrations/"}
 
-func TestPaymentVendorsAreNamedOnlyByTheirAdapters(t *testing.T) {
+func TestVendorsAreNamedOnlyByTheirAdapters(t *testing.T) {
 	root := moduleRoot(t)
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -41,7 +42,7 @@ func TestPaymentVendorsAreNamedOnlyByTheirAdapters(t *testing.T) {
 			if !strings.Contains(source, vendor) || slices.ContainsFunc(homes, func(home string) bool { return strings.HasPrefix(rel, home) }) {
 				continue
 			}
-			t.Errorf("%s names the payment vendor %q; a payment provider is known by name only to its adapter, the composition root and the seeder, and everything else goes through sponsor.Provider", rel, vendor)
+			t.Errorf("%s names the vendor %q; a vendor is known by name only to its adapter and the composition root, and everything else goes through the port its adapter fills (sponsor.Provider, search.Recognizer)", rel, vendor)
 		}
 		return nil
 	})

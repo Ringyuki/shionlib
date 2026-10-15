@@ -1,6 +1,8 @@
 package searchhttp
 
 import (
+	"github.com/danielgtaylor/huma/v2"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 )
 
@@ -31,4 +33,10 @@ type searchTrendingInput struct {
 type searchSuggestInput struct {
 	Prefix string `query:"prefix" required:"true" minLength:"1" maxLength:"100"`
 	Limit  int    `query:"limit" default:"10" minimum:"1" maximum:"20"`
+}
+
+type searchImageInput struct {
+	RawBody huma.MultipartFormFiles[struct {
+		File huma.FormFile `form:"file" required:"false" doc:"JPG, PNG, WebP or GIF picture to recognize"`
+	}]
 }

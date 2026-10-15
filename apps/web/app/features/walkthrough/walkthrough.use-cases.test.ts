@@ -4,11 +4,14 @@ import type { ApiData } from '~/shared/api/types'
 import type { RichDocument } from '~/shared/richtext/rich-text'
 import type { WalkthroughSummary } from './walkthrough'
 import {
+  countWalkthroughs,
+  loadFormatTask,
   loadGuides,
   loadUserWalkthroughs,
   loadWriting,
   removeWalkthrough,
   saveWalkthrough,
+  startFormat,
 } from './walkthrough.use-cases'
 
 const note: RichDocument = {
@@ -134,17 +137,36 @@ describe('loadUserWalkthroughs', () => {
   })
 })
 
+describe('countWalkthroughs', () => {
+  it('counts the published walkthroughs and leaves out a draft', async () => {
+    const draft: WalkthroughSummary = { ...summary(15, 3), status: 'DRAFT' }
+    const { api } = fakeApi().on('get', '/walkthrough/game/{id}', [
+      draft,
+      summary(12, 2),
+      summary(9, 4),
+    ])
+    expect(await countWalkthroughs(api, 7)).toBe(2)
+  })
+
+  it('counts nothing for a game without walkthroughs', async () => {
+    const { api } = fakeApi().on('get', '/walkthrough/game/{id}', null)
+    expect(await countWalkthroughs(api, 7)).toBe(0)
+  })
+})
+
 describe('loadWriting', () => {
   it('opens what the writer wrote before', async () => {
     const { api } = fakeApi()
       .on('get', '/game/{id}/header', header)
       .on('get', '/game/{id}/characters', cast)
       .on('get', '/walkthrough/game/{id}', [summary(15, 3), summary(12, 2)])
+      .on('get', '/walkthrough/format', { available: true })
       .on('get', '/walkthrough/{id}', walkthrough)
     const writing = await loadWriting(api, 7, 2)
     expect(writing.game).toEqual({ id: 7, title_jp: 'タイトル', title_zh: '标题', title_en: '' })
     expect(writing.credits).toEqual([])
     expect(writing.stored).toEqual(walkthrough)
+    expect(writing.formattable).toBe(true)
   })
 
   it('starts from nothing for a writer without a walkthrough and for a guest', async () => {
@@ -152,9 +174,36 @@ describe('loadWriting', () => {
       .on('get', '/game/{id}/header', header)
       .on('get', '/game/{id}/characters', cast)
       .on('get', '/walkthrough/game/{id}', [summary(15, 3)])
-    expect((await loadWriting(fake.api, 7, 2)).stored).toBeUndefined()
-    expect((await loadWriting(fake.api, 7, undefined)).stored).toBeUndefined()
+      .on('get', '/walkthrough/format', { available: false })
+    expect(await loadWriting(fake.api, 7, 2)).toMatchObject({
+      stored: undefined,
+      formattable: false,
+    })
+    expect(await loadWriting(fake.api, 7, undefined)).toMatchObject({
+      stored: undefined,
+      formattable: false,
+    })
     expect(paths(fake.requests).filter(path => path === '/walkthrough/game/7')).toHaveLength(1)
+    expect(paths(fake.requests).filter(path => path === '/walkthrough/format')).toHaveLength(1)
+  })
+})
+
+describe('formatting', () => {
+  const task = {
+    id: '6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b',
+    state: 'working' as const,
+    result: null,
+  }
+
+  it('starts a task with the text and reads it back by its id', async () => {
+    const { api, requests } = fakeApi()
+      .on('post', '/walkthrough/game/{id}/format', task)
+      .on('get', '/walkthrough/format/{task}', task)
+    expect(await startFormat(api, { gameId: 7, text: '新谷 灯华' })).toEqual(task)
+    expect(new URL(requests[0]?.url ?? '').pathname).toBe('/walkthrough/game/7/format')
+    expect(await requests[0]?.json()).toEqual({ text: '新谷 灯华' })
+    expect(await loadFormatTask(api, task.id)).toEqual(task)
+    expect(new URL(requests[1]?.url ?? '').pathname).toBe(`/walkthrough/format/${task.id}`)
   })
 })
 

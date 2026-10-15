@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aiwalkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
@@ -37,6 +38,7 @@ type e2eAIGateway struct {
 	repo        *aipg.Repository
 	reviewScene string
 	screenScene string
+	formatScene string
 }
 
 func e2eCatalog() ai.Catalog {
@@ -71,6 +73,7 @@ func (s *e2eSeeder) seedAIGateway(ctx context.Context, tx *ent.Client) error {
 		repo:        aipg.NewRepository(tx),
 		reviewScene: aimoderation.ReviewScene,
 		screenScene: aimoderation.ScreenScene,
+		formatScene: aiwalkthrough.FormatScene,
 	}
 	if err := gateway.seedRoutes(ctx); err != nil {
 		return err
@@ -123,7 +126,7 @@ func (g *e2eAIGateway) seedRoutes(ctx context.Context) error {
 	if err := g.repo.ReplaceOffers(ctx, g.primary, offers); err != nil {
 		return fmt.Errorf("seed ai offers: %w", err)
 	}
-	for scene, model := range map[string]int{g.screenScene: g.screenModel, g.reviewScene: g.reviewModel} {
+	for scene, model := range map[string]int{g.screenScene: g.screenModel, g.reviewScene: g.reviewModel, g.formatScene: g.reviewModel} {
 		if err := g.repo.SaveSceneConfig(ctx, ai.SceneConfig{Key: scene, ModelID: &model}); err != nil {
 			return fmt.Errorf("seed ai scene %s: %w", scene, err)
 		}

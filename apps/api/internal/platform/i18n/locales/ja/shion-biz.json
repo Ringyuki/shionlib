@@ -121,6 +121,9 @@
   "WALKTHROUGH_EMPTY": "攻略には説明かルートが必要です",
   "WALKTHROUGH_ROUTE_INCOMPLETE": "すべてのルートに名前と手順が必要です",
   "WALKTHROUGH_ALREADY_WRITTEN": "このゲームの攻略はすでに作成済みです",
+  "WALKTHROUGH_FORMAT_QUOTA_EXHAUSTED": "本日の整理回数の上限に達しました",
+  "WALKTHROUGH_FORMAT_FAILED": "整理に失敗しました。しばらくしてからもう一度お試しください",
+  "WALKTHROUGH_FORMAT_TASK_NOT_FOUND": "整理タスクが存在しないか、期限切れです",
   "SPONSOR_ORDER_NOT_FOUND": "スポンサー注文が見つかりません",
   "SPONSOR_ORDER_ALREADY_PAID": "この注文はすでに支払い済みです",
   "SPONSOR_ORDER_EXPIRED": "この注文は期限切れです",
@@ -199,5 +202,10 @@
   "API_KEY_NOT_FOUND": "API キーが見つかりません",
   "OPEN_LOOKUP_ONE_KIND": "id、hid、bid、vid のいずれか一種類の ID を指定してください",
   "OPEN_LOOKUP_TOO_MANY": "一度に検索できる ID は {max} 件までです",
-  "OPEN_LOOKUP_BAD_VALUE": "ID の形式が正しくありません：{value}"
+  "OPEN_LOOKUP_BAD_VALUE": "ID の形式が正しくありません：{value}",
+  "SEARCH_IMAGE_MISSING": "画像を選択してください",
+  "SEARCH_IMAGE_TOO_LARGE": "画像は {max} MB 以内にしてください",
+  "SEARCH_IMAGE_UNSUPPORTED": "この画像形式には対応していません。JPG、PNG、WebP、GIF を使用してください",
+  "SEARCH_IMAGE_BUSY": "画像検索が混み合っています。しばらくしてからもう一度お試しください",
+  "SEARCH_IMAGE_FAILED": "画像を認識できませんでした。しばらくしてからもう一度お試しください"
 }

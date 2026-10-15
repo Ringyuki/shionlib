@@ -1,6 +1,7 @@
 {
   "label": "検索",
   "placeholder": "ゲーム、ブランド、キャラクターを検索",
+  "submit": "検索",
   "list": "候補と検索結果",
   "groups": {
     "suggestions": "候補",
@@ -33,5 +34,21 @@
   "released": {
     "thisMonth": "今月発売",
     "lastMonth": "先月発売"
+  },
+  "image": {
+    "label": "画像で検索",
+    "choose": "画像を選択",
+    "drop": "画像をドロップ、貼り付け、またはクリックして選択",
+    "formats": "JPG、PNG、WebP、GIF",
+    "credit": "画像認識：<source>{name}</source>",
+    "unsupported": "この画像形式には対応していません",
+    "picked": "選択した画像",
+    "reading": "認識しています…",
+    "found": "{count, number} 人のキャラクターを認識しました",
+    "none": "キャラクターを認識できませんでした",
+    "again": "別の画像",
+    "unsure": "不正確な可能性があります",
+    "searchWork": "「{work}」を検索",
+    "results": "画像検索の結果"
   }
 }

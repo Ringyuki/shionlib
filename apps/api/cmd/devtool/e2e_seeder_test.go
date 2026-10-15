@@ -90,7 +90,7 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		"ai_routes":                          3,
 		"ai_route_adjustments":               1,
 		"ai_provider_offers":                 3,
-		"ai_scenes":                          2,
+		"ai_scenes":                          3,
 		"ai_requests":                        6,
 		"ai_request_payloads":                3,
 		"ai_catalog_providers":               3,

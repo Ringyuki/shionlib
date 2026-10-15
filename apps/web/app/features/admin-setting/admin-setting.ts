@@ -44,6 +44,8 @@ export const sections = [
   { key: 'throttle', groups: ['throttle'] },
   { key: 'hot_score', groups: ['hot_score'] },
   { key: 'catalog', groups: ['catalog'] },
+  { key: 'search', groups: ['search'] },
+  { key: 'walkthrough', groups: ['walkthrough'] },
   { key: 'ai', groups: ['ai'] },
   { key: 'open', groups: ['open'] },
   { key: 'indexing', groups: ['indexing'] },

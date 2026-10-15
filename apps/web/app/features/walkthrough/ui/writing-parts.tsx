@@ -1,5 +1,5 @@
-import { cn, Flex, IconButton, Stack } from '@hina-ui/react'
-import { GripVertical, Plus } from 'lucide-react'
+import { cn, Flex, IconButton, Inline, Stack } from '@hina-ui/react'
+import { GripVertical, Plus, WandSparkles } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
 import { Sortable, useSortableRow, type SortSpeech } from '~/shared/ui/sortable'
@@ -16,10 +16,11 @@ type WritingPartsProps = {
   onShow: (key: string) => void
   onMove: (key: string, over: string) => void
   onAdd: () => void
+  onFormat?: () => void
 }
 
 export function WritingParts(props: WritingPartsProps) {
-  const { routes, faces, shown, full, roomy = false, onShow, onMove, onAdd } = props
+  const { routes, faces, shown, full, roomy = false, onShow, onMove, onAdd, onFormat } = props
   const t = useTranslations('walkthrough')
   const locks = routes.some(route => conditioned(route))
   const name = (key: string) => {
@@ -49,17 +50,29 @@ export function WritingParts(props: WritingPartsProps) {
           />
         ))}
       </Sortable>
-      <Button
-        variant="outline"
-        tone="neutral"
-        size={roomy ? 'md' : 'sm'}
-        icon={<Plus />}
-        disabled={full}
-        className="mt-2 self-start"
-        onClick={onAdd}
-      >
-        {t('addRoute')}
-      </Button>
+      <Inline gap="sm" className="mt-2">
+        <Button
+          variant="outline"
+          tone="neutral"
+          size={roomy ? 'md' : 'sm'}
+          icon={<Plus />}
+          disabled={full}
+          onClick={onAdd}
+        >
+          {t('addRoute')}
+        </Button>
+        {onFormat !== undefined && (
+          <Button
+            variant="outline"
+            tone="neutral"
+            size={roomy ? 'md' : 'sm'}
+            icon={<WandSparkles />}
+            onClick={onFormat}
+          >
+            {t('format.open')}
+          </Button>
+        )}
+      </Inline>
     </Stack>
   )
 }

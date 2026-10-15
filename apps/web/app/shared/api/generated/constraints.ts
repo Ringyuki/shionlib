@@ -1768,6 +1768,15 @@ export const constraints = {
       "format": "email"
     }
   },
+  "FormatWalkthroughInputBody": {
+    "text": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 50000
+    }
+  },
   "HoldUploadsInputBody": {
     "upload_session_ids": {
       "type": "array",

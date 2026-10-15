@@ -11,6 +11,8 @@ import {
   type WalkthroughState,
 } from './walkthrough'
 import type { WalkthroughRemoval, WalkthroughSave } from './walkthrough.schema'
+import type { FormatTask } from './walkthrough-format'
+import type { WalkthroughFormat } from './walkthrough-format.schema'
 import type { Step } from './walkthrough-steps'
 
 type Sent = ApiBody<'/walkthrough/game/{id}/mine', 'put'>
@@ -21,7 +23,12 @@ type SentStep = NonNullable<SentRoute['steps']>[number]
 
 export type GameRef = Pick<Schema<'GameHeaderDTO'>, 'id' | 'title_jp' | 'title_zh' | 'title_en'>
 
-export type Writing = { game: GameRef; credits: Credit[]; stored: Walkthrough | undefined }
+export type Writing = {
+  game: GameRef
+  credits: Credit[]
+  stored: Walkthrough | undefined
+  formattable: boolean
+}
 
 export type Saved = { id: number; state: WalkthroughState }
 
@@ -43,6 +50,11 @@ export async function loadGuides(
   return { gameId, summaries, shown }
 }
 
+export async function countWalkthroughs(api: ApiClient, gameId: number): Promise<number> {
+  const listed = await api.get('/walkthrough/game/{id}', { params: { path: { id: gameId } } })
+  return (listed ?? []).filter(summary => summary.status === 'PUBLISHED').length
+}
+
 export async function loadUserWalkthroughs(
   api: ApiClient,
   userId: number,
@@ -60,10 +72,11 @@ export async function loadWriting(
   writerId: number | undefined,
 ): Promise<Writing> {
   const path = { params: { path: { id: gameId } } }
-  const [header, cast, listed] = await Promise.all([
+  const [header, cast, listed, formatter] = await Promise.all([
     api.get('/game/{id}/header', path),
     api.get('/game/{id}/characters', path),
     writerId === undefined ? undefined : api.get('/walkthrough/game/{id}', path),
+    writerId === undefined ? undefined : api.get('/walkthrough/format'),
   ])
   const own = writtenBy(listed ?? [], writerId)
   return {
@@ -75,6 +88,7 @@ export async function loadWriting(
     },
     credits: cast.characters ?? [],
     stored: own === undefined ? undefined : await written(api, own.id),
+    formattable: formatter?.available === true,
   }
 }
 
@@ -92,6 +106,17 @@ export async function saveWalkthrough(api: ApiClient, save: WalkthroughSave): Pr
 
 export async function removeWalkthrough(api: ApiClient, removal: WalkthroughRemoval) {
   await api.delete('/walkthrough/{id}', { params: { path: { id: removal.walkthroughId } } })
+}
+
+export function startFormat(api: ApiClient, format: WalkthroughFormat): Promise<FormatTask> {
+  return api.post('/walkthrough/game/{id}/format', {
+    params: { path: { id: format.gameId } },
+    body: { text: format.text },
+  })
+}
+
+export function loadFormatTask(api: ApiClient, task: string): Promise<FormatTask> {
+  return api.get('/walkthrough/format/{task}', { params: { path: { task } } })
 }
 
 function written(api: ApiClient, walkthroughId: number): Promise<Walkthrough> {

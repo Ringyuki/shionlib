@@ -1,6 +1,7 @@
 import type { ResourceRule } from '~/features/game'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
+import { fileBody } from '~/shared/api/file-body'
 import {
   emptyResults,
   normalizeQuery,
@@ -51,13 +52,11 @@ async function loadTrending(api: ApiClient): Promise<string[]> {
 export async function loadPalette(api: ApiClient, raw: string): Promise<Palette> {
   const query = normalizeQuery(raw)
   if (query === '') {
-    return {
-      query,
-      suggestions: [],
-      trending: await loadTrending(api),
-      results: null,
-      unavailable: false,
-    }
+    const [trending, imageSource] = await Promise.all([
+      loadTrending(api),
+      quietly(api.get('/search/image/source'), null),
+    ])
+    return { query, suggestions: [], trending, results: null, unavailable: false, imageSource }
   }
   const [suggestions, found] = await Promise.all([
     quietly(
@@ -78,6 +77,7 @@ export async function loadPalette(api: ApiClient, raw: string): Promise<Palette>
     trending: [],
     results: found.results,
     unavailable: found.unavailable,
+    imageSource: null,
   }
 }
 
@@ -166,4 +166,8 @@ export async function loadRecentReleases(api: ApiClient, now: Date): Promise<Rel
     null,
   )
   return byReleaseMonth(page?.items ?? [], window)
+}
+
+export async function searchByImage(api: ApiClient, image: File) {
+  return api.post('/search/image', fileBody('file', image))
 }

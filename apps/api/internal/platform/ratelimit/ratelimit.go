@@ -45,6 +45,25 @@ end
 return {1, hits, ttl, 0}
 `)
 
+type Pace struct {
+	Name     string
+	Interval time.Duration
+	MaxWait  time.Duration
+}
+
+var paceScript = goredis.NewScript(`
+local clock = redis.call('TIME')
+local now = tonumber(clock[1]) * 1000 + math.floor(tonumber(clock[2]) / 1000)
+local free = tonumber(redis.call('GET', KEYS[1]) or '0')
+local slot = math.max(now, free)
+local wait = slot - now
+if wait > tonumber(ARGV[2]) then
+  return -1
+end
+redis.call('SET', KEYS[1], slot + tonumber(ARGV[1]), 'PX', wait + tonumber(ARGV[1]) + 1)
+return wait
+`)
+
 type Limiter struct {
 	client *redis.Client
 }
@@ -68,4 +87,15 @@ func (l *Limiter) Allow(ctx context.Context, policy Policy, key string) (Decisio
 		ResetAfter: time.Duration(max(values[2], 0)) * time.Millisecond,
 		RetryAfter: time.Duration(max(values[3], 0)) * time.Millisecond,
 	}, nil
+}
+
+func (l *Limiter) Reserve(ctx context.Context, pace Pace) (time.Duration, bool, error) {
+	wait, err := paceScript.Run(ctx, l.client.Client, []string{l.client.Key("pace", pace.Name)}, pace.Interval.Milliseconds(), pace.MaxWait.Milliseconds()).Int64()
+	if err != nil {
+		return 0, false, fmt.Errorf("pace %s: %w", pace.Name, err)
+	}
+	if wait < 0 {
+		return 0, false, nil
+	}
+	return time.Duration(wait) * time.Millisecond, true, nil
 }

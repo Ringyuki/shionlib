@@ -121,6 +121,9 @@
   "WALKTHROUGH_EMPTY": "a walkthrough needs a note or at least one route",
   "WALKTHROUGH_ROUTE_INCOMPLETE": "every route needs a name and at least one step",
   "WALKTHROUGH_ALREADY_WRITTEN": "you have already written a walkthrough for this game",
+  "WALKTHROUGH_FORMAT_QUOTA_EXHAUSTED": "you have reached today's formatting limit",
+  "WALKTHROUGH_FORMAT_FAILED": "formatting failed, please try again later",
+  "WALKTHROUGH_FORMAT_TASK_NOT_FOUND": "the formatting task does not exist or has expired",
   "SPONSOR_ORDER_NOT_FOUND": "sponsor order not found",
   "SPONSOR_ORDER_ALREADY_PAID": "this order has already been paid",
   "SPONSOR_ORDER_EXPIRED": "this order has expired",
@@ -199,5 +202,10 @@
   "API_KEY_NOT_FOUND": "API key not found",
   "OPEN_LOOKUP_ONE_KIND": "give one kind of ID: id, hid, bid or vid",
   "OPEN_LOOKUP_TOO_MANY": "at most {max} IDs can be looked up at once",
-  "OPEN_LOOKUP_BAD_VALUE": "not a valid ID: {value}"
+  "OPEN_LOOKUP_BAD_VALUE": "not a valid ID: {value}",
+  "SEARCH_IMAGE_MISSING": "Choose a picture",
+  "SEARCH_IMAGE_TOO_LARGE": "The picture must not exceed {max} MB",
+  "SEARCH_IMAGE_UNSUPPORTED": "This picture format is not supported. Use JPG, PNG, WebP or GIF",
+  "SEARCH_IMAGE_BUSY": "Picture search is busy. Try again later",
+  "SEARCH_IMAGE_FAILED": "The picture could not be recognized. Try again later"
 }

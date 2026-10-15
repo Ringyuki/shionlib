@@ -1,6 +1,7 @@
 import type { GameImage, ResourceRule } from '~/features/game'
 import type { ApiData } from '~/shared/api/types'
 import { isoDate, siteMonthStart } from '~/shared/i18n/site-time'
+import type { ImageSource } from './search-image'
 
 export type SearchResults = ApiData<'/search', 'get'>
 
@@ -14,6 +15,7 @@ export type Palette = {
   trending: string[]
   results: SearchResults | null
   unavailable: boolean
+  imageSource: ImageSource | null
 }
 
 export const paletteSize = 5

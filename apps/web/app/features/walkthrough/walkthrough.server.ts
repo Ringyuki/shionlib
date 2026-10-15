@@ -3,15 +3,18 @@ import { loadViewer } from '~/features/viewer'
 import { isLocale } from '~/shared/i18n/locale.schema'
 import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { idParam, optionalIdParam } from '~/shared/route/params'
-import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared/route/route.server'
 import { userPageSize, writingPath } from './walkthrough'
 import { walkthroughRemovalCommand, walkthroughSaveCommand } from './walkthrough.schema'
+import { formatTaskFrom, walkthroughFormatCommand } from './walkthrough-format.schema'
 import {
+  loadFormatTask,
   loadGuides,
   loadUserWalkthroughs,
   loadWriting,
   removeWalkthrough,
   saveWalkthrough,
+  startFormat,
 } from './walkthrough.use-cases'
 
 export async function guidesLoader(args: LoaderFunctionArgs) {
@@ -56,4 +59,17 @@ export async function walkthroughSaveAction(args: ActionFunctionArgs) {
 export async function walkthroughRemovalAction(args: ActionFunctionArgs) {
   const removal = await readCommand(args, walkthroughRemovalCommand)
   return routeAction(args, api => removeWalkthrough(api, removal))
+}
+
+export async function walkthroughFormatAction(args: ActionFunctionArgs) {
+  const format = await readCommand(args, walkthroughFormatCommand)
+  return routeAction(args, api => startFormat(api, format))
+}
+
+export function walkthroughFormatLoader(args: LoaderFunctionArgs) {
+  const task = formatTaskFrom(args.url.searchParams.get('task') ?? undefined)
+  if (task === undefined) {
+    throw data(null, { status: 404 })
+  }
+  return routeLazyLoader(args, api => loadFormatTask(api, task))
 }

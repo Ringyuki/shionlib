@@ -4,18 +4,23 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aiwalkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/moderationpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/walkthroughpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/walkthroughredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/commenthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/walkthroughhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/moderationjobs"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/walkthroughjobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 )
 
@@ -49,14 +54,31 @@ func wireContent(infra *Infra, shared *Shared, modules *Modules) {
 	})
 	pins := comment.NewPinService(commentRepo, commented, shared.Transactor, shared.Now)
 	walkthroughs := walkthrough.NewService(walkthroughpg.NewRepository(infra.Ent), shared.GameCards, shared.Activities, shared.Queue, shared.Transactor)
+	formatter, err := aiwalkthrough.NewFormatter(shared.AI)
+	if err != nil {
+		panic(fmt.Errorf("wire walkthrough formatting: %w", err))
+	}
+	formats := walkthrough.NewFormatService(walkthrough.FormatDeps{
+		Games:     shared.GameCards,
+		Cast:      walkthroughpg.NewCastStore(infra.Ent),
+		Formatter: formatter,
+		Tasks:     walkthroughredis.NewFormatTaskStore(infra.Redis),
+		Quota:     walkthroughredis.NewFormatQuota(infra.Redis),
+		Queue:     shared.Queue,
+		Settings:  shared.Settings,
+		Now:       infra.Now,
+		NewID:     uuid.NewString,
+	})
 
 	modules.Handlers = append(modules.Handlers,
 		commenthttp.NewHandler(comments, pins, shared.Builder),
 		walkthroughhttp.NewHandler(walkthroughs, shared.Builder),
+		walkthroughhttp.NewFormatHandler(formats, shared.Builder),
 	)
-	modules.Jobs.Register = append(modules.Jobs.Register, moderationjobs.Register(moderations))
+	modules.Jobs.Register = append(modules.Jobs.Register, moderationjobs.Register(moderations), walkthroughjobs.Register(formats))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, moderationjobs.Tasks(moderations, shared.Now)...)
 	for name, workers := range moderation.QueueConcurrency() {
 		modules.Jobs.Queues[name] = workers
 	}
+	modules.Jobs.Queues[walkthrough.FormatQueue] = walkthrough.FormatConcurrency
 }

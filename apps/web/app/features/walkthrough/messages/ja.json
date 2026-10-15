@@ -95,5 +95,21 @@
     "lead": "{author}による『{game}』の攻略です。ルートは {count, number} 本、{date}に更新されました。",
     "language": "言語は{language}です。",
     "routes": "ルート：{names}。"
+  },
+  "format": {
+    "open": "テキストから整理",
+    "title": "テキストから整理",
+    "description": "既存の攻略テキストを AI が説明とルートに整理し、整理後も編集できます",
+    "source": "攻略の原文",
+    "count": "{count} / {max}",
+    "placement": "整理結果",
+    "append": "既存のルートの後に追加",
+    "replace": "既存の説明とルートを置き換える",
+    "start": "整理を開始",
+    "working": "整理中…",
+    "elapsed": "経過時間 {time}",
+    "hint": "通常 30 秒から 2 分ほどかかります",
+    "done": "ルートを {count, number} 本整理しました。公開前に 1 本ずつ確認してください",
+    "undo": "元に戻す"
   }
 }

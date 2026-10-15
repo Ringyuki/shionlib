@@ -5,8 +5,11 @@ import { SideColumn } from '~/shared/ui/side-column'
 import { useWalkthroughWriting } from '../use-walkthrough-writing'
 import { facesOf, portraitsIn } from '../walkthrough'
 import { routesOf, savesOf } from '../walkthrough-draft'
+import { filled } from '../walkthrough-format'
 import { routeLimits } from '../walkthrough.schema'
 import type { Writing } from '../walkthrough.use-cases'
+import { FormatDialog } from './format-dialog'
+import { FormatNotice } from './format-notice'
 import { NoteField } from './note-field'
 import { RouteForm } from './route-form'
 import { LeaveDialog, RemoveDialog } from './writing-dialogs'
@@ -20,6 +23,7 @@ export function WritingDesk({ writing }: { writing: Writing }) {
   const faces = facesOf(writing.credits, locale)
   const writer = useWalkthroughWriting(writing, faces)
   const [removing, setRemoving] = useState(false)
+  const [formatting, setFormatting] = useState(false)
   const [view, setView] = useState<'edit' | 'preview'>('edit')
   const { draft, shown, flagged } = writer
   const index = draft.routes.findIndex(route => route.key === shown)
@@ -40,6 +44,14 @@ export function WritingDesk({ writing }: { writing: Writing }) {
         writer.add()
         onPicked?.()
       }}
+      onFormat={
+        writing.formattable
+          ? () => {
+              setFormatting(true)
+              onPicked?.()
+            }
+          : undefined
+      }
     />
   )
   const saving = {
@@ -56,6 +68,7 @@ export function WritingDesk({ writing }: { writing: Writing }) {
         onRemove={() => setRemoving(true)}
         {...saving}
       />
+      <FormatNotice {...writer.notice} onUndo={writer.undo} onDismiss={writer.dismiss} />
       <NoteField
         value={draft.note}
         error={flagged?.key === undefined ? flagged?.note : undefined}
@@ -117,6 +130,13 @@ export function WritingDesk({ writing }: { writing: Writing }) {
         <SaveButtons block className="w-full" {...saving} />
       </Affix>
       <LeaveDialog guard={writer.guard} />
+      <FormatDialog
+        gameId={writing.game.id}
+        filled={filled(draft)}
+        open={formatting}
+        onOpenChange={setFormatting}
+        onFormatted={writer.place}
+      />
       <RemoveDialog
         walkthroughId={writer.walkthroughId}
         open={removing}

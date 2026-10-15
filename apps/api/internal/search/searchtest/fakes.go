@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
 	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
@@ -179,4 +180,65 @@ func (a *Analytics) DecayTrends(_ context.Context, windows []search.Window, fact
 		}
 	}
 	return nil
+}
+
+type Finder struct {
+	mu         sync.Mutex
+	Games      map[string]game.Card
+	Characters map[string][]character.Summary
+	Err        error
+	Queries    []search.Query
+	Viewers    []actor.Actor
+}
+
+func (f *Finder) Search(_ context.Context, viewer actor.Actor, query search.Query) (search.Results, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.Queries = append(f.Queries, query)
+	f.Viewers = append(f.Viewers, viewer)
+	if f.Err != nil {
+		return search.Results{}, f.Err
+	}
+	results := search.Results{}
+	if card, ok := f.Games[query.Q]; ok && slices.Contains(query.Kinds, catalog.EntityGame) {
+		results.Games.Items = []game.Card{card}
+	}
+	if slices.Contains(query.Kinds, catalog.EntityCharacter) {
+		results.Characters.Items = f.Characters[query.Q]
+	}
+	return results, nil
+}
+
+type Recognizer struct {
+	mu        sync.Mutex
+	Sightings []search.Sighting
+	Err       error
+	Images    [][]byte
+}
+
+func (r *Recognizer) Source() search.ImageSource {
+	return search.ImageSource{Name: "Recognizer", URL: "https://recognizer.test/"}
+}
+
+func (r *Recognizer) Recognize(_ context.Context, image []byte) ([]search.Sighting, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.Images = append(r.Images, image)
+	return r.Sightings, r.Err
+}
+
+type Pictures struct {
+	mu      sync.Mutex
+	Err     error
+	Longest []int
+}
+
+func (p *Pictures) Shrink(_ context.Context, data []byte, longest int) ([]byte, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Longest = append(p.Longest, longest)
+	if p.Err != nil {
+		return nil, p.Err
+	}
+	return append([]byte("shrunk:"), data...), nil
 }
