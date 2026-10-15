@@ -1988,6 +1988,11 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"INITIATED", "UPLOADING", "COMPLETED", "ABORTED", "EXPIRED"}, SchemaType: map[string]string{"postgres": "game_upload_session_status"}},
 		{Name: "storage_path", Type: field.TypeString, Size: 2147483647},
 		{Name: "expires_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "last_chunk_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "submitted_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "aborted_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2000,7 +2005,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_upload_sessions_creator_id_fkey",
-				Columns:    []*schema.Column{GameUploadSessionsColumns[14]},
+				Columns:    []*schema.Column{GameUploadSessionsColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -2015,6 +2020,11 @@ var (
 				Name:    "game_upload_sessions_status_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameUploadSessionsColumns[9]},
+			},
+			{
+				Name:    "game_upload_sessions_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameUploadSessionsColumns[17]},
 			},
 		},
 	}
@@ -2652,6 +2662,11 @@ var (
 				Name:    "upload_failures_created_idx",
 				Unique:  false,
 				Columns: []*schema.Column{UploadFailuresColumns[16]},
+			},
+			{
+				Name:    "upload_failures_session_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{UploadFailuresColumns[17]},
 			},
 		},
 	}

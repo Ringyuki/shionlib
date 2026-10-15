@@ -92,6 +92,7 @@
   "GAME_UPLOAD_SESSION_NOT_OWNER": "アップロードセッションが現在のユーザーに属していません",
   "GAME_UPLOAD_SESSION_ALREADY_USED": "アップロードセッションは別のファイルによって使用されています",
   "GAME_UPLOAD_SESSION_HELD_ELSEWHERE": "このファイルは別のブラウザーまたは端末からアップロード中です",
+  "GAME_UPLOAD_FAILURE_NOT_FOUND": "アップロード失敗の記録が存在しません",
   "GAME_UPLOAD_INVALID_FILE_STATUS": "アップロードファイル状態が無効です",
   "GAME_UPLOAD_INVALID_CHUNK_SIZE": "チャンクサイズが無効です。0 より大きく、転送上限以下である必要があります",
   "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "アップロードファイルサイズが制限を超えています",

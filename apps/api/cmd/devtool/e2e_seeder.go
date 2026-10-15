@@ -626,6 +626,9 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 	if err := s.seedInspection(ctx, tx, reportableID, reportable.ID); err != nil {
 		return err
 	}
+	if err := s.seedUploads(ctx, tx, content.managedID, reportable); err != nil {
+		return err
+	}
 	if err := s.seedTranslators(ctx, tx, content.adminID, reportableID); err != nil {
 		return err
 	}

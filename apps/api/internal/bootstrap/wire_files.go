@@ -87,7 +87,9 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	banner := userPenalties{users: shared.Users}
 
 	quota := newQuotaService(infra, shared)
-	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, uploadredis.NewHolds(infra.Redis), shared.Transactor, shared.Settings, shared.Now)
+	holds := uploadredis.NewHolds(infra.Redis)
+	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, holds, shared.Transactor, shared.Settings, shared.Now)
+	uploadAdmin := download.NewUploadService(download.UploadDeps{Store: uploadpg.NewAdminStore(infra.Ent), Holds: holds, Uploads: uploads, Now: shared.Now})
 
 	downloadRepo := downloadpg.NewRepository(infra.Ent)
 	inspectionRepo := inspectionpg.NewRepository(infra.Ent)
@@ -193,6 +195,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 
 	modules.Handlers = append(modules.Handlers,
 		uploadhttp.NewHandler(uploads, quota, shared.Builder),
+		uploadhttp.NewAdminHandler(uploadAdmin, shared.Builder),
 		downloadhttp.NewHandler(downloads, resourceDetails, links, shared.Builder),
 		downloadhttp.NewNameHandler(names, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),

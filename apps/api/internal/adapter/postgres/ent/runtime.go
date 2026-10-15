@@ -1128,11 +1128,11 @@ func init() {
 	gameuploadsessionFields := schema.GameUploadSession{}.Fields()
 	_ = gameuploadsessionFields
 	// gameuploadsessionDescCreated is the schema descriptor for created field.
-	gameuploadsessionDescCreated := gameuploadsessionFields[13].Descriptor()
+	gameuploadsessionDescCreated := gameuploadsessionFields[18].Descriptor()
 	// gameuploadsession.DefaultCreated holds the default value on creation for the created field.
 	gameuploadsession.DefaultCreated = gameuploadsessionDescCreated.Default.(func() time.Time)
 	// gameuploadsessionDescUpdated is the schema descriptor for updated field.
-	gameuploadsessionDescUpdated := gameuploadsessionFields[14].Descriptor()
+	gameuploadsessionDescUpdated := gameuploadsessionFields[19].Descriptor()
 	// gameuploadsession.DefaultUpdated holds the default value on creation for the updated field.
 	gameuploadsession.DefaultUpdated = gameuploadsessionDescUpdated.Default.(func() time.Time)
 	// gameuploadsession.UpdateDefaultUpdated holds the default value on update for the updated field.

@@ -32,6 +32,11 @@ func (GameUploadSession) Fields() []ent.Field {
 		field.Text("storage_path"),
 		field.Time("expires_at").SchemaType(timestamp3),
 		field.Int("creator_id").SchemaType(pg("integer")),
+		field.Time("last_chunk_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("completed_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("submitted_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("aborted_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("ended_at").SchemaType(timestamp3).Optional().Nillable(),
 		created(),
 		updated(),
 	}
@@ -50,5 +55,6 @@ func (GameUploadSession) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("expires_at").StorageKey("game_upload_sessions_expires_at_idx"),
 		index.Fields("status").StorageKey("game_upload_sessions_status_idx"),
+		index.Fields("created").StorageKey("game_upload_sessions_created_idx"),
 	}
 }

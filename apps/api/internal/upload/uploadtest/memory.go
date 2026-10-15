@@ -105,7 +105,7 @@ func (r *MemoryRepository) ListOngoing(_ context.Context, creatorID int, now tim
 	out := []upload.Session{}
 	for _, session := range r.sessions {
 		uploading := session.Status == upload.StatusUploading && !session.ExpiresAt.Before(now)
-		unattached := session.Status == upload.StatusCompleted && !r.attached[session.ID]
+		unattached := session.Status == upload.StatusCompleted && session.SubmittedAt == nil && !r.attached[session.ID]
 		if session.CreatorID == creatorID && (uploading || unattached) {
 			out = append(out, session)
 		}
@@ -150,7 +150,9 @@ func (r *MemoryRepository) AddChunk(_ context.Context, id, index int, expiresAt 
 	}
 	session.UploadedChunks = append(slices.Clone(session.UploadedChunks), index)
 	session.ExpiresAt = expiresAt
-	session.Updated = r.now()
+	now := r.now()
+	session.Updated = now
+	session.LastChunkAt = &now
 	r.sessions[id] = session
 	return nil
 }
@@ -162,6 +164,13 @@ func (r *MemoryRepository) SetStatus(_ context.Context, id int, from, to upload.
 			return false
 		}
 		s.Status = to
+		now := r.now()
+		switch to {
+		case upload.StatusAborted:
+			s.AbortedAt = &now
+		case upload.StatusExpired:
+			s.EndedAt = &now
+		}
 		changed = true
 		return true
 	})
@@ -177,10 +186,20 @@ func (r *MemoryRepository) Complete(_ context.Context, id int, hash, mimeType st
 		s.Status = upload.StatusCompleted
 		s.FileHash = hash
 		s.MimeType = &mimeType
+		now := r.now()
+		s.CompletedAt = &now
 		changed = true
 		return true
 	})
 	return changed && missing == nil, nil
+}
+
+func (r *MemoryRepository) MarkSubmitted(_ context.Context, id int) error {
+	return r.mutate(id, func(s *upload.Session) bool {
+		now := r.now()
+		s.SubmittedAt = &now
+		return true
+	})
 }
 
 func (r *MemoryRepository) ListStale(_ context.Context, now, before time.Time, limit int) ([]upload.Session, error) {
@@ -195,7 +214,7 @@ func (r *MemoryRepository) ListStale(_ context.Context, now, before time.Time, l
 		case upload.StatusUploading:
 			stale = session.ExpiresAt.Before(before)
 		case upload.StatusCompleted:
-			stale = session.Updated.Before(before) && !r.attached[session.ID] && !r.liveUpload(session.CreatorID, now)
+			stale = session.SubmittedAt == nil && session.Updated.Before(before) && !r.attached[session.ID] && !r.liveUpload(session.CreatorID, now)
 		}
 		if stale {
 			out = append(out, session)

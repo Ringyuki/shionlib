@@ -24,7 +24,7 @@ func failureBody(stage string) map[string]any {
 
 func TestReportFailure(t *testing.T) {
 	e := setup(t)
-	session := e.repo.Seed(upload.Session{Status: upload.StatusUploading, TotalChunks: 2, CreatorID: member.UserID, ExpiresAt: apitest.Now.Add(time.Hour)})
+	session := e.repo.Seed(upload.Session{Status: upload.StatusUploading, FileName: "【PC】罚抄_PLUS.zip", TotalSize: 6915224321, TotalChunks: 2, CreatorID: member.UserID, ExpiresAt: apitest.Now.Add(time.Hour)})
 	headers := map[string]string{"X-Upload-Client": "client-1", "User-Agent": "test-agent"}
 
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/failures", Body: failureBody("chunk")}), http.StatusUnauthorized, 200101)
@@ -41,4 +41,23 @@ func TestReportFailure(t *testing.T) {
 
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/failures", As: &outsider, Body: failureBody("chunk")}), http.StatusForbidden, 480113)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/failures", As: &member, Body: failureBody("upload")}), http.StatusUnprocessableEntity, 100101)
+}
+
+func TestReportSubmissionFailure(t *testing.T) {
+	e := setup(t)
+	one := e.repo.Seed(upload.Session{Status: upload.StatusCompleted, FileName: "part1.rar", TotalSize: 6, CreatorID: member.UserID})
+	two := e.repo.Seed(upload.Session{Status: upload.StatusCompleted, FileName: "part2.rar", TotalSize: 4, CreatorID: member.UserID})
+	body := map[string]any{
+		"session_ids": []int{one.ID, two.ID},
+		"stage":       "submit",
+		"reason":      "rejected",
+		"error":       map[string]any{"name": "ApiError", "message": "Conflict", "status": 409},
+		"file_name":   "Windows",
+		"file_size":   10,
+	}
+	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/failures", As: &member, Body: body})
+	e.server.Expect(resp, http.StatusCreated, 0)
+	if len(e.repo.Failures) != 2 || *e.repo.Failures[1].Report.SessionID != two.ID || e.repo.Failures[1].Report.FileName != "part2.rar" {
+		t.Fatalf("failures %+v", e.repo.Failures)
+	}
 }

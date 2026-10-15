@@ -528,3 +528,122 @@ func TestReportFailureRecordsWhatTheBrowserSaw(t *testing.T) {
 func second[A, B any](_ A, b B) B {
 	return b
 }
+
+func TestAnUploadRecordsWhenItsStepsHappened(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	content := []byte("0123456789")
+	session := f.startUpload(t, content)
+	f.sendChunks(t, session, content)
+	if err := f.service.Complete(ctx, uploader, "", session.ID, uploadtest.Digest(content)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Claim(ctx, uploader, session.ID); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := f.repo.GetSession(ctx, session.ID)
+	if got.LastChunkAt == nil || got.CompletedAt == nil || got.SubmittedAt == nil || got.AbortedAt != nil || got.EndedAt != nil {
+		t.Fatalf("milestones %+v", got)
+	}
+	cancelled := f.startUpload(t, []byte("0123"))
+	if err := f.service.Abort(ctx, uploader, "", cancelled.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.CleanStaleSessions(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetSession(ctx, cancelled.ID); got.Status != upload.StatusExpired || got.AbortedAt == nil || got.EndedAt == nil {
+		t.Fatalf("a cancelled upload keeps when it was cancelled: %+v", got)
+	}
+}
+
+func TestAnEndedUploadIsExpiredForItsUploader(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	content := []byte("0123")
+	session := f.startUpload(t, content)
+	if err := f.service.Terminate(ctx, session.ID); err != nil {
+		t.Fatal(err)
+	}
+	chunk := upload.Chunk{SHA256: uploadtest.Digest(content), ContentLength: int64(len(content))}
+	expectCode(t, f.service.WriteChunk(ctx, uploader, "", session.ID, 0, chunk, bytes.NewReader(content)), upload.ErrSessionExpired)
+	expectCode(t, f.service.Complete(ctx, uploader, "", session.ID, uploadtest.Digest(content)), upload.ErrSessionExpired)
+	_, err := f.service.Status(ctx, uploader, session.ID)
+	expectCode(t, err, upload.ErrSessionExpired)
+}
+
+func TestAdminsTerminateUploadsInProgressOrNotYetSubmitted(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	uploading := f.startUpload(t, []byte("0123456789"))
+	f.spool.Put(uploading.StoragePath, []byte("01"), now)
+	finished := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("finished")})
+	submitted := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("submitted"), SubmittedAt: ptr(now)})
+	attached := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("attached")})
+	f.repo.AttachFile(attached.ID, attached.StoragePath)
+	late := f.repo.Seed(upload.Session{Status: upload.StatusUploading, CreatorID: uploader.UserID, ExpiresAt: now.Add(-time.Minute)})
+
+	for _, id := range []int{uploading.ID, finished.ID} {
+		if err := f.service.Terminate(ctx, id); err != nil {
+			t.Fatalf("terminate %d: %v", id, err)
+		}
+		if got, _ := f.repo.GetSession(ctx, id); got.Status != upload.StatusAborted || got.AbortedAt == nil {
+			t.Fatalf("terminated %+v", got)
+		}
+	}
+	if _, ok := f.spool.Content(uploading.StoragePath); ok {
+		t.Fatal("the uploaded part is discarded")
+	}
+	expectCode(t, f.service.Terminate(ctx, submitted.ID), upload.ErrSessionAlreadyUsed)
+	expectCode(t, f.service.Terminate(ctx, attached.ID), upload.ErrSessionAlreadyUsed)
+	expectCode(t, f.service.Terminate(ctx, late.ID), upload.ErrSessionExpired)
+	expectCode(t, f.service.Terminate(ctx, uploading.ID), upload.ErrInvalidSessionStatus)
+	expectCode(t, f.service.Terminate(ctx, 999), upload.ErrSessionNotFound)
+}
+
+func TestASubmittedUploadIsNeitherLeftOverNorCleanedUp(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	replaced := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("old"), Updated: now.Add(-7 * time.Hour), SubmittedAt: ptr(now.Add(-8 * time.Hour))})
+	if err := f.service.CleanStaleSessions(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetSession(ctx, replaced.ID); got.Status != upload.StatusCompleted {
+		t.Fatalf("a submitted upload whose file was replaced stays as it was: %+v", got)
+	}
+	ongoing, err := f.service.Ongoing(ctx, uploader, "")
+	if err != nil || len(ongoing) != 0 {
+		t.Fatalf("it is not offered to the uploader again: %+v %v", ongoing, err)
+	}
+}
+
+func TestASubmissionFailureIsRecordedUnderEachUploadItNames(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	one := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, FileName: "part1.rar", TotalSize: 10, CreatorID: uploader.UserID})
+	two := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, FileName: "part2.rar", TotalSize: 6, CreatorID: uploader.UserID})
+	report := upload.FailureReport{
+		SessionIDs: []int{one.ID, 404, two.ID},
+		Stage:      upload.FailureSubmitting,
+		Reason:     "rejected",
+		Error:      upload.ClientError{Name: "ApiError", Message: "Conflict", Status: ptr(409)},
+		FileName:   "Windows 简体中文",
+		FileSize:   16,
+	}
+	id, err := f.service.ReportFailure(ctx, uploader, report)
+	if err != nil || id != 1 || len(f.repo.Failures) != 2 {
+		t.Fatalf("recorded %d %v %d", id, err, len(f.repo.Failures))
+	}
+	for i, session := range []upload.Session{one, two} {
+		got := f.repo.Failures[i].Report
+		if *got.SessionID != session.ID || got.FileName != session.FileName || got.FileSize != session.TotalSize || got.SessionIDs != nil {
+			t.Fatalf("failure %d %+v", i, got)
+		}
+	}
+	nobody := report
+	nobody.SessionIDs = []int{404}
+	if _, err := f.service.ReportFailure(ctx, uploader, nobody); err != nil || f.repo.Failures[2].Report.SessionID != nil || f.repo.Failures[2].Report.FileName != "Windows 简体中文" {
+		t.Fatalf("with no upload left the failure stands alone: %v %+v", err, f.repo.Failures[2].Report)
+	}
+	expectCode(t, second(f.service.ReportFailure(ctx, stranger, report)), upload.ErrSessionNotOwner)
+}

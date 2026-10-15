@@ -115,6 +115,76 @@ func (_c *GameUploadSessionCreate) SetCreatorID(v int) *GameUploadSessionCreate 
 	return _c
 }
 
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (_c *GameUploadSessionCreate) SetLastChunkAt(v time.Time) *GameUploadSessionCreate {
+	_c.mutation.SetLastChunkAt(v)
+	return _c
+}
+
+// SetNillableLastChunkAt sets the "last_chunk_at" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableLastChunkAt(v *time.Time) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetLastChunkAt(*v)
+	}
+	return _c
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (_c *GameUploadSessionCreate) SetCompletedAt(v time.Time) *GameUploadSessionCreate {
+	_c.mutation.SetCompletedAt(v)
+	return _c
+}
+
+// SetNillableCompletedAt sets the "completed_at" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableCompletedAt(v *time.Time) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetCompletedAt(*v)
+	}
+	return _c
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (_c *GameUploadSessionCreate) SetSubmittedAt(v time.Time) *GameUploadSessionCreate {
+	_c.mutation.SetSubmittedAt(v)
+	return _c
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableSubmittedAt(v *time.Time) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetSubmittedAt(*v)
+	}
+	return _c
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (_c *GameUploadSessionCreate) SetAbortedAt(v time.Time) *GameUploadSessionCreate {
+	_c.mutation.SetAbortedAt(v)
+	return _c
+}
+
+// SetNillableAbortedAt sets the "aborted_at" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableAbortedAt(v *time.Time) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetAbortedAt(*v)
+	}
+	return _c
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (_c *GameUploadSessionCreate) SetEndedAt(v time.Time) *GameUploadSessionCreate {
+	_c.mutation.SetEndedAt(v)
+	return _c
+}
+
+// SetNillableEndedAt sets the "ended_at" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableEndedAt(v *time.Time) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetEndedAt(*v)
+	}
+	return _c
+}
+
 // SetCreated sets the "created" field.
 func (_c *GameUploadSessionCreate) SetCreated(v time.Time) *GameUploadSessionCreate {
 	_c.mutation.SetCreated(v)
@@ -376,6 +446,26 @@ func (_c *GameUploadSessionCreate) createSpec() (*GameUploadSession, *sqlgraph.C
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(gameuploadsession.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
+	}
+	if value, ok := _c.mutation.LastChunkAt(); ok {
+		_spec.SetField(gameuploadsession.FieldLastChunkAt, field.TypeTime, value)
+		_node.LastChunkAt = &value
+	}
+	if value, ok := _c.mutation.CompletedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldCompletedAt, field.TypeTime, value)
+		_node.CompletedAt = &value
+	}
+	if value, ok := _c.mutation.SubmittedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldSubmittedAt, field.TypeTime, value)
+		_node.SubmittedAt = &value
+	}
+	if value, ok := _c.mutation.AbortedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldAbortedAt, field.TypeTime, value)
+		_node.AbortedAt = &value
+	}
+	if value, ok := _c.mutation.EndedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldEndedAt, field.TypeTime, value)
+		_node.EndedAt = &value
 	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gameuploadsession.FieldCreated, field.TypeTime, value)
@@ -676,6 +766,96 @@ func (u *GameUploadSessionUpsert) UpdateCreatorID() *GameUploadSessionUpsert {
 	return u
 }
 
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (u *GameUploadSessionUpsert) SetLastChunkAt(v time.Time) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldLastChunkAt, v)
+	return u
+}
+
+// UpdateLastChunkAt sets the "last_chunk_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateLastChunkAt() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldLastChunkAt)
+	return u
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (u *GameUploadSessionUpsert) ClearLastChunkAt() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldLastChunkAt)
+	return u
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (u *GameUploadSessionUpsert) SetCompletedAt(v time.Time) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldCompletedAt, v)
+	return u
+}
+
+// UpdateCompletedAt sets the "completed_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateCompletedAt() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldCompletedAt)
+	return u
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (u *GameUploadSessionUpsert) ClearCompletedAt() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldCompletedAt)
+	return u
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (u *GameUploadSessionUpsert) SetSubmittedAt(v time.Time) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldSubmittedAt, v)
+	return u
+}
+
+// UpdateSubmittedAt sets the "submitted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateSubmittedAt() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldSubmittedAt)
+	return u
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (u *GameUploadSessionUpsert) ClearSubmittedAt() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldSubmittedAt)
+	return u
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (u *GameUploadSessionUpsert) SetAbortedAt(v time.Time) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldAbortedAt, v)
+	return u
+}
+
+// UpdateAbortedAt sets the "aborted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateAbortedAt() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldAbortedAt)
+	return u
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (u *GameUploadSessionUpsert) ClearAbortedAt() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldAbortedAt)
+	return u
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (u *GameUploadSessionUpsert) SetEndedAt(v time.Time) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldEndedAt, v)
+	return u
+}
+
+// UpdateEndedAt sets the "ended_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateEndedAt() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldEndedAt)
+	return u
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (u *GameUploadSessionUpsert) ClearEndedAt() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldEndedAt)
+	return u
+}
+
 // SetUpdated sets the "updated" field.
 func (u *GameUploadSessionUpsert) SetUpdated(v time.Time) *GameUploadSessionUpsert {
 	u.Set(gameuploadsession.FieldUpdated, v)
@@ -939,6 +1119,111 @@ func (u *GameUploadSessionUpsertOne) SetCreatorID(v int) *GameUploadSessionUpser
 func (u *GameUploadSessionUpsertOne) UpdateCreatorID() *GameUploadSessionUpsertOne {
 	return u.Update(func(s *GameUploadSessionUpsert) {
 		s.UpdateCreatorID()
+	})
+}
+
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (u *GameUploadSessionUpsertOne) SetLastChunkAt(v time.Time) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetLastChunkAt(v)
+	})
+}
+
+// UpdateLastChunkAt sets the "last_chunk_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateLastChunkAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateLastChunkAt()
+	})
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (u *GameUploadSessionUpsertOne) ClearLastChunkAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearLastChunkAt()
+	})
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (u *GameUploadSessionUpsertOne) SetCompletedAt(v time.Time) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetCompletedAt(v)
+	})
+}
+
+// UpdateCompletedAt sets the "completed_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateCompletedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateCompletedAt()
+	})
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (u *GameUploadSessionUpsertOne) ClearCompletedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearCompletedAt()
+	})
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (u *GameUploadSessionUpsertOne) SetSubmittedAt(v time.Time) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetSubmittedAt(v)
+	})
+}
+
+// UpdateSubmittedAt sets the "submitted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateSubmittedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateSubmittedAt()
+	})
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (u *GameUploadSessionUpsertOne) ClearSubmittedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearSubmittedAt()
+	})
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (u *GameUploadSessionUpsertOne) SetAbortedAt(v time.Time) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetAbortedAt(v)
+	})
+}
+
+// UpdateAbortedAt sets the "aborted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateAbortedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateAbortedAt()
+	})
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (u *GameUploadSessionUpsertOne) ClearAbortedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearAbortedAt()
+	})
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (u *GameUploadSessionUpsertOne) SetEndedAt(v time.Time) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetEndedAt(v)
+	})
+}
+
+// UpdateEndedAt sets the "ended_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateEndedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateEndedAt()
+	})
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (u *GameUploadSessionUpsertOne) ClearEndedAt() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearEndedAt()
 	})
 }
 
@@ -1373,6 +1658,111 @@ func (u *GameUploadSessionUpsertBulk) SetCreatorID(v int) *GameUploadSessionUpse
 func (u *GameUploadSessionUpsertBulk) UpdateCreatorID() *GameUploadSessionUpsertBulk {
 	return u.Update(func(s *GameUploadSessionUpsert) {
 		s.UpdateCreatorID()
+	})
+}
+
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (u *GameUploadSessionUpsertBulk) SetLastChunkAt(v time.Time) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetLastChunkAt(v)
+	})
+}
+
+// UpdateLastChunkAt sets the "last_chunk_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateLastChunkAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateLastChunkAt()
+	})
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (u *GameUploadSessionUpsertBulk) ClearLastChunkAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearLastChunkAt()
+	})
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (u *GameUploadSessionUpsertBulk) SetCompletedAt(v time.Time) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetCompletedAt(v)
+	})
+}
+
+// UpdateCompletedAt sets the "completed_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateCompletedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateCompletedAt()
+	})
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (u *GameUploadSessionUpsertBulk) ClearCompletedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearCompletedAt()
+	})
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (u *GameUploadSessionUpsertBulk) SetSubmittedAt(v time.Time) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetSubmittedAt(v)
+	})
+}
+
+// UpdateSubmittedAt sets the "submitted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateSubmittedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateSubmittedAt()
+	})
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (u *GameUploadSessionUpsertBulk) ClearSubmittedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearSubmittedAt()
+	})
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (u *GameUploadSessionUpsertBulk) SetAbortedAt(v time.Time) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetAbortedAt(v)
+	})
+}
+
+// UpdateAbortedAt sets the "aborted_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateAbortedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateAbortedAt()
+	})
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (u *GameUploadSessionUpsertBulk) ClearAbortedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearAbortedAt()
+	})
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (u *GameUploadSessionUpsertBulk) SetEndedAt(v time.Time) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetEndedAt(v)
+	})
+}
+
+// UpdateEndedAt sets the "ended_at" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateEndedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateEndedAt()
+	})
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (u *GameUploadSessionUpsertBulk) ClearEndedAt() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearEndedAt()
 	})
 }
 

@@ -50430,6 +50430,11 @@ type GameUploadSessionMutation struct {
 	status                             *gameuploadsession.Status
 	storage_path                       *string
 	expires_at                         *time.Time
+	last_chunk_at                      *time.Time
+	completed_at                       *time.Time
+	submitted_at                       *time.Time
+	aborted_at                         *time.Time
+	ended_at                           *time.Time
 	created                            *time.Time
 	updated                            *time.Time
 	clearedFields                      map[string]struct{}
@@ -51070,6 +51075,251 @@ func (m *GameUploadSessionMutation) ResetCreatorID() {
 	m.creator = nil
 }
 
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (m *GameUploadSessionMutation) SetLastChunkAt(t time.Time) {
+	m.last_chunk_at = &t
+}
+
+// LastChunkAt returns the value of the "last_chunk_at" field in the mutation.
+func (m *GameUploadSessionMutation) LastChunkAt() (r time.Time, exists bool) {
+	v := m.last_chunk_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastChunkAt returns the old "last_chunk_at" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldLastChunkAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastChunkAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastChunkAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastChunkAt: %w", err)
+	}
+	return oldValue.LastChunkAt, nil
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (m *GameUploadSessionMutation) ClearLastChunkAt() {
+	m.last_chunk_at = nil
+	m.clearedFields[gameuploadsession.FieldLastChunkAt] = struct{}{}
+}
+
+// LastChunkAtCleared returns if the "last_chunk_at" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) LastChunkAtCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldLastChunkAt]
+	return ok
+}
+
+// ResetLastChunkAt resets all changes to the "last_chunk_at" field.
+func (m *GameUploadSessionMutation) ResetLastChunkAt() {
+	m.last_chunk_at = nil
+	delete(m.clearedFields, gameuploadsession.FieldLastChunkAt)
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *GameUploadSessionMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *GameUploadSessionMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *GameUploadSessionMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[gameuploadsession.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *GameUploadSessionMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, gameuploadsession.FieldCompletedAt)
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (m *GameUploadSessionMutation) SetSubmittedAt(t time.Time) {
+	m.submitted_at = &t
+}
+
+// SubmittedAt returns the value of the "submitted_at" field in the mutation.
+func (m *GameUploadSessionMutation) SubmittedAt() (r time.Time, exists bool) {
+	v := m.submitted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubmittedAt returns the old "submitted_at" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldSubmittedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubmittedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubmittedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubmittedAt: %w", err)
+	}
+	return oldValue.SubmittedAt, nil
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (m *GameUploadSessionMutation) ClearSubmittedAt() {
+	m.submitted_at = nil
+	m.clearedFields[gameuploadsession.FieldSubmittedAt] = struct{}{}
+}
+
+// SubmittedAtCleared returns if the "submitted_at" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) SubmittedAtCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldSubmittedAt]
+	return ok
+}
+
+// ResetSubmittedAt resets all changes to the "submitted_at" field.
+func (m *GameUploadSessionMutation) ResetSubmittedAt() {
+	m.submitted_at = nil
+	delete(m.clearedFields, gameuploadsession.FieldSubmittedAt)
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (m *GameUploadSessionMutation) SetAbortedAt(t time.Time) {
+	m.aborted_at = &t
+}
+
+// AbortedAt returns the value of the "aborted_at" field in the mutation.
+func (m *GameUploadSessionMutation) AbortedAt() (r time.Time, exists bool) {
+	v := m.aborted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAbortedAt returns the old "aborted_at" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldAbortedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAbortedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAbortedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAbortedAt: %w", err)
+	}
+	return oldValue.AbortedAt, nil
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (m *GameUploadSessionMutation) ClearAbortedAt() {
+	m.aborted_at = nil
+	m.clearedFields[gameuploadsession.FieldAbortedAt] = struct{}{}
+}
+
+// AbortedAtCleared returns if the "aborted_at" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) AbortedAtCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldAbortedAt]
+	return ok
+}
+
+// ResetAbortedAt resets all changes to the "aborted_at" field.
+func (m *GameUploadSessionMutation) ResetAbortedAt() {
+	m.aborted_at = nil
+	delete(m.clearedFields, gameuploadsession.FieldAbortedAt)
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (m *GameUploadSessionMutation) SetEndedAt(t time.Time) {
+	m.ended_at = &t
+}
+
+// EndedAt returns the value of the "ended_at" field in the mutation.
+func (m *GameUploadSessionMutation) EndedAt() (r time.Time, exists bool) {
+	v := m.ended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndedAt returns the old "ended_at" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldEndedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndedAt: %w", err)
+	}
+	return oldValue.EndedAt, nil
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (m *GameUploadSessionMutation) ClearEndedAt() {
+	m.ended_at = nil
+	m.clearedFields[gameuploadsession.FieldEndedAt] = struct{}{}
+}
+
+// EndedAtCleared returns if the "ended_at" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) EndedAtCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldEndedAt]
+	return ok
+}
+
+// ResetEndedAt resets all changes to the "ended_at" field.
+func (m *GameUploadSessionMutation) ResetEndedAt() {
+	m.ended_at = nil
+	delete(m.clearedFields, gameuploadsession.FieldEndedAt)
+}
+
 // SetCreated sets the "created" field.
 func (m *GameUploadSessionMutation) SetCreated(t time.Time) {
 	m.created = &t
@@ -51350,7 +51600,7 @@ func (m *GameUploadSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameUploadSessionMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 19)
 	if m.file_name != nil {
 		fields = append(fields, gameuploadsession.FieldFileName)
 	}
@@ -51386,6 +51636,21 @@ func (m *GameUploadSessionMutation) Fields() []string {
 	}
 	if m.creator != nil {
 		fields = append(fields, gameuploadsession.FieldCreatorID)
+	}
+	if m.last_chunk_at != nil {
+		fields = append(fields, gameuploadsession.FieldLastChunkAt)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, gameuploadsession.FieldCompletedAt)
+	}
+	if m.submitted_at != nil {
+		fields = append(fields, gameuploadsession.FieldSubmittedAt)
+	}
+	if m.aborted_at != nil {
+		fields = append(fields, gameuploadsession.FieldAbortedAt)
+	}
+	if m.ended_at != nil {
+		fields = append(fields, gameuploadsession.FieldEndedAt)
 	}
 	if m.created != nil {
 		fields = append(fields, gameuploadsession.FieldCreated)
@@ -51425,6 +51690,16 @@ func (m *GameUploadSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.ExpiresAt()
 	case gameuploadsession.FieldCreatorID:
 		return m.CreatorID()
+	case gameuploadsession.FieldLastChunkAt:
+		return m.LastChunkAt()
+	case gameuploadsession.FieldCompletedAt:
+		return m.CompletedAt()
+	case gameuploadsession.FieldSubmittedAt:
+		return m.SubmittedAt()
+	case gameuploadsession.FieldAbortedAt:
+		return m.AbortedAt()
+	case gameuploadsession.FieldEndedAt:
+		return m.EndedAt()
 	case gameuploadsession.FieldCreated:
 		return m.Created()
 	case gameuploadsession.FieldUpdated:
@@ -51462,6 +51737,16 @@ func (m *GameUploadSessionMutation) OldField(ctx context.Context, name string) (
 		return m.OldExpiresAt(ctx)
 	case gameuploadsession.FieldCreatorID:
 		return m.OldCreatorID(ctx)
+	case gameuploadsession.FieldLastChunkAt:
+		return m.OldLastChunkAt(ctx)
+	case gameuploadsession.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	case gameuploadsession.FieldSubmittedAt:
+		return m.OldSubmittedAt(ctx)
+	case gameuploadsession.FieldAbortedAt:
+		return m.OldAbortedAt(ctx)
+	case gameuploadsession.FieldEndedAt:
+		return m.OldEndedAt(ctx)
 	case gameuploadsession.FieldCreated:
 		return m.OldCreated(ctx)
 	case gameuploadsession.FieldUpdated:
@@ -51559,6 +51844,41 @@ func (m *GameUploadSessionMutation) SetField(name string, value ent.Value) error
 		}
 		m.SetCreatorID(v)
 		return nil
+	case gameuploadsession.FieldLastChunkAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastChunkAt(v)
+		return nil
+	case gameuploadsession.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	case gameuploadsession.FieldSubmittedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubmittedAt(v)
+		return nil
+	case gameuploadsession.FieldAbortedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAbortedAt(v)
+		return nil
+	case gameuploadsession.FieldEndedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndedAt(v)
+		return nil
 	case gameuploadsession.FieldCreated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -51648,6 +51968,21 @@ func (m *GameUploadSessionMutation) ClearedFields() []string {
 	if m.FieldCleared(gameuploadsession.FieldUploadedChunks) {
 		fields = append(fields, gameuploadsession.FieldUploadedChunks)
 	}
+	if m.FieldCleared(gameuploadsession.FieldLastChunkAt) {
+		fields = append(fields, gameuploadsession.FieldLastChunkAt)
+	}
+	if m.FieldCleared(gameuploadsession.FieldCompletedAt) {
+		fields = append(fields, gameuploadsession.FieldCompletedAt)
+	}
+	if m.FieldCleared(gameuploadsession.FieldSubmittedAt) {
+		fields = append(fields, gameuploadsession.FieldSubmittedAt)
+	}
+	if m.FieldCleared(gameuploadsession.FieldAbortedAt) {
+		fields = append(fields, gameuploadsession.FieldAbortedAt)
+	}
+	if m.FieldCleared(gameuploadsession.FieldEndedAt) {
+		fields = append(fields, gameuploadsession.FieldEndedAt)
+	}
 	return fields
 }
 
@@ -51667,6 +52002,21 @@ func (m *GameUploadSessionMutation) ClearField(name string) error {
 		return nil
 	case gameuploadsession.FieldUploadedChunks:
 		m.ClearUploadedChunks()
+		return nil
+	case gameuploadsession.FieldLastChunkAt:
+		m.ClearLastChunkAt()
+		return nil
+	case gameuploadsession.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	case gameuploadsession.FieldSubmittedAt:
+		m.ClearSubmittedAt()
+		return nil
+	case gameuploadsession.FieldAbortedAt:
+		m.ClearAbortedAt()
+		return nil
+	case gameuploadsession.FieldEndedAt:
+		m.ClearEndedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown GameUploadSession nullable field %s", name)
@@ -51711,6 +52061,21 @@ func (m *GameUploadSessionMutation) ResetField(name string) error {
 		return nil
 	case gameuploadsession.FieldCreatorID:
 		m.ResetCreatorID()
+		return nil
+	case gameuploadsession.FieldLastChunkAt:
+		m.ResetLastChunkAt()
+		return nil
+	case gameuploadsession.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	case gameuploadsession.FieldSubmittedAt:
+		m.ResetSubmittedAt()
+		return nil
+	case gameuploadsession.FieldAbortedAt:
+		m.ResetAbortedAt()
+		return nil
+	case gameuploadsession.FieldEndedAt:
+		m.ResetEndedAt()
 		return nil
 	case gameuploadsession.FieldCreated:
 		m.ResetCreated()

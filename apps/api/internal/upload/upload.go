@@ -44,12 +44,21 @@ type Session struct {
 	StoragePath    string
 	ExpiresAt      time.Time
 	CreatorID      int
+	LastChunkAt    *time.Time
+	CompletedAt    *time.Time
+	SubmittedAt    *time.Time
+	AbortedAt      *time.Time
+	EndedAt        *time.Time
 	Created        time.Time
 	Updated        time.Time
 }
 
 func (s Session) Expired(now time.Time) bool {
 	return s.ExpiresAt.Before(now)
+}
+
+func (s Session) Ended() bool {
+	return s.Status == StatusAborted || s.Status == StatusExpired
 }
 
 func (s Session) ChunkOffset(index int) int64 {

@@ -103,7 +103,7 @@ func (r *Repository) ListOngoing(ctx context.Context, creatorID int, now time.Ti
 
 func (r *Repository) AddChunk(ctx context.Context, id, index int, expiresAt time.Time) error {
 	_, err := r.db(ctx).ExecContext(ctx,
-		`UPDATE game_upload_sessions SET uploaded_chunks = array_append(uploaded_chunks, $2::integer), expires_at = $3, updated = $4 WHERE id = $1 AND NOT ($2::integer = ANY(uploaded_chunks))`,
+		`UPDATE game_upload_sessions SET uploaded_chunks = array_append(uploaded_chunks, $2::integer), expires_at = $3, updated = $4, last_chunk_at = $4 WHERE id = $1 AND NOT ($2::integer = ANY(uploaded_chunks))`,
 		id, index, expiresAt.UTC(), time.Now().UTC())
 	if err != nil {
 		return fmt.Errorf("record upload chunk %d of session %d: %w", index, id, err)
@@ -112,10 +112,17 @@ func (r *Repository) AddChunk(ctx context.Context, id, index int, expiresAt time
 }
 
 func (r *Repository) SetStatus(ctx context.Context, id int, from, to upload.SessionStatus) (bool, error) {
-	changed, err := r.db(ctx).GameUploadSession.Update().
+	update := r.db(ctx).GameUploadSession.Update().
 		Where(gameuploadsession.ID(id), gameuploadsession.StatusEQ(gameuploadsession.Status(from))).
-		SetStatus(gameuploadsession.Status(to)).
-		Save(ctx)
+		SetStatus(gameuploadsession.Status(to))
+	now := time.Now().UTC()
+	switch to {
+	case upload.StatusAborted:
+		update.SetAbortedAt(now)
+	case upload.StatusExpired:
+		update.SetEndedAt(now)
+	}
+	changed, err := update.Save(ctx)
 	if err != nil {
 		return false, fmt.Errorf("set upload session %d status: %w", id, err)
 	}
@@ -128,11 +135,22 @@ func (r *Repository) Complete(ctx context.Context, id int, hash, mimeType string
 		SetStatus(gameuploadsession.StatusCOMPLETED).
 		SetFileSha256(hash).
 		SetMimeType(mimeType).
+		SetCompletedAt(time.Now().UTC()).
 		Save(ctx)
 	if err != nil {
 		return false, fmt.Errorf("complete upload session %d: %w", id, err)
 	}
 	return changed > 0, nil
+}
+
+func (r *Repository) MarkSubmitted(ctx context.Context, id int) error {
+	if err := r.db(ctx).GameUploadSession.UpdateOneID(id).SetSubmittedAt(time.Now().UTC()).Exec(ctx); err != nil {
+		if ent.IsNotFound(err) {
+			return upload.ErrSessionNotFound
+		}
+		return fmt.Errorf("mark upload session %d submitted: %w", id, err)
+	}
+	return nil
 }
 
 func (r *Repository) ListStale(ctx context.Context, now, before time.Time, limit int) ([]upload.Session, error) {
@@ -179,7 +197,7 @@ func liveUpload(now time.Time) predicate.GameUploadSession {
 }
 
 func unattached() predicate.GameUploadSession {
-	return gameuploadsession.And(gameuploadsession.StatusEQ(gameuploadsession.StatusCOMPLETED), gameuploadsession.Not(gameuploadsession.HasGameDownloadResourceFile()))
+	return gameuploadsession.And(gameuploadsession.StatusEQ(gameuploadsession.StatusCOMPLETED), gameuploadsession.SubmittedAtIsNil(), gameuploadsession.Not(gameuploadsession.HasGameDownloadResourceFile()))
 }
 
 func (r *Repository) PendingBytes(ctx context.Context, now time.Time) (int64, error) {

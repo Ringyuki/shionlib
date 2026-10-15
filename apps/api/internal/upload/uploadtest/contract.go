@@ -131,6 +131,39 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
+	t.Run("each step of an upload is stamped when it happens", func(t *testing.T) {
+		env := newEnv(t)
+		user := env.NewUser(t)
+		created, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/m1.part", later))
+		if created.LastChunkAt != nil || created.CompletedAt != nil || created.SubmittedAt != nil || created.AbortedAt != nil || created.EndedAt != nil {
+			t.Fatalf("a new upload has no milestones: %+v", created)
+		}
+		_ = env.Repo.AddChunk(ctx, created.ID, 0, later)
+		_, _ = env.Repo.Complete(ctx, created.ID, "digest", upload.DefaultMimeType)
+		if err := env.Repo.MarkSubmitted(ctx, created.ID); err != nil {
+			t.Fatal(err)
+		}
+		done, _ := env.Repo.GetSession(ctx, created.ID)
+		if done.LastChunkAt == nil || done.CompletedAt == nil || done.SubmittedAt == nil || done.AbortedAt != nil || done.EndedAt != nil {
+			t.Fatalf("milestones of a submitted upload: %+v", done)
+		}
+		if ongoing, _ := env.Repo.ListOngoing(ctx, user, time.Now(), 10); len(ongoing) != 0 {
+			t.Fatalf("a submitted upload is no longer waiting: %+v", ongoing)
+		}
+		if stale, _ := env.Repo.ListStale(ctx, time.Now(), time.Now().Add(time.Hour), 10); len(stale) != 0 {
+			t.Fatalf("a submitted upload is never stale: %+v", stale)
+		}
+		cancelled, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/m2.part", later))
+		_, _ = env.Repo.SetStatus(ctx, cancelled.ID, upload.StatusUploading, upload.StatusAborted)
+		_, _ = env.Repo.SetStatus(ctx, cancelled.ID, upload.StatusAborted, upload.StatusExpired)
+		if got, _ := env.Repo.GetSession(ctx, cancelled.ID); got.AbortedAt == nil || got.EndedAt == nil || got.Status != upload.StatusExpired {
+			t.Fatalf("a cancelled upload that was cleaned up: %+v", got)
+		}
+		if err := env.Repo.MarkSubmitted(ctx, 987654); !errors.Is(err, upload.ErrSessionNotFound) {
+			t.Fatalf("missing session: %v", err)
+		}
+	})
+
 	t.Run("stale sessions and referenced paths", func(t *testing.T) {
 		env := newEnv(t)
 		user, idle := env.NewUser(t), env.NewUser(t)

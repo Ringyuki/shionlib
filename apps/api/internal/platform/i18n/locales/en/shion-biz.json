@@ -92,6 +92,7 @@
   "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner",
   "GAME_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
   "GAME_UPLOAD_SESSION_HELD_ELSEWHERE": "this file is being uploaded from another browser or device",
+  "GAME_UPLOAD_FAILURE_NOT_FOUND": "the upload failure record does not exist",
   "GAME_UPLOAD_INVALID_FILE_STATUS": "upload file status invalid",
   "GAME_UPLOAD_INVALID_CHUNK_SIZE": "invalid chunk size, it must be positive and not exceed the transfer limit",
   "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "upload file size exceeds limit",
