@@ -13,6 +13,7 @@ export const adminPaths = {
   games: `${adminRoot}/games`,
   translators: `${adminRoot}/translators`,
   users: `${adminRoot}/users`,
+  uploads: `${adminRoot}/uploads`,
   ads: `${adminRoot}/ads`,
   adSlots: `${adminRoot}/ads/slots`,
   sponsors: `${adminRoot}/sponsors`,
@@ -29,6 +30,7 @@ export const adminPaths = {
   comment: (id: number) => `${adminRoot}/comments?id=${id}`,
   commentsBy: (userId: number) => `${adminRoot}/comments?status=ALL&author=${userId}`,
   keysOf: (userId: number) => `${adminRoot}/open-api?user=${userId}`,
+  uploadsBy: (userId: number) => `${adminRoot}/uploads?user=${userId}`,
   walkthrough: (id: number) => `${adminRoot}/walkthroughs?status=HELD&id=${id}`,
 } as const
 
@@ -51,6 +53,7 @@ export type NavKey =
   | 'games'
   | 'translators'
   | 'users'
+  | 'uploads'
   | 'ads'
   | 'sponsors'
   | 'friendLinks'
@@ -100,6 +103,7 @@ export function navigationOf(pending: Pending): Navigation {
           entry('games', adminPaths.games),
           entry('translators', adminPaths.translators),
           entry('users', adminPaths.users),
+          entry('uploads', adminPaths.uploads),
           entry('ads', adminPaths.ads),
           entry('sponsors', adminPaths.sponsors),
           entry('friendLinks', adminPaths.friendLinks),

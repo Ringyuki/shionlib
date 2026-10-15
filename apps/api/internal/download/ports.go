@@ -132,3 +132,17 @@ type Authorizer interface {
 type TicketSealer interface {
 	Seal(ticket Ticket) (string, error)
 }
+
+type UploadStore interface {
+	Uploads(ctx context.Context, filter UploadFilter, page Page) ([]Upload, int, error)
+	SessionUpload(ctx context.Context, id int) (UploadDetail, error)
+	AttemptUpload(ctx context.Context, id int) (UploadDetail, error)
+}
+
+type UploadHolds interface {
+	Holders(ctx context.Context, sessionIDs []int) (map[int]string, error)
+}
+
+type UploadTerminator interface {
+	Terminate(ctx context.Context, id int) error
+}

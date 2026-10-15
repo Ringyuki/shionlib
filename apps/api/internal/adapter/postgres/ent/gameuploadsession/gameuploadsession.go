@@ -39,6 +39,16 @@ const (
 	FieldExpiresAt = "expires_at"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
+	// FieldLastChunkAt holds the string denoting the last_chunk_at field in the database.
+	FieldLastChunkAt = "last_chunk_at"
+	// FieldCompletedAt holds the string denoting the completed_at field in the database.
+	FieldCompletedAt = "completed_at"
+	// FieldSubmittedAt holds the string denoting the submitted_at field in the database.
+	FieldSubmittedAt = "submitted_at"
+	// FieldAbortedAt holds the string denoting the aborted_at field in the database.
+	FieldAbortedAt = "aborted_at"
+	// FieldEndedAt holds the string denoting the ended_at field in the database.
+	FieldEndedAt = "ended_at"
 	// FieldCreated holds the string denoting the created field in the database.
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
@@ -98,6 +108,11 @@ var Columns = []string{
 	FieldStoragePath,
 	FieldExpiresAt,
 	FieldCreatorID,
+	FieldLastChunkAt,
+	FieldCompletedAt,
+	FieldSubmittedAt,
+	FieldAbortedAt,
+	FieldEndedAt,
 	FieldCreated,
 	FieldUpdated,
 }
@@ -239,6 +254,31 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatorID orders the results by the creator_id field.
 func ByCreatorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatorID, opts...).ToFunc()
+}
+
+// ByLastChunkAt orders the results by the last_chunk_at field.
+func ByLastChunkAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastChunkAt, opts...).ToFunc()
+}
+
+// ByCompletedAt orders the results by the completed_at field.
+func ByCompletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCompletedAt, opts...).ToFunc()
+}
+
+// BySubmittedAt orders the results by the submitted_at field.
+func BySubmittedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubmittedAt, opts...).ToFunc()
+}
+
+// ByAbortedAt orders the results by the aborted_at field.
+func ByAbortedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAbortedAt, opts...).ToFunc()
+}
+
+// ByEndedAt orders the results by the ended_at field.
+func ByEndedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEndedAt, opts...).ToFunc()
 }
 
 // ByCreated orders the results by the created field.

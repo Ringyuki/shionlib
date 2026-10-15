@@ -126,6 +126,8 @@
     "title": "相关记录",
     "resources": "资源",
     "resourcesValue": "{count, number} 个已发布的资源",
+    "uploads": "上传",
+    "uploadsValue": "上传记录",
     "comments": "评论",
     "commentsValue": "{count, number} 条评论",
     "reports": "举报",

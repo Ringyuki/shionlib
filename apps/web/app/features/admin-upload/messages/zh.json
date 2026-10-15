@@ -1,0 +1,142 @@
+{
+  "title": "上传",
+  "stageFilter": "按状态筛选",
+  "stage": {
+    "all": "全部状态",
+    "not_started": "未能开始",
+    "uploading": "上传中",
+    "pending": "待提交",
+    "processing": "处理中",
+    "published": "已发布",
+    "rejected": "未通过检查",
+    "canceled": "已取消",
+    "expired": "已过期"
+  },
+  "search": "搜索文件名或上传者",
+  "byUser": "上传者：{name}",
+  "failedOnly": "只看有失败记录",
+  "total": "共 {count, number} 个上传",
+  "column": {
+    "file": "文件",
+    "uploader": "上传者",
+    "stage": "状态",
+    "failures": "失败",
+    "started": "开始"
+  },
+  "fileFacts": "{size} · {where}",
+  "unsubmitted": "未提交",
+  "received": "{received, number}/{chunks, number} 片",
+  "progress": "{percent, number}% · {received, number}/{chunks, number} 片",
+  "fileStage": {
+    "checking": "检查中",
+    "awaiting_volumes": "等待分卷",
+    "storing": "转存中",
+    "stored": "通过",
+    "under_review": "等待复核",
+    "stalled": "检查未完成",
+    "rejected": "未通过"
+  },
+  "rejection": {
+    "truncated": "文件不完整或已损坏",
+    "unsupported": "文件已损坏或格式不受支持",
+    "encrypted": "文件已加密",
+    "harmful": "含有病毒",
+    "incomplete_set": "分卷不全",
+    "abandoned": "检查一直未完成"
+  },
+  "detached": "已不在资源中",
+  "empty": {
+    "none": "暂无上传",
+    "uploading": "当前没有正在上传的文件",
+    "filtered": "没有符合条件的上传"
+  },
+  "pane": {
+    "title": "上传详情",
+    "facts": "概况",
+    "target": "资源",
+    "failures": "失败记录"
+  },
+  "notice": {
+    "allReceived": "{chunks, number} 个分片已全部收到，但没有提交成资源，过期后文件已清除",
+    "notStarted": "这个文件在开始上传之前就失败了，服务器上没有对应的上传"
+  },
+  "fact": {
+    "stage": "状态",
+    "uploader": "上传者",
+    "file": "文件",
+    "progress": "进度",
+    "hash": "校验值",
+    "started": "开始",
+    "time": "时间",
+    "lastChunk": "最近活动",
+    "deadline": "期限",
+    "completed": "完成",
+    "cancelled": "取消",
+    "ended": "清除",
+    "held": "占用",
+    "where": "去向"
+  },
+  "fileShape": "{size}，{chunks, number} 个分片，每片 {chunk}",
+  "progressValue": "{received, number} / {chunks, number}（{percent, number}%）",
+  "heldValue": "正在一个浏览器中上传",
+  "target": {
+    "game": "游戏",
+    "resource": "资源",
+    "file": "文件",
+    "check": "检查",
+    "storage": "存储",
+    "published": "发布",
+    "openResource": "在站点中查看",
+    "inChecks": "在文件检查中查看",
+    "removed": "资源已删除",
+    "unpublished": "尚未发布",
+    "inspected": "已列出压缩包内容"
+  },
+  "storage": {
+    "server": "服务器暂存",
+    "objectStore": "对象存储"
+  },
+  "noFailures": "没有失败记录",
+  "failuresSince": "失败记录从 2026年10月14日 开始记录",
+  "failureStage": {
+    "open": "开始上传",
+    "read": "读取文件",
+    "chunk": "发送分片",
+    "complete": "完成上传",
+    "submit": "提交资源"
+  },
+  "chunkNumber": "第 {number, number} 片",
+  "failure": {
+    "hint": "提示",
+    "error": "错误",
+    "request": "请求 ID",
+    "ray": "Ray ID",
+    "retries": "重试",
+    "browser": "浏览器",
+    "ip": "IP"
+  },
+  "reason": {
+    "different_file": "所选文件与之前上传的文件不是同一个",
+    "changed_file": "文件在上传过程中被修改",
+    "unreadable": "无法读取文件，请确认文件没有被移动、修改或删除后重新选择",
+    "expired": "上传已过期，请重新上传",
+    "rejected": "上传失败",
+    "submitRejected": "提交失败"
+  },
+  "wait": {
+    "network": "网络已中断",
+    "busy": "服务器繁忙",
+    "in_flight": "上传总量已达上限",
+    "signed_out": "登录已失效"
+  },
+  "errorStatus": "HTTP {status}",
+  "errorCode": "错误码 {code}",
+  "noRequestId": "没有请求 ID，响应不是由本站接口返回的",
+  "browserValue": "{name} {version}",
+  "browserOn": "{browser}，{system}",
+  "copy": "复制",
+  "terminate": "终止上传",
+  "terminateConfirm": "确定要终止这个上传吗？",
+  "terminateDescription": "已上传的部分将被丢弃，上传者需要重新上传这个文件",
+  "terminated": "上传已终止"
+}

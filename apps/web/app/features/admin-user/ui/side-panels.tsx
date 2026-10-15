@@ -32,6 +32,12 @@ export function RecordsPanel({ detail, records }: RecordsPanelProps) {
             {t('resourcesValue', { count: detail.counts.resources })}
           </Link>
         </DescriptionDetails>
+        <DescriptionTerm>{t('uploads')}</DescriptionTerm>
+        <DescriptionDetails>
+          <Link asChild>
+            <RouterLink to={adminPaths.uploadsBy(detail.id)}>{t('uploadsValue')}</RouterLink>
+          </Link>
+        </DescriptionDetails>
         <DescriptionTerm>{t('comments')}</DescriptionTerm>
         <DescriptionDetails>
           <Link asChild>

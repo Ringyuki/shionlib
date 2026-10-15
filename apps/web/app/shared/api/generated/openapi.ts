@@ -1599,6 +1599,74 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the uploads of every user, newest first, with failures reported before a session was opened */
+        get: operations["adminUpload.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/uploads/attempts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a failure reported before an upload session was opened */
+        get: operations["adminUpload.attempt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/uploads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read an upload session with the file made from it and the failures reported for it */
+        get: operations["adminUpload.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/uploads/{id}/terminate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End an upload in progress or not yet submitted and discard what was uploaded */
+        post: operations["adminUpload.terminate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -5259,6 +5327,178 @@ export type components = {
             /** @description Translators whose credits and names move to the one in the path */
             merged_ids: number[] | null;
         };
+        AdminUploadAttemptDTO: {
+            /** Format: date-time */
+            at: string;
+            error: components["schemas"]["AdminUploadErrorDTO"];
+            /** @enum {string} */
+            wait: "network" | "busy" | "in_flight" | "signed_out";
+        };
+        AdminUploadDTO: {
+            /** Format: int64 */
+            chunks: number;
+            /** Format: int64 */
+            failure_count: number;
+            /** @description Newest first */
+            failures: components["schemas"]["AdminUploadFailureDTO"][] | null;
+            file_name: string;
+            /**
+             * @description Where the file made from the upload is; null before a file was made
+             * @enum {string|null}
+             */
+            file_stage: "checking" | "awaiting_volumes" | "storing" | "stored" | "under_review" | "stalled" | "rejected" | null;
+            /** @description The game of the resource the file is in */
+            game: components["schemas"]["AdminUploadGameDTO"];
+            /** @description A browser is uploading it right now */
+            held: boolean;
+            /**
+             * Format: int64
+             * @description The session id, or the failure id of an attempt
+             */
+            id: number;
+            /**
+             * @description An upload session, or a failure the browser reported before it opened one
+             * @enum {string}
+             */
+            kind: "session" | "attempt";
+            /**
+             * Format: int64
+             * @description Chunks received
+             */
+            received: number;
+            /**
+             * @description Why the check refused the file
+             * @enum {string|null}
+             */
+            rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | "abandoned" | null;
+            /** @description Null for an attempt */
+            session: components["schemas"]["AdminUploadSessionDTO"] | null;
+            /** Format: int64 */
+            size: number;
+            /** @enum {string} */
+            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+            /** Format: date-time */
+            started: string;
+            /** @description The resource file made from the upload; null before one was made */
+            target: components["schemas"]["AdminUploadTargetDTO"] | null;
+            uploader: components["schemas"]["AdminUploadUserDTO"];
+        };
+        AdminUploadErrorDTO: {
+            /** Format: int64 */
+            code: number | null;
+            message: string;
+            name: string;
+            ray: string | null;
+            request_id: string | null;
+            /** Format: int64 */
+            status: number | null;
+        };
+        AdminUploadFailureDTO: {
+            /** Format: date-time */
+            at: string;
+            /** @description Tries retried before the failure, oldest first */
+            attempts: components["schemas"]["AdminUploadAttemptDTO"][] | null;
+            /** Format: int64 */
+            chunk: number | null;
+            client: string;
+            error: components["schemas"]["AdminUploadErrorDTO"];
+            file_name: string;
+            /** Format: int64 */
+            file_size: number;
+            /** Format: int64 */
+            id: number;
+            ip: string;
+            /** @enum {string} */
+            reason: "different_file" | "changed_file" | "unreadable" | "expired" | "rejected";
+            /** @enum {string} */
+            stage: "open" | "read" | "chunk" | "complete" | "submit";
+            user_agent: string;
+        };
+        AdminUploadGameDTO: {
+            /** Format: int64 */
+            id: number;
+            title_en: string;
+            title_jp: string;
+            title_zh: string;
+        } | null;
+        AdminUploadItemDTO: {
+            /** Format: int64 */
+            chunks: number;
+            /** Format: int64 */
+            failure_count: number;
+            file_name: string;
+            /**
+             * @description Where the file made from the upload is; null before a file was made
+             * @enum {string|null}
+             */
+            file_stage: "checking" | "awaiting_volumes" | "storing" | "stored" | "under_review" | "stalled" | "rejected" | null;
+            /** @description The game of the resource the file is in */
+            game: components["schemas"]["AdminUploadGameDTO"] | null;
+            /**
+             * Format: int64
+             * @description The session id, or the failure id of an attempt
+             */
+            id: number;
+            /**
+             * @description An upload session, or a failure the browser reported before it opened one
+             * @enum {string}
+             */
+            kind: "session" | "attempt";
+            /**
+             * Format: int64
+             * @description Chunks received
+             */
+            received: number;
+            /**
+             * @description Why the check refused the file
+             * @enum {string|null}
+             */
+            rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | "abandoned" | null;
+            /** Format: int64 */
+            size: number;
+            /** @enum {string} */
+            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+            /** Format: date-time */
+            started: string;
+            uploader: components["schemas"]["AdminUploadUserDTO"];
+        };
+        AdminUploadSessionDTO: {
+            /** Format: date-time */
+            aborted_at: string | null;
+            /** Format: int64 */
+            chunk_size: number;
+            /** Format: date-time */
+            completed_at: string | null;
+            /** Format: date-time */
+            ended_at: string | null;
+            /** Format: date-time */
+            expires_at: string;
+            file_hash: string;
+            /** @enum {string} */
+            hash_algorithm: "sha256" | "blake3";
+            /** Format: date-time */
+            last_chunk_at: string | null;
+            /** Format: date-time */
+            submitted_at: string | null;
+            /** Format: date-time */
+            updated: string;
+        } | null;
+        AdminUploadTargetDTO: {
+            /** Format: int64 */
+            file_id: number;
+            /** Format: int64 */
+            inspection_id: number | null;
+            /** Format: int64 */
+            resource_id: number;
+            /** Format: date-time */
+            resource_published_at: string | null;
+            resource_removed: boolean;
+        } | null;
+        AdminUploadUserDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
         AdminUserAllowMaskDTO: {
             /** @description Decimal string of the user's own grants */
             allowMask: string;
@@ -6326,7 +6566,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 560107 | 560108 | 560109 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103 | 700101 | 700102 | 700103 | 700104 | 700105;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 480118 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 560107 | 560108 | 560109 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103 | 700101 | 700102 | 700103 | 700104 | 700105;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -7556,6 +7796,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeAdminUploadDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminUploadDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeAdminUserAllowMaskDTO: {
             /** Format: int64 */
             code: number;
@@ -8701,6 +8951,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageAdminTranslatorItemDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageAdminUploadItemDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageAdminUploadItemDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -10368,6 +10628,10 @@ export type components = {
             items: components["schemas"]["AdminTranslatorItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
+        PageAdminUploadItemDTO: {
+            items: components["schemas"]["AdminUploadItemDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
         PageAdminUserItemDTO: {
             items: components["schemas"]["AdminUserItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
@@ -10667,6 +10931,8 @@ export type components = {
              * @description The upload session, when one was opened
              */
             session_id?: number;
+            /** @description The upload sessions of the files a failed submission was made of; the failure is recorded once for each */
+            session_ids?: number[] | null;
             /**
              * @description Opening the session, reading the file, sending a chunk, completing the session, or creating the resource from the finished uploads
              * @enum {string}
@@ -15371,6 +15637,143 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeUploadLadderDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminUpload.list": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+                stage?: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+                /** @description Part of the file name or of the uploader's name */
+                search?: string;
+                userId?: number;
+                /** @description Only uploads with a failure the browser reported */
+                failed?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageAdminUploadItemDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminUpload.attempt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminUploadDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminUpload.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminUploadDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminUpload.terminate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
                 };
             };
             /** @description Error */

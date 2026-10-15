@@ -52,5 +52,6 @@ func (UploadFailure) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id").StorageKey("upload_failures_user_id_idx"),
 		index.Fields("created").StorageKey("upload_failures_created_idx"),
+		index.Fields("session_id").StorageKey("upload_failures_session_id_idx"),
 	}
 }

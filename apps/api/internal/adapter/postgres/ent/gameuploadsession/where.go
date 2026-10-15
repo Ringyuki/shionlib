@@ -106,6 +106,31 @@ func CreatorID(v int) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldEQ(FieldCreatorID, v))
 }
 
+// LastChunkAt applies equality check predicate on the "last_chunk_at" field. It's identical to LastChunkAtEQ.
+func LastChunkAt(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldLastChunkAt, v))
+}
+
+// CompletedAt applies equality check predicate on the "completed_at" field. It's identical to CompletedAtEQ.
+func CompletedAt(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldCompletedAt, v))
+}
+
+// SubmittedAt applies equality check predicate on the "submitted_at" field. It's identical to SubmittedAtEQ.
+func SubmittedAt(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldSubmittedAt, v))
+}
+
+// AbortedAt applies equality check predicate on the "aborted_at" field. It's identical to AbortedAtEQ.
+func AbortedAt(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldAbortedAt, v))
+}
+
+// EndedAt applies equality check predicate on the "ended_at" field. It's identical to EndedAtEQ.
+func EndedAt(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldEndedAt, v))
+}
+
 // Created applies equality check predicate on the "created" field. It's identical to CreatedEQ.
 func Created(v time.Time) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldEQ(FieldCreated, v))
@@ -654,6 +679,256 @@ func CreatorIDIn(vs ...int) predicate.GameUploadSession {
 // CreatorIDNotIn applies the NotIn predicate on the "creator_id" field.
 func CreatorIDNotIn(vs ...int) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldNotIn(FieldCreatorID, vs...))
+}
+
+// LastChunkAtEQ applies the EQ predicate on the "last_chunk_at" field.
+func LastChunkAtEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldLastChunkAt, v))
+}
+
+// LastChunkAtNEQ applies the NEQ predicate on the "last_chunk_at" field.
+func LastChunkAtNEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldLastChunkAt, v))
+}
+
+// LastChunkAtIn applies the In predicate on the "last_chunk_at" field.
+func LastChunkAtIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldLastChunkAt, vs...))
+}
+
+// LastChunkAtNotIn applies the NotIn predicate on the "last_chunk_at" field.
+func LastChunkAtNotIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldLastChunkAt, vs...))
+}
+
+// LastChunkAtGT applies the GT predicate on the "last_chunk_at" field.
+func LastChunkAtGT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldLastChunkAt, v))
+}
+
+// LastChunkAtGTE applies the GTE predicate on the "last_chunk_at" field.
+func LastChunkAtGTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldLastChunkAt, v))
+}
+
+// LastChunkAtLT applies the LT predicate on the "last_chunk_at" field.
+func LastChunkAtLT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldLastChunkAt, v))
+}
+
+// LastChunkAtLTE applies the LTE predicate on the "last_chunk_at" field.
+func LastChunkAtLTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldLastChunkAt, v))
+}
+
+// LastChunkAtIsNil applies the IsNil predicate on the "last_chunk_at" field.
+func LastChunkAtIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldLastChunkAt))
+}
+
+// LastChunkAtNotNil applies the NotNil predicate on the "last_chunk_at" field.
+func LastChunkAtNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldLastChunkAt))
+}
+
+// CompletedAtEQ applies the EQ predicate on the "completed_at" field.
+func CompletedAtEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldCompletedAt, v))
+}
+
+// CompletedAtNEQ applies the NEQ predicate on the "completed_at" field.
+func CompletedAtNEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldCompletedAt, v))
+}
+
+// CompletedAtIn applies the In predicate on the "completed_at" field.
+func CompletedAtIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldCompletedAt, vs...))
+}
+
+// CompletedAtNotIn applies the NotIn predicate on the "completed_at" field.
+func CompletedAtNotIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldCompletedAt, vs...))
+}
+
+// CompletedAtGT applies the GT predicate on the "completed_at" field.
+func CompletedAtGT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldCompletedAt, v))
+}
+
+// CompletedAtGTE applies the GTE predicate on the "completed_at" field.
+func CompletedAtGTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldCompletedAt, v))
+}
+
+// CompletedAtLT applies the LT predicate on the "completed_at" field.
+func CompletedAtLT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldCompletedAt, v))
+}
+
+// CompletedAtLTE applies the LTE predicate on the "completed_at" field.
+func CompletedAtLTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldCompletedAt, v))
+}
+
+// CompletedAtIsNil applies the IsNil predicate on the "completed_at" field.
+func CompletedAtIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldCompletedAt))
+}
+
+// CompletedAtNotNil applies the NotNil predicate on the "completed_at" field.
+func CompletedAtNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldCompletedAt))
+}
+
+// SubmittedAtEQ applies the EQ predicate on the "submitted_at" field.
+func SubmittedAtEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldSubmittedAt, v))
+}
+
+// SubmittedAtNEQ applies the NEQ predicate on the "submitted_at" field.
+func SubmittedAtNEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldSubmittedAt, v))
+}
+
+// SubmittedAtIn applies the In predicate on the "submitted_at" field.
+func SubmittedAtIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldSubmittedAt, vs...))
+}
+
+// SubmittedAtNotIn applies the NotIn predicate on the "submitted_at" field.
+func SubmittedAtNotIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldSubmittedAt, vs...))
+}
+
+// SubmittedAtGT applies the GT predicate on the "submitted_at" field.
+func SubmittedAtGT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldSubmittedAt, v))
+}
+
+// SubmittedAtGTE applies the GTE predicate on the "submitted_at" field.
+func SubmittedAtGTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldSubmittedAt, v))
+}
+
+// SubmittedAtLT applies the LT predicate on the "submitted_at" field.
+func SubmittedAtLT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldSubmittedAt, v))
+}
+
+// SubmittedAtLTE applies the LTE predicate on the "submitted_at" field.
+func SubmittedAtLTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldSubmittedAt, v))
+}
+
+// SubmittedAtIsNil applies the IsNil predicate on the "submitted_at" field.
+func SubmittedAtIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldSubmittedAt))
+}
+
+// SubmittedAtNotNil applies the NotNil predicate on the "submitted_at" field.
+func SubmittedAtNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldSubmittedAt))
+}
+
+// AbortedAtEQ applies the EQ predicate on the "aborted_at" field.
+func AbortedAtEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldAbortedAt, v))
+}
+
+// AbortedAtNEQ applies the NEQ predicate on the "aborted_at" field.
+func AbortedAtNEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldAbortedAt, v))
+}
+
+// AbortedAtIn applies the In predicate on the "aborted_at" field.
+func AbortedAtIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldAbortedAt, vs...))
+}
+
+// AbortedAtNotIn applies the NotIn predicate on the "aborted_at" field.
+func AbortedAtNotIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldAbortedAt, vs...))
+}
+
+// AbortedAtGT applies the GT predicate on the "aborted_at" field.
+func AbortedAtGT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldAbortedAt, v))
+}
+
+// AbortedAtGTE applies the GTE predicate on the "aborted_at" field.
+func AbortedAtGTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldAbortedAt, v))
+}
+
+// AbortedAtLT applies the LT predicate on the "aborted_at" field.
+func AbortedAtLT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldAbortedAt, v))
+}
+
+// AbortedAtLTE applies the LTE predicate on the "aborted_at" field.
+func AbortedAtLTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldAbortedAt, v))
+}
+
+// AbortedAtIsNil applies the IsNil predicate on the "aborted_at" field.
+func AbortedAtIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldAbortedAt))
+}
+
+// AbortedAtNotNil applies the NotNil predicate on the "aborted_at" field.
+func AbortedAtNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldAbortedAt))
+}
+
+// EndedAtEQ applies the EQ predicate on the "ended_at" field.
+func EndedAtEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldEndedAt, v))
+}
+
+// EndedAtNEQ applies the NEQ predicate on the "ended_at" field.
+func EndedAtNEQ(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldEndedAt, v))
+}
+
+// EndedAtIn applies the In predicate on the "ended_at" field.
+func EndedAtIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldEndedAt, vs...))
+}
+
+// EndedAtNotIn applies the NotIn predicate on the "ended_at" field.
+func EndedAtNotIn(vs ...time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldEndedAt, vs...))
+}
+
+// EndedAtGT applies the GT predicate on the "ended_at" field.
+func EndedAtGT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldEndedAt, v))
+}
+
+// EndedAtGTE applies the GTE predicate on the "ended_at" field.
+func EndedAtGTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldEndedAt, v))
+}
+
+// EndedAtLT applies the LT predicate on the "ended_at" field.
+func EndedAtLT(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldEndedAt, v))
+}
+
+// EndedAtLTE applies the LTE predicate on the "ended_at" field.
+func EndedAtLTE(v time.Time) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldEndedAt, v))
+}
+
+// EndedAtIsNil applies the IsNil predicate on the "ended_at" field.
+func EndedAtIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldEndedAt))
+}
+
+// EndedAtNotNil applies the NotNil predicate on the "ended_at" field.
+func EndedAtNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldEndedAt))
 }
 
 // CreatedEQ applies the EQ predicate on the "created" field.

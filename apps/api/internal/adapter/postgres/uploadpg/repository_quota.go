@@ -30,7 +30,7 @@ SELECT
 	+
 	(SELECT COALESCE(SUM(s.total_size), 0)
 	FROM game_upload_sessions s
-	WHERE s.creator_id = $1 AND s.status = 'COMPLETED'
+	WHERE s.creator_id = $1 AND s.status = 'COMPLETED' AND s.submitted_at IS NULL
 	AND NOT EXISTS (SELECT 1 FROM game_download_resource_files f WHERE f.upload_session_id = s.id))`
 
 const inFlightBytesSQL = `

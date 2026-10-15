@@ -39,6 +39,7 @@ describe('navigationOf', () => {
       ['games', adminPaths.games],
       ['translators', adminPaths.translators],
       ['users', adminPaths.users],
+      ['uploads', adminPaths.uploads],
       ['ads', adminPaths.ads],
       ['sponsors', adminPaths.sponsors],
       ['friendLinks', adminPaths.friendLinks],

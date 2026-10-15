@@ -111,4 +111,18 @@ describe('reports', () => {
       file_size: 13830448642,
     })
   })
+
+  it('names the uploads of a resource that could not be made', () => {
+    const opened = { ...upload, session: { id: 7781, chunkSize: 4, totalChunks: 2 } }
+    expect(
+      submissionReport('Rewrite+', [opened, upload], new TypeError('Failed to fetch')),
+    ).toEqual({
+      session_ids: [7781],
+      stage: 'submit',
+      reason: 'rejected',
+      error: { name: 'TypeError', message: 'Failed to fetch' },
+      file_name: 'Rewrite+',
+      file_size: 13830448642,
+    })
+  })
 })

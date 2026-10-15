@@ -30,15 +30,23 @@ type FailureAttempt struct {
 }
 
 type FailureReport struct {
-	SessionID *int
-	Stage     FailureStage
-	Reason    string
-	Error     ClientError
-	Chunk     *int
-	FileName  string
-	FileSize  int64
-	Attempts  []FailureAttempt
-	Client    string
-	IP        string
-	UserAgent string
+	SessionID  *int
+	SessionIDs []int
+	Stage      FailureStage
+	Reason     string
+	Error      ClientError
+	Chunk      *int
+	FileName   string
+	FileSize   int64
+	Attempts   []FailureAttempt
+	Client     string
+	IP         string
+	UserAgent  string
+}
+
+type Failure struct {
+	FailureReport
+	ID     int
+	UserID int
+	At     time.Time
 }

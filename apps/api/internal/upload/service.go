@@ -122,6 +122,9 @@ func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, holder string
 	if err != nil {
 		return err
 	}
+	if session.Ended() {
+		return ErrSessionExpired
+	}
 	if session.Status != StatusUploading {
 		return ErrInvalidSessionStatus
 	}
@@ -167,7 +170,7 @@ func (s *Service) Status(ctx context.Context, who actor.Actor, id int) (Session,
 	if err != nil {
 		return Session{}, err
 	}
-	if session.Expired(s.now()) {
+	if session.Ended() || session.Expired(s.now()) {
 		return Session{}, ErrSessionExpired
 	}
 	if session.CreatorID != who.UserID {
@@ -186,6 +189,9 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, holder string, 
 	}
 	if session.Status == StatusCompleted && session.FileHash == fileHash {
 		return nil
+	}
+	if session.Ended() {
+		return ErrSessionExpired
 	}
 	if session.Status != StatusUploading {
 		return ErrInvalidSessionStatus
@@ -343,7 +349,36 @@ func (s *Service) Claim(ctx context.Context, who actor.Actor, id int) (Session, 
 	if session.CreatorID != who.UserID {
 		return Session{}, ErrSessionNotOwner
 	}
+	if err := s.repo.MarkSubmitted(ctx, session.ID); err != nil {
+		return Session{}, err
+	}
 	return session, nil
+}
+
+func (s *Service) Terminate(ctx context.Context, id int) error {
+	var path string
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		session, err := s.repo.LockSession(ctx, id)
+		if err != nil {
+			return err
+		}
+		if session.SubmittedAt != nil {
+			return ErrSessionAlreadyUsed
+		}
+		if err := s.discardable(ctx, session); err != nil {
+			return err
+		}
+		if _, err := s.repo.SetStatus(ctx, session.ID, session.Status, StatusAborted); err != nil {
+			return err
+		}
+		path = session.StoragePath
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	_ = s.removeOwned(ctx, path)
+	return nil
 }
 
 func (s *Service) Take(ctx context.Context, who actor.Actor, id int, target string) (Session, error) {
@@ -421,7 +456,7 @@ func (s *Service) isStale(ctx context.Context, session Session) (bool, error) {
 	case StatusExpired:
 		return false, nil
 	case StatusCompleted:
-		if !session.Updated.Before(cutoff) {
+		if session.SubmittedAt != nil || !session.Updated.Before(cutoff) {
 			return false, nil
 		}
 		attached, err := s.repo.HasFile(ctx, session.ID)
@@ -464,19 +499,40 @@ func (s *Service) removeOwned(ctx context.Context, path string) error {
 }
 
 func (s *Service) ReportFailure(ctx context.Context, who actor.Actor, report FailureReport) (int, error) {
-	if report.SessionID != nil {
-		session, err := s.repo.GetSession(ctx, *report.SessionID)
-		switch {
-		case errors.Is(err, ErrSessionNotFound):
-			report.SessionID = nil
-		case err != nil:
-			return 0, err
-		case session.CreatorID != who.UserID:
-			return 0, ErrSessionNotOwner
-		}
-	}
 	if len(report.Attempts) > MaxFailureAttempts {
 		report.Attempts = report.Attempts[len(report.Attempts)-MaxFailureAttempts:]
 	}
+	ids := report.SessionIDs
+	report.SessionIDs = nil
+	if report.SessionID != nil {
+		ids = append([]int{*report.SessionID}, ids...)
+	}
+	first := 0
+	for _, id := range ids {
+		session, err := s.repo.GetSession(ctx, id)
+		if errors.Is(err, ErrSessionNotFound) {
+			continue
+		}
+		if err != nil {
+			return 0, err
+		}
+		if session.CreatorID != who.UserID {
+			return 0, ErrSessionNotOwner
+		}
+		one := report
+		one.SessionID = &session.ID
+		one.FileName, one.FileSize = session.FileName, session.TotalSize
+		recorded, err := s.repo.RecordFailure(ctx, who.UserID, one, s.now())
+		if err != nil {
+			return 0, err
+		}
+		if first == 0 {
+			first = recorded
+		}
+	}
+	if first != 0 {
+		return first, nil
+	}
+	report.SessionID = nil
 	return s.repo.RecordFailure(ctx, who.UserID, report, s.now())
 }

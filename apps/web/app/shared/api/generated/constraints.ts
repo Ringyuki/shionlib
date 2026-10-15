@@ -2111,6 +2111,12 @@ export const constraints = {
       "format": "int64",
       "minimum": 1
     },
+    "session_ids": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 100
+    },
     "stage": {
       "type": "string",
       "required": true,

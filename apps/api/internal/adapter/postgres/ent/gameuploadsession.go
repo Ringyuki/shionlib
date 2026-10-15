@@ -44,6 +44,16 @@ type GameUploadSession struct {
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID int `json:"creator_id,omitempty"`
+	// LastChunkAt holds the value of the "last_chunk_at" field.
+	LastChunkAt *time.Time `json:"last_chunk_at,omitempty"`
+	// CompletedAt holds the value of the "completed_at" field.
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	// SubmittedAt holds the value of the "submitted_at" field.
+	SubmittedAt *time.Time `json:"submitted_at,omitempty"`
+	// AbortedAt holds the value of the "aborted_at" field.
+	AbortedAt *time.Time `json:"aborted_at,omitempty"`
+	// EndedAt holds the value of the "ended_at" field.
+	EndedAt *time.Time `json:"ended_at,omitempty"`
 	// Created holds the value of the "created" field.
 	Created time.Time `json:"created,omitempty"`
 	// Updated holds the value of the "updated" field.
@@ -120,7 +130,7 @@ func (*GameUploadSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case gameuploadsession.FieldFileName, gameuploadsession.FieldMimeType, gameuploadsession.FieldHashAlgorithm, gameuploadsession.FieldFileSha256, gameuploadsession.FieldStatus, gameuploadsession.FieldStoragePath:
 			values[i] = new(sql.NullString)
-		case gameuploadsession.FieldExpiresAt, gameuploadsession.FieldCreated, gameuploadsession.FieldUpdated:
+		case gameuploadsession.FieldExpiresAt, gameuploadsession.FieldLastChunkAt, gameuploadsession.FieldCompletedAt, gameuploadsession.FieldSubmittedAt, gameuploadsession.FieldAbortedAt, gameuploadsession.FieldEndedAt, gameuploadsession.FieldCreated, gameuploadsession.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -215,6 +225,41 @@ func (_m *GameUploadSession) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field creator_id", values[i])
 			} else if value.Valid {
 				_m.CreatorID = int(value.Int64)
+			}
+		case gameuploadsession.FieldLastChunkAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_chunk_at", values[i])
+			} else if value.Valid {
+				_m.LastChunkAt = new(time.Time)
+				*_m.LastChunkAt = value.Time
+			}
+		case gameuploadsession.FieldCompletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field completed_at", values[i])
+			} else if value.Valid {
+				_m.CompletedAt = new(time.Time)
+				*_m.CompletedAt = value.Time
+			}
+		case gameuploadsession.FieldSubmittedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field submitted_at", values[i])
+			} else if value.Valid {
+				_m.SubmittedAt = new(time.Time)
+				*_m.SubmittedAt = value.Time
+			}
+		case gameuploadsession.FieldAbortedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field aborted_at", values[i])
+			} else if value.Valid {
+				_m.AbortedAt = new(time.Time)
+				*_m.AbortedAt = value.Time
+			}
+		case gameuploadsession.FieldEndedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field ended_at", values[i])
+			} else if value.Valid {
+				_m.EndedAt = new(time.Time)
+				*_m.EndedAt = value.Time
 			}
 		case gameuploadsession.FieldCreated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -321,6 +366,31 @@ func (_m *GameUploadSession) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("creator_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatorID))
+	builder.WriteString(", ")
+	if v := _m.LastChunkAt; v != nil {
+		builder.WriteString("last_chunk_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CompletedAt; v != nil {
+		builder.WriteString("completed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.SubmittedAt; v != nil {
+		builder.WriteString("submitted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.AbortedAt; v != nil {
+		builder.WriteString("aborted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.EndedAt; v != nil {
+		builder.WriteString("ended_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created=")
 	builder.WriteString(_m.Created.Format(time.ANSIC))

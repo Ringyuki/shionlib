@@ -227,6 +227,106 @@ func (_u *GameUploadSessionUpdate) SetNillableCreatorID(v *int) *GameUploadSessi
 	return _u
 }
 
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (_u *GameUploadSessionUpdate) SetLastChunkAt(v time.Time) *GameUploadSessionUpdate {
+	_u.mutation.SetLastChunkAt(v)
+	return _u
+}
+
+// SetNillableLastChunkAt sets the "last_chunk_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableLastChunkAt(v *time.Time) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetLastChunkAt(*v)
+	}
+	return _u
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (_u *GameUploadSessionUpdate) ClearLastChunkAt() *GameUploadSessionUpdate {
+	_u.mutation.ClearLastChunkAt()
+	return _u
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (_u *GameUploadSessionUpdate) SetCompletedAt(v time.Time) *GameUploadSessionUpdate {
+	_u.mutation.SetCompletedAt(v)
+	return _u
+}
+
+// SetNillableCompletedAt sets the "completed_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableCompletedAt(v *time.Time) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetCompletedAt(*v)
+	}
+	return _u
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (_u *GameUploadSessionUpdate) ClearCompletedAt() *GameUploadSessionUpdate {
+	_u.mutation.ClearCompletedAt()
+	return _u
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (_u *GameUploadSessionUpdate) SetSubmittedAt(v time.Time) *GameUploadSessionUpdate {
+	_u.mutation.SetSubmittedAt(v)
+	return _u
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableSubmittedAt(v *time.Time) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetSubmittedAt(*v)
+	}
+	return _u
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (_u *GameUploadSessionUpdate) ClearSubmittedAt() *GameUploadSessionUpdate {
+	_u.mutation.ClearSubmittedAt()
+	return _u
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (_u *GameUploadSessionUpdate) SetAbortedAt(v time.Time) *GameUploadSessionUpdate {
+	_u.mutation.SetAbortedAt(v)
+	return _u
+}
+
+// SetNillableAbortedAt sets the "aborted_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableAbortedAt(v *time.Time) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetAbortedAt(*v)
+	}
+	return _u
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (_u *GameUploadSessionUpdate) ClearAbortedAt() *GameUploadSessionUpdate {
+	_u.mutation.ClearAbortedAt()
+	return _u
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (_u *GameUploadSessionUpdate) SetEndedAt(v time.Time) *GameUploadSessionUpdate {
+	_u.mutation.SetEndedAt(v)
+	return _u
+}
+
+// SetNillableEndedAt sets the "ended_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableEndedAt(v *time.Time) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetEndedAt(*v)
+	}
+	return _u
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (_u *GameUploadSessionUpdate) ClearEndedAt() *GameUploadSessionUpdate {
+	_u.mutation.ClearEndedAt()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *GameUploadSessionUpdate) SetUpdated(v time.Time) *GameUploadSessionUpdate {
 	_u.mutation.SetUpdated(v)
@@ -465,6 +565,36 @@ func (_u *GameUploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(gameuploadsession.FieldExpiresAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.LastChunkAt(); ok {
+		_spec.SetField(gameuploadsession.FieldLastChunkAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastChunkAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldLastChunkAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CompletedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldCompletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CompletedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SubmittedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldSubmittedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SubmittedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldSubmittedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AbortedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldAbortedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AbortedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldAbortedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.EndedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldEndedAt, field.TypeTime, value)
+	}
+	if _u.mutation.EndedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldEndedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)
@@ -832,6 +962,106 @@ func (_u *GameUploadSessionUpdateOne) SetNillableCreatorID(v *int) *GameUploadSe
 	return _u
 }
 
+// SetLastChunkAt sets the "last_chunk_at" field.
+func (_u *GameUploadSessionUpdateOne) SetLastChunkAt(v time.Time) *GameUploadSessionUpdateOne {
+	_u.mutation.SetLastChunkAt(v)
+	return _u
+}
+
+// SetNillableLastChunkAt sets the "last_chunk_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableLastChunkAt(v *time.Time) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetLastChunkAt(*v)
+	}
+	return _u
+}
+
+// ClearLastChunkAt clears the value of the "last_chunk_at" field.
+func (_u *GameUploadSessionUpdateOne) ClearLastChunkAt() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearLastChunkAt()
+	return _u
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (_u *GameUploadSessionUpdateOne) SetCompletedAt(v time.Time) *GameUploadSessionUpdateOne {
+	_u.mutation.SetCompletedAt(v)
+	return _u
+}
+
+// SetNillableCompletedAt sets the "completed_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableCompletedAt(v *time.Time) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetCompletedAt(*v)
+	}
+	return _u
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (_u *GameUploadSessionUpdateOne) ClearCompletedAt() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearCompletedAt()
+	return _u
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (_u *GameUploadSessionUpdateOne) SetSubmittedAt(v time.Time) *GameUploadSessionUpdateOne {
+	_u.mutation.SetSubmittedAt(v)
+	return _u
+}
+
+// SetNillableSubmittedAt sets the "submitted_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableSubmittedAt(v *time.Time) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetSubmittedAt(*v)
+	}
+	return _u
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (_u *GameUploadSessionUpdateOne) ClearSubmittedAt() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearSubmittedAt()
+	return _u
+}
+
+// SetAbortedAt sets the "aborted_at" field.
+func (_u *GameUploadSessionUpdateOne) SetAbortedAt(v time.Time) *GameUploadSessionUpdateOne {
+	_u.mutation.SetAbortedAt(v)
+	return _u
+}
+
+// SetNillableAbortedAt sets the "aborted_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableAbortedAt(v *time.Time) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetAbortedAt(*v)
+	}
+	return _u
+}
+
+// ClearAbortedAt clears the value of the "aborted_at" field.
+func (_u *GameUploadSessionUpdateOne) ClearAbortedAt() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearAbortedAt()
+	return _u
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (_u *GameUploadSessionUpdateOne) SetEndedAt(v time.Time) *GameUploadSessionUpdateOne {
+	_u.mutation.SetEndedAt(v)
+	return _u
+}
+
+// SetNillableEndedAt sets the "ended_at" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableEndedAt(v *time.Time) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetEndedAt(*v)
+	}
+	return _u
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (_u *GameUploadSessionUpdateOne) ClearEndedAt() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearEndedAt()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *GameUploadSessionUpdateOne) SetUpdated(v time.Time) *GameUploadSessionUpdateOne {
 	_u.mutation.SetUpdated(v)
@@ -1100,6 +1330,36 @@ func (_u *GameUploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *GameU
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(gameuploadsession.FieldExpiresAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.LastChunkAt(); ok {
+		_spec.SetField(gameuploadsession.FieldLastChunkAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastChunkAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldLastChunkAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CompletedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldCompletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CompletedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SubmittedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldSubmittedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SubmittedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldSubmittedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AbortedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldAbortedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AbortedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldAbortedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.EndedAt(); ok {
+		_spec.SetField(gameuploadsession.FieldEndedAt, field.TypeTime, value)
+	}
+	if _u.mutation.EndedAtCleared() {
+		_spec.ClearField(gameuploadsession.FieldEndedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)

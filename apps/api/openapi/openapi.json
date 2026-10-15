@@ -2261,6 +2261,592 @@
         ],
         "type": "object"
       },
+      "AdminUploadAttemptDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/AdminUploadErrorDTO"
+          },
+          "wait": {
+            "enum": [
+              "network",
+              "busy",
+              "in_flight",
+              "signed_out"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "wait",
+          "error"
+        ],
+        "type": "object"
+      },
+      "AdminUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failure_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failures": {
+            "description": "Newest first",
+            "items": {
+              "$ref": "#/components/schemas/AdminUploadFailureDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_stage": {
+            "description": "Where the file made from the upload is; null before a file was made",
+            "enum": [
+              "checking",
+              "awaiting_volumes",
+              "storing",
+              "stored",
+              "under_review",
+              "stalled",
+              "rejected"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "game": {
+            "$ref": "#/components/schemas/AdminUploadGameDTO",
+            "description": "The game of the resource the file is in"
+          },
+          "held": {
+            "description": "A browser is uploading it right now",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The session id, or the failure id of an attempt",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "An upload session, or a failure the browser reported before it opened one",
+            "enum": [
+              "session",
+              "attempt"
+            ],
+            "type": "string"
+          },
+          "received": {
+            "description": "Chunks received",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejection": {
+            "description": "Why the check refused the file",
+            "enum": [
+              "truncated",
+              "unsupported",
+              "encrypted",
+              "harmful",
+              "incomplete_set",
+              "abandoned"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session": {
+            "description": "Null for an attempt",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminUploadSessionDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stage": {
+            "enum": [
+              "not_started",
+              "uploading",
+              "pending",
+              "processing",
+              "published",
+              "rejected",
+              "canceled",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "started": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "target": {
+            "description": "The resource file made from the upload; null before one was made",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminUploadTargetDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/AdminUploadUserDTO"
+          }
+        },
+        "required": [
+          "session",
+          "target",
+          "held",
+          "failures",
+          "kind",
+          "id",
+          "file_name",
+          "size",
+          "uploader",
+          "stage",
+          "file_stage",
+          "rejection",
+          "received",
+          "chunks",
+          "game",
+          "failure_count",
+          "started"
+        ],
+        "type": "object"
+      },
+      "AdminUploadErrorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ray": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "request_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "status",
+          "code",
+          "request_id",
+          "ray"
+        ],
+        "type": "object"
+      },
+      "AdminUploadFailureDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "attempts": {
+            "description": "Tries retried before the failure, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/AdminUploadAttemptDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "chunk": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "client": {
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/AdminUploadErrorDTO"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "different_file",
+              "changed_file",
+              "unreadable",
+              "expired",
+              "rejected"
+            ],
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "open",
+              "read",
+              "chunk",
+              "complete",
+              "submit"
+            ],
+            "type": "string"
+          },
+          "user_agent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "stage",
+          "reason",
+          "error",
+          "chunk",
+          "file_name",
+          "file_size",
+          "attempts",
+          "client",
+          "ip",
+          "user_agent"
+        ],
+        "type": "object"
+      },
+      "AdminUploadGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "AdminUploadItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failure_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_stage": {
+            "description": "Where the file made from the upload is; null before a file was made",
+            "enum": [
+              "checking",
+              "awaiting_volumes",
+              "storing",
+              "stored",
+              "under_review",
+              "stalled",
+              "rejected"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "game": {
+            "description": "The game of the resource the file is in",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminUploadGameDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "description": "The session id, or the failure id of an attempt",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "An upload session, or a failure the browser reported before it opened one",
+            "enum": [
+              "session",
+              "attempt"
+            ],
+            "type": "string"
+          },
+          "received": {
+            "description": "Chunks received",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rejection": {
+            "description": "Why the check refused the file",
+            "enum": [
+              "truncated",
+              "unsupported",
+              "encrypted",
+              "harmful",
+              "incomplete_set",
+              "abandoned"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stage": {
+            "enum": [
+              "not_started",
+              "uploading",
+              "pending",
+              "processing",
+              "published",
+              "rejected",
+              "canceled",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "started": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/AdminUploadUserDTO"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "file_name",
+          "size",
+          "uploader",
+          "stage",
+          "file_stage",
+          "rejection",
+          "received",
+          "chunks",
+          "game",
+          "failure_count",
+          "started"
+        ],
+        "type": "object"
+      },
+      "AdminUploadSessionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aborted_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "chunk_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ended_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "hash_algorithm": {
+            "enum": [
+              "sha256",
+              "blake3"
+            ],
+            "type": "string"
+          },
+          "last_chunk_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chunk_size",
+          "hash_algorithm",
+          "file_hash",
+          "expires_at",
+          "last_chunk_at",
+          "completed_at",
+          "submitted_at",
+          "aborted_at",
+          "ended_at",
+          "updated"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "AdminUploadTargetDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inspection_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "resource_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resource_published_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resource_removed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "file_id",
+          "resource_id",
+          "resource_removed",
+          "resource_published_at",
+          "inspection_id"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "AdminUploadUserDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "AdminUserAllowMaskDTO": {
         "additionalProperties": false,
         "properties": {
@@ -6411,6 +6997,7 @@
           480115,
           480116,
           480117,
+          480118,
           490101,
           490102,
           490103,
@@ -6617,6 +7204,7 @@
           "GAME_UPLOAD_INVALID_FILE_STATUS",
           "GAME_UPLOAD_INVALID_CHUNK_SIZE",
           "GAME_UPLOAD_SESSION_HELD_ELSEWHERE",
+          "GAME_UPLOAD_FAILURE_NOT_FOUND",
           "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT",
           "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED",
           "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE",
@@ -11274,6 +11862,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeAdminUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUploadDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeAdminUserAllowMaskDTO": {
         "additionalProperties": false,
         "properties": {
@@ -15257,6 +15878,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageAdminTranslatorItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminUploadItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminUploadItemDTO"
           },
           "message": {
             "type": "string"
@@ -21261,6 +21915,28 @@
         ],
         "type": "object"
       },
+      "PageAdminUploadItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUploadItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageAdminUserItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -22500,6 +23176,18 @@
             "format": "int64",
             "minimum": 1,
             "type": "integer"
+          },
+          "session_ids": {
+            "description": "The upload sessions of the files a failed submission was made of; the failure is recorded once for each",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 100,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "stage": {
             "description": "Opening the session, reading the file, sending a chunk, completing the session, or creating the resource from the finished uploads",
@@ -33344,6 +34032,304 @@
           }
         ],
         "summary": "What each upload tier takes and allows",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/uploads": {
+      "get": {
+        "operationId": "adminUpload.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "stage",
+            "schema": {
+              "enum": [
+                "not_started",
+                "uploading",
+                "pending",
+                "processing",
+                "published",
+                "rejected",
+                "canceled",
+                "expired"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Part of the file name or of the uploader's name",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Part of the file name or of the uploader's name",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "userId",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only uploads with a failure the browser reported",
+            "explode": false,
+            "in": "query",
+            "name": "failed",
+            "schema": {
+              "description": "Only uploads with a failure the browser reported",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminUploadItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the uploads of every user, newest first, with failures reported before a session was opened",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/uploads/attempts/{id}": {
+      "get": {
+        "operationId": "adminUpload.attempt",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUploadDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a failure reported before an upload session was opened",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/uploads/{id}": {
+      "get": {
+        "operationId": "adminUpload.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUploadDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read an upload session with the file made from it and the failures reported for it",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/uploads/{id}/terminate": {
+      "post": {
+        "operationId": "adminUpload.terminate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "End an upload in progress or not yet submitted and discard what was uploaded",
         "tags": [
           "admin"
         ]
