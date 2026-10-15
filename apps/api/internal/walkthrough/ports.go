@@ -2,6 +2,7 @@ package walkthrough
 
 import (
 	"context"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -44,4 +45,22 @@ type Queue interface {
 
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type Cast interface {
+	Cast(ctx context.Context, gameID int) ([]CastMember, error)
+}
+
+type Formatter interface {
+	Ready(ctx context.Context) (bool, error)
+	Format(ctx context.Context, request FormatRequest) (Formatted, error)
+}
+
+type FormatTasks interface {
+	Save(ctx context.Context, task FormatTask, ttl time.Duration) error
+	Get(ctx context.Context, id string) (FormatTask, bool, error)
+}
+
+type FormatQuota interface {
+	Take(ctx context.Context, userID int, day string, limit int) (bool, error)
 }

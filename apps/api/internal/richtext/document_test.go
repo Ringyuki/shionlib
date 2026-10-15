@@ -185,3 +185,20 @@ func TestVocabularyIsExposedForTheContract(t *testing.T) {
 		t.Fatal("the vocabulary must not be shared")
 	}
 }
+
+func TestParagraphsBuildADocumentFromPlainText(t *testing.T) {
+	built, err := richtext.Paragraphs([]string{"通关一次后", "第一行\n第二行"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"通关一次后"}]},{"type":"paragraph","content":[{"type":"text","text":"第一行"},{"type":"hard_break"},{"type":"text","text":"第二行"}]}]}`
+	if string(built.Raw()) != want || built.Text() != "通关一次后\n第一行\n第二行" {
+		t.Fatalf("built %s %q", built.Raw(), built.Text())
+	}
+	if parsed, err := richtext.Parse(built.Raw(), richtext.Comment); err != nil || string(parsed.Raw()) != want {
+		t.Fatalf("parsed %v", err)
+	}
+	if empty, err := richtext.Paragraphs(nil); err != nil || !empty.Empty() {
+		t.Fatalf("empty %v", err)
+	}
+}

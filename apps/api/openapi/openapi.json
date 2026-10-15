@@ -6434,6 +6434,9 @@
           560104,
           560105,
           560106,
+          560107,
+          560108,
+          560109,
           570101,
           570102,
           570103,
@@ -6637,6 +6640,9 @@
           "WALKTHROUGH_EMPTY",
           "WALKTHROUGH_ROUTE_INCOMPLETE",
           "WALKTHROUGH_ALREADY_WRITTEN",
+          "WALKTHROUGH_FORMAT_QUOTA_EXHAUSTED",
+          "WALKTHROUGH_FORMAT_FAILED",
+          "WALKTHROUGH_FORMAT_TASK_NOT_FOUND",
           "SPONSOR_ORDER_NOT_FOUND",
           "SPONSOR_ORDER_ALREADY_PAID",
           "SPONSOR_ORDER_EXPIRED",
@@ -17297,6 +17303,72 @@
         ],
         "type": "object"
       },
+      "EnvelopeWalkthroughFormatTaskDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WalkthroughFormatTaskDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeWalkthroughFormatterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WalkthroughFormatterDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "ErrorData": {
         "additionalProperties": false,
         "properties": {
@@ -17682,6 +17754,21 @@
         },
         "required": [
           "email"
+        ],
+        "type": "object"
+      },
+      "FormatWalkthroughInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "The walkthrough as plain text",
+            "maxLength": 50000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
         ],
         "type": "object"
       },
@@ -25387,6 +25474,77 @@
           "status",
           "review_pending",
           "creator"
+        ],
+        "type": "object"
+      },
+      "WalkthroughFormatTaskDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "result": {
+            "description": "The note and routes once the task is done; null while it works",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/WalkthroughFormattedDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "working",
+              "done"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "result"
+        ],
+        "type": "object"
+      },
+      "WalkthroughFormattedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "What belongs to no route; left out when there is none"
+          },
+          "routes": {
+            "description": "In the order of the text; a route about characters only has no name",
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughRouteDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "routes"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "WalkthroughFormatterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "True when a model formats walkthroughs and the daily quota is above zero",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "available"
         ],
         "type": "object"
       },
@@ -45239,6 +45397,109 @@
         ]
       }
     },
+    "/walkthrough/format": {
+      "get": {
+        "operationId": "walkthrough.formatter",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughFormatterDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Whether the caller can have walkthrough text formatted",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough/format/{task}": {
+      "get": {
+        "operationId": "walkthrough.formatResult",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f-]{36}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughFormatTaskDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Get a formatting task the caller started, with its result once done",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
     "/walkthrough/game/{id}": {
       "get": {
         "operationId": "walkthrough.listByGame",
@@ -45283,6 +45544,73 @@
           }
         },
         "summary": "List the published walkthroughs of a game, the caller's own first even when it is not published, then by latest update",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough/game/{id}/format": {
+      "post": {
+        "operationId": "walkthrough.format",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FormatWalkthroughInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughFormatTaskDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Start formatting walkthrough text into a note and routes; the result is fetched by the task id",
         "tags": [
           "walkthrough"
         ]

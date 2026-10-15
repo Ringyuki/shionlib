@@ -1,11 +1,13 @@
 package bootstrap
 
 import (
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aiwalkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/llm"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/modelsdev"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
@@ -29,7 +31,7 @@ func wireAI(infra *Infra, shared *Shared, modules *Modules) {
 	requests := aipg.NewRequestStore(infra.Ent)
 	stats := aipg.NewStatsStore(infra.Ent)
 	gateway := ai.NewService(ai.Deps{
-		Scenes:   aimoderation.Scenes,
+		Scenes:   slices.Concat(aimoderation.Scenes, aiwalkthrough.Scenes),
 		Repo:     repo,
 		Requests: requests,
 		Upstream: llm.NewClient(httpclient.New(httpclient.Options{Timeout: cfg.MaxCallDuration})),

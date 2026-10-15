@@ -65,7 +65,7 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Payment method brand | The vendor-neutral identity of a way to pay (`alipay`, `wechat_pay`, `paypal`, `google_pay`, `apple_pay`, `usdt`), assigned by a provider's adapter to the methods it recognises (`sponsor.MethodBrand`). |
 | AI model | The site's name for a model and its capabilities, optionally linked to a models.dev catalog entry (`ai.Model`). |
 | AI route | One way to reach a model: a provider, the upstream model id, protocol, price, priority and health status (`ai.Route`). |
-| AI scene | A call site in code (`moderation_screen`, `moderation_review`) bound to a model in the admin panel (`ai.SceneDefinition`). |
+| AI scene | A call site in code (`moderation_screen`, `moderation_review`, `walkthrough_format`) bound to a model in the admin panel (`ai.SceneDefinition`). |
 
 ## Banned words
 

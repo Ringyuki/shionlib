@@ -68,6 +68,30 @@ func Parse(raw []byte, schema Schema) (Document, error) {
 	return Document{raw: canonical, root: &root}, nil
 }
 
+func Paragraphs(texts []string) (Document, error) {
+	root := node{Type: nodeDocument}
+	for _, text := range texts {
+		paragraph := &node{Type: nodeParagraph}
+		for i, line := range strings.Split(text, "\n") {
+			if i > 0 {
+				paragraph.Content = append(paragraph.Content, &node{Type: nodeHardBreak})
+			}
+			if line != "" {
+				paragraph.Content = append(paragraph.Content, &node{Type: nodeText, Text: line})
+			}
+		}
+		root.Content = append(root.Content, paragraph)
+	}
+	if len(root.Content) == 0 {
+		return Document{}, nil
+	}
+	raw, err := json.Marshal(&root)
+	if err != nil {
+		return Document{}, fmt.Errorf("encode rich text document: %w", err)
+	}
+	return Document{raw: raw, root: &root}, nil
+}
+
 func notDocument(err error) error {
 	const unknownField = "json: unknown field "
 	if field, ok := strings.CutPrefix(err.Error(), unknownField); ok {

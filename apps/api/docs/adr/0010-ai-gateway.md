@@ -15,6 +15,7 @@ Add the capability `internal/ai`, modelled on the Hikarinagi gateway:
 - Protocols are implemented in `internal/adapter/llm` with streamed responses (idle timeout `AI_IDLE_TIMEOUT` between chunks, total bound `AI_MAX_CALL_DURATION`), and upstream errors are classified into `ai.ErrorKind` there.
 - The admin API lives under `/admin/ai/*`: reads for admins, changes, discovery, checks and the playground for super admins.
 - Moderation uses the gateway through `internal/adapter/aimoderation`. An unconfigured scene keeps the old behaviour of an empty `OPENAI_API_KEY`: content is approved without review.
+- Walkthrough formatting uses the gateway through `internal/adapter/aiwalkthrough` (scene `walkthrough_format`). An unconfigured scene hides the feature from writers.
 
 Hikarinagi features without a Shionlib use are left out: user AI credits, tool calling and the TypeSafe decision protocol.
 
