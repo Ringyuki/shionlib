@@ -8,7 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/animetrace"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/bangumi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/imaging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/characterpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/developerpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
@@ -24,6 +26,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sitemap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
@@ -37,7 +40,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/searchjobs"
 )
 
-const catalogOutboundTimeout = 15 * time.Second
+const (
+	catalogOutboundTimeout = 15 * time.Second
+	recognitionTimeout     = 30 * time.Second
+)
 
 func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
@@ -75,6 +81,17 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		Analytics:   searchredis.NewAnalytics(infra.Redis),
 	})
 
+	images := search.NewImageService(search.ImageDeps{
+		Finder: searchService,
+		Recognizer: animetrace.NewClient(animetrace.Options{
+			HTTP:     httpclient.New(httpclient.Options{Timeout: recognitionTimeout}),
+			Pacer:    ratelimit.New(infra.Redis),
+			Settings: shared.Settings,
+		}),
+		Pictures: imaging.NewTranscoder(),
+		Cache:    shared.Cache,
+	})
+
 	modules.Handlers = append(modules.Handlers,
 		gamehttp.NewHandler(gameService, scores, shared.Builder),
 		gamehttp.NewBangumiHandler(bangumiLink, shared.Builder, cfg.App.SiteURL, shared.Logger),
@@ -82,6 +99,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		developerhttp.NewHandler(developer.NewService(developers, shared.Transactor), shared.Builder),
 		translatorhttp.NewHandler(translator.NewService(translatorpg.NewRepository(infra.Ent)), shared.Builder),
 		searchhttp.NewHandler(searchService, shared.Builder),
+		searchhttp.NewImageHandler(images, shared.Builder),
 		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache), shared.Builder),
 	)
 	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService))

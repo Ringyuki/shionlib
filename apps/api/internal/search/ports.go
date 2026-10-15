@@ -59,3 +59,16 @@ type Analytics interface {
 	Top(ctx context.Context, window Window, limit int) ([]Term, error)
 	DecayTrends(ctx context.Context, windows []Window, factor, minScore float64) error
 }
+
+type Finder interface {
+	Search(ctx context.Context, viewer actor.Actor, query Query) (Results, error)
+}
+
+type Recognizer interface {
+	Source() ImageSource
+	Recognize(ctx context.Context, image []byte) ([]Sighting, error)
+}
+
+type Pictures interface {
+	Shrink(ctx context.Context, data []byte, longest int) ([]byte, error)
+}

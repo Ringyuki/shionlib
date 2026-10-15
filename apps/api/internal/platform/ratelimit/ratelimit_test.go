@@ -38,3 +38,27 @@ func TestFixedWindowWithBlock(t *testing.T) {
 		t.Fatalf("requests are allowed again after the block: %+v %v", recovered, err)
 	}
 }
+
+func TestPaceQueuesCallsAnIntervalApart(t *testing.T) {
+	limiter := ratelimit.New(redistest.New(t))
+	ctx := context.Background()
+	pace := ratelimit.Pace{Name: "test", Interval: 300 * time.Millisecond, MaxWait: 500 * time.Millisecond}
+	first, ok, err := limiter.Reserve(ctx, pace)
+	if err != nil || !ok || first != 0 {
+		t.Fatalf("the first call goes at once: %s %v %v", first, ok, err)
+	}
+	second, ok, err := limiter.Reserve(ctx, pace)
+	if err != nil || !ok || second < 250*time.Millisecond || second > 300*time.Millisecond {
+		t.Fatalf("the second call waits for its turn: %s %v %v", second, ok, err)
+	}
+	if third, ok, err := limiter.Reserve(ctx, pace); err != nil || ok || third != 0 {
+		t.Fatalf("a call that would wait past the limit is turned away: %s %v %v", third, ok, err)
+	}
+	if other, ok, err := limiter.Reserve(ctx, ratelimit.Pace{Name: "other", Interval: time.Second, MaxWait: 0}); err != nil || !ok || other != 0 {
+		t.Fatalf("paces are independent: %s %v %v", other, ok, err)
+	}
+	time.Sleep(700 * time.Millisecond)
+	if again, ok, err := limiter.Reserve(ctx, pace); err != nil || !ok || again != 0 {
+		t.Fatalf("an idle pace lets the next call go at once: %s %v %v", again, ok, err)
+	}
+}

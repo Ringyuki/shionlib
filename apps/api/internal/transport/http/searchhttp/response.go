@@ -54,6 +54,43 @@ type searchResultsDTO struct {
 	Characters searchCharacterSectionDTO `json:"characters"`
 }
 
+type searchImageSourceDTO struct {
+	Name string `json:"name" doc:"Service that recognized the picture, credited beside the results"`
+	URL  string `json:"url"`
+}
+
+type searchImageBoxDTO struct {
+	Left   float64 `json:"left" minimum:"0" maximum:"1" doc:"Share of the picture's width"`
+	Top    float64 `json:"top" minimum:"0" maximum:"1" doc:"Share of the picture's height"`
+	Right  float64 `json:"right" minimum:"0" maximum:"1" doc:"Share of the picture's width"`
+	Bottom float64 `json:"bottom" minimum:"0" maximum:"1" doc:"Share of the picture's height"`
+}
+
+type searchImageCharacterDTO struct {
+	_      struct{} `nullable:"true"`
+	ID     int      `json:"id"`
+	Image  *string  `json:"image"`
+	NameJP string   `json:"name_jp"`
+	NameZH *string  `json:"name_zh"`
+	NameEN *string  `json:"name_en"`
+}
+
+type searchSightingDTO struct {
+	Box       searchImageBoxDTO        `json:"box" doc:"Where the character is in the picture"`
+	Name      string                   `json:"name" doc:"Name the recognizer gave the character"`
+	Work      string                   `json:"work" doc:"Title the recognizer gave the work"`
+	Unsure    bool                     `json:"unsure" doc:"The recognizer is not confident about this character"`
+	GameID    *int                     `json:"game_id" doc:"Game in the library the work matched; it is listed in games"`
+	Character *searchImageCharacterDTO `json:"character" doc:"Character of that game the name matched"`
+}
+
+type searchImageDTO struct {
+	Source     searchImageSourceDTO       `json:"source"`
+	Games      []gamehttp.GameListItemDTO `json:"games" doc:"Games the recognized works matched, each once, in the order they were recognized"`
+	Unlisted   []string                   `json:"unlisted_works" doc:"Recognized works the library has no game for"`
+	Characters []searchSightingDTO        `json:"characters" doc:"Every character recognized, in the recognizer's order"`
+}
+
 type searchTagDTO struct {
 	ID          int      `json:"id"`
 	Name        string   `json:"name"`
@@ -81,6 +118,31 @@ func toResultsDTO(results search.Results) searchResultsDTO {
 	}
 	for i, summary := range results.Characters.Items {
 		out.Characters.Items[i] = toCharacterDTO(summary)
+	}
+	return out
+}
+
+func toImageDTO(results search.ImageResults) searchImageDTO {
+	out := searchImageDTO{
+		Source:     searchImageSourceDTO{Name: results.Source.Name, URL: results.Source.URL},
+		Games:      make([]gamehttp.GameListItemDTO, len(results.Games)),
+		Unlisted:   nonNil(results.Unlisted),
+		Characters: make([]searchSightingDTO, len(results.Characters)),
+	}
+	for i, card := range results.Games {
+		out.Games[i] = gamehttp.ToGameListItem(card)
+	}
+	for i, spotted := range results.Characters {
+		out.Characters[i] = searchSightingDTO{
+			Box:    searchImageBoxDTO(spotted.Box),
+			Name:   spotted.Name,
+			Work:   spotted.Work,
+			Unsure: spotted.Unsure,
+			GameID: spotted.GameID,
+		}
+		if found := spotted.Character; found != nil {
+			out.Characters[i].Character = &searchImageCharacterDTO{ID: found.ID, Image: found.Image, NameJP: found.NameJP, NameZH: found.NameZH, NameEN: found.NameEN}
+		}
 	}
 	return out
 }

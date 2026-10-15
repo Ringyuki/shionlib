@@ -36,6 +36,7 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 				"download":               {Limit: httpapi.DownloadThrottleLimit, Window: httpapi.DownloadThrottleWindow, Block: httpapi.DownloadThrottleBlock},
 				"auth":                   {Limit: httpapi.AuthThrottleLimit, Window: httpapi.AuthThrottleWindow, Block: httpapi.AuthThrottleBlock},
 				searchhttp.Throttle:      {Limit: httpapi.SearchThrottleLimit, Window: httpapi.SearchThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+				searchhttp.ImageThrottle: {Limit: httpapi.ImageSearchThrottleLimit, Window: httpapi.ImageSearchThrottleWindow, Block: httpapi.DefaultThrottleBlock},
 				uploadhttp.ChunkThrottle: {Limit: httpapi.UploadChunkThrottleLimit, Window: httpapi.UploadChunkThrottleWindow, Block: httpapi.DefaultThrottleBlock},
 				openhttp.Throttle:        {Limit: httpapi.OpenThrottleLimit, Window: httpapi.OpenThrottleWindow, Block: httpapi.OpenThrottleBlock},
 			},

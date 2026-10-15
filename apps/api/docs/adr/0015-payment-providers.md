@@ -12,7 +12,7 @@ A payment provider is known to the rest of the system only as `sponsor.Provider`
 - Callbacks arrive at `POST /sponsor/webhook/{provider}`. The address given to a provider is built by the composition root from that name.
 - Sponsor orders are accepted when the setting `sponsor.enabled` is on and the provider is ready; `GET /sponsor/state` reports the two together and the admin statistics report them apart.
 - An adapter declares its own settings in its `settings.go` under the group `payment` and reads them on every call, so credentials are changed in the admin panel and apply at once. iDataRiver has `payment.idatariver_base_url`, `payment.idatariver_project_id` and `payment.idatariver_secret`.
-- The name of a vendor appears only in its adapter (`internal/adapter/idatariver`), in the composition root that wires it and in the seeder. `TestPaymentVendorsAreNamedOnlyByTheirAdapters` enforces it for every Go file, tests included.
+- The name of a vendor appears only in its adapter (`internal/adapter/idatariver`), in the composition root that wires it and in the seeder. `TestVendorsAreNamedOnlyByTheirAdapters` enforces it for every Go file, tests included.
 
 ## Alternatives
 A separate `payment` capability between sponsorship and the adapters: nothing but sponsorship takes payments, so it would be a layer with one caller. Keeping the credentials in the environment with the settings as an override, as the OIDC and Bangumi credentials do: it leaves the vendor's name in the platform configuration and in the deployment files.

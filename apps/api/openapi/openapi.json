@@ -6508,7 +6508,12 @@
           680107,
           690101,
           690102,
-          690103
+          690103,
+          700101,
+          700102,
+          700103,
+          700104,
+          700105
         ],
         "format": "int64",
         "type": "integer",
@@ -6706,7 +6711,12 @@
           "API_KEY_NOT_FOUND",
           "OPEN_LOOKUP_ONE_KIND",
           "OPEN_LOOKUP_TOO_MANY",
-          "OPEN_LOOKUP_BAD_VALUE"
+          "OPEN_LOOKUP_BAD_VALUE",
+          "SEARCH_IMAGE_MISSING",
+          "SEARCH_IMAGE_TOO_LARGE",
+          "SEARCH_IMAGE_UNSUPPORTED",
+          "SEARCH_IMAGE_BUSY",
+          "SEARCH_IMAGE_FAILED"
         ]
       },
       "CatalogExcludedDTO": {
@@ -16292,6 +16302,72 @@
         ],
         "type": "object"
       },
+      "EnvelopeSearchImageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SearchImageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSearchImageSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SearchImageSourceDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeSearchResultsDTO": {
         "additionalProperties": false,
         "properties": {
@@ -23112,6 +23188,149 @@
         ],
         "type": "object"
       },
+      "SearchImageBoxDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "bottom": {
+            "description": "Share of the picture's height",
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "left": {
+            "description": "Share of the picture's width",
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "right": {
+            "description": "Share of the picture's width",
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "top": {
+            "description": "Share of the picture's height",
+            "format": "double",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "left",
+          "top",
+          "right",
+          "bottom"
+        ],
+        "type": "object"
+      },
+      "SearchImageCharacterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "image",
+          "name_jp",
+          "name_zh",
+          "name_en"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "SearchImageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "characters": {
+            "description": "Every character recognized, in the recognizer's order",
+            "items": {
+              "$ref": "#/components/schemas/SearchSightingDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "games": {
+            "description": "Games the recognized works matched, each once, in the order they were recognized",
+            "items": {
+              "$ref": "#/components/schemas/GameListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/SearchImageSourceDTO"
+          },
+          "unlisted_works": {
+            "description": "Recognized works the library has no game for",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "games",
+          "unlisted_works",
+          "characters"
+        ],
+        "type": "object"
+      },
+      "SearchImageSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Service that recognized the picture, credited beside the results",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "type": "object"
+      },
       "SearchRecordInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -23144,6 +23363,55 @@
           "games",
           "developers",
           "characters"
+        ],
+        "type": "object"
+      },
+      "SearchSightingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "box": {
+            "$ref": "#/components/schemas/SearchImageBoxDTO",
+            "description": "Where the character is in the picture"
+          },
+          "character": {
+            "description": "Character of that game the name matched",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SearchImageCharacterDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "game_id": {
+            "description": "Game in the library the work matched; it is listed in games",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "Name the recognizer gave the character",
+            "type": "string"
+          },
+          "unsure": {
+            "description": "The recognizer is not confident about this character",
+            "type": "boolean"
+          },
+          "work": {
+            "description": "Title the recognizer gave the work",
+            "type": "string"
+          }
+        },
+        "required": [
+          "box",
+          "name",
+          "work",
+          "unsure",
+          "game_id",
+          "character"
         ],
         "type": "object"
       },
@@ -41411,6 +41679,105 @@
           }
         },
         "summary": "Search games, developers and characters",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/image": {
+      "post": {
+        "operationId": "search.image",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "JPG, PNG, WebP or GIF picture to recognize",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSearchImageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Find the games and characters a picture shows",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/image/source": {
+      "get": {
+        "operationId": "search.imageSource",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSearchImageSourceDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Service that recognizes pictures, to credit it",
         "tags": [
           "search"
         ]

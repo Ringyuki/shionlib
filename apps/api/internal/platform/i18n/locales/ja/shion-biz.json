@@ -199,5 +199,10 @@
   "API_KEY_NOT_FOUND": "API キーが見つかりません",
   "OPEN_LOOKUP_ONE_KIND": "id、hid、bid、vid のいずれか一種類の ID を指定してください",
   "OPEN_LOOKUP_TOO_MANY": "一度に検索できる ID は {max} 件までです",
-  "OPEN_LOOKUP_BAD_VALUE": "ID の形式が正しくありません：{value}"
+  "OPEN_LOOKUP_BAD_VALUE": "ID の形式が正しくありません：{value}",
+  "SEARCH_IMAGE_MISSING": "画像を選択してください",
+  "SEARCH_IMAGE_TOO_LARGE": "画像は {max} MB 以内にしてください",
+  "SEARCH_IMAGE_UNSUPPORTED": "この画像形式には対応していません。JPG、PNG、WebP、GIF を使用してください",
+  "SEARCH_IMAGE_BUSY": "画像検索が混み合っています。しばらくしてからもう一度お試しください",
+  "SEARCH_IMAGE_FAILED": "画像を認識できませんでした。しばらくしてからもう一度お試しください"
 }

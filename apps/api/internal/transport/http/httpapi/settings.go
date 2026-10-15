@@ -72,6 +72,17 @@ var (
 		Label:   "搜索限流：窗口长度",
 		Default: time.Minute, Min: time.Second, Max: day,
 	})
+	ImageSearchThrottleLimit = setting.Int(setting.Spec[int]{
+		Name:        "throttle.image_search_limit",
+		Label:       "以图搜索限流：每窗口次数",
+		Description: "同一 IP 在一个窗口内最多可发起的以图搜索次数。",
+		Default:     5, Min: 1, Max: 1_000_000,
+	})
+	ImageSearchThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
+		Name:    "throttle.image_search_window",
+		Label:   "以图搜索限流：窗口长度",
+		Default: time.Minute, Min: time.Second, Max: day,
+	})
 	UploadChunkThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.upload_chunk_limit",
 		Label:       "上传分片限流：每窗口次数",

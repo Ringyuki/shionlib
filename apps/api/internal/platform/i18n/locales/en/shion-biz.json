@@ -199,5 +199,10 @@
   "API_KEY_NOT_FOUND": "API key not found",
   "OPEN_LOOKUP_ONE_KIND": "give one kind of ID: id, hid, bid or vid",
   "OPEN_LOOKUP_TOO_MANY": "at most {max} IDs can be looked up at once",
-  "OPEN_LOOKUP_BAD_VALUE": "not a valid ID: {value}"
+  "OPEN_LOOKUP_BAD_VALUE": "not a valid ID: {value}",
+  "SEARCH_IMAGE_MISSING": "Choose a picture",
+  "SEARCH_IMAGE_TOO_LARGE": "The picture must not exceed {max} MB",
+  "SEARCH_IMAGE_UNSUPPORTED": "This picture format is not supported. Use JPG, PNG, WebP or GIF",
+  "SEARCH_IMAGE_BUSY": "Picture search is busy. Try again later",
+  "SEARCH_IMAGE_FAILED": "The picture could not be recognized. Try again later"
 }
