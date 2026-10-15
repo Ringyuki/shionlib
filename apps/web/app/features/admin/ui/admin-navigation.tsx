@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Settings,
   Sparkles,
+  Upload,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -32,6 +33,7 @@ const icons: Record<NavKey, LucideIcon> = {
   games: Gamepad2,
   translators: BookA,
   users: Users,
+  uploads: Upload,
   ads: Megaphone,
   sponsors: Heart,
   friendLinks: Link,

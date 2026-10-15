@@ -22,6 +22,8 @@ const errorFields = constraints.ClientErrorInput
 
 const mostAttempts = constraints.ReportFailureInputBody.attempts.maxItems
 
+const mostSessions = constraints.ReportFailureInputBody.session_ids.maxItems
+
 const reasonNames: Readonly<Record<FailureReason, FailureReport['reason']>> = {
   differentFile: 'different_file',
   changedFile: 'changed_file',
@@ -96,11 +98,15 @@ export function submissionReport(
   uploads: readonly Upload[],
   error: unknown,
 ): FailureReport {
+  const sessions = uploads.flatMap(upload =>
+    upload.session === undefined ? [] : [upload.session.id],
+  )
   return {
     stage: 'submit',
     reason: 'rejected',
     error: describeError(error),
     file_name: label,
     file_size: uploads.reduce((total, upload) => total + upload.file.size, 0),
+    ...(sessions.length === 0 ? {} : { session_ids: sessions.slice(0, mostSessions) }),
   }
 }
