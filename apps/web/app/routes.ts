@@ -41,6 +41,7 @@ export default [
   route('resources/favorites', 'routes/resources.favorites.ts'),
   route('resources/walkthroughs', 'routes/resources.walkthroughs.ts'),
   route('resources/walkthroughs/remove', 'routes/resources.walkthroughs.remove.ts'),
+  route('resources/walkthroughs/format', 'routes/resources.walkthroughs.format.ts'),
   route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
   route('resources/favorites/list-edit', 'routes/resources.favorites.list-edit.ts'),
   route('resources/favorites/list-remove', 'routes/resources.favorites.list-remove.ts'),

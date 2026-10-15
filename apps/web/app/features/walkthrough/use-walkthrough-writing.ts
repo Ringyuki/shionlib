@@ -21,13 +21,17 @@ import {
   refusedFrom,
   routeErrors,
   routeForm,
+  routeLimits,
   type RouteErrors,
   type RouteIssue,
 } from './walkthrough.schema'
+import { placed, type Formatted, type Placement } from './walkthrough-format'
 import type { Writing } from './walkthrough.use-cases'
 import { useWalkthroughSave } from './use-walkthrough-save'
 
 export type Flagged = { key: string; errors: RouteErrors } | { key: undefined; note: string }
+
+type Notice = { count: number; before: Draft; shown: string | undefined }
 
 export function useWalkthroughWriting(writing: Writing, faces: readonly Face[]) {
   const t = useTranslations('walkthrough')
@@ -45,6 +49,8 @@ export function useWalkthroughWriting(writing: Writing, faces: readonly Face[]) 
   const [walkthroughId, setWalkthroughId] = useState(writing.stored?.id)
   const [shown, setShown] = useState(() => stored.routes[0]?.key)
   const [flagged, setFlagged] = useState<Flagged | undefined>(undefined)
+  const [notice, setNotice] = useState<Notice>()
+  const [noticed, setNoticed] = useState(false)
   const guard = useLeaveGuard(!sameDraft(draft, stored))
   const issue = (found: RouteIssue) => t(`issue.${found.kind}`, found)
   const flag = (index: number, errors: RouteErrors) => {
@@ -74,6 +80,7 @@ export function useWalkthroughWriting(writing: Writing, faces: readonly Face[]) 
       return
     }
     setStored(written)
+    setNoticed(false)
     setState(outcome.result.state)
     setWalkthroughId(outcome.result.id)
     if (!publish) {
@@ -110,6 +117,23 @@ export function useWalkthroughWriting(writing: Writing, faces: readonly Face[]) 
       setShown(left.routes[0]?.key)
     },
     move: (key: string, over: string) => setDraft(current => withRouteMoved(current, key, over)),
+    notice: { count: notice?.count ?? 0, open: noticed },
+    place: (formatted: Formatted, placement: Placement) => {
+      const result = placed(draft, formatted, placement, naming, words, routeLimits.routes)
+      setNotice({ count: result.added.length, before: draft, shown })
+      setNoticed(true)
+      setFlagged(undefined)
+      setDraft(result.draft)
+      setShown(result.added[0] ?? result.draft.routes[0]?.key)
+    },
+    undo: () => {
+      if (notice !== undefined) {
+        setDraft(notice.before)
+        setShown(notice.shown)
+      }
+      setNoticed(false)
+    },
+    dismiss: () => setNoticed(false),
     saveDraft: () => submit(false),
     publish: () => submit(true),
     leaveAfterRemoval: () => {

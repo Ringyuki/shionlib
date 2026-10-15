@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { sessionFile } from './support/accounts'
 import { expectNotice } from './support/notices'
+import { formatted, refused, stubFormatting } from './support/walkthrough-format'
 
 test('shows an empty walkthrough tab and asks a guest to sign in before writing', async ({
   page,
@@ -156,5 +157,64 @@ test.describe('as a member', () => {
     await leave.getByRole('button', { name: '放弃修改' }).click()
     await expect(leave).toBeHidden()
     await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
+  })
+})
+
+test.describe('formatting text', () => {
+  test.use({ storageState: sessionFile('member') })
+
+  test('puts the routes formatted from text into the editor and undoes it', async ({ page }) => {
+    await stubFormatting(page, formatted)
+    await page.goto('/zh/game/3/walkthrough/edit')
+    const parts = page.getByRole('navigation', { name: '线路' })
+    await parts.getByRole('button', { name: '从文本整理' }).click()
+    const dialog = page.getByRole('dialog', { name: '从文本整理' })
+    await expect(dialog.getByRole('radiogroup')).toHaveCount(0)
+    const source = dialog.getByRole('textbox', { name: /攻略原文/ })
+    await dialog.getByRole('button', { name: '开始整理' }).click()
+    await expect(source).toHaveAttribute('aria-invalid', 'true')
+    await source.fill('共通线\n去天文台')
+    await expect(dialog.getByText('8 / 50000')).toBeVisible()
+    await dialog.getByRole('button', { name: '开始整理' }).click()
+    await expect(dialog.getByText('正在整理…')).toBeVisible()
+    await expect(dialog.getByText('通常需要 30 秒到 2 分钟')).toBeVisible()
+    await expect(dialog).toBeHidden()
+
+    const notice = page
+      .getByRole('status')
+      .filter({ hasText: '已整理出 2 条线路，发布前请逐条核对' })
+    await expect(notice).toBeVisible()
+    await expect(parts.getByRole('button', { name: /共通线/ })).toBeVisible()
+    await expect(parts.getByRole('button', { name: /真结局/ })).toBeVisible()
+    await expect(page.getByRole('textbox', { name: '线路名称' })).toHaveValue('共通线')
+    await expect(page.getByRole('textbox', { name: '步骤' })).toHaveValue('去天文台\n存档 01')
+    await expect(page.getByRole('textbox', { name: '说明' })).toContainText(
+      '开始之前请先安装修正补丁',
+    )
+
+    await parts.getByRole('button', { name: '从文本整理' }).click()
+    await expect(dialog.getByRole('radio', { name: '接在现有线路之后' })).toBeChecked()
+    await dialog.getByRole('button', { name: '取消' }).click()
+    await expect(dialog).toBeHidden()
+
+    await notice.getByRole('button', { name: '撤销' }).click()
+    await expect(notice).toBeHidden()
+    await expect(parts.getByRole('button', { name: /共通线/ })).toHaveCount(0)
+    await expect(page.getByRole('textbox', { name: '说明' })).not.toContainText('修正补丁')
+  })
+
+  test('keeps the text when formatting fails', async ({ page }) => {
+    await stubFormatting(page, refused)
+    await page.goto('/zh/game/3/walkthrough/edit')
+    await page
+      .getByRole('navigation', { name: '线路' })
+      .getByRole('button', { name: '从文本整理' })
+      .click()
+    const dialog = page.getByRole('dialog', { name: '从文本整理' })
+    await dialog.getByRole('textbox', { name: '攻略原文' }).fill('共通线\n去天文台')
+    await dialog.getByRole('button', { name: '开始整理' }).click()
+    await expectNotice(page, '整理失败，请稍后再试')
+    await expect(dialog.getByRole('textbox', { name: '攻略原文' })).toHaveValue('共通线\n去天文台')
+    await expect(dialog.getByRole('button', { name: '开始整理' })).toBeEnabled()
   })
 })

@@ -95,5 +95,21 @@
     "lead": "A walkthrough of {game} by {author} with {count, plural, one {# route} other {# routes}}, updated on {date}. ",
     "language": "Written in {language}. ",
     "routes": "Routes: {names}. "
+  },
+  "format": {
+    "open": "Format from text",
+    "title": "Format from text",
+    "description": "AI arranges walkthrough text you already have into notes and routes, which you can still edit",
+    "source": "Walkthrough text",
+    "count": "{count} / {max}",
+    "placement": "Result",
+    "append": "Add after the current routes",
+    "replace": "Replace the current notes and routes",
+    "start": "Format",
+    "working": "Formatting…",
+    "elapsed": "Elapsed {time}",
+    "hint": "This usually takes 30 seconds to 2 minutes",
+    "done": "{count, plural, one {# route was} other {# routes were}} formatted. Check each one before publishing",
+    "undo": "Undo"
   }
 }
