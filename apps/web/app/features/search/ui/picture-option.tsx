@@ -1,4 +1,4 @@
-import { Center, Image, Inline, Stack, Text } from '@hina-ui/react'
+import { Center, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
 import { Building2, Gamepad2, UserRound } from 'lucide-react'
 import { GamePicture } from '~/features/game'
 import type { Picture, PictureShape } from '../search'
@@ -7,6 +7,7 @@ type PictureOptionProps = {
   name: string
   detail: string | undefined
   picture: Picture
+  note?: string
 }
 
 const frames = {
@@ -17,7 +18,7 @@ const frames = {
 
 const frameClass = 'bg-inset w-9 shrink-0 rounded-sm'
 
-export function PictureOption({ name, detail, picture }: PictureOptionProps) {
+export function PictureOption({ name, detail, picture, note }: PictureOptionProps) {
   const frame = frames[picture.shape]
   const Icon = frame.icon
   const empty = (
@@ -47,9 +48,16 @@ export function PictureOption({ name, detail, picture }: PictureOptionProps) {
         />
       )}
       <Stack as="span" gap="none" className="min-w-0">
-        <Text as="span" size="sm" weight="medium" truncate>
-          {name}
-        </Text>
+        <Inline as="span" gap="xs" align="center" wrap={false}>
+          <Text as="span" size="sm" weight="medium" truncate>
+            {name}
+          </Text>
+          {note !== undefined && (
+            <Tag size="sm" tone="warning" className="shrink-0">
+              {note}
+            </Tag>
+          )}
+        </Inline>
         {detail !== undefined && detail !== '' && (
           <Text as="span" size="xs" tone="muted" truncate>
             {detail}

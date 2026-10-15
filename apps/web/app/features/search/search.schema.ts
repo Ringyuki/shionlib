@@ -5,6 +5,8 @@ export const recordSearchCommand = v.object({ query: v.string() })
 
 export type RecordSearch = v.InferOutput<typeof recordSearchCommand>
 
+export const imageSearchCommand = v.object({ image: v.instance(File) })
+
 const recentSearches = v.fallback(
   v.pipe(v.string(), v.parseJson(), v.array(v.fallback(v.string(), ''))),
   [],

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import { emptyResults } from './search'
-import { loadPalette, recordSearch, searchGames } from './search.use-cases'
+import { loadPalette, recordSearch, searchByImage, searchGames } from './search.use-cases'
 
 const results = {
   ...emptyResults(),
@@ -9,15 +9,26 @@ const results = {
 }
 
 describe('loadPalette', () => {
-  it('offers trending keywords for an empty query', async () => {
-    const fake = fakeApi().on('get', '/search/trending', [{ query: 'sakura', score: 3 }])
+  it('offers trending keywords and names the picture search service for an empty query', async () => {
+    const source = { name: 'Recognizer', url: 'https://recognizer.test/' }
+    const fake = fakeApi()
+      .on('get', '/search/trending', [{ query: 'sakura', score: 3 }])
+      .on('get', '/search/image/source', source)
     await expect(loadPalette(fake.api, '  ')).resolves.toEqual({
       query: '',
       suggestions: [],
       trending: ['sakura'],
       results: null,
       unavailable: false,
+      imageSource: source,
     })
+  })
+
+  it('leaves the picture search service unnamed when it cannot be asked', async () => {
+    const fake = fakeApi()
+      .on('get', '/search/trending', [])
+      .fail('get', '/search/image/source', 502, { code: 0, message: 'down' })
+    await expect(loadPalette(fake.api, '')).resolves.toMatchObject({ imageSource: null })
   })
 
   it('asks for every kind and drops the suggestion equal to the query', async () => {
@@ -45,6 +56,24 @@ describe('loadPalette', () => {
       suggestions: ['サクラノ詩'],
       unavailable: true,
     })
+  })
+})
+
+describe('searchByImage', () => {
+  it('sends the picture as the file field', async () => {
+    const found = {
+      source: { name: 'R', url: 'https://r.test/' },
+      games: [],
+      unlisted_works: [],
+      characters: [],
+    }
+    const fake = fakeApi().on('post', '/search/image', found)
+    const picture = new File(['png'], 'shot.png', { type: 'image/png' })
+    await expect(searchByImage(fake.api, picture)).resolves.toEqual(found)
+    const sent = await fake.requests[0]?.formData()
+    const file = sent?.get('file')
+    expect(file).toBeInstanceOf(File)
+    expect(await new Response(file ?? null).text()).toBe('png')
   })
 })
 

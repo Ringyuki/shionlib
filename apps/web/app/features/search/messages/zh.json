@@ -1,6 +1,7 @@
 {
   "label": "搜索",
   "placeholder": "搜索游戏、开发商、角色",
+  "submit": "搜索",
   "list": "搜索建议与结果",
   "groups": {
     "suggestions": "搜索建议",
@@ -33,5 +34,21 @@
   "released": {
     "thisMonth": "本月发售",
     "lastMonth": "上月发售"
+  },
+  "image": {
+    "label": "以图搜索",
+    "choose": "选择图片",
+    "drop": "拖放、粘贴或点击选择图片",
+    "formats": "JPG、PNG、WebP 或 GIF",
+    "credit": "识图由 <source>{name}</source> 提供",
+    "unsupported": "不支持该图片格式",
+    "picked": "所选图片",
+    "reading": "正在识别…",
+    "found": "识别到 {count, number} 个角色",
+    "none": "没有识别到角色",
+    "again": "换一张",
+    "unsure": "可能不准确",
+    "searchWork": "搜索「{work}」",
+    "results": "识图结果"
   }
 }

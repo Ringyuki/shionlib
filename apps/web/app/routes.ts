@@ -54,6 +54,7 @@ export default [
   route('resources/auth/sign-out', 'routes/resources.auth.sign-out.ts'),
   route('resources/search', 'routes/resources.search.ts'),
   route('resources/search/games', 'routes/resources.search.games.ts'),
+  route('resources/search/image', 'routes/resources.search.image.ts'),
   route('resources/search/releases', 'routes/resources.search.releases.ts'),
   route('resources/translator/options', 'routes/resources.translator.options.ts'),
   route('resources/game/view', 'routes/resources.game.view.ts'),

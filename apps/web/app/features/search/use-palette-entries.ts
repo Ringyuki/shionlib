@@ -11,6 +11,7 @@ type EntryBase = {
   value: string
   label: string
   description?: string
+  note?: string
   stays?: boolean
   action: () => void
 }

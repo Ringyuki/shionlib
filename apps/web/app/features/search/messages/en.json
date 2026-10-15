@@ -1,6 +1,7 @@
 {
   "label": "Search",
   "placeholder": "Search games, developers, characters",
+  "submit": "Search",
   "list": "Suggestions and results",
   "groups": {
     "suggestions": "Suggestions",
@@ -33,5 +34,21 @@
   "released": {
     "thisMonth": "Released this month",
     "lastMonth": "Released last month"
+  },
+  "image": {
+    "label": "Search by image",
+    "choose": "Choose a picture",
+    "drop": "Drop, paste or click to choose a picture",
+    "formats": "JPG, PNG, WebP or GIF",
+    "credit": "Recognized by <source>{name}</source>",
+    "unsupported": "This picture format is not supported",
+    "picked": "Chosen picture",
+    "reading": "Recognizing…",
+    "found": "{count, plural, one {# character found} other {# characters found}}",
+    "none": "No characters found",
+    "again": "Another picture",
+    "unsure": "May be inaccurate",
+    "searchWork": "Search “{work}”",
+    "results": "Picture search results"
   }
 }

@@ -3513,6 +3513,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/search/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Find the games and characters a picture shows */
+        post: operations["search.image"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search/image/source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Service that recognizes pictures, to credit it */
+        get: operations["search.imageSource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/search/record": {
         parameters: {
             query?: never;
@@ -6241,7 +6275,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103 | 700101 | 700102 | 700103 | 700104 | 700105;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -8933,6 +8967,26 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeSearchImageDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SearchImageDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeSearchImageSourceDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SearchImageSourceDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeSearchResultsDTO: {
             /** Format: int64 */
             code: number;
@@ -10762,6 +10816,50 @@ export type components = {
              */
             total: number;
         };
+        SearchImageBoxDTO: {
+            /**
+             * Format: double
+             * @description Share of the picture's height
+             */
+            bottom: number;
+            /**
+             * Format: double
+             * @description Share of the picture's width
+             */
+            left: number;
+            /**
+             * Format: double
+             * @description Share of the picture's width
+             */
+            right: number;
+            /**
+             * Format: double
+             * @description Share of the picture's height
+             */
+            top: number;
+        };
+        SearchImageCharacterDTO: {
+            /** Format: int64 */
+            id: number;
+            image: string | null;
+            name_en: string | null;
+            name_jp: string;
+            name_zh: string | null;
+        } | null;
+        SearchImageDTO: {
+            /** @description Every character recognized, in the recognizer's order */
+            characters: components["schemas"]["SearchSightingDTO"][] | null;
+            /** @description Games the recognized works matched, each once, in the order they were recognized */
+            games: components["schemas"]["GameListItemDTO"][] | null;
+            source: components["schemas"]["SearchImageSourceDTO"];
+            /** @description Recognized works the library has no game for */
+            unlisted_works: string[] | null;
+        };
+        SearchImageSourceDTO: {
+            /** @description Service that recognized the picture, credited beside the results */
+            name: string;
+            url: string;
+        };
         SearchRecordInputBody: {
             /** @description Keyword the visitor settled on */
             q: string;
@@ -10770,6 +10868,23 @@ export type components = {
             characters: components["schemas"]["SearchCharacterSectionDTO"];
             developers: components["schemas"]["SearchDeveloperSectionDTO"];
             games: components["schemas"]["SearchGameSectionDTO"];
+        };
+        SearchSightingDTO: {
+            /** @description Where the character is in the picture */
+            box: components["schemas"]["SearchImageBoxDTO"];
+            /** @description Character of that game the name matched */
+            character: components["schemas"]["SearchImageCharacterDTO"] | null;
+            /**
+             * Format: int64
+             * @description Game in the library the work matched; it is listed in games
+             */
+            game_id: number | null;
+            /** @description Name the recognizer gave the character */
+            name: string;
+            /** @description The recognizer is not confident about this character */
+            unsure: boolean;
+            /** @description Title the recognizer gave the work */
+            work: string;
         };
         SearchTagDTO: {
             aliases: string[] | null;
@@ -19753,6 +19868,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeSearchResultsDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "search.image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description JPG, PNG, WebP or GIF picture to recognize
+                     */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeSearchImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "search.imageSource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeSearchImageSourceDTO"];
                 };
             };
             /** @description Error */
