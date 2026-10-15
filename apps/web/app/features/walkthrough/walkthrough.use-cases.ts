@@ -50,6 +50,11 @@ export async function loadGuides(
   return { gameId, summaries, shown }
 }
 
+export async function countWalkthroughs(api: ApiClient, gameId: number): Promise<number> {
+  const listed = await api.get('/walkthrough/game/{id}', { params: { path: { id: gameId } } })
+  return (listed ?? []).filter(summary => summary.status === 'PUBLISHED').length
+}
+
 export async function loadUserWalkthroughs(
   api: ApiClient,
   userId: number,

@@ -80,6 +80,7 @@ test.describe('as a member', () => {
     await page.goto('/zh/game/2/walkthrough')
     const guide = page.getByRole('region', { name: '攻略' })
     await expect(guide.getByText('草稿', { exact: true })).toBeVisible()
+    await expect(page.getByRole('tab', { name: /攻略/ })).toHaveText('攻略0')
     await expect(guide.getByText('开始之前请先安装修正补丁')).toBeVisible()
     await expect(guide.getByRole('heading', { name: 'ルビイ', level: 2 })).toBeVisible()
     const routes = guide.getByRole('navigation', { name: '线路' })

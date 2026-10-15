@@ -4,6 +4,7 @@ import type { ApiData } from '~/shared/api/types'
 import type { RichDocument } from '~/shared/richtext/rich-text'
 import type { WalkthroughSummary } from './walkthrough'
 import {
+  countWalkthroughs,
   loadFormatTask,
   loadGuides,
   loadUserWalkthroughs,
@@ -133,6 +134,23 @@ describe('loadUserWalkthroughs', () => {
     })
     expect(await loadUserWalkthroughs(api, 5, 2)).toEqual({ items: [], total: 21, page: 2 })
     expect(new URL(requests[0]?.url ?? '').search).toBe('?page=2&pageSize=20')
+  })
+})
+
+describe('countWalkthroughs', () => {
+  it('counts the published walkthroughs and leaves out a draft', async () => {
+    const draft: WalkthroughSummary = { ...summary(15, 3), status: 'DRAFT' }
+    const { api } = fakeApi().on('get', '/walkthrough/game/{id}', [
+      draft,
+      summary(12, 2),
+      summary(9, 4),
+    ])
+    expect(await countWalkthroughs(api, 7)).toBe(2)
+  })
+
+  it('counts nothing for a game without walkthroughs', async () => {
+    const { api } = fakeApi().on('get', '/walkthrough/game/{id}', null)
+    expect(await countWalkthroughs(api, 7)).toBe(0)
   })
 })
 
