@@ -53,8 +53,10 @@ test.describe('as an administrator', () => {
     const uploads = page.getByRole('table', { name: '上传' })
     await expect(uploads.getByRole('row', { name: new RegExp(uploading) })).toBeVisible()
     await expect(uploads.getByRole('row', { name: new RegExp(unreadable) })).toBeVisible()
-    await page.getByRole('checkbox', { name: '只看有失败记录' }).check()
+    const failedOnly = page.getByRole('checkbox', { name: '只看有失败记录' })
+    await failedOnly.click()
     await expect(page).toHaveURL(/\/zh\/admin\/uploads\?user=\d+&failed=1$/)
+    await expect(failedOnly).toBeChecked()
     await expect(uploads.getByRole('row')).toHaveCount(3)
   })
 
