@@ -24,10 +24,10 @@ func (s *Service) Entries(ctx context.Context, viewer actor.Actor, gameID int) (
 	if err != nil {
 		return nil, err
 	}
-	if !ok || (len(game.Anchors) == 0 && game.SearchTitle() == "") {
+	if !ok || !game.Findable() {
 		return []Entry{}, nil
 	}
-	key := EntriesKeyPrefix + strconv.Itoa(gameID)
+	key := entriesKey(gameID)
 	var cached []Entry
 	if found, err := s.cache.Get(ctx, key, &cached); err == nil && found {
 		return listed(cached), nil
@@ -44,49 +44,14 @@ func (s *Service) Entries(ctx context.Context, viewer actor.Actor, gameID int) (
 }
 
 func (s *Service) fetch(ctx context.Context, game Game) ([]Entry, error) {
-	works, err := s.works(ctx, game)
+	if game.Assigned {
+		return s.patches.Entries(ctx, PageQuery{IDs: game.Pages})
+	}
+	works, err := worksOf(ctx, s.cache, s.patches, game.Anchors)
 	if err != nil {
 		return nil, err
 	}
-	vndbID := ""
-	for _, anchor := range game.Anchors {
-		if anchor.Source == SourceVNDB {
-			vndbID = anchor.ID
-		}
-	}
-	return s.patches.Entries(ctx, vndbID, works)
-}
-
-func (s *Service) works(ctx context.Context, game Game) ([]string, error) {
-	if len(game.Anchors) > 0 {
-		named := make([]string, len(game.Anchors))
-		for i, anchor := range game.Anchors {
-			named[i] = string(anchor.Source) + ":" + anchor.ID
-		}
-		works, err := remember(ctx, s.cache, WorksKeyPrefix+strings.Join(named, ","), func() ([]string, error) {
-			return s.patches.Works(ctx, game.Anchors)
-		})
-		if err != nil || len(works) > 0 {
-			return works, err
-		}
-	}
-	title := game.SearchTitle()
-	if title == "" {
-		return []string{}, nil
-	}
-	candidates, err := remember(ctx, s.cache, WorksKeyPrefix+"title:"+TitleKey(title), func() ([]Work, error) {
-		return s.patches.Titled(ctx, title)
-	})
-	if err != nil {
-		return nil, err
-	}
-	works := []string{}
-	for _, work := range candidates {
-		if game.Names(work) {
-			works = append(works, work.ID)
-		}
-	}
-	return works, nil
+	return s.patches.Entries(ctx, PageQuery{VNDBID: game.VNDBID(), Works: works})
 }
 
 func (s *Service) ByHash(ctx context.Context, viewer actor.Actor, gameID int, sha256 string) (Entry, bool, error) {
@@ -109,17 +74,29 @@ func (s *Service) ByHash(ctx context.Context, viewer actor.Actor, gameID int, sh
 	return Entry{}, false, nil
 }
 
-func remember[T any](ctx context.Context, cache Cache, key string, load func() ([]T, error)) ([]T, error) {
-	var cached []T
+func entriesKey(gameID int) string {
+	return EntriesKeyPrefix + strconv.Itoa(gameID)
+}
+
+func worksOf(ctx context.Context, cache Cache, patches Patches, anchors []Anchor) ([]string, error) {
+	if len(anchors) == 0 {
+		return []string{}, nil
+	}
+	named := make([]string, len(anchors))
+	for i, anchor := range anchors {
+		named[i] = string(anchor.Source) + ":" + anchor.ID
+	}
+	key := WorksKeyPrefix + strings.Join(named, ",")
+	var cached []string
 	if found, err := cache.Get(ctx, key, &cached); err == nil && found {
 		return listed(cached), nil
 	}
-	loaded, err := load()
+	works, err := patches.Works(ctx, anchors)
 	if err != nil {
 		return nil, err
 	}
-	_ = cache.Set(ctx, key, listed(loaded), WorksTTL)
-	return listed(loaded), nil
+	_ = cache.Set(ctx, key, listed(works), WorksTTL)
+	return listed(works), nil
 }
 
 func listed[T any](items []T) []T {

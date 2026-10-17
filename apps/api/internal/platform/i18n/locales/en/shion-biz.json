@@ -144,6 +144,8 @@
   "TRANSLATOR_TOO_MANY": "a resource can credit at most {max} translators",
   "TRANSLATOR_MERGE_NEEDS_OTHERS": "choose at least one other translator",
   "MOYU_REQUEST_FAILED": "failed to get patches",
+  "MOYU_PAGE_NOT_FOUND": "鲲 Galgame 补丁 has no such page",
+  "MOYU_ADDRESS_UNRECOGNIZED": "this address cannot be recognized",
   "AI_PROVIDER_NOT_FOUND": "AI provider not found",
   "AI_PROVIDER_NAME_TAKEN": "An AI provider with this name already exists",
   "AI_PROVIDER_BASE_URL_REQUIRED": "Enter the provider API base URL",

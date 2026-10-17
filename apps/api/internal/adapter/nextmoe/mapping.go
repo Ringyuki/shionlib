@@ -24,7 +24,7 @@ const (
 
 var sources = map[moyu.Source]string{moyu.SourceVNDB: refVNDB, moyu.SourceBangumi: "bangumi"}
 
-var workID = regexp.MustCompile(`^[0-9]+$`)
+var numericID = regexp.MustCompile(`^[0-9]+$`)
 
 var machineTypes = []string{"ai", "machine", "machine_polishing"}
 
@@ -93,18 +93,12 @@ func entryOf(raw json.RawMessage) (moyu.Entry, bool) {
 	return entry, true
 }
 
-var dateLayouts = []string{time.DateOnly, "2006-01", "2006"}
-
-func dateOf(raw *string) *time.Time {
-	if raw == nil {
-		return nil
+func pageOf(id, vndbID string, workID *string, resources int, webURL string) (moyu.Page, bool) {
+	page := moyu.Page{ID: strings.TrimSpace(id), URL: linkOf(webURL, "https", "http"), VNDBID: strings.TrimSpace(vndbID), Resources: max(resources, 0)}
+	if workID != nil && numericID.MatchString(strings.TrimSpace(*workID)) {
+		page.WorkID = strings.TrimSpace(*workID)
 	}
-	for _, layout := range dateLayouts {
-		if date, err := time.Parse(layout, strings.TrimSpace(*raw)); err == nil {
-			return &date
-		}
-	}
-	return nil
+	return page, moyu.IsPageID(page.ID) && page.URL != ""
 }
 
 func refOf(source, id string) (string, bool) {

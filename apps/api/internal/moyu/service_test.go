@@ -5,7 +5,6 @@ import (
 	"errors"
 	"slices"
 	"testing"
-	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
@@ -19,11 +18,6 @@ var (
 
 func anchored(anchors ...moyu.Anchor) moyu.Game {
 	return moyu.Game{Anchors: anchors}
-}
-
-func on(year int) *time.Time {
-	date := time.Date(year, 12, 28, 0, 0, 0, 0, time.UTC)
-	return &date
 }
 
 func ids(entries []moyu.Entry) []string {
@@ -98,34 +92,29 @@ func TestAPageIsFoundThroughEveryWorkTheIDsOfItsGameLeadTo(t *testing.T) {
 	}
 }
 
-func TestAGameWhoseIDsLeadToNoWorkIsFoundByItsTitle(t *testing.T) {
+func TestPagesAnAdministratorAssignedTakeThePlaceOfTheIDs(t *testing.T) {
 	ctx := context.Background()
-	archives := moyu.Work{ID: "212857", Titles: []string{"プレミアムアーカイブス むとうけいじ", "Premium Archives"}, Released: on(2016)}
+	cache := moyutest.NewCache()
 	patches := &moyutest.Patches{
-		Known: map[moyu.Anchor][]string{vndb("v4145"): {"61311"}},
-		Titles: map[string][]moyu.Work{
-			"プレミアムアーカイブス　むとうけいじ": {{ID: "1", Titles: []string{"プレミアムアーカイブス"}}, archives, {ID: "2", Titles: []string{"プレミアムアーカイブス むとうけいじ"}, Released: on(2019)}},
-			"脅迫": {{ID: "11529", Titles: []string{"脅迫"}}},
-		},
-		Listed: map[string][]moyu.Entry{"212857": {{ID: "r1"}}, "61311": {{ID: "r2"}}, "11529": {{ID: "r3"}}, "2": {{ID: "r4"}}},
+		Known:  map[moyu.Anchor][]string{vndb("v2240"): {"10363"}},
+		Listed: map[string][]moyu.Entry{"10363": {{ID: "r1"}}, "211652": {{ID: "r2"}}, "212857": {{ID: "r3"}}},
 	}
 	service := moyu.NewService(moyutest.Games{
-		1: {Titles: []string{"プレミアムアーカイブス　むとうけいじ", "高级典藏 武藤启治"}, Released: on(2016)},
-		2: {Anchors: []moyu.Anchor{vndb("v4145")}, Titles: []string{"脅迫"}},
-		3: {Anchors: []moyu.Anchor{vndb("v9")}, Titles: []string{"脅迫"}, Released: on(1996)},
-		4: {Titles: []string{" ", "-"}},
-	}, patches, moyutest.NewCache())
+		1: {Anchors: []moyu.Anchor{vndb("v2240")}, Assigned: true, Pages: []string{"211652"}},
+		2: {Assigned: true, Pages: []string{"212857"}},
+		3: {Anchors: []moyu.Anchor{vndb("v2240")}, Assigned: true},
+	}, patches, cache)
 	for _, c := range []struct {
 		game int
 		want []string
-	}{{1, []string{"r1"}}, {2, []string{"r2"}}, {3, []string{"r3"}}, {4, []string{}}} {
+	}{{1, []string{"r2"}}, {2, []string{"r3"}}, {3, []string{}}} {
 		entries, err := service.Entries(ctx, actor.Guest(), c.game)
 		if err != nil || !slices.Equal(ids(entries), c.want) {
 			t.Fatalf("game %d: %+v %v", c.game, entries, err)
 		}
 	}
-	if !slices.Equal(patches.Searches, []string{"プレミアムアーカイブス　むとうけいじ", "脅迫"}) {
-		t.Fatalf("only a game whose ids lead to no work is searched for, by its first title: %v", patches.Searches)
+	if len(patches.Lookups) != 0 || patches.Calls != 2 || cache.Has("moyu:entries:game:3") {
+		t.Fatalf("assigned pages are asked for by their ids alone, and no pages ask for nothing: lookups %v, calls %d", patches.Lookups, patches.Calls)
 	}
 	if patches.Unbounded != 0 {
 		t.Fatalf("every request of a lookup shares the time one request may take: %d unbounded", patches.Unbounded)

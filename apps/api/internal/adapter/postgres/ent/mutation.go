@@ -61,6 +61,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/patchpageassignment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
@@ -141,6 +142,7 @@ const (
 	TypeMessage                         = "Message"
 	TypeModerationEvent                 = "ModerationEvent"
 	TypeOidcIdentity                    = "OidcIdentity"
+	TypePatchPageAssignment             = "PatchPageAssignment"
 	TypeRoleFieldPermission             = "RoleFieldPermission"
 	TypeSetting                         = "Setting"
 	TypeSettingChange                   = "SettingChange"
@@ -62050,6 +62052,711 @@ func (m *OidcIdentityMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown OidcIdentity edge %s", name)
+}
+
+// PatchPageAssignmentMutation represents an operation that mutates the PatchPageAssignment nodes in the graph.
+type PatchPageAssignmentMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	page_ids        *pgvalue.Strings
+	created         *time.Time
+	updated         *time.Time
+	clearedFields   map[string]struct{}
+	game            *int
+	clearedgame     bool
+	assigner        *int
+	clearedassigner bool
+	done            bool
+	oldValue        func(context.Context) (*PatchPageAssignment, error)
+	predicates      []predicate.PatchPageAssignment
+}
+
+var _ ent.Mutation = (*PatchPageAssignmentMutation)(nil)
+
+// patchpageassignmentOption allows management of the mutation configuration using functional options.
+type patchpageassignmentOption func(*PatchPageAssignmentMutation)
+
+// newPatchPageAssignmentMutation creates new mutation for the PatchPageAssignment entity.
+func newPatchPageAssignmentMutation(c config, op Op, opts ...patchpageassignmentOption) *PatchPageAssignmentMutation {
+	m := &PatchPageAssignmentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePatchPageAssignment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPatchPageAssignmentID sets the ID field of the mutation.
+func withPatchPageAssignmentID(id int) patchpageassignmentOption {
+	return func(m *PatchPageAssignmentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PatchPageAssignment
+		)
+		m.oldValue = func(ctx context.Context) (*PatchPageAssignment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PatchPageAssignment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPatchPageAssignment sets the old PatchPageAssignment of the mutation.
+func withPatchPageAssignment(node *PatchPageAssignment) patchpageassignmentOption {
+	return func(m *PatchPageAssignmentMutation) {
+		m.oldValue = func(context.Context) (*PatchPageAssignment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PatchPageAssignmentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PatchPageAssignmentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PatchPageAssignment entities.
+func (m *PatchPageAssignmentMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PatchPageAssignmentMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PatchPageAssignmentMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PatchPageAssignment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetGameID sets the "game_id" field.
+func (m *PatchPageAssignmentMutation) SetGameID(i int) {
+	m.game = &i
+}
+
+// GameID returns the value of the "game_id" field in the mutation.
+func (m *PatchPageAssignmentMutation) GameID() (r int, exists bool) {
+	v := m.game
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGameID returns the old "game_id" field's value of the PatchPageAssignment entity.
+// If the PatchPageAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PatchPageAssignmentMutation) OldGameID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGameID: %w", err)
+	}
+	return oldValue.GameID, nil
+}
+
+// ResetGameID resets all changes to the "game_id" field.
+func (m *PatchPageAssignmentMutation) ResetGameID() {
+	m.game = nil
+}
+
+// SetPageIds sets the "page_ids" field.
+func (m *PatchPageAssignmentMutation) SetPageIds(pg pgvalue.Strings) {
+	m.page_ids = &pg
+}
+
+// PageIds returns the value of the "page_ids" field in the mutation.
+func (m *PatchPageAssignmentMutation) PageIds() (r pgvalue.Strings, exists bool) {
+	v := m.page_ids
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPageIds returns the old "page_ids" field's value of the PatchPageAssignment entity.
+// If the PatchPageAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PatchPageAssignmentMutation) OldPageIds(ctx context.Context) (v pgvalue.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPageIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPageIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPageIds: %w", err)
+	}
+	return oldValue.PageIds, nil
+}
+
+// ClearPageIds clears the value of the "page_ids" field.
+func (m *PatchPageAssignmentMutation) ClearPageIds() {
+	m.page_ids = nil
+	m.clearedFields[patchpageassignment.FieldPageIds] = struct{}{}
+}
+
+// PageIdsCleared returns if the "page_ids" field was cleared in this mutation.
+func (m *PatchPageAssignmentMutation) PageIdsCleared() bool {
+	_, ok := m.clearedFields[patchpageassignment.FieldPageIds]
+	return ok
+}
+
+// ResetPageIds resets all changes to the "page_ids" field.
+func (m *PatchPageAssignmentMutation) ResetPageIds() {
+	m.page_ids = nil
+	delete(m.clearedFields, patchpageassignment.FieldPageIds)
+}
+
+// SetAssignedBy sets the "assigned_by" field.
+func (m *PatchPageAssignmentMutation) SetAssignedBy(i int) {
+	m.assigner = &i
+}
+
+// AssignedBy returns the value of the "assigned_by" field in the mutation.
+func (m *PatchPageAssignmentMutation) AssignedBy() (r int, exists bool) {
+	v := m.assigner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAssignedBy returns the old "assigned_by" field's value of the PatchPageAssignment entity.
+// If the PatchPageAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PatchPageAssignmentMutation) OldAssignedBy(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAssignedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAssignedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAssignedBy: %w", err)
+	}
+	return oldValue.AssignedBy, nil
+}
+
+// ClearAssignedBy clears the value of the "assigned_by" field.
+func (m *PatchPageAssignmentMutation) ClearAssignedBy() {
+	m.assigner = nil
+	m.clearedFields[patchpageassignment.FieldAssignedBy] = struct{}{}
+}
+
+// AssignedByCleared returns if the "assigned_by" field was cleared in this mutation.
+func (m *PatchPageAssignmentMutation) AssignedByCleared() bool {
+	_, ok := m.clearedFields[patchpageassignment.FieldAssignedBy]
+	return ok
+}
+
+// ResetAssignedBy resets all changes to the "assigned_by" field.
+func (m *PatchPageAssignmentMutation) ResetAssignedBy() {
+	m.assigner = nil
+	delete(m.clearedFields, patchpageassignment.FieldAssignedBy)
+}
+
+// SetCreated sets the "created" field.
+func (m *PatchPageAssignmentMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *PatchPageAssignmentMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the PatchPageAssignment entity.
+// If the PatchPageAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PatchPageAssignmentMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *PatchPageAssignmentMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *PatchPageAssignmentMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *PatchPageAssignmentMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the PatchPageAssignment entity.
+// If the PatchPageAssignment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PatchPageAssignmentMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *PatchPageAssignmentMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// ClearGame clears the "game" edge to the Game entity.
+func (m *PatchPageAssignmentMutation) ClearGame() {
+	m.clearedgame = true
+	m.clearedFields[patchpageassignment.FieldGameID] = struct{}{}
+}
+
+// GameCleared reports if the "game" edge to the Game entity was cleared.
+func (m *PatchPageAssignmentMutation) GameCleared() bool {
+	return m.clearedgame
+}
+
+// GameIDs returns the "game" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GameID instead. It exists only for internal usage by the builders.
+func (m *PatchPageAssignmentMutation) GameIDs() (ids []int) {
+	if id := m.game; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGame resets all changes to the "game" edge.
+func (m *PatchPageAssignmentMutation) ResetGame() {
+	m.game = nil
+	m.clearedgame = false
+}
+
+// SetAssignerID sets the "assigner" edge to the User entity by id.
+func (m *PatchPageAssignmentMutation) SetAssignerID(id int) {
+	m.assigner = &id
+}
+
+// ClearAssigner clears the "assigner" edge to the User entity.
+func (m *PatchPageAssignmentMutation) ClearAssigner() {
+	m.clearedassigner = true
+	m.clearedFields[patchpageassignment.FieldAssignedBy] = struct{}{}
+}
+
+// AssignerCleared reports if the "assigner" edge to the User entity was cleared.
+func (m *PatchPageAssignmentMutation) AssignerCleared() bool {
+	return m.AssignedByCleared() || m.clearedassigner
+}
+
+// AssignerID returns the "assigner" edge ID in the mutation.
+func (m *PatchPageAssignmentMutation) AssignerID() (id int, exists bool) {
+	if m.assigner != nil {
+		return *m.assigner, true
+	}
+	return
+}
+
+// AssignerIDs returns the "assigner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AssignerID instead. It exists only for internal usage by the builders.
+func (m *PatchPageAssignmentMutation) AssignerIDs() (ids []int) {
+	if id := m.assigner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAssigner resets all changes to the "assigner" edge.
+func (m *PatchPageAssignmentMutation) ResetAssigner() {
+	m.assigner = nil
+	m.clearedassigner = false
+}
+
+// Where appends a list predicates to the PatchPageAssignmentMutation builder.
+func (m *PatchPageAssignmentMutation) Where(ps ...predicate.PatchPageAssignment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PatchPageAssignmentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PatchPageAssignmentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PatchPageAssignment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PatchPageAssignmentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PatchPageAssignmentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PatchPageAssignment).
+func (m *PatchPageAssignmentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PatchPageAssignmentMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.game != nil {
+		fields = append(fields, patchpageassignment.FieldGameID)
+	}
+	if m.page_ids != nil {
+		fields = append(fields, patchpageassignment.FieldPageIds)
+	}
+	if m.assigner != nil {
+		fields = append(fields, patchpageassignment.FieldAssignedBy)
+	}
+	if m.created != nil {
+		fields = append(fields, patchpageassignment.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, patchpageassignment.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PatchPageAssignmentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case patchpageassignment.FieldGameID:
+		return m.GameID()
+	case patchpageassignment.FieldPageIds:
+		return m.PageIds()
+	case patchpageassignment.FieldAssignedBy:
+		return m.AssignedBy()
+	case patchpageassignment.FieldCreated:
+		return m.Created()
+	case patchpageassignment.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PatchPageAssignmentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case patchpageassignment.FieldGameID:
+		return m.OldGameID(ctx)
+	case patchpageassignment.FieldPageIds:
+		return m.OldPageIds(ctx)
+	case patchpageassignment.FieldAssignedBy:
+		return m.OldAssignedBy(ctx)
+	case patchpageassignment.FieldCreated:
+		return m.OldCreated(ctx)
+	case patchpageassignment.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PatchPageAssignment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PatchPageAssignmentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case patchpageassignment.FieldGameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGameID(v)
+		return nil
+	case patchpageassignment.FieldPageIds:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPageIds(v)
+		return nil
+	case patchpageassignment.FieldAssignedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAssignedBy(v)
+		return nil
+	case patchpageassignment.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case patchpageassignment.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PatchPageAssignment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PatchPageAssignmentMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PatchPageAssignmentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PatchPageAssignmentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PatchPageAssignment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PatchPageAssignmentMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(patchpageassignment.FieldPageIds) {
+		fields = append(fields, patchpageassignment.FieldPageIds)
+	}
+	if m.FieldCleared(patchpageassignment.FieldAssignedBy) {
+		fields = append(fields, patchpageassignment.FieldAssignedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PatchPageAssignmentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PatchPageAssignmentMutation) ClearField(name string) error {
+	switch name {
+	case patchpageassignment.FieldPageIds:
+		m.ClearPageIds()
+		return nil
+	case patchpageassignment.FieldAssignedBy:
+		m.ClearAssignedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown PatchPageAssignment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PatchPageAssignmentMutation) ResetField(name string) error {
+	switch name {
+	case patchpageassignment.FieldGameID:
+		m.ResetGameID()
+		return nil
+	case patchpageassignment.FieldPageIds:
+		m.ResetPageIds()
+		return nil
+	case patchpageassignment.FieldAssignedBy:
+		m.ResetAssignedBy()
+		return nil
+	case patchpageassignment.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case patchpageassignment.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PatchPageAssignment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PatchPageAssignmentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.game != nil {
+		edges = append(edges, patchpageassignment.EdgeGame)
+	}
+	if m.assigner != nil {
+		edges = append(edges, patchpageassignment.EdgeAssigner)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PatchPageAssignmentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case patchpageassignment.EdgeGame:
+		if id := m.game; id != nil {
+			return []ent.Value{*id}
+		}
+	case patchpageassignment.EdgeAssigner:
+		if id := m.assigner; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PatchPageAssignmentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PatchPageAssignmentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PatchPageAssignmentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedgame {
+		edges = append(edges, patchpageassignment.EdgeGame)
+	}
+	if m.clearedassigner {
+		edges = append(edges, patchpageassignment.EdgeAssigner)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PatchPageAssignmentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case patchpageassignment.EdgeGame:
+		return m.clearedgame
+	case patchpageassignment.EdgeAssigner:
+		return m.clearedassigner
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PatchPageAssignmentMutation) ClearEdge(name string) error {
+	switch name {
+	case patchpageassignment.EdgeGame:
+		m.ClearGame()
+		return nil
+	case patchpageassignment.EdgeAssigner:
+		m.ClearAssigner()
+		return nil
+	}
+	return fmt.Errorf("unknown PatchPageAssignment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PatchPageAssignmentMutation) ResetEdge(name string) error {
+	switch name {
+	case patchpageassignment.EdgeGame:
+		m.ResetGame()
+		return nil
+	case patchpageassignment.EdgeAssigner:
+		m.ResetAssigner()
+		return nil
+	}
+	return fmt.Errorf("unknown PatchPageAssignment edge %s", name)
 }
 
 // RoleFieldPermissionMutation represents an operation that mutates the RoleFieldPermission nodes in the graph.

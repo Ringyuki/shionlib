@@ -52,6 +52,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/patchpageassignment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/schema"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
@@ -1385,6 +1386,18 @@ func init() {
 	oidcidentity.DefaultUpdated = oidcidentityDescUpdated.Default.(func() time.Time)
 	// oidcidentity.UpdateDefaultUpdated holds the default value on update for the updated field.
 	oidcidentity.UpdateDefaultUpdated = oidcidentityDescUpdated.UpdateDefault.(func() time.Time)
+	patchpageassignmentFields := schema.PatchPageAssignment{}.Fields()
+	_ = patchpageassignmentFields
+	// patchpageassignmentDescCreated is the schema descriptor for created field.
+	patchpageassignmentDescCreated := patchpageassignmentFields[4].Descriptor()
+	// patchpageassignment.DefaultCreated holds the default value on creation for the created field.
+	patchpageassignment.DefaultCreated = patchpageassignmentDescCreated.Default.(func() time.Time)
+	// patchpageassignmentDescUpdated is the schema descriptor for updated field.
+	patchpageassignmentDescUpdated := patchpageassignmentFields[5].Descriptor()
+	// patchpageassignment.DefaultUpdated holds the default value on creation for the updated field.
+	patchpageassignment.DefaultUpdated = patchpageassignmentDescUpdated.Default.(func() time.Time)
+	// patchpageassignment.UpdateDefaultUpdated holds the default value on update for the updated field.
+	patchpageassignment.UpdateDefaultUpdated = patchpageassignmentDescUpdated.UpdateDefault.(func() time.Time)
 	rolefieldpermissionFields := schema.RoleFieldPermission{}.Fields()
 	_ = rolefieldpermissionFields
 	// rolefieldpermissionDescAllowMask is the schema descriptor for allow_mask field.

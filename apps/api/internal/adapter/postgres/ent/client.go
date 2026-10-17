@@ -64,6 +64,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/patchpageassignment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
@@ -189,6 +190,8 @@ type Client struct {
 	ModerationEvent *ModerationEventClient
 	// OidcIdentity is the client for interacting with the OidcIdentity builders.
 	OidcIdentity *OidcIdentityClient
+	// PatchPageAssignment is the client for interacting with the PatchPageAssignment builders.
+	PatchPageAssignment *PatchPageAssignmentClient
 	// RoleFieldPermission is the client for interacting with the RoleFieldPermission builders.
 	RoleFieldPermission *RoleFieldPermissionClient
 	// Setting is the client for interacting with the Setting builders.
@@ -285,6 +288,7 @@ func (c *Client) init() {
 	c.Message = NewMessageClient(c.config)
 	c.ModerationEvent = NewModerationEventClient(c.config)
 	c.OidcIdentity = NewOidcIdentityClient(c.config)
+	c.PatchPageAssignment = NewPatchPageAssignmentClient(c.config)
 	c.RoleFieldPermission = NewRoleFieldPermissionClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.SettingChange = NewSettingChangeClient(c.config)
@@ -444,6 +448,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
+		PatchPageAssignment:             NewPatchPageAssignmentClient(cfg),
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
 		Setting:                         NewSettingClient(cfg),
 		SettingChange:                   NewSettingChangeClient(cfg),
@@ -530,6 +535,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
+		PatchPageAssignment:             NewPatchPageAssignmentClient(cfg),
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
 		Setting:                         NewSettingClient(cfg),
 		SettingChange:                   NewSettingChangeClient(cfg),
@@ -590,11 +596,11 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.MalwareScanDetection, c.Message, c.ModerationEvent, c.OidcIdentity,
-		c.RoleFieldPermission, c.Setting, c.SettingChange, c.SiteDailyStat,
-		c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction, c.UploadFailure,
-		c.User, c.UserAPIKey, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.PatchPageAssignment, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction,
+		c.UploadFailure, c.User, c.UserAPIKey, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -617,11 +623,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.Inspection, c.InspectionEntry, c.MalwareScanCase,
 		c.MalwareScanDetection, c.Message, c.ModerationEvent, c.OidcIdentity,
-		c.RoleFieldPermission, c.Setting, c.SettingChange, c.SiteDailyStat,
-		c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction, c.UploadFailure,
-		c.User, c.UserAPIKey, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.PatchPageAssignment, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.Translator, c.TranslatorDistinction,
+		c.UploadFailure, c.User, c.UserAPIKey, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -728,6 +734,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ModerationEvent.mutate(ctx, m)
 	case *OidcIdentityMutation:
 		return c.OidcIdentity.mutate(ctx, m)
+	case *PatchPageAssignmentMutation:
+		return c.PatchPageAssignment.mutate(ctx, m)
 	case *RoleFieldPermissionMutation:
 		return c.RoleFieldPermission.mutate(ctx, m)
 	case *SettingMutation:
@@ -9476,6 +9484,171 @@ func (c *OidcIdentityClient) mutate(ctx context.Context, m *OidcIdentityMutation
 	}
 }
 
+// PatchPageAssignmentClient is a client for the PatchPageAssignment schema.
+type PatchPageAssignmentClient struct {
+	config
+}
+
+// NewPatchPageAssignmentClient returns a client for the PatchPageAssignment from the given config.
+func NewPatchPageAssignmentClient(c config) *PatchPageAssignmentClient {
+	return &PatchPageAssignmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `patchpageassignment.Hooks(f(g(h())))`.
+func (c *PatchPageAssignmentClient) Use(hooks ...Hook) {
+	c.hooks.PatchPageAssignment = append(c.hooks.PatchPageAssignment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `patchpageassignment.Intercept(f(g(h())))`.
+func (c *PatchPageAssignmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PatchPageAssignment = append(c.inters.PatchPageAssignment, interceptors...)
+}
+
+// Create returns a builder for creating a PatchPageAssignment entity.
+func (c *PatchPageAssignmentClient) Create() *PatchPageAssignmentCreate {
+	mutation := newPatchPageAssignmentMutation(c.config, OpCreate)
+	return &PatchPageAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PatchPageAssignment entities.
+func (c *PatchPageAssignmentClient) CreateBulk(builders ...*PatchPageAssignmentCreate) *PatchPageAssignmentCreateBulk {
+	return &PatchPageAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PatchPageAssignmentClient) MapCreateBulk(slice any, setFunc func(*PatchPageAssignmentCreate, int)) *PatchPageAssignmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PatchPageAssignmentCreateBulk{err: fmt.Errorf("calling to PatchPageAssignmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PatchPageAssignmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PatchPageAssignmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PatchPageAssignment.
+func (c *PatchPageAssignmentClient) Update() *PatchPageAssignmentUpdate {
+	mutation := newPatchPageAssignmentMutation(c.config, OpUpdate)
+	return &PatchPageAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PatchPageAssignmentClient) UpdateOne(_m *PatchPageAssignment) *PatchPageAssignmentUpdateOne {
+	mutation := newPatchPageAssignmentMutation(c.config, OpUpdateOne, withPatchPageAssignment(_m))
+	return &PatchPageAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PatchPageAssignmentClient) UpdateOneID(id int) *PatchPageAssignmentUpdateOne {
+	mutation := newPatchPageAssignmentMutation(c.config, OpUpdateOne, withPatchPageAssignmentID(id))
+	return &PatchPageAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PatchPageAssignment.
+func (c *PatchPageAssignmentClient) Delete() *PatchPageAssignmentDelete {
+	mutation := newPatchPageAssignmentMutation(c.config, OpDelete)
+	return &PatchPageAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PatchPageAssignmentClient) DeleteOne(_m *PatchPageAssignment) *PatchPageAssignmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PatchPageAssignmentClient) DeleteOneID(id int) *PatchPageAssignmentDeleteOne {
+	builder := c.Delete().Where(patchpageassignment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PatchPageAssignmentDeleteOne{builder}
+}
+
+// Query returns a query builder for PatchPageAssignment.
+func (c *PatchPageAssignmentClient) Query() *PatchPageAssignmentQuery {
+	return &PatchPageAssignmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePatchPageAssignment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PatchPageAssignment entity by its id.
+func (c *PatchPageAssignmentClient) Get(ctx context.Context, id int) (*PatchPageAssignment, error) {
+	return c.Query().Where(patchpageassignment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PatchPageAssignmentClient) GetX(ctx context.Context, id int) *PatchPageAssignment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGame queries the game edge of a PatchPageAssignment.
+func (c *PatchPageAssignmentClient) QueryGame(_m *PatchPageAssignment) *GameQuery {
+	query := (&GameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(patchpageassignment.Table, patchpageassignment.FieldID, id),
+			sqlgraph.To(game.Table, game.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, patchpageassignment.GameTable, patchpageassignment.GameColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAssigner queries the assigner edge of a PatchPageAssignment.
+func (c *PatchPageAssignmentClient) QueryAssigner(_m *PatchPageAssignment) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(patchpageassignment.Table, patchpageassignment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, patchpageassignment.AssignerTable, patchpageassignment.AssignerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PatchPageAssignmentClient) Hooks() []Hook {
+	return c.hooks.PatchPageAssignment
+}
+
+// Interceptors returns the client interceptors.
+func (c *PatchPageAssignmentClient) Interceptors() []Interceptor {
+	return c.inters.PatchPageAssignment
+}
+
+func (c *PatchPageAssignmentClient) mutate(ctx context.Context, m *PatchPageAssignmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PatchPageAssignmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PatchPageAssignmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PatchPageAssignmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PatchPageAssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PatchPageAssignment mutation op: %q", m.Op())
+	}
+}
+
 // RoleFieldPermissionClient is a client for the RoleFieldPermission schema.
 type RoleFieldPermissionClient struct {
 	config
@@ -12764,11 +12937,11 @@ type (
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
 		InspectionEntry, MalwareScanCase, MalwareScanDetection, Message,
-		ModerationEvent, OidcIdentity, RoleFieldPermission, Setting, SettingChange,
-		SiteDailyStat, SponsorOrder, Tag, Translator, TranslatorDistinction,
-		UploadFailure, User, UserAPIKey, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		Walkthrough []ent.Hook
+		ModerationEvent, OidcIdentity, PatchPageAssignment, RoleFieldPermission,
+		Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag, Translator,
+		TranslatorDistinction, UploadFailure, User, UserAPIKey, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -12782,11 +12955,11 @@ type (
 		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
 		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
 		InspectionEntry, MalwareScanCase, MalwareScanDetection, Message,
-		ModerationEvent, OidcIdentity, RoleFieldPermission, Setting, SettingChange,
-		SiteDailyStat, SponsorOrder, Tag, Translator, TranslatorDistinction,
-		UploadFailure, User, UserAPIKey, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		Walkthrough []ent.Interceptor
+		ModerationEvent, OidcIdentity, PatchPageAssignment, RoleFieldPermission,
+		Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag, Translator,
+		TranslatorDistinction, UploadFailure, User, UserAPIKey, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
 	}
 )
 

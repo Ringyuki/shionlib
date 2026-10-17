@@ -19,7 +19,7 @@ func read(t *testing.T, resources ...string) []moyu.Entry {
 		_, _ = w.Write([]byte(`{"items":[{"resources":[` + strings.Join(resources, ",") + `]}]}`))
 	}))
 	t.Cleanup(server.Close)
-	entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").Entries(context.Background(), "v1", nil)
+	entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").Entries(context.Background(), moyu.PageQuery{VNDBID: "v1"})
 	if err != nil {
 		t.Fatal(err)
 	}

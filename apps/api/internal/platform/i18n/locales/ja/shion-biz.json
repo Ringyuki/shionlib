@@ -144,6 +144,8 @@
   "TRANSLATOR_TOO_MANY": "一つのリソースに記入できる翻訳グループは {max} 件までです",
   "TRANSLATOR_MERGE_NEEDS_OTHERS": "他の翻訳グループを一つ以上選択してください",
   "MOYU_REQUEST_FAILED": "パッチを取得できませんでした",
+  "MOYU_PAGE_NOT_FOUND": "鲲 Galgame 补丁にこのページはありません",
+  "MOYU_ADDRESS_UNRECOGNIZED": "このアドレスを認識できません",
   "AI_PROVIDER_NOT_FOUND": "AI プロバイダーが見つかりません",
   "AI_PROVIDER_NAME_TAKEN": "同じ名前の AI プロバイダーが既に存在します",
   "AI_PROVIDER_BASE_URL_REQUIRED": "プロバイダーの API ベース URL を入力してください",

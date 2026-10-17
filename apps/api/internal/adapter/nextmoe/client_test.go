@@ -25,7 +25,7 @@ func TestEntries(t *testing.T) {
 	}))
 	t.Cleanup(server.Close)
 	client := nextmoe.NewClient(server.Client(), server.URL+"/", "nmk_test_key")
-	entries, err := client.Entries(context.Background(), "v4145", []string{"61311", "212857"})
+	entries, err := client.Entries(context.Background(), moyu.PageQuery{VNDBID: "v4145", Works: []string{"61311", "212857"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,11 +38,14 @@ func TestEntries(t *testing.T) {
 	if !entries[1].Updated.Equal(time.Date(2025, 9, 24, 16, 0, 0, 0, time.UTC)) {
 		t.Fatalf("updated: %v", entries[1].Updated)
 	}
-	if _, err := client.Entries(context.Background(), "", []string{"212857"}); err != nil || gotURI != "/v2/moyu/patches?include=resources%2Cpublisher&nsfw=true&refs=catalog%3A212857" {
+	if _, err := client.Entries(context.Background(), moyu.PageQuery{Works: []string{"212857"}}); err != nil || gotURI != "/v2/moyu/patches?include=resources%2Cpublisher&nsfw=true&refs=catalog%3A212857" {
 		t.Fatalf("a page whose game is not on vndb is found by its work: %s %v", gotURI, err)
 	}
+	if _, err := client.Entries(context.Background(), moyu.PageQuery{VNDBID: "v4145", IDs: []string{"212857", "212857", "x", "3125"}}); err != nil || gotURI != "/v2/moyu/patches?ids=212857%2C3125&include=resources%2Cpublisher&nsfw=true" {
+		t.Fatalf("pages assigned by hand are asked for by their ids alone: %s %v", gotURI, err)
+	}
 	gotURI = ""
-	none, err := client.Entries(context.Background(), " ", []string{"", "1,2"})
+	none, err := client.Entries(context.Background(), moyu.PageQuery{VNDBID: " ", Works: []string{"", "1,2"}, IDs: []string{"x"}})
 	if err != nil || none == nil || len(none) != 0 || gotURI != "" {
 		t.Fatalf("nothing to look for asks for nothing, not for every page: %s %+v %v", gotURI, none, err)
 	}
@@ -71,34 +74,65 @@ func TestWorks(t *testing.T) {
 	}
 }
 
-func TestTitled(t *testing.T) {
-	var gotURI string
+func TestPages(t *testing.T) {
+	var asked []string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotURI = r.URL.RequestURI()
+		asked = append(asked, r.URL.RequestURI())
+		if r.URL.Path == "/v2/catalog/works" {
+			_, _ = w.Write([]byte(`{"object":"list","items":[{"object":"work","id":"3125","display_name":" 俺たちに翼はない "},{"object":"work","id":"215305","display_name":"俺たちに翼はない R"}]}`))
+			return
+		}
 		_, _ = w.Write([]byte(`{"object":"list","items":[` +
-			`{"object":"work","id":"212857","display_name":" プレミアムアーカイブス むとうけいじ ","latin":null,"localized":{"ja":{"value":"プレミアムアーカイブス むとうけいじ","is_machine":false},"zh-Hans":{"value":"高级典藏 武藤启治","is_machine":true}},"release_date":"2016-12-22"},` +
-			`{"object":"work","id":"7","display_name":"Premium","latin":"Puremiamu","localized":{},"release_date":"2016"},` +
-			`{"object":"work","id":"x","display_name":"ignored"}],"next_cursor":null}`))
+			`{"object":"patch","id":"3125","vndb_id":"v1141","catalog_work_id":"3125","resource_count":5,"web_url":"https://www.moyu.moe/galgame/3125"},` +
+			`{"object":"patch","id":"215305","vndb_id":"wiki-215305","catalog_work_id":"215305","resource_count":1,"web_url":"https://www.moyu.moe/galgame/215305"},` +
+			`{"object":"patch","id":"3125","vndb_id":"v1141","catalog_work_id":"3125","resource_count":5,"web_url":"https://www.moyu.moe/galgame/3125"},` +
+			`{"object":"patch","id":"9","vndb_id":"pending-9","catalog_work_id":null,"resource_count":-1,"web_url":"https://www.moyu.moe/galgame/9"},` +
+			`{"object":"patch","id":"x","web_url":"https://www.moyu.moe/galgame/x"},{"object":"patch","id":"10","web_url":"javascript:alert(1)"}]}`))
 	}))
 	t.Cleanup(server.Close)
 	client := nextmoe.NewClient(server.Client(), server.URL, "k")
-	works, err := client.Titled(context.Background(), " プレミアムアーカイブス むとうけいじ ")
-	if err != nil || len(works) != 2 {
-		t.Fatalf("works: %+v %v", works, err)
+	pages, err := client.Pages(context.Background(), moyu.PageQuery{VNDBID: "v1141", Works: []string{"215305"}})
+	if err != nil || len(pages) != 3 {
+		t.Fatalf("pages: %+v %v", pages, err)
 	}
-	if gotURI != "/v2/catalog/works?include=titles&limit=10&nsfw=true&q=%E3%83%97%E3%83%AC%E3%83%9F%E3%82%A2%E3%83%A0%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96%E3%82%B9+%E3%82%80%E3%81%A8%E3%81%86%E3%81%91%E3%81%84%E3%81%98" {
-		t.Fatalf("unexpected request %s", gotURI)
+	if !slices.Equal(asked, []string{"/v2/moyu/patches?nsfw=true&refs=vndb%3Av1141%2Ccatalog%3A215305", "/v2/catalog/works?ids=3125%2C215305&nsfw=true"}) {
+		t.Fatalf("the pages, then the names of their works: %v", asked)
 	}
-	archives, other := works[0], works[1]
-	if archives.ID != "212857" || !slices.Equal(archives.Titles, []string{"プレミアムアーカイブス むとうけいじ", "プレミアムアーカイブス むとうけいじ"}) || archives.Released == nil || archives.Released.Format(time.DateOnly) != "2016-12-22" {
-		t.Fatalf("a title a machine translated is not a title of the work: %+v", archives)
+	original, edition, placeholder := pages[0], pages[1], pages[2]
+	if original != (moyu.Page{ID: "3125", URL: "https://www.moyu.moe/galgame/3125", VNDBID: "v1141", WorkID: "3125", Title: "俺たちに翼はない", Resources: 5}) || edition.Title != "俺たちに翼はない R" {
+		t.Fatalf("pages with their works: %+v %+v", original, edition)
 	}
-	if !slices.Equal(other.Titles, []string{"Premium", "Puremiamu"}) || other.Released == nil || other.Released.Year() != 2016 {
-		t.Fatalf("a date known only to the year: %+v", other)
+	if placeholder.WorkID != "" || placeholder.Title != "" || placeholder.Resources != 0 {
+		t.Fatalf("a page filed under no work: %+v", placeholder)
+	}
+	asked = nil
+	if _, err := client.Pages(context.Background(), moyu.PageQuery{IDs: []string{"212857"}}); err != nil || asked[0] != "/v2/moyu/patches?ids=212857&nsfw=true" {
+		t.Fatalf("by id: %v %v", asked, err)
+	}
+}
+
+func TestPageOfResource(t *testing.T) {
+	var gotURI string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotURI = r.URL.RequestURI()
+		if r.URL.Path == "/v2/moyu/resources/11421" {
+			_, _ = w.Write([]byte(`{"object":"patch_resource","id":"11421","patch_id":"212857"}`))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(server.Close)
+	client := nextmoe.NewClient(server.Client(), server.URL, "k")
+	page, found, err := client.PageOfResource(context.Background(), "11421")
+	if err != nil || !found || page != "212857" || gotURI != "/v2/moyu/resources/11421" {
+		t.Fatalf("resource: %q %v %v %s", page, found, err, gotURI)
+	}
+	if _, found, err := client.PageOfResource(context.Background(), "1"); err != nil || found {
+		t.Fatalf("a resource the other site does not list: %v %v", found, err)
 	}
 	gotURI = ""
-	if none, err := client.Titled(context.Background(), " "); err != nil || none == nil || len(none) != 0 || gotURI != "" {
-		t.Fatalf("no title asks for nothing: %v %v %s", none, err, gotURI)
+	if _, found, err := client.PageOfResource(context.Background(), "../patches"); err != nil || found || gotURI != "" {
+		t.Fatalf("an id that is not a number asks for nothing: %v %v %s", found, err, gotURI)
 	}
 }
 
@@ -107,7 +141,7 @@ func TestEmptyAndMissingPatches(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte(body))
 		}))
-		entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").Entries(context.Background(), "v1", nil)
+		entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").Entries(context.Background(), moyu.PageQuery{VNDBID: "v1"})
 		server.Close()
 		if err != nil || entries == nil || len(entries) != 0 {
 			t.Fatalf("%s: got %+v %v", body, entries, err)
@@ -132,14 +166,17 @@ func TestUpstreamFailures(t *testing.T) {
 			httpClient := server.Client()
 			httpClient.Timeout = 100 * time.Millisecond
 			client := nextmoe.NewClient(httpClient, server.URL, "k")
-			if _, err := client.Entries(context.Background(), "v1", nil); !errors.Is(err, moyu.ErrRequestFailed) {
+			if _, err := client.Entries(context.Background(), moyu.PageQuery{VNDBID: "v1"}); !errors.Is(err, moyu.ErrRequestFailed) {
 				t.Fatalf("entries: expected MOYU_REQUEST_FAILED, got %v", err)
 			}
 			if _, err := client.Works(context.Background(), []moyu.Anchor{{Source: moyu.SourceVNDB, ID: "v1"}}); !errors.Is(err, moyu.ErrRequestFailed) {
 				t.Fatalf("works: expected MOYU_REQUEST_FAILED, got %v", err)
 			}
-			if _, err := client.Titled(context.Background(), "脅迫"); !errors.Is(err, moyu.ErrRequestFailed) {
-				t.Fatalf("titled: expected MOYU_REQUEST_FAILED, got %v", err)
+			if _, err := client.Pages(context.Background(), moyu.PageQuery{IDs: []string{"3125"}}); !errors.Is(err, moyu.ErrRequestFailed) {
+				t.Fatalf("pages: expected MOYU_REQUEST_FAILED, got %v", err)
+			}
+			if _, _, err := client.PageOfResource(context.Background(), "11421"); !errors.Is(err, moyu.ErrRequestFailed) {
+				t.Fatalf("resource: expected MOYU_REQUEST_FAILED, got %v", err)
 			}
 		})
 	}

@@ -144,6 +144,8 @@
   "TRANSLATOR_TOO_MANY": "一个资源最多填写 {max} 个汉化组",
   "TRANSLATOR_MERGE_NEEDS_OTHERS": "请选择至少一个其他汉化组",
   "MOYU_REQUEST_FAILED": "获取补丁失败",
+  "MOYU_PAGE_NOT_FOUND": "鲲 Galgame 补丁上没有这个页面",
+  "MOYU_ADDRESS_UNRECOGNIZED": "无法识别这个地址",
   "AI_PROVIDER_NOT_FOUND": "AI 渠道不存在",
   "AI_PROVIDER_NAME_TAKEN": "已存在同名的 AI 渠道",
   "AI_PROVIDER_BASE_URL_REQUIRED": "请填写渠道的 API 地址",

@@ -112,6 +112,8 @@ type Tx struct {
 	ModerationEvent *ModerationEventClient
 	// OidcIdentity is the client for interacting with the OidcIdentity builders.
 	OidcIdentity *OidcIdentityClient
+	// PatchPageAssignment is the client for interacting with the PatchPageAssignment builders.
+	PatchPageAssignment *PatchPageAssignmentClient
 	// RoleFieldPermission is the client for interacting with the RoleFieldPermission builders.
 	RoleFieldPermission *RoleFieldPermissionClient
 	// Setting is the client for interacting with the Setting builders.
@@ -328,6 +330,7 @@ func (tx *Tx) init() {
 	tx.Message = NewMessageClient(tx.config)
 	tx.ModerationEvent = NewModerationEventClient(tx.config)
 	tx.OidcIdentity = NewOidcIdentityClient(tx.config)
+	tx.PatchPageAssignment = NewPatchPageAssignmentClient(tx.config)
 	tx.RoleFieldPermission = NewRoleFieldPermissionClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.SettingChange = NewSettingChangeClient(tx.config)
