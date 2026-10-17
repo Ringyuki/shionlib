@@ -29,10 +29,8 @@ export function matchedOf(pages: PatchPages): PatchPage[] {
 }
 
 export function draftOf(pages: PatchPages): Draft {
-  return {
-    manual: pages.manual,
-    assigned: pages.manual ? (pages.assigned ?? []) : matchedOf(pages),
-  }
+  const assigned = pages.manual ? (pages.assigned ?? []) : matchedOf(pages)
+  return { manual: pages.manual, assigned: assigned.map(page => ({ ...page, via: null })) }
 }
 
 export function shownPages(pages: PatchPages, draft: Draft): PatchPage[] {

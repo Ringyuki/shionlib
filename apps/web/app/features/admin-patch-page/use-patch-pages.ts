@@ -20,6 +20,7 @@ export function useAssignPatchPages() {
   const command = useCommand(
     useFetcher<typeof patchPagesAction>(),
     href('/resources/admin/patch-pages'),
+    { revalidate: false },
   )
   return { ...command, run: (assignment: Assignment) => command.run(assignment) }
 }
@@ -28,6 +29,7 @@ export function usePatchPageLookup() {
   const command = useCommand(
     useFetcher<typeof patchPageLookupAction>(),
     href('/resources/admin/patch-pages/lookup'),
+    { revalidate: false },
   )
   return { ...command, run: (lookup: Lookup) => command.run(lookup) }
 }

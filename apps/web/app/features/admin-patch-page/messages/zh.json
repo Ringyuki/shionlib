@@ -24,5 +24,6 @@
     "duplicate": "这个页面已在列表中",
     "full": "最多指定 {max, number} 个页面"
   },
-  "loading": "正在读取补丁页"
+  "loading": "正在读取补丁页",
+  "untitled": "未关联作品"
 }

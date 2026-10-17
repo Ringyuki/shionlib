@@ -41,10 +41,16 @@ function PageRow({ page, onRemove }: { page: PatchPage; onRemove?: (page: PatchP
   const t = useTranslations('adminPatchPage')
   const name = nameOf(page)
   return (
-    <Inline as="li" gap="md" align="center" wrap={false} className="py-3 ps-3.5 pe-2">
+    <Inline
+      as="li"
+      gap="md"
+      align="center"
+      wrap={false}
+      className={onRemove === undefined ? 'px-3.5 py-3' : 'py-3 ps-3.5 pe-2'}
+    >
       <Stack gap="none" className="min-w-0 flex-1">
-        <Text as="span" weight="medium" truncate>
-          {name}
+        <Text as="span" weight="medium" tone={page.title === null ? 'muted' : undefined} truncate>
+          {page.title ?? t('untitled')}
         </Text>
         <Inline gap="xs" align="center" className="min-w-0">
           <Link

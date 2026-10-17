@@ -34,7 +34,11 @@ const found: PatchPages = {
 
 describe('draftOf', () => {
   it('starts an assignment by hand from what the ids found', () => {
-    expect(draftOf(found)).toEqual({ manual: false, assigned: [original, edition] })
+    const matched = {
+      ...found,
+      matched: [{ ...original, via: { source: 'vndb' as const, id: 'v1141' } }, edition],
+    }
+    expect(draftOf(matched)).toEqual({ manual: false, assigned: [original, edition] })
   })
 
   it('keeps the pages assigned by hand', () => {

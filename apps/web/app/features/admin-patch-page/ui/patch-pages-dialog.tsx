@@ -20,10 +20,15 @@ export function PatchPagesDialog({ target, open, onOpenChange }: PatchPagesDialo
   const assign = useAssignPatchPages()
   const [edited, setEdited] = useOpenState<Draft | undefined>(open, () => undefined)
   const id = target?.id
-  const load = useEffectEvent((wanted: number) => void fetched.load(wanted))
+  const reload = () => {
+    if (id !== undefined) {
+      void fetched.load(id)
+    }
+  }
+  const load = useEffectEvent(reload)
   useEffect(() => {
-    if (open && id !== undefined) {
-      load(id)
+    if (open) {
+      load()
     }
   }, [open, id])
   const loaded = fetched.result?.id === id && !fetched.loading ? fetched.result?.pages : undefined
@@ -42,7 +47,7 @@ export function PatchPagesDialog({ target, open, onOpenChange }: PatchPagesDialo
           draft={draft}
           failed={fetched.failed}
           retrying={fetched.loading}
-          onRetry={() => id !== undefined && load(id)}
+          onRetry={reload}
           onChange={setEdited}
         />
       )}

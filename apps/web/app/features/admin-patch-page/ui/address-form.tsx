@@ -43,6 +43,7 @@ export function AddressForm({ draft, onAdd }: AddressFormProps) {
         }
         onAdd(outcome.result)
         setValues({ address: '' })
+        form.current?.reset()
       }}
     >
       <FormField name="address" label={t('address')}>
