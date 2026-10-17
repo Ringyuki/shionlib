@@ -8,11 +8,13 @@ import (
 )
 
 type Games interface {
-	VNDBID(ctx context.Context, gameID int, viewer actor.Actor) (string, bool, error)
+	Game(ctx context.Context, gameID int, viewer actor.Actor) (Game, bool, error)
 }
 
 type Patches interface {
-	EntriesByVNDBID(ctx context.Context, vndbID string) ([]Entry, error)
+	Works(ctx context.Context, anchors []Anchor) ([]string, error)
+	Titled(ctx context.Context, title string) ([]Work, error)
+	Entries(ctx context.Context, vndbID string, works []string) ([]Entry, error)
 }
 
 type Cache interface {

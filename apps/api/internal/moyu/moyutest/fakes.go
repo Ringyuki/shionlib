@@ -3,6 +3,7 @@ package moyutest
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"sync"
 	"time"
 
@@ -10,28 +11,85 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
 )
 
-type Games map[int]string
+type Games map[int]moyu.Game
 
-func (g Games) VNDBID(_ context.Context, gameID int, _ actor.Actor) (string, bool, error) {
-	id, ok := g[gameID]
-	return id, ok, nil
+func (g Games) Game(_ context.Context, gameID int, _ actor.Actor) (moyu.Game, bool, error) {
+	game, ok := g[gameID]
+	return game, ok, nil
+}
+
+func VNDB(id string) moyu.Game {
+	return moyu.Game{Anchors: []moyu.Anchor{{Source: moyu.SourceVNDB, ID: id}}}
 }
 
 type Patches struct {
-	mu      sync.Mutex
-	Entries map[string][]moyu.Entry
-	Fail    error
-	Calls   int
+	mu        sync.Mutex
+	Known     map[moyu.Anchor][]string
+	Titles    map[string][]moyu.Work
+	Listed    map[string][]moyu.Entry
+	Fail      error
+	FailWorks error
+	Calls     int
+	Lookups   []moyu.Anchor
+	Searches  []string
+	Unbounded int
 }
 
-func (p *Patches) EntriesByVNDBID(_ context.Context, vndbID string) ([]moyu.Entry, error) {
+func (p *Patches) bound(ctx context.Context) {
+	if deadline, ok := ctx.Deadline(); !ok || time.Until(deadline) > moyu.RequestTimeout {
+		p.Unbounded++
+	}
+}
+
+func (p *Patches) Works(ctx context.Context, anchors []moyu.Anchor) ([]string, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	p.bound(ctx)
+	p.Lookups = append(p.Lookups, anchors...)
+	if p.FailWorks != nil {
+		return nil, p.FailWorks
+	}
+	works := []string{}
+	for _, anchor := range anchors {
+		for _, work := range p.Known[anchor] {
+			if !slices.Contains(works, work) {
+				works = append(works, work)
+			}
+		}
+	}
+	return works, nil
+}
+
+func (p *Patches) Titled(ctx context.Context, title string) ([]moyu.Work, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.bound(ctx)
+	p.Searches = append(p.Searches, title)
+	if p.FailWorks != nil {
+		return nil, p.FailWorks
+	}
+	return p.Titles[title], nil
+}
+
+func (p *Patches) Entries(ctx context.Context, vndbID string, works []string) ([]moyu.Entry, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.bound(ctx)
 	p.Calls++
 	if p.Fail != nil {
 		return nil, p.Fail
 	}
-	return p.Entries[vndbID], nil
+	entries := []moyu.Entry{}
+	seen := map[string]bool{}
+	for _, ref := range append([]string{vndbID}, works...) {
+		for _, entry := range p.Listed[ref] {
+			if !seen[entry.ID] {
+				seen[entry.ID] = true
+				entries = append(entries, entry)
+			}
+		}
+	}
+	return entries, nil
 }
 
 type Cache struct {

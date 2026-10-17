@@ -17,8 +17,14 @@ import (
 const (
 	typeSave   = "save"
 	typeManual = "manual"
+	refVNDB    = "vndb"
+	refCatalog = "catalog"
 	largest    = float64(1 << 50)
 )
+
+var sources = map[moyu.Source]string{moyu.SourceVNDB: refVNDB, moyu.SourceBangumi: "bangumi"}
+
+var workID = regexp.MustCompile(`^[0-9]+$`)
 
 var machineTypes = []string{"ai", "machine", "machine_polishing"}
 
@@ -85,6 +91,28 @@ func entryOf(raw json.RawMessage) (moyu.Entry, bool) {
 		entry.Publisher = &moyu.Publisher{Name: trimmed(resource.Publisher.Name), Avatar: linkOf(resource.Publisher.AvatarURL, "https")}
 	}
 	return entry, true
+}
+
+var dateLayouts = []string{time.DateOnly, "2006-01", "2006"}
+
+func dateOf(raw *string) *time.Time {
+	if raw == nil {
+		return nil
+	}
+	for _, layout := range dateLayouts {
+		if date, err := time.Parse(layout, strings.TrimSpace(*raw)); err == nil {
+			return &date
+		}
+	}
+	return nil
+}
+
+func refOf(source, id string) (string, bool) {
+	id = strings.TrimSpace(id)
+	if source == "" || id == "" || strings.ContainsAny(id, ", ") {
+		return "", false
+	}
+	return source + ":" + id, true
 }
 
 func trimmed(text string) string {

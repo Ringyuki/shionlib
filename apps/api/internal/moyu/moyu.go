@@ -5,11 +5,37 @@ import (
 )
 
 const (
-	CacheTTL       = 5 * time.Minute
-	FailureTTL     = time.Minute
-	RequestTimeout = 3 * time.Second
-	CacheKeyPrefix = "moyu:entries:vndb:"
+	CacheTTL         = 5 * time.Minute
+	FailureTTL       = time.Minute
+	WorksTTL         = 24 * time.Hour
+	RequestTimeout   = 3 * time.Second
+	EntriesKeyPrefix = "moyu:entries:game:"
+	WorksKeyPrefix   = "moyu:works:"
 )
+
+type Source string
+
+const (
+	SourceVNDB    Source = "vndb"
+	SourceBangumi Source = "bangumi"
+)
+
+type Anchor struct {
+	Source Source
+	ID     string
+}
+
+type Game struct {
+	Anchors  []Anchor
+	Titles   []string
+	Released *time.Time
+}
+
+type Work struct {
+	ID       string
+	Titles   []string
+	Released *time.Time
+}
 
 type Kind string
 

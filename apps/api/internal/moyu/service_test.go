@@ -3,31 +3,55 @@ package moyu_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu/moyutest"
 )
 
+var (
+	vndb    = func(id string) moyu.Anchor { return moyu.Anchor{Source: moyu.SourceVNDB, ID: id} }
+	bangumi = func(id string) moyu.Anchor { return moyu.Anchor{Source: moyu.SourceBangumi, ID: id} }
+)
+
+func anchored(anchors ...moyu.Anchor) moyu.Game {
+	return moyu.Game{Anchors: anchors}
+}
+
+func on(year int) *time.Time {
+	date := time.Date(year, 12, 28, 0, 0, 0, 0, time.UTC)
+	return &date
+}
+
+func ids(entries []moyu.Entry) []string {
+	out := []string{}
+	for _, entry := range entries {
+		out = append(out, entry.ID)
+	}
+	return out
+}
+
 func TestEntries(t *testing.T) {
 	ctx := context.Background()
-	patches := &moyutest.Patches{Entries: map[string][]moyu.Entry{
-		"v4145": {{ID: "r1", Kind: moyu.KindPatch, Name: "patch"}},
-	}}
+	patches := &moyutest.Patches{
+		Known:  map[moyu.Anchor][]string{vndb("v4145"): {"61311"}},
+		Listed: map[string][]moyu.Entry{"v4145": {{ID: "r1", Kind: moyu.KindPatch, Name: "patch"}}, "61311": {{ID: "r1"}, {ID: "r3"}}},
+	}
 	cache := moyutest.NewCache()
-	service := moyu.NewService(moyutest.Games{1: "v4145", 2: "v1", 4: ""}, patches, cache)
-
+	service := moyu.NewService(moyutest.Games{1: anchored(vndb("v4145"), bangumi("302835")), 2: moyutest.VNDB("v1"), 4: {}}, patches, cache)
 	entries, err := service.Entries(ctx, actor.Guest(), 1)
-	if err != nil || len(entries) != 1 || entries[0].ID != "r1" || entries[0].Kind != moyu.KindPatch {
+	if err != nil || !slices.Equal(ids(entries), []string{"r1", "r3"}) || entries[0].Kind != moyu.KindPatch {
 		t.Fatalf("entries: %+v %v", entries, err)
 	}
-	if !cache.Has("moyu:entries:vndb:v4145") {
-		t.Fatal("what the other site lists is cached")
+	if !cache.Has("moyu:entries:game:1") || cache.TTL("moyu:works:vndb:v4145,bangumi:302835") != moyu.WorksTTL {
+		t.Fatal("what the other site lists and the work a game is filed under are cached")
 	}
 	again, err := service.Entries(ctx, actor.Guest(), 1)
-	if err != nil || patches.Calls != 1 || len(again) != 1 || again[0].Name != "patch" {
-		t.Fatalf("cache hits skip upstream: calls=%d %+v %v", patches.Calls, again, err)
+	if err != nil || patches.Calls != 1 || len(patches.Lookups) != 2 || len(again) != 2 || again[0].Name != "patch" {
+		t.Fatalf("cache hits skip upstream: calls=%d lookups=%v %+v %v", patches.Calls, patches.Lookups, again, err)
 	}
 	empty, err := service.Entries(ctx, actor.Guest(), 2)
 	if err != nil || empty == nil || len(empty) != 0 {
@@ -40,34 +64,105 @@ func TestEntries(t *testing.T) {
 	for _, gameID := range []int{4, 99} {
 		none, err := service.Entries(ctx, actor.Guest(), gameID)
 		if err != nil || none == nil || len(none) != 0 || patches.Calls != calls {
-			t.Fatalf("game %d without a vndb id: %v %v", gameID, none, err)
+			t.Fatalf("game %d without external ids: %v %v", gameID, none, err)
 		}
+	}
+}
+
+func TestAPageIsFoundThroughEveryWorkTheIDsOfItsGameLeadTo(t *testing.T) {
+	ctx := context.Background()
+	patches := &moyutest.Patches{
+		Known: map[moyu.Anchor][]string{
+			vndb("v56650"): {"212857"}, bangumi("700741"): {"255986"}, bangumi("302835"): {"1"}, vndb("v4145"): {"61311"},
+		},
+		Listed: map[string][]moyu.Entry{"212857": {{ID: "r1"}}, "255986": {{ID: "r2"}}, "1": {{ID: "r3"}}, "61311": {{ID: "r4"}}},
+	}
+	service := moyu.NewService(moyutest.Games{
+		1: moyutest.VNDB("v56650"),
+		2: anchored(bangumi("700741")),
+		3: anchored(vndb("v9"), bangumi("302835")),
+		4: anchored(vndb("v4145"), bangumi("302835")),
+	}, patches, moyutest.NewCache())
+	for _, c := range []struct {
+		game int
+		want []string
+	}{{1, []string{"r1"}}, {2, []string{"r2"}}, {3, []string{"r3"}}, {4, []string{"r4", "r3"}}} {
+		entries, err := service.Entries(ctx, actor.Guest(), c.game)
+		if err != nil || !slices.Equal(ids(entries), c.want) {
+			t.Fatalf("game %d: %+v %v", c.game, entries, err)
+		}
+	}
+	asked := []moyu.Anchor{vndb("v56650"), bangumi("700741"), vndb("v9"), bangumi("302835"), vndb("v4145"), bangumi("302835")}
+	if !slices.Equal(patches.Lookups, asked) {
+		t.Fatalf("every id of a game is asked about at once: %v", patches.Lookups)
+	}
+}
+
+func TestAGameWhoseIDsLeadToNoWorkIsFoundByItsTitle(t *testing.T) {
+	ctx := context.Background()
+	archives := moyu.Work{ID: "212857", Titles: []string{"プレミアムアーカイブス むとうけいじ", "Premium Archives"}, Released: on(2016)}
+	patches := &moyutest.Patches{
+		Known: map[moyu.Anchor][]string{vndb("v4145"): {"61311"}},
+		Titles: map[string][]moyu.Work{
+			"プレミアムアーカイブス　むとうけいじ": {{ID: "1", Titles: []string{"プレミアムアーカイブス"}}, archives, {ID: "2", Titles: []string{"プレミアムアーカイブス むとうけいじ"}, Released: on(2019)}},
+			"脅迫": {{ID: "11529", Titles: []string{"脅迫"}}},
+		},
+		Listed: map[string][]moyu.Entry{"212857": {{ID: "r1"}}, "61311": {{ID: "r2"}}, "11529": {{ID: "r3"}}, "2": {{ID: "r4"}}},
+	}
+	service := moyu.NewService(moyutest.Games{
+		1: {Titles: []string{"プレミアムアーカイブス　むとうけいじ", "高级典藏 武藤启治"}, Released: on(2016)},
+		2: {Anchors: []moyu.Anchor{vndb("v4145")}, Titles: []string{"脅迫"}},
+		3: {Anchors: []moyu.Anchor{vndb("v9")}, Titles: []string{"脅迫"}, Released: on(1996)},
+		4: {Titles: []string{" ", "-"}},
+	}, patches, moyutest.NewCache())
+	for _, c := range []struct {
+		game int
+		want []string
+	}{{1, []string{"r1"}}, {2, []string{"r2"}}, {3, []string{"r3"}}, {4, []string{}}} {
+		entries, err := service.Entries(ctx, actor.Guest(), c.game)
+		if err != nil || !slices.Equal(ids(entries), c.want) {
+			t.Fatalf("game %d: %+v %v", c.game, entries, err)
+		}
+	}
+	if !slices.Equal(patches.Searches, []string{"プレミアムアーカイブス　むとうけいじ", "脅迫"}) {
+		t.Fatalf("only a game whose ids lead to no work is searched for, by its first title: %v", patches.Searches)
+	}
+	if patches.Unbounded != 0 {
+		t.Fatalf("every request of a lookup shares the time one request may take: %d unbounded", patches.Unbounded)
 	}
 }
 
 func TestAFailureIsReportedOnceAndThenLeavesTheListEmptyForAWhile(t *testing.T) {
 	ctx := context.Background()
-	patches := &moyutest.Patches{Fail: moyu.ErrRequestFailed.Wrap(errors.New("429"))}
-	cache := moyutest.NewCache()
-	service := moyu.NewService(moyutest.Games{1: "v9"}, patches, cache)
-	if _, err := service.Entries(ctx, actor.Guest(), 1); !errors.Is(err, moyu.ErrRequestFailed) {
-		t.Fatalf("expected request failure, got %v", err)
-	}
-	if ttl := cache.TTL("moyu:entries:vndb:v9"); ttl != moyu.FailureTTL || ttl >= moyu.CacheTTL {
-		t.Fatalf("a failure holds requests back for a short while: %v", ttl)
-	}
-	entries, err := service.Entries(ctx, actor.Guest(), 1)
-	if err != nil || entries == nil || len(entries) != 0 || patches.Calls != 1 {
-		t.Fatalf("while held back the list is empty and upstream is left alone: %v %v calls=%d", entries, err, patches.Calls)
+	for name, patches := range map[string]*moyutest.Patches{
+		"patches": {Fail: moyu.ErrRequestFailed.Wrap(errors.New("429"))},
+		"works":   {FailWorks: moyu.ErrRequestFailed.Wrap(errors.New("429"))},
+	} {
+		cache := moyutest.NewCache()
+		service := moyu.NewService(moyutest.Games{1: moyutest.VNDB("v9")}, patches, cache)
+		if _, err := service.Entries(ctx, actor.Guest(), 1); !errors.Is(err, moyu.ErrRequestFailed) {
+			t.Fatalf("%s: expected request failure, got %v", name, err)
+		}
+		if ttl := cache.TTL("moyu:entries:game:1"); ttl != moyu.FailureTTL || ttl >= moyu.CacheTTL {
+			t.Fatalf("%s: a failure holds requests back for a short while: %v", name, ttl)
+		}
+		if cache.Has("moyu:works:vndb:v9") == (patches.FailWorks != nil) {
+			t.Fatalf("%s: only a lookup that was answered is remembered", name)
+		}
+		calls, lookups := patches.Calls, len(patches.Lookups)
+		entries, err := service.Entries(ctx, actor.Guest(), 1)
+		if err != nil || entries == nil || len(entries) != 0 || patches.Calls != calls || len(patches.Lookups) != lookups {
+			t.Fatalf("%s: while held back the list is empty and upstream is left alone: %v %v", name, entries, err)
+		}
 	}
 }
 
 func TestAnEntryIsFoundByTheDigestOfItsFile(t *testing.T) {
 	ctx := context.Background()
-	patches := &moyutest.Patches{Entries: map[string][]moyu.Entry{
+	patches := &moyutest.Patches{Listed: map[string][]moyu.Entry{
 		"v4145": {{ID: "r1", Hash: "9f86d081"}, {ID: "r2"}},
 	}}
-	service := moyu.NewService(moyutest.Games{1: "v4145", 2: "v1"}, patches, moyutest.NewCache())
+	service := moyu.NewService(moyutest.Games{1: moyutest.VNDB("v4145"), 2: moyutest.VNDB("v1")}, patches, moyutest.NewCache())
 	entry, found, err := service.ByHash(ctx, actor.Guest(), 1, " 9F86D081 ")
 	if err != nil || !found || entry.ID != "r1" {
 		t.Fatalf("found by digest: %+v %v %v", entry, found, err)
@@ -81,7 +176,7 @@ func TestAnEntryIsFoundByTheDigestOfItsFile(t *testing.T) {
 		t.Fatalf("a game the other site does not list: %v %v", found, err)
 	}
 	patches.Fail = moyu.ErrRequestFailed.Wrap(errors.New("down"))
-	failing := moyu.NewService(moyutest.Games{9: "v9"}, patches, moyutest.NewCache())
+	failing := moyu.NewService(moyutest.Games{9: moyutest.VNDB("v9")}, patches, moyutest.NewCache())
 	if _, found, err := failing.ByHash(ctx, actor.Guest(), 9, "9f86d081"); err != nil || found {
 		t.Fatalf("an outage of the other site matches nothing: %v %v", found, err)
 	}
