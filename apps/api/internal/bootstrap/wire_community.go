@@ -76,11 +76,9 @@ func wireCommunity(infra *Infra, shared *Shared, modules *Modules) {
 		Options:  adOptions,
 	})
 
-	moyuService := moyu.NewService(
-		moyupg.NewGameStore(shared.Ent),
-		nextmoe.NewClient(httpclient.New(httpclient.Options{Timeout: moyu.RequestTimeout}), cfg.NextMoe.BaseURL, cfg.NextMoe.APIKey),
-		shared.Cache,
-	)
+	nextMoe := nextmoe.NewClient(httpclient.New(httpclient.Options{Timeout: moyu.RequestTimeout}), cfg.NextMoe.BaseURL, cfg.NextMoe.APIKey)
+	moyuService := moyu.NewService(moyupg.NewGameStore(shared.Ent), nextMoe, shared.Cache)
+	patchPages := moyu.NewAssignmentService(moyupg.NewAssignmentStore(shared.Ent), nextMoe, shared.Cache)
 
 	shared.Patches = moyuService
 
@@ -111,6 +109,7 @@ func wireCommunity(infra *Infra, shared *Shared, modules *Modules) {
 		adhttp.NewHandler(adService, adPlacements, shared.Builder),
 		friendlinkhttp.NewHandler(friendlink.NewService(friendlinkpg.NewRepository(shared.Ent), shared.Transactor), shared.Builder),
 		moyuhttp.NewHandler(moyuService, shared.Builder),
+		moyuhttp.NewAdminHandler(patchPages, shared.Builder),
 		potatovnhttp.NewHandler(pvnService, shared.Builder),
 		analysishttp.NewHandler(analysisService, shared.Builder),
 	)

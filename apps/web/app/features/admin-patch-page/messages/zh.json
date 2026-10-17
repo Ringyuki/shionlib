@@ -1,0 +1,29 @@
+{
+  "title": "鲲 Galgame 补丁页",
+  "mode": {
+    "label": "匹配方式",
+    "ids": "按编号匹配",
+    "manual": "手动指定"
+  },
+  "ids": "游戏的编号",
+  "none": "—",
+  "pages": "补丁页",
+  "via": "按 {source} {id} 匹配",
+  "resources": "{count, number} 个资源",
+  "noMatch": "没有匹配到补丁页",
+  "hidden": "不显示鲲 Galgame 补丁的条目",
+  "address": "补丁页地址",
+  "placeholder": "https://www.moyu.moe/galgame/…",
+  "add": "添加",
+  "remove": "移除 {name}",
+  "unreadable": "无法读取补丁页",
+  "retry": "重试",
+  "save": "保存",
+  "saved": "已保存 {name} 的补丁页",
+  "issue": {
+    "duplicate": "这个页面已在列表中",
+    "full": "最多指定 {max, number} 个页面"
+  },
+  "loading": "正在读取补丁页",
+  "untitled": "未关联作品"
+}

@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { pageSize, useQueryDraft } from '~/features/admin'
+import { PatchPagesDialog } from '~/features/admin-patch-page'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { useLast } from '~/shared/ui/use-last'
 import {
@@ -37,6 +38,8 @@ export function GamesPage({ filter, games, total }: Listing) {
   const stay = useInPageNavigate()
   const [removing, setRemoving] = useState<Game>()
   const asked = useLast(removing)
+  const [patching, setPatching] = useState<Game>()
+  const patched = useLast(patching)
   const remove = useGameChange()
   const show = (changes: Partial<Filter>, replace = false) =>
     stay({ search: searchOf({ ...filter, ...changes }) }, { replace })
@@ -85,8 +88,20 @@ export function GamesPage({ filter, games, total }: Listing) {
           paging={{ page: filter.page, pageSize, total }}
           filtered={narrowed(filter)}
           onRemove={setRemoving}
+          onPatchPages={setPatching}
         />
       </Card>
+      <PatchPagesDialog
+        target={
+          patched === undefined ? undefined : { id: patched.id, name: titlesOf(patched).main }
+        }
+        open={patching !== undefined}
+        onOpenChange={open => {
+          if (!open) {
+            setPatching(undefined)
+          }
+        }}
+      />
       <AlertDialog
         tone="danger"
         title={t('remove.title', { name })}

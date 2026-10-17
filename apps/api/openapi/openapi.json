@@ -1863,6 +1863,94 @@
         ],
         "type": "object"
       },
+      "AdminPatchPageLookupInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "description": "The address of a page or of a resource on 鲲 Galgame 补丁, or a page number",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "address"
+        ],
+        "type": "object"
+      },
+      "AdminPatchPagesAssignInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "manual": {
+            "description": "true lists only the pages given; false finds the pages by the game's VNDB and Bangumi ids",
+            "type": "boolean"
+          },
+          "pages": {
+            "description": "Page numbers on 鲲 Galgame 补丁, in the order they are listed; ignored unless manual",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "manual",
+          "pages"
+        ],
+        "type": "object"
+      },
+      "AdminPatchPagesDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "assigned": {
+            "description": "The pages assigned by hand that the other site still lists",
+            "items": {
+              "$ref": "#/components/schemas/PatchPageDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "bangumi_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "manual": {
+            "type": "boolean"
+          },
+          "matched": {
+            "description": "The pages the game's ids find, whether or not they are listed",
+            "items": {
+              "$ref": "#/components/schemas/PatchPageDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "vndb_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "manual",
+          "vndb_id",
+          "bangumi_id",
+          "matched",
+          "assigned"
+        ],
+        "type": "object"
+      },
       "AdminPendingDTO": {
         "additionalProperties": false,
         "properties": {
@@ -7042,6 +7130,8 @@
           600103,
           600104,
           610102,
+          610103,
+          610104,
           620101,
           620102,
           620103,
@@ -7249,6 +7339,8 @@
           "TRANSLATOR_TOO_MANY",
           "TRANSLATOR_MERGE_NEEDS_OTHERS",
           "MOYU_REQUEST_FAILED",
+          "MOYU_ADDRESS_UNRECOGNIZED",
+          "MOYU_PAGE_NOT_FOUND",
           "CATALOG_SOURCE_UNAVAILABLE",
           "CATALOG_UNKNOWN_SOURCE",
           "CATALOG_ENTRY_NOT_FOUND",
@@ -11706,6 +11798,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/AdminKeyDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminPatchPagesDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminPatchPagesDTO"
           },
           "message": {
             "type": "string"
@@ -16670,6 +16795,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PasskeyRevokedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePatchPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PatchPageDTO"
           },
           "message": {
             "type": "string"
@@ -22616,6 +22774,68 @@
         "required": [
           "identifier",
           "password"
+        ],
+        "type": "object"
+      },
+      "PatchPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resources": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "description": "The name of the work the page is about; null when the page is filed under no work",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "description": "The page on 鲲 Galgame 补丁",
+            "type": "string"
+          },
+          "via": {
+            "description": "The id of the game that found the page; null for pages assigned by hand",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PatchPageViaDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "title",
+          "resources",
+          "via"
+        ],
+        "type": "object"
+      },
+      "PatchPageViaDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "vndb",
+              "bangumi"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "id"
         ],
         "type": "object"
       },
@@ -31391,6 +31611,130 @@
         ]
       }
     },
+    "/admin/content/games/{id}/patch-pages": {
+      "get": {
+        "operationId": "adminPatchPages.read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminPatchPagesDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "The pages of a game on 鲲 Galgame 补丁, found by its ids or assigned by hand",
+        "tags": [
+          "admin"
+        ]
+      },
+      "put": {
+        "operationId": "adminPatchPages.assign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPatchPagesAssignInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Assign the pages of a game on 鲲 Galgame 补丁 by hand, or find them by its ids again",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/content/games/{id}/recent-update": {
       "delete": {
         "operationId": "adminGame.unmarkRecentUpdate",
@@ -31920,6 +32264,62 @@
           }
         ],
         "summary": "What confirming a detection does to the uploader",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/patch-pages/lookup": {
+      "post": {
+        "operationId": "adminPatchPages.lookup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPatchPageLookupInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePatchPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read the page of 鲲 Galgame 补丁 an address points to",
         "tags": [
           "admin"
         ]

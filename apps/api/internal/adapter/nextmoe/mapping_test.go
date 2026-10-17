@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -18,15 +19,19 @@ func read(t *testing.T, resources ...string) []moyu.Entry {
 		_, _ = w.Write([]byte(`{"items":[{"resources":[` + strings.Join(resources, ",") + `]}]}`))
 	}))
 	t.Cleanup(server.Close)
-	entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").EntriesByVNDBID(context.Background(), "v1")
+	entries, err := nextmoe.NewClient(server.Client(), server.URL, "k").Entries(context.Background(), moyu.PageQuery{VNDBID: "v1"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return entries
 }
 
+var resources int
+
 func resource(fields string) string {
-	return `{"id":"r1","web_url":"https://www.moyu.moe/resource/r1","updated_at":"2026-07-09T08:00:00Z"` + fields + `}`
+	resources++
+	id := "r" + strconv.Itoa(resources)
+	return `{"id":"` + id + `","web_url":"https://www.moyu.moe/resource/` + id + `","updated_at":"2026-07-09T08:00:00Z"` + fields + `}`
 }
 
 func TestAnEntrySpeaksTheSitesVocabulary(t *testing.T) {
@@ -46,7 +51,7 @@ func TestAnEntrySpeaksTheSitesVocabulary(t *testing.T) {
 	if !slices.Equal(entry.Languages, []string{"zh", "zh-hant", "jp", "en"}) || !slices.Equal(entry.Platforms, []string{"win", "and", "mac", "ios", "lin"}) {
 		t.Fatalf("languages and platforms: %v %v", entry.Languages, entry.Platforms)
 	}
-	if entry.Size == nil || *entry.Size != 891650310 || entry.Hash != "9f86d081884c7d65" || entry.Downloads != 561 || entry.URL != "https://www.moyu.moe/resource/r1" {
+	if entry.Size == nil || *entry.Size != 891650310 || entry.Hash != "9f86d081884c7d65" || entry.Downloads != 561 || entry.URL != "https://www.moyu.moe/resource/"+entry.ID {
 		t.Fatalf("size, hash, downloads, page: %+v", entry)
 	}
 	if entry.Publisher == nil || entry.Publisher.Name != "VN视觉小说汉化补丁遗产归档" || entry.Publisher.Avatar != "https://image.example/avatar.avif" {

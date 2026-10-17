@@ -597,6 +597,18 @@ func (f OidcIdentityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OidcIdentityMutation", m)
 }
 
+// The PatchPageAssignmentFunc type is an adapter to allow the use of ordinary
+// function as PatchPageAssignment mutator.
+type PatchPageAssignmentFunc func(context.Context, *ent.PatchPageAssignmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PatchPageAssignmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PatchPageAssignmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PatchPageAssignmentMutation", m)
+}
+
 // The RoleFieldPermissionFunc type is an adapter to allow the use of ordinary
 // function as RoleFieldPermission mutator.
 type RoleFieldPermissionFunc func(context.Context, *ent.RoleFieldPermissionMutation) (ent.Value, error)

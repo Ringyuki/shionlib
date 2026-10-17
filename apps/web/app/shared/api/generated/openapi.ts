@@ -982,6 +982,24 @@ export type paths = {
         patch: operations["adminGame.editScalar"];
         trace?: never;
     };
+    "/admin/content/games/{id}/patch-pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The pages of a game on 鲲 Galgame 补丁, found by its ids or assigned by hand */
+        get: operations["adminPatchPages.read"];
+        /** Assign the pages of a game on 鲲 Galgame 补丁 by hand, or find them by its ids again */
+        put: operations["adminPatchPages.assign"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/content/games/{id}/recent-update": {
         parameters: {
             query?: never;
@@ -1079,6 +1097,23 @@ export type paths = {
         get: operations["adminMalware.policy"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/patch-pages/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read the page of 鲲 Galgame 补丁 an address points to */
+        post: operations["adminPatchPages.lookup"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5156,6 +5191,25 @@ export type components = {
             /** @description Requests in the last 30 days */
             total: components["schemas"]["UsageDTO"];
         };
+        AdminPatchPageLookupInputBody: {
+            /** @description The address of a page or of a resource on 鲲 Galgame 补丁, or a page number */
+            address: string;
+        };
+        AdminPatchPagesAssignInputBody: {
+            /** @description true lists only the pages given; false finds the pages by the game's VNDB and Bangumi ids */
+            manual: boolean;
+            /** @description Page numbers on 鲲 Galgame 补丁, in the order they are listed; ignored unless manual */
+            pages: string[] | null;
+        };
+        AdminPatchPagesDTO: {
+            /** @description The pages assigned by hand that the other site still lists */
+            assigned: components["schemas"]["PatchPageDTO"][] | null;
+            bangumi_id: string | null;
+            manual: boolean;
+            /** @description The pages the game's ids find, whether or not they are listed */
+            matched: components["schemas"]["PatchPageDTO"][] | null;
+            vndb_id: string | null;
+        };
         AdminPendingDTO: {
             /**
              * Format: int64
@@ -6566,7 +6620,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 480118 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 560107 | 560108 | 560109 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103 | 700101 | 700102 | 700103 | 700104 | 700105;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 480118 | 490101 | 490102 | 490103 | 490104 | 490105 | 490106 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 560107 | 560108 | 560109 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 580102 | 580103 | 580104 | 580105 | 580106 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 610103 | 610104 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113 | 670101 | 670102 | 680101 | 680102 | 680103 | 680104 | 680105 | 680106 | 680107 | 690101 | 690102 | 690103 | 700101 | 700102 | 700103 | 700104 | 700105;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -7750,6 +7804,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AdminKeyDetailDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdminPatchPagesDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminPatchPagesDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -9191,6 +9255,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PasskeyRevokedDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePatchPageDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PatchPageDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -10778,6 +10852,22 @@ export type components = {
         PasswordLoginInputBody: {
             identifier: string;
             password: string;
+        };
+        PatchPageDTO: {
+            id: string;
+            /** Format: int64 */
+            resources: number;
+            /** @description The name of the work the page is about; null when the page is filed under no work */
+            title: string | null;
+            /** @description The page on 鲲 Galgame 补丁 */
+            url: string;
+            /** @description The id of the game that found the page; null for pages assigned by hand */
+            via: components["schemas"]["PatchPageViaDTO"] | null;
+        };
+        PatchPageViaDTO: {
+            id: string;
+            /** @enum {string} */
+            source: "vndb" | "bangumi";
         };
         PaySponsorOrderInputBody: {
             /** @description id of one of the order's payment methods */
@@ -14281,6 +14371,74 @@ export interface operations {
             };
         };
     };
+    "adminPatchPages.read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminPatchPagesDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminPatchPages.assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPatchPagesAssignInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "adminGame.markRecentUpdate": {
         parameters: {
             query?: never;
@@ -14511,6 +14669,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeMalwarePolicyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminPatchPages.lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPatchPageLookupInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePatchPageDTO"];
                 };
             };
             /** @description Error */

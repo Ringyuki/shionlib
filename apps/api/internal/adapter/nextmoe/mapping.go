@@ -17,8 +17,14 @@ import (
 const (
 	typeSave   = "save"
 	typeManual = "manual"
+	refVNDB    = "vndb"
+	refCatalog = "catalog"
 	largest    = float64(1 << 50)
 )
+
+var sources = map[moyu.Source]string{moyu.SourceVNDB: refVNDB, moyu.SourceBangumi: "bangumi"}
+
+var numericID = regexp.MustCompile(`^[0-9]+$`)
 
 var machineTypes = []string{"ai", "machine", "machine_polishing"}
 
@@ -85,6 +91,22 @@ func entryOf(raw json.RawMessage) (moyu.Entry, bool) {
 		entry.Publisher = &moyu.Publisher{Name: trimmed(resource.Publisher.Name), Avatar: linkOf(resource.Publisher.AvatarURL, "https")}
 	}
 	return entry, true
+}
+
+func pageOf(id, vndbID string, workID *string, resources int, webURL string) (moyu.Page, bool) {
+	page := moyu.Page{ID: strings.TrimSpace(id), URL: linkOf(webURL, "https", "http"), VNDBID: strings.TrimSpace(vndbID), Resources: max(resources, 0)}
+	if workID != nil && numericID.MatchString(strings.TrimSpace(*workID)) {
+		page.WorkID = strings.TrimSpace(*workID)
+	}
+	return page, moyu.IsPageID(page.ID) && page.URL != ""
+}
+
+func refOf(source, id string) (string, bool) {
+	id = strings.TrimSpace(id)
+	if source == "" || id == "" || strings.ContainsAny(id, ", ") {
+		return "", false
+	}
+	return source + ":" + id, true
 }
 
 func trimmed(text string) string {

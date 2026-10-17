@@ -361,6 +361,28 @@ export const constraints = {
       ]
     }
   },
+  "AdminPatchPageLookupInputBody": {
+    "address": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "AdminPatchPagesAssignInputBody": {
+    "manual": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
+    },
+    "pages": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 20
+    }
+  },
   "AdminTranslatorDismissInputBody": {
     "ids": {
       "type": "array",

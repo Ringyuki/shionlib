@@ -15,7 +15,7 @@ import (
 func TestPatches(t *testing.T) {
 	server := apitest.New(t)
 	size, group := int64(891650310), moyu.TranslationGroup
-	patches := &moyutest.Patches{Entries: map[string][]moyu.Entry{
+	patches := &moyutest.Patches{Listed: map[string][]moyu.Entry{
 		"v4145": {
 			{
 				ID: "r1", Kind: moyu.KindPatch, Name: "人工汉化补丁", Size: &size, Hash: "9f86", Languages: []string{"zh", "zh-hant"}, Platforms: []string{"win"},
@@ -25,7 +25,7 @@ func TestPatches(t *testing.T) {
 			{ID: "r2", Kind: moyu.KindSave, Languages: []string{}, Platforms: []string{}, URL: "https://www.moyu.moe/resource/r2", Updated: time.Date(2025, 9, 25, 0, 0, 0, 0, time.UTC)},
 		},
 	}}
-	service := moyu.NewService(moyutest.Games{1: "v4145", 2: "v1"}, patches, moyutest.NewCache())
+	service := moyu.NewService(moyutest.Games{1: moyutest.VNDB("v4145"), 2: moyutest.VNDB("v1")}, patches, moyutest.NewCache())
 	moyuhttp.NewHandler(service, server.Builder).Register(server.API)
 
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/moyu/game/1/patches"})
@@ -48,7 +48,7 @@ func TestPatches(t *testing.T) {
 
 	patches.Fail = moyu.ErrRequestFailed.Wrap(errors.New("timeout"))
 	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/moyu/game/1/patches"}), http.StatusOK, 0)
-	failing := moyu.NewService(moyutest.Games{9: "v9"}, patches, moyutest.NewCache())
+	failing := moyu.NewService(moyutest.Games{9: moyutest.VNDB("v9")}, patches, moyutest.NewCache())
 	other := apitest.New(t)
 	moyuhttp.NewHandler(failing, other.Builder).Register(other.API)
 	other.Expect(other.Do(apitest.Request{Method: http.MethodGet, Path: "/moyu/game/9/patches"}), http.StatusBadGateway, 610102)

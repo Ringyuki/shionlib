@@ -2388,6 +2388,42 @@ var (
 			},
 		},
 	}
+	// PatchPageAssignmentsColumns holds the columns for the "patch_page_assignments" table.
+	PatchPageAssignmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "page_ids", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "assigned_by", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// PatchPageAssignmentsTable holds the schema information for the "patch_page_assignments" table.
+	PatchPageAssignmentsTable = &schema.Table{
+		Name:       "patch_page_assignments",
+		Columns:    PatchPageAssignmentsColumns,
+		PrimaryKey: []*schema.Column{PatchPageAssignmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "patch_page_assignments_game_id_fkey",
+				Columns:    []*schema.Column{PatchPageAssignmentsColumns[4]},
+				RefColumns: []*schema.Column{GamesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "patch_page_assignments_assigned_by_fkey",
+				Columns:    []*schema.Column{PatchPageAssignmentsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "patch_page_assignments_game_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{PatchPageAssignmentsColumns[4]},
+			},
+		},
+	}
 	// RoleFieldPermissionsColumns holds the columns for the "role_field_permissions" table.
 	RoleFieldPermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -3135,6 +3171,7 @@ var (
 		MessagesTable,
 		ModerationEventsTable,
 		OidcIdentitiesTable,
+		PatchPageAssignmentsTable,
 		RoleFieldPermissionsTable,
 		SettingsTable,
 		SettingChangesTable,
@@ -3384,6 +3421,11 @@ func init() {
 	OidcIdentitiesTable.ForeignKeys[0].RefTable = UsersTable
 	OidcIdentitiesTable.Annotation = &entsql.Annotation{
 		Table: "oidc_identities",
+	}
+	PatchPageAssignmentsTable.ForeignKeys[0].RefTable = GamesTable
+	PatchPageAssignmentsTable.ForeignKeys[1].RefTable = UsersTable
+	PatchPageAssignmentsTable.Annotation = &entsql.Annotation{
+		Table: "patch_page_assignments",
 	}
 	RoleFieldPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "role_field_permissions",

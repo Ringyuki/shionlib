@@ -61,6 +61,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/patchpageassignment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
@@ -188,6 +189,7 @@ func checkColumn(t, c string) error {
 			message.Table:                         message.ValidColumn,
 			moderationevent.Table:                 moderationevent.ValidColumn,
 			oidcidentity.Table:                    oidcidentity.ValidColumn,
+			patchpageassignment.Table:             patchpageassignment.ValidColumn,
 			rolefieldpermission.Table:             rolefieldpermission.ValidColumn,
 			setting.Table:                         setting.ValidColumn,
 			settingchange.Table:                   settingchange.ValidColumn,

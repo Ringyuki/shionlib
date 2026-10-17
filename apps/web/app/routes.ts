@@ -10,6 +10,8 @@ export default [
   route('resources/admin/checks/stalled', 'routes/resources.admin.checks.stalled.ts'),
   route('resources/admin/users', 'routes/resources.admin.users.ts'),
   route('resources/admin/games', 'routes/resources.admin.games.ts'),
+  route('resources/admin/patch-pages', 'routes/resources.admin.patch-pages.ts'),
+  route('resources/admin/patch-pages/lookup', 'routes/resources.admin.patch-pages.lookup.ts'),
   route('resources/admin/sponsors', 'routes/resources.admin.sponsors.ts'),
   route('resources/admin/friend-links', 'routes/resources.admin.friend-links.ts'),
   route('resources/admin/ads', 'routes/resources.admin.ads.ts'),

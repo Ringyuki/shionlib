@@ -153,6 +153,9 @@ type ModerationEvent func(*sql.Selector)
 // OidcIdentity is the predicate function for oidcidentity builders.
 type OidcIdentity func(*sql.Selector)
 
+// PatchPageAssignment is the predicate function for patchpageassignment builders.
+type PatchPageAssignment func(*sql.Selector)
+
 // RoleFieldPermission is the predicate function for rolefieldpermission builders.
 type RoleFieldPermission func(*sql.Selector)
 
