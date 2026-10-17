@@ -10,11 +10,12 @@ type GameTableProps = {
   paging: Paging
   filtered: boolean
   onRemove: (game: Game) => void
+  onPatchPages: (game: Game) => void
 }
 
 const missing = '—'
 
-export function GameTable({ games, paging, filtered, onRemove }: GameTableProps) {
+export function GameTable({ games, paging, filtered, onRemove, onPatchPages }: GameTableProps) {
   const t = useTranslations('adminGame')
   const shared = useTranslations('admin')
   const format = useFormatter()
@@ -95,7 +96,7 @@ export function GameTable({ games, paging, filtered, onRemove }: GameTableProps)
               </Tag>
             )
           default:
-            return <GameMenu game={game} onRemove={onRemove} />
+            return <GameMenu game={game} onRemove={onRemove} onPatchPages={onPatchPages} />
         }
       }}
     />

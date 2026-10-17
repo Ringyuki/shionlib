@@ -32,7 +32,8 @@
     "unmark": "移出最近更新",
     "hide": "隐藏",
     "show": "显示",
-    "remove": "删除并不再收录"
+    "remove": "删除并不再收录",
+    "patchPages": "鲲 Galgame 补丁页"
   },
   "refreshed": "已刷新 {name}",
   "marked": "已将 {name} 列入最近更新",

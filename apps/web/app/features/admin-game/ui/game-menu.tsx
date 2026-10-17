@@ -1,5 +1,15 @@
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, toast } from '@hina-ui/react'
-import { Ellipsis, ExternalLink, Eye, EyeOff, Pin, PinOff, RefreshCw, Trash2 } from 'lucide-react'
+import {
+  Ellipsis,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Pin,
+  PinOff,
+  Puzzle,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useTranslations } from 'use-intl'
 import { useSourceName } from '~/features/admin'
@@ -11,9 +21,10 @@ import { useGameChange } from '../use-game-change'
 type GameMenuProps = {
   game: Game
   onRemove: (game: Game) => void
+  onPatchPages: (game: Game) => void
 }
 
-export function GameMenu({ game, onRemove }: GameMenuProps) {
+export function GameMenu({ game, onRemove, onPatchPages }: GameMenuProps) {
   const t = useTranslations('adminGame')
   const sourceName = useSourceName()
   const navigate = useNavigate()
@@ -68,6 +79,9 @@ export function GameMenu({ game, onRemove }: GameMenuProps) {
             }
           >
             {t(game.recently_updated ? 'menu.unmark' : 'menu.mark')}
+          </DropdownMenuItem>
+          <DropdownMenuItem icon={<Puzzle />} onSelect={() => onPatchPages(game)}>
+            {t('menu.patchPages')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
