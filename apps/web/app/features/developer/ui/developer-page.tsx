@@ -34,6 +34,7 @@ export function DeveloperPage({ content }: { content: DeveloperContent }) {
       <Inline as="header" gap="lg" align="start" wrap={false} className="max-sm:gap-4">
         <DeveloperLogo
           src={developer.logo}
+          thumbhash={developer.logo_thumb_hash}
           eager
           className="size-20 shrink-0 rounded-xl bg-inset sm:size-24"
         />

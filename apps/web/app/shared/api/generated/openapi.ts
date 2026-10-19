@@ -4913,6 +4913,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image?: string;
+            /** @description ThumbHash of the image in base64 */
+            image_thumb_hash?: string;
             name_en: string | null;
             name_jp: string;
             name_zh: string | null;
@@ -5037,6 +5039,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             logo?: string;
+            /** @description ThumbHash of the logo in base64 */
+            logo_thumb_hash?: string;
             name: string;
             /** Format: date-time */
             updated: string;
@@ -5046,6 +5050,8 @@ export type components = {
             dims: number[] | null;
             /** Format: int64 */
             sexual: number;
+            /** @description ThumbHash of the picture in base64, null when unknown */
+            thumb_hash: string | null;
             url: string;
             /** Format: int64 */
             violence: number;
@@ -6735,6 +6741,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             intro_en: string;
             intro_jp: string;
             intro_zh: string;
@@ -6765,6 +6773,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             intro_en: string;
             intro_jp: string;
             intro_zh: string;
@@ -7256,6 +7266,8 @@ export type components = {
             intro_jp: string;
             intro_zh: string;
             logo: string | null;
+            /** @description ThumbHash of the logo in base64, null when unknown */
+            logo_thumb_hash: string | null;
             name: string;
             website: string | null;
         };
@@ -7268,6 +7280,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             logo: string | null;
+            /** @description ThumbHash of the logo in base64, null when unknown */
+            logo_thumb_hash: string | null;
             name: string;
             /** Format: int64 */
             works_count: number;
@@ -9821,6 +9835,8 @@ export type components = {
             actor: string | null;
             character: components["schemas"]["GameCharacterDTO"];
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             /** @enum {string} */
             role: "main" | "primary" | "side" | "appears";
         };
@@ -9841,6 +9857,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             intro_en: string;
             intro_jp: string;
             intro_zh: string;
@@ -9865,6 +9883,8 @@ export type components = {
             masked: boolean;
             /** Format: int64 */
             sexual: number;
+            /** @description ThumbHash of the picture in base64, null when unknown */
+            thumb_hash: string | null;
             /** @enum {string} */
             type: "pkgfront" | "dig";
             url: string;
@@ -9944,6 +9964,8 @@ export type components = {
             dims: number[] | null;
             /** Format: int64 */
             sexual: number;
+            /** @description ThumbHash of the picture in base64, null when unknown */
+            thumb_hash: string | null;
             url: string;
             /** Format: int64 */
             violence: number;
@@ -11203,6 +11225,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             name_en: string | null;
             name_jp: string;
             name_zh: string | null;
@@ -11227,6 +11251,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             logo: string | null;
+            /** @description ThumbHash of the logo in base64, null when unknown */
+            logo_thumb_hash: string | null;
             name: string;
             /** Format: int64 */
             works_count: number;
@@ -11273,6 +11299,8 @@ export type components = {
             /** Format: int64 */
             id: number;
             image: string | null;
+            /** @description ThumbHash of the image in base64, null when unknown */
+            image_thumb_hash: string | null;
             name_en: string | null;
             name_jp: string;
             name_zh: string | null;

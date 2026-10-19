@@ -4,7 +4,16 @@ import type { ApiData } from '~/shared/api/types'
 import { loadDeveloper, loadDevelopers } from './developer.use-cases'
 
 const listed = (totalItems: number): ApiData<'/developer/list', 'get'> => ({
-  items: [{ id: 1, name: 'まどそふと', aliases: ['窗社'], logo: null, works_count: 4 }],
+  items: [
+    {
+      id: 1,
+      name: 'まどそふと',
+      aliases: ['窗社'],
+      logo: null,
+      logo_thumb_hash: null,
+      works_count: 4,
+    },
+  ],
   meta: { currentPage: 1, itemCount: 1, itemsPerPage: 48, totalItems, totalPages: 1 },
 })
 
@@ -14,6 +23,7 @@ const developer: ApiData<'/developer/{id}', 'get'> = {
   name: 'まどそふと',
   aliases: ['窗社'],
   logo: null,
+  logo_thumb_hash: null,
   intro_jp: '',
   intro_zh: '',
   intro_en: '',

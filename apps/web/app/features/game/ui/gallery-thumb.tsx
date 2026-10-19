@@ -2,6 +2,7 @@ import { Card, cn, Image, Ripple } from '@hina-ui/react'
 
 type GalleryThumbProps = {
   src: string
+  thumbhash: string | undefined
   label: string
   ratio?: number
   data: Record<`data-${string}`, string>
@@ -13,6 +14,7 @@ type GalleryThumbProps = {
 
 export function GalleryThumb({
   src,
+  thumbhash,
   label,
   ratio,
   data,
@@ -35,6 +37,7 @@ export function GalleryThumb({
       <Ripple />
       <Image
         src={src}
+        thumbhash={thumbhash}
         alt=""
         ratio={ratio}
         fit="cover"

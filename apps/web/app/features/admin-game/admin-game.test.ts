@@ -37,7 +37,13 @@ describe('titlesOf', () => {
 
 describe('coverOf', () => {
   it('takes the first cover', () => {
-    const cover = { url: 'game/1/cover.webp', dims: [300, 400], sexual: 0, violence: 0 }
+    const cover = {
+      url: 'game/1/cover.webp',
+      dims: [300, 400],
+      thumb_hash: null,
+      sexual: 0,
+      violence: 0,
+    }
     expect(coverOf({ covers: [cover] })).toBe(cover)
     expect(coverOf({ covers: null })).toBeUndefined()
   })

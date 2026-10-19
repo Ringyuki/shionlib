@@ -31,11 +31,13 @@ export function GamePicture({
   const plain = useShowsExplicit()
   const [revealed, setRevealed] = useState<string>()
   const shown = revealed !== undefined && revealed === picture?.url
+  const thumbhash = picture?.thumb_hash ?? undefined
   if (picture?.masked === true) {
     return (
       <Image
         {...image}
         src={picture.url}
+        thumbhash={thumbhash}
         ratio={ratio}
         className={cn('bg-inset', className)}
         imageClass={cn(imageClass, blurredByServer)}
@@ -48,6 +50,7 @@ export function GamePicture({
         {...image}
         {...(shown ? { lazy: false, eager: true } : {})}
         src={picture?.url}
+        thumbhash={thumbhash}
         ratio={ratio}
         preview={preview}
         previewSize={picture === undefined ? undefined : imageSize(picture)}
@@ -61,6 +64,7 @@ export function GamePicture({
       <Image
         {...image}
         src={picture.url}
+        thumbhash={thumbhash}
         ratio={ratio}
         className={cn('bg-inset @container', className)}
         imageClass={cn(imageClass, blurred)}
@@ -93,6 +97,7 @@ export function GamePicture({
       <Image
         {...image}
         src={picture.url}
+        thumbhash={thumbhash}
         className="size-full"
         imageClass={cn(imageClass, blurred)}
       />

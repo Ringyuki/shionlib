@@ -3,14 +3,16 @@ import { Building2 } from 'lucide-react'
 
 type DeveloperLogoProps = {
   src: string | null
+  thumbhash: string | null
   className: string
   eager?: boolean
 }
 
-export function DeveloperLogo({ src, className, eager }: DeveloperLogoProps) {
+export function DeveloperLogo({ src, thumbhash, className, eager }: DeveloperLogoProps) {
   return (
     <Image
       src={src ?? undefined}
+      thumbhash={thumbhash ?? undefined}
       alt=""
       ratio={1}
       fit="contain"

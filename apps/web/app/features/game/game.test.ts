@@ -21,6 +21,7 @@ import { resourceRuleFrom } from './game.schema'
 
 const cover = (type: Schema<'GameCoverDTO'>['type'], url: string): Schema<'GameCoverDTO'> => ({
   dims: null,
+  thumb_hash: null,
   language: 'jp',
   masked: false,
   sexual: 0,
@@ -91,7 +92,13 @@ describe('display helpers', () => {
 })
 
 describe('bannerIndex', () => {
-  const image = (sexual: number) => ({ url: `${sexual}`, dims: null, sexual, violence: 0 })
+  const image = (sexual: number) => ({
+    url: `${sexual}`,
+    dims: null,
+    thumb_hash: null,
+    sexual,
+    violence: 0,
+  })
 
   it('picks the first image that is safe to show large', () => {
     expect(bannerIndex([image(1), image(0)])).toBe(1)

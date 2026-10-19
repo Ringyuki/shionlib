@@ -22,6 +22,7 @@ export function CharacterPage({ content }: { content: CharacterContent }) {
       >
         <Image
           src={character.image ?? undefined}
+          thumbhash={character.image_thumb_hash ?? undefined}
           alt={name}
           ratio={3 / 4}
           fit="cover"

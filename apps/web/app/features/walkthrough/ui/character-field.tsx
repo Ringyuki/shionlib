@@ -13,7 +13,12 @@ type CharacterFieldProps = {
 
 export function CharacterField({ value, faces, className, onValueChange }: CharacterFieldProps) {
   const t = useTranslations('walkthrough')
-  const options = faces.map(face => ({ value: face.id, label: face.name, picture: face.picture }))
+  const options = faces.map(face => ({
+    value: face.id,
+    label: face.name,
+    picture: face.picture,
+    thumbhash: face.thumbhash,
+  }))
   return (
     <FormField
       name="characters"
@@ -31,7 +36,7 @@ export function CharacterField({ value, faces, className, onValueChange }: Chara
           <PictureOption
             name={option.label}
             detail={undefined}
-            picture={{ src: option.picture, shape: 'portrait' }}
+            picture={{ src: option.picture, thumbhash: option.thumbhash, shape: 'portrait' }}
           />
         )}
       />

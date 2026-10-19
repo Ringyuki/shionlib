@@ -65,7 +65,7 @@ export type WorksOf = { developer: number } | { character: number } | { translat
 
 export const worksPageSize = 36
 
-export type GameImage = Pick<Cover, 'url' | 'dims' | 'sexual' | 'violence'> &
+export type GameImage = Pick<Cover, 'url' | 'dims' | 'thumb_hash' | 'sexual' | 'violence'> &
   Partial<Pick<Cover, 'masked'>>
 
 export const gameTabs = ['resources', 'info', 'characters', 'comments', 'walkthrough'] as const

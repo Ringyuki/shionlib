@@ -40,7 +40,7 @@ export const maxQueryLength = 100
 
 export type Picture =
   | { shape: 'cover'; cover: GameImage | undefined }
-  | { shape: 'portrait' | 'logo'; src: string | undefined }
+  | { shape: 'portrait' | 'logo'; src: string | undefined; thumbhash?: string }
 
 export type PictureShape = Picture['shape']
 

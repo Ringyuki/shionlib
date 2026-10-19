@@ -13,7 +13,11 @@ export function DeveloperCard({ developer }: { developer: DeveloperItem }) {
     <Card padded={false} className="hn-interactive h-full overflow-hidden">
       <Link to={developerPath(locale, developer.id)} prefetch="intent" className="block h-full p-3">
         <Inline gap="md" align="center" wrap={false}>
-          <DeveloperLogo src={developer.logo} className="size-14 shrink-0 rounded-lg bg-inset" />
+          <DeveloperLogo
+            src={developer.logo}
+            thumbhash={developer.logo_thumb_hash}
+            className="size-14 shrink-0 rounded-lg bg-inset"
+          />
           <Stack gap="none" className="min-w-0 flex-1">
             <Text weight="medium" truncate>
               {developer.name}

@@ -16,6 +16,12 @@ export type CastCredit = Schema<'GameCharacterCreditDTO'>
 
 export type CastRole = CastCredit['role']
 
+type Pictured = Pick<CastCredit, 'image' | 'image_thumb_hash'> & {
+  character: Pick<CastCredit['character'], 'image' | 'image_thumb_hash'>
+}
+
+export type CastPicture = { src: string | undefined; thumbhash: string | undefined }
+
 export const castRoles: readonly CastRole[] = ['main', 'primary', 'side', 'appears']
 
 const leapYear = 2000
@@ -50,6 +56,11 @@ export function appearanceIn(
   gameId: number,
 ): Appearance | undefined {
   return (character.appearances ?? []).find(appearance => appearance.game_id === gameId)
+}
+
+export function castPicture(credit: Pictured): CastPicture {
+  const shown = credit.image === null ? credit.character : credit
+  return { src: shown.image ?? undefined, thumbhash: shown.image_thumb_hash ?? undefined }
 }
 
 export function voiceOf(credit: Pick<Appearance, 'actor'>): string | undefined {
