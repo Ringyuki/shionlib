@@ -7,30 +7,31 @@ import (
 )
 
 type Character struct {
-	ID        int
-	BID       *string
-	VID       *string
-	HID       *int
-	Image     *string
-	NameJP    string
-	NameZH    *string
-	NameEN    *string
-	Aliases   []string
-	IntroJP   string
-	IntroZH   string
-	IntroEN   string
-	BloodType *string
-	Height    *int
-	Weight    *int
-	Bust      *int
-	Waist     *int
-	Hips      *int
-	Cup       *string
-	Age       *int
-	Birthday  []int
-	Gender    []string
-	Created   time.Time
-	Updated   time.Time
+	ID             int
+	BID            *string
+	VID            *string
+	HID            *int
+	Image          *string
+	ImageThumbHash *string
+	NameJP         string
+	NameZH         *string
+	NameEN         *string
+	Aliases        []string
+	IntroJP        string
+	IntroZH        string
+	IntroEN        string
+	BloodType      *string
+	Height         *int
+	Weight         *int
+	Bust           *int
+	Waist          *int
+	Hips           *int
+	Cup            *string
+	Age            *int
+	Birthday       []int
+	Gender         []string
+	Created        time.Time
+	Updated        time.Time
 }
 
 type Appearance struct {
@@ -52,13 +53,14 @@ type GameRef struct {
 }
 
 type Summary struct {
-	ID      int
-	Image   *string
-	NameJP  string
-	NameZH  *string
-	NameEN  *string
-	Aliases []string
-	Game    *GameRef
+	ID             int
+	Image          *string
+	ImageThumbHash *string
+	NameJP         string
+	NameZH         *string
+	NameEN         *string
+	Aliases        []string
+	Game           *GameRef
 }
 
 func (s Summary) InGame() bool {
@@ -83,13 +85,14 @@ type AdminFilter struct {
 }
 
 type AdminEntry struct {
-	ID         int
-	NameJP     string
-	NameZH     *string
-	NameEN     *string
-	Image      *string
-	Gender     []string
-	GamesCount int
-	Created    time.Time
-	Updated    time.Time
+	ID             int
+	NameJP         string
+	NameZH         *string
+	NameEN         *string
+	Image          *string
+	ImageThumbHash *string
+	Gender         []string
+	GamesCount     int
+	Created        time.Time
+	Updated        time.Time
 }

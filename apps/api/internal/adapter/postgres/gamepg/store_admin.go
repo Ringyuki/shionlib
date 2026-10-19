@@ -195,7 +195,7 @@ func (s *AdminStore) firstCovers(ctx context.Context, ids []int) (map[int]game.A
 	}
 	found, err := s.db(ctx).GameCover.Query().
 		Where(gamecover.GameIDIn(ids...)).
-		Select(gamecover.FieldGameID, gamecover.FieldURL, gamecover.FieldDims, gamecover.FieldSexual, gamecover.FieldViolence).
+		Select(gamecover.FieldGameID, gamecover.FieldURL, gamecover.FieldDims, gamecover.FieldThumbHash, gamecover.FieldSexual, gamecover.FieldViolence).
 		Order(ent.Asc(gamecover.FieldGameID), ent.Asc(gamecover.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -203,7 +203,7 @@ func (s *AdminStore) firstCovers(ctx context.Context, ids []int) (map[int]game.A
 	}
 	for _, cover := range found {
 		if _, seen := covers[cover.GameID]; !seen {
-			covers[cover.GameID] = game.AdminCover{URL: cover.URL, Dims: cover.Dims, Sexual: cover.Sexual, Violence: cover.Violence}
+			covers[cover.GameID] = game.AdminCover{URL: cover.URL, Dims: cover.Dims, ThumbHash: cover.ThumbHash, Sexual: cover.Sexual, Violence: cover.Violence}
 		}
 	}
 	return covers, nil

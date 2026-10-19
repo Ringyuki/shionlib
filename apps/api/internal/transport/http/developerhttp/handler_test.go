@@ -33,21 +33,21 @@ func setup(t *testing.T) (*apitest.Server, *developertest.MemoryRepository) {
 func TestListAndDetailShapes(t *testing.T) {
 	server, repo := setup(t)
 	yuzu := repo.Seed(developer.Developer{
-		Name: "Yuzusoft", Aliases: []string{"柚子社"}, Logo: ptr("logo.webp"), IntroZH: "简介", Website: ptr("https://yuzu-soft.com"), HID: ptr(5),
+		Name: "Yuzusoft", Aliases: []string{"柚子社"}, Logo: ptr("logo.webp"), LogoThumbHash: ptr("logo-hash"), IntroZH: "简介", Website: ptr("https://yuzu-soft.com"), HID: ptr(5),
 		ExtraInfo: []developer.ExtraInfo{{Key: "国家/地区", Value: "日本"}},
 	})
 	repo.Link(yuzu.ID, false)
 
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/developer/list?q=柚子"})
 	server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"name":"Yuzusoft","aliases":["柚子社"],"logo":"logo.webp","works_count":1}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[{"id":1,"name":"Yuzusoft","aliases":["柚子社"],"logo":"logo.webp","logo_thumb_hash":"logo-hash","works_count":1}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
 	}
 
 	resp = server.Do(apitest.Request{Method: http.MethodGet, Path: "/developer/" + strconv.Itoa(yuzu.ID)})
 	server.Expect(resp, http.StatusOK, 0)
-	want = `{"id":1,"h_id":5,"name":"Yuzusoft","aliases":["柚子社"],"logo":"logo.webp","intro_jp":"","intro_zh":"简介","intro_en":"","website":"https://yuzu-soft.com","extra_info":[{"key":"国家/地区","value":"日本"}]}`
+	want = `{"id":1,"h_id":5,"name":"Yuzusoft","aliases":["柚子社"],"logo":"logo.webp","logo_thumb_hash":"logo-hash","intro_jp":"","intro_zh":"简介","intro_en":"","website":"https://yuzu-soft.com","extra_info":[{"key":"国家/地区","value":"日本"}]}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected detail\n got %s\nwant %s", resp.Data, want)
 	}

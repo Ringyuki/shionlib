@@ -47,12 +47,12 @@ func TestToGameRecordMapsCreditsMediaAndIdentifiers(t *testing.T) {
 		Title:      catalog.Localized{Origin: strings.Repeat("長", 300)},
 		Aliases:    []string{"a", "a", " ", "b"},
 		Covers: []catalog.Cover{
-			{Media: catalog.Media{URL: "low.webp"}, Votes: 1, Language: "zh-Hans", Kind: "DIG"},
-			{Media: catalog.Media{URL: "high.webp", Width: new(800), Height: new(1200), Sexual: 1}, Votes: 9, Language: "ja", Kind: "PKGFRONT"},
+			{Media: catalog.Media{URL: "low.webp", ThumbHash: new(" ")}, Votes: 1, Language: "zh-Hans", Kind: "DIG"},
+			{Media: catalog.Media{URL: "high.webp", Width: new(800), Height: new(1200), ThumbHash: new("1QcSHQRnh493V4dIh4eXh1h4kJUI"), Sexual: 1}, Votes: 9, Language: "ja", Kind: "PKGFRONT"},
 			{Media: catalog.Media{URL: "odd.webp", Width: new(10)}, Votes: 5, Language: "ko"},
 		},
 		Developers: []catalog.DeveloperCredit{
-			{ExternalID: "5", Name: "枕", Role: "DEVELOPER", Logo: &catalog.Media{URL: "logo.webp"}},
+			{ExternalID: "5", Name: "枕", Role: "DEVELOPER", Logo: &catalog.Media{URL: "logo.webp", ThumbHash: new("logo-hash")}},
 			{ExternalID: "6", Name: "发行", Role: "PUBLISHER"},
 			{ExternalID: "7", Name: "无角色"},
 		},
@@ -85,8 +85,14 @@ func TestToGameRecordMapsCreditsMediaAndIdentifiers(t *testing.T) {
 	if record.Covers[1].Language != "unknown" || len(record.Covers[1].Dims) != 0 || record.Covers[2].Language != "zh" || record.Covers[2].Type != "dig" {
 		t.Fatalf("cover mapping %+v", record.Covers)
 	}
+	if *first.ThumbHash != "1QcSHQRnh493V4dIh4eXh1h4kJUI" || record.Covers[1].ThumbHash != nil || record.Covers[2].ThumbHash != nil {
+		t.Fatalf("cover thumbhashes %+v", record.Covers)
+	}
 	if len(record.Developers) != 2 || record.Developers[0].Role != "开发" || *record.Developers[0].Logo != "logo.webp" || record.Developers[1].ExternalID != "7" || record.Developers[1].Role != "开发" {
 		t.Fatalf("only developer credits are kept: %+v", record.Developers)
+	}
+	if *record.Developers[0].LogoThumbHash != "logo-hash" || record.Developers[1].LogoThumbHash != nil {
+		t.Fatalf("developer logo thumbhash %+v", record.Developers)
 	}
 	if *record.Developers[0].HikarinagiID != 5 {
 		t.Fatalf("developer hikarinagi id %+v", record.Developers[0])
@@ -138,11 +144,11 @@ func TestToDeveloperRecord(t *testing.T) {
 		Name:       "枕",
 		Intro:      catalog.Localized{Origin: "紹介", OriginLang: "ja", Translated: new("介绍")},
 		Website:    new("  "),
-		Logo:       &catalog.Media{URL: "logo.webp"},
+		Logo:       &catalog.Media{URL: "logo.webp", ThumbHash: new("logo-hash")},
 		Extra:      []catalog.KeyValue{{Key: "country", Value: "JP"}},
 		External:   catalog.ExternalIDs{VNDB: new("p100")},
 	})
-	if *record.HikarinagiID != 5 || record.Name != "枕" || record.IntroJP != "紹介" || record.IntroZH != "介绍" || record.Website != nil || *record.Logo != "logo.webp" || *record.VID != "p100" || len(record.Extra) != 1 {
+	if *record.HikarinagiID != 5 || record.Name != "枕" || record.IntroJP != "紹介" || record.IntroZH != "介绍" || record.Website != nil || *record.Logo != "logo.webp" || *record.LogoThumbHash != "logo-hash" || *record.VID != "p100" || len(record.Extra) != 1 {
 		t.Fatalf("developer record %+v", record)
 	}
 }

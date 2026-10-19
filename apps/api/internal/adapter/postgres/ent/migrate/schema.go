@@ -1173,6 +1173,7 @@ var (
 		{Name: "v_id", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "h_id", Type: field.TypeInt, Unique: true, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "image", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "image_thumb_hash", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "name_jp", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "name_zh", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "name_en", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1222,7 +1223,7 @@ var (
 			{
 				Name:    "game_characters_name_jp_trgm_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCharactersColumns[5]},
+				Columns: []*schema.Column{GameCharactersColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					OpClass: "gin_trgm_ops",
 					Type:    "GIN",
@@ -1231,7 +1232,7 @@ var (
 			{
 				Name:    "game_characters_name_zh_trgm_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCharactersColumns[6]},
+				Columns: []*schema.Column{GameCharactersColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
 					OpClass: "gin_trgm_ops",
 					Type:    "GIN",
@@ -1240,7 +1241,7 @@ var (
 			{
 				Name:    "game_characters_name_en_trgm_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCharactersColumns[7]},
+				Columns: []*schema.Column{GameCharactersColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					OpClass: "gin_trgm_ops",
 					Type:    "GIN",
@@ -1252,6 +1253,7 @@ var (
 	GameCharacterRelationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "image", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "image_thumb_hash", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "actor", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "role", Type: field.TypeEnum, Nullable: true, Enums: []string{"main", "primary", "side", "appears"}, SchemaType: map[string]string{"postgres": "game_character_role"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -1267,13 +1269,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_character_relations_game_id_fkey",
-				Columns:    []*schema.Column{GameCharacterRelationsColumns[6]},
+				Columns:    []*schema.Column{GameCharacterRelationsColumns[7]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_character_relations_character_id_fkey",
-				Columns:    []*schema.Column{GameCharacterRelationsColumns[7]},
+				Columns:    []*schema.Column{GameCharacterRelationsColumns[8]},
 				RefColumns: []*schema.Column{GameCharactersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1282,12 +1284,12 @@ var (
 			{
 				Name:    "game_character_relations_game_id_character_id_key",
 				Unique:  true,
-				Columns: []*schema.Column{GameCharacterRelationsColumns[6], GameCharacterRelationsColumns[7]},
+				Columns: []*schema.Column{GameCharacterRelationsColumns[7], GameCharacterRelationsColumns[8]},
 			},
 			{
 				Name:    "game_character_relations_character_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCharacterRelationsColumns[7]},
+				Columns: []*schema.Column{GameCharacterRelationsColumns[8]},
 			},
 		},
 	}
@@ -1298,6 +1300,7 @@ var (
 		{Name: "url", Type: field.TypeString, Size: 2147483647},
 		{Name: "type", Type: field.TypeString, Size: 2147483647},
 		{Name: "dims", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "integer[]"}},
+		{Name: "thumb_hash", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "sexual", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "violence", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "source", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1315,7 +1318,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_covers_game_id_fkey",
-				Columns:    []*schema.Column{GameCoversColumns[12]},
+				Columns:    []*schema.Column{GameCoversColumns[13]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -1324,17 +1327,17 @@ var (
 			{
 				Name:    "game_covers_source_source_key_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCoversColumns[7], GameCoversColumns[8]},
+				Columns: []*schema.Column{GameCoversColumns[8], GameCoversColumns[9]},
 			},
 			{
 				Name:    "game_covers_game_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCoversColumns[12]},
+				Columns: []*schema.Column{GameCoversColumns[13]},
 			},
 			{
 				Name:    "game_covers_rated_game_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameCoversColumns[12]},
+				Columns: []*schema.Column{GameCoversColumns[13]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "sexual > 0",
 				},
@@ -1350,6 +1353,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 255, Default: "", SchemaType: map[string]string{"postgres": "character varying(255)"}},
 		{Name: "aliases", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
 		{Name: "logo", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "logo_thumb_hash", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "intro_jp", Type: field.TypeString, Size: 20000, Default: "", SchemaType: map[string]string{"postgres": "character varying(20000)"}},
 		{Name: "intro_zh", Type: field.TypeString, Size: 20000, Default: "", SchemaType: map[string]string{"postgres": "character varying(20000)"}},
 		{Name: "intro_en", Type: field.TypeString, Size: 20000, Default: "", SchemaType: map[string]string{"postgres": "character varying(20000)"}},
@@ -1367,7 +1371,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_developers_parent_developer_id_fkey",
-				Columns:    []*schema.Column{GameDevelopersColumns[14]},
+				Columns:    []*schema.Column{GameDevelopersColumns[15]},
 				RefColumns: []*schema.Column{GameDevelopersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1405,7 +1409,7 @@ var (
 			{
 				Name:    "game_developers_parent_developer_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDevelopersColumns[14]},
+				Columns: []*schema.Column{GameDevelopersColumns[15]},
 			},
 		},
 	}
@@ -1783,6 +1787,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "url", Type: field.TypeString, Size: 2147483647},
 		{Name: "dims", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "integer[]"}},
+		{Name: "thumb_hash", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "sexual", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "violence", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "source", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1800,7 +1805,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_images_game_id_fkey",
-				Columns:    []*schema.Column{GameImagesColumns[10]},
+				Columns:    []*schema.Column{GameImagesColumns[11]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -1809,12 +1814,12 @@ var (
 			{
 				Name:    "game_images_source_source_key_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameImagesColumns[5], GameImagesColumns[6]},
+				Columns: []*schema.Column{GameImagesColumns[6], GameImagesColumns[7]},
 			},
 			{
 				Name:    "game_images_game_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameImagesColumns[10]},
+				Columns: []*schema.Column{GameImagesColumns[11]},
 			},
 		},
 	}

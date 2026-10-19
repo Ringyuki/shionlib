@@ -48,7 +48,7 @@ func (r *Repository) Search(ctx context.Context, filter character.AdminFilter, p
 	rows, err := query.
 		Select(
 			gamecharacter.FieldID, gamecharacter.FieldNameJp, gamecharacter.FieldNameZh, gamecharacter.FieldNameEn,
-			gamecharacter.FieldImage, gamecharacter.FieldGender, gamecharacter.FieldCreated, gamecharacter.FieldUpdated,
+			gamecharacter.FieldImage, gamecharacter.FieldImageThumbHash, gamecharacter.FieldGender, gamecharacter.FieldCreated, gamecharacter.FieldUpdated,
 		).
 		Order(order(field), order(gamecharacter.FieldID)).
 		Offset(page.Offset()).
@@ -68,15 +68,16 @@ func (r *Repository) Search(ctx context.Context, filter character.AdminFilter, p
 			gender = []string{}
 		}
 		entries[i] = character.AdminEntry{
-			ID:         row.ID,
-			NameJP:     row.NameJp,
-			NameZH:     row.NameZh,
-			NameEN:     row.NameEn,
-			Image:      row.Image,
-			Gender:     gender,
-			GamesCount: counts[row.ID],
-			Created:    row.Created,
-			Updated:    row.Updated,
+			ID:             row.ID,
+			NameJP:         row.NameJp,
+			NameZH:         row.NameZh,
+			NameEN:         row.NameEn,
+			Image:          row.Image,
+			ImageThumbHash: row.ImageThumbHash,
+			Gender:         gender,
+			GamesCount:     counts[row.ID],
+			Created:        row.Created,
+			Updated:        row.Updated,
 		}
 	}
 	return entries, total, nil
@@ -171,7 +172,7 @@ func (r *Repository) Summaries(ctx context.Context, ids []int) (map[int]characte
 		return nil, fmt.Errorf("load character summaries: %w", err)
 	}
 	for _, row := range rows {
-		summary := character.Summary{ID: row.ID, Image: row.Image, NameJP: row.NameJp, NameZH: row.NameZh, NameEN: row.NameEn, Aliases: slices.Clone([]string(row.Aliases))}
+		summary := character.Summary{ID: row.ID, Image: row.Image, ImageThumbHash: row.ImageThumbHash, NameJP: row.NameJp, NameZH: row.NameZh, NameEN: row.NameEn, Aliases: slices.Clone([]string(row.Aliases))}
 		if summary.Aliases == nil {
 			summary.Aliases = []string{}
 		}

@@ -58,7 +58,7 @@ func (r *MemoryRepository) List(_ context.Context, query string, page developer.
 	end := min(start+page.Size, total)
 	summaries := make([]developer.Summary, 0, end-start)
 	for _, d := range matched[start:end] {
-		summaries = append(summaries, developer.Summary{ID: d.ID, Name: d.Name, Aliases: d.Aliases, Logo: d.Logo, WorksCount: r.works(d.ID)})
+		summaries = append(summaries, developer.Summary{ID: d.ID, Name: d.Name, Aliases: d.Aliases, Logo: d.Logo, LogoThumbHash: d.LogoThumbHash, WorksCount: r.works(d.ID)})
 	}
 	return summaries, total, nil
 }

@@ -195,6 +195,7 @@ func (s *Store) replaceMedia(ctx context.Context, gameID int, source string, rec
 				SetType(cover.Type).
 				SetURL(cover.URL).
 				SetDims(pgvalue.Ints(cover.Dims)).
+				SetNillableThumbHash(cover.ThumbHash).
 				SetSexual(cover.Sexual).
 				SetViolence(cover.Violence).
 				SetSource(source).
@@ -215,6 +216,7 @@ func (s *Store) replaceMedia(ctx context.Context, gameID int, source string, rec
 				SetGameID(gameID).
 				SetURL(image.URL).
 				SetDims(pgvalue.Ints(image.Dims)).
+				SetNillableThumbHash(image.ThumbHash).
 				SetSexual(image.Sexual).
 				SetViolence(image.Violence).
 				SetSource(source).
@@ -395,6 +397,7 @@ func (s *Store) replaceCharacters(ctx context.Context, gameID int, source string
 			SetCharacterID(characterID).
 			SetRole(gamecharacterrelation.Role(credit.Role)).
 			SetNillableImage(credit.Image).
+			SetNillableImageThumbHash(credit.ImageThumbHash).
 			SetNillableActor(credit.Actor)
 		if err := create.Exec(ctx); err != nil {
 			return nil, fmt.Errorf("insert character relation: %w", err)

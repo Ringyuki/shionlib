@@ -32,6 +32,8 @@ type GameDeveloper struct {
 	Aliases pgvalue.Strings `json:"aliases,omitempty"`
 	// Logo holds the value of the "logo" field.
 	Logo *string `json:"logo,omitempty"`
+	// LogoThumbHash holds the value of the "logo_thumb_hash" field.
+	LogoThumbHash *string `json:"logo_thumb_hash,omitempty"`
 	// IntroJp holds the value of the "intro_jp" field.
 	IntroJp string `json:"intro_jp,omitempty"`
 	// IntroZh holds the value of the "intro_zh" field.
@@ -118,7 +120,7 @@ func (*GameDeveloper) scanValues(columns []string) ([]any, error) {
 			values[i] = new(pgvalue.Strings)
 		case gamedeveloper.FieldID, gamedeveloper.FieldHID, gamedeveloper.FieldParentDeveloperID:
 			values[i] = new(sql.NullInt64)
-		case gamedeveloper.FieldBID, gamedeveloper.FieldVID, gamedeveloper.FieldName, gamedeveloper.FieldLogo, gamedeveloper.FieldIntroJp, gamedeveloper.FieldIntroZh, gamedeveloper.FieldIntroEn, gamedeveloper.FieldWebsite:
+		case gamedeveloper.FieldBID, gamedeveloper.FieldVID, gamedeveloper.FieldName, gamedeveloper.FieldLogo, gamedeveloper.FieldLogoThumbHash, gamedeveloper.FieldIntroJp, gamedeveloper.FieldIntroZh, gamedeveloper.FieldIntroEn, gamedeveloper.FieldWebsite:
 			values[i] = new(sql.NullString)
 		case gamedeveloper.FieldCreated, gamedeveloper.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -182,6 +184,13 @@ func (_m *GameDeveloper) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Logo = new(string)
 				*_m.Logo = value.String
+			}
+		case gamedeveloper.FieldLogoThumbHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field logo_thumb_hash", values[i])
+			} else if value.Valid {
+				_m.LogoThumbHash = new(string)
+				*_m.LogoThumbHash = value.String
 			}
 		case gamedeveloper.FieldIntroJp:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -314,6 +323,11 @@ func (_m *GameDeveloper) String() string {
 	builder.WriteString(", ")
 	if v := _m.Logo; v != nil {
 		builder.WriteString("logo=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.LogoThumbHash; v != nil {
+		builder.WriteString("logo_thumb_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

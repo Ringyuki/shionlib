@@ -32,7 +32,7 @@ type adminEnv struct {
 
 func newAdminEnv(t *testing.T) adminEnv {
 	t.Helper()
-	cover := game.AdminCover{URL: "cover.webp", Dims: []int{600, 800}, Sexual: 1}
+	cover := game.AdminCover{URL: "cover.webp", Dims: []int{600, 800}, ThumbHash: ptr("cover-hash"), Sexual: 1}
 	first := gametest.AdminGame{
 		Entry:  game.AdminEntry{ID: 1, TitleJP: "サマポケ", TitleZH: "夏日口袋", Status: game.StatusVisible, Views: 9, Downloads: 3, Resources: 4, Created: created, Updated: created, Cover: &cover, Creator: game.CreatorRef{ID: 7, Name: "importer"}, Source: &game.SourceRef{Source: "hikarinagi", ExternalID: "100"}},
 		Scalar: game.Scalar{BID: ptr("100"), VID: ptr("v100"), Aliases: []string{"SP"}, ReleaseDate: &released, ExtraInfo: json.RawMessage(`[{"key":"k","value":"v"}]`), Platform: []string{"win"}, Type: ptr("ADV")},
@@ -77,7 +77,7 @@ func TestAdminGameListShape(t *testing.T) {
 	}
 	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPut, Path: "/admin/content/games/1/recent-update", As: &staff}), http.StatusOK, 0)
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games?status=1&search=%E5%A4%8F&sortBy=views&sortOrder=asc", As: &staff})
-	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"resources":4,"nsfw":false,"recently_updated":true,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[{"url":"cover.webp","dims":[600,800],"sexual":1,"violence":0}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp","source":{"name":"hikarinagi","external_id":"100"}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
+	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"resources":4,"nsfw":false,"recently_updated":true,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[{"url":"cover.webp","dims":[600,800],"thumb_hash":"cover-hash","sexual":1,"violence":0}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp","source":{"name":"hikarinagi","external_id":"100"}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("filtered\n got %s\nwant %s", resp.Data, want)
 	}

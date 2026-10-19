@@ -86,6 +86,11 @@ func Logo(v string) predicate.GameDeveloper {
 	return predicate.GameDeveloper(sql.FieldEQ(FieldLogo, v))
 }
 
+// LogoThumbHash applies equality check predicate on the "logo_thumb_hash" field. It's identical to LogoThumbHashEQ.
+func LogoThumbHash(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldEQ(FieldLogoThumbHash, v))
+}
+
 // IntroJp applies equality check predicate on the "intro_jp" field. It's identical to IntroJpEQ.
 func IntroJp(v string) predicate.GameDeveloper {
 	return predicate.GameDeveloper(sql.FieldEQ(FieldIntroJp, v))
@@ -509,6 +514,81 @@ func LogoEqualFold(v string) predicate.GameDeveloper {
 // LogoContainsFold applies the ContainsFold predicate on the "logo" field.
 func LogoContainsFold(v string) predicate.GameDeveloper {
 	return predicate.GameDeveloper(sql.FieldContainsFold(FieldLogo, v))
+}
+
+// LogoThumbHashEQ applies the EQ predicate on the "logo_thumb_hash" field.
+func LogoThumbHashEQ(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldEQ(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashNEQ applies the NEQ predicate on the "logo_thumb_hash" field.
+func LogoThumbHashNEQ(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldNEQ(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashIn applies the In predicate on the "logo_thumb_hash" field.
+func LogoThumbHashIn(vs ...string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldIn(FieldLogoThumbHash, vs...))
+}
+
+// LogoThumbHashNotIn applies the NotIn predicate on the "logo_thumb_hash" field.
+func LogoThumbHashNotIn(vs ...string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldNotIn(FieldLogoThumbHash, vs...))
+}
+
+// LogoThumbHashGT applies the GT predicate on the "logo_thumb_hash" field.
+func LogoThumbHashGT(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldGT(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashGTE applies the GTE predicate on the "logo_thumb_hash" field.
+func LogoThumbHashGTE(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldGTE(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashLT applies the LT predicate on the "logo_thumb_hash" field.
+func LogoThumbHashLT(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldLT(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashLTE applies the LTE predicate on the "logo_thumb_hash" field.
+func LogoThumbHashLTE(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldLTE(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashContains applies the Contains predicate on the "logo_thumb_hash" field.
+func LogoThumbHashContains(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldContains(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashHasPrefix applies the HasPrefix predicate on the "logo_thumb_hash" field.
+func LogoThumbHashHasPrefix(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldHasPrefix(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashHasSuffix applies the HasSuffix predicate on the "logo_thumb_hash" field.
+func LogoThumbHashHasSuffix(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldHasSuffix(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashIsNil applies the IsNil predicate on the "logo_thumb_hash" field.
+func LogoThumbHashIsNil() predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldIsNull(FieldLogoThumbHash))
+}
+
+// LogoThumbHashNotNil applies the NotNil predicate on the "logo_thumb_hash" field.
+func LogoThumbHashNotNil() predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldNotNull(FieldLogoThumbHash))
+}
+
+// LogoThumbHashEqualFold applies the EqualFold predicate on the "logo_thumb_hash" field.
+func LogoThumbHashEqualFold(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldEqualFold(FieldLogoThumbHash, v))
+}
+
+// LogoThumbHashContainsFold applies the ContainsFold predicate on the "logo_thumb_hash" field.
+func LogoThumbHashContainsFold(v string) predicate.GameDeveloper {
+	return predicate.GameDeveloper(sql.FieldContainsFold(FieldLogoThumbHash, v))
 }
 
 // IntroJpEQ applies the EQ predicate on the "intro_jp" field.

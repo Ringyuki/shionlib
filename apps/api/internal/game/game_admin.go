@@ -37,10 +37,11 @@ type SourceRef struct {
 }
 
 type AdminCover struct {
-	URL      string
-	Dims     []int
-	Sexual   int
-	Violence int
+	URL       string
+	Dims      []int
+	ThumbHash *string
+	Sexual    int
+	Violence  int
 }
 
 type AdminEntry struct {

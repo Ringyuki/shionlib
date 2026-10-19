@@ -12,25 +12,27 @@ type ExtraInfo struct {
 }
 
 type Developer struct {
-	ID        int
-	HID       *int
-	Name      string
-	Aliases   []string
-	Logo      *string
-	IntroJP   string
-	IntroZH   string
-	IntroEN   string
-	Website   *string
-	ExtraInfo []ExtraInfo
-	ParentID  *int
+	ID            int
+	HID           *int
+	Name          string
+	Aliases       []string
+	Logo          *string
+	LogoThumbHash *string
+	IntroJP       string
+	IntroZH       string
+	IntroEN       string
+	Website       *string
+	ExtraInfo     []ExtraInfo
+	ParentID      *int
 }
 
 type Summary struct {
-	ID         int
-	Name       string
-	Aliases    []string
-	Logo       *string
-	WorksCount int
+	ID            int
+	Name          string
+	Aliases       []string
+	Logo          *string
+	LogoThumbHash *string
+	WorksCount    int
 }
 
 func (s Summary) HasWorks() bool {
@@ -55,10 +57,11 @@ type AdminFilter struct {
 }
 
 type AdminEntry struct {
-	ID         int
-	Name       string
-	Logo       *string
-	GamesCount int
-	Created    time.Time
-	Updated    time.Time
+	ID            int
+	Name          string
+	Logo          *string
+	LogoThumbHash *string
+	GamesCount    int
+	Created       time.Time
+	Updated       time.Time
 }

@@ -27,13 +27,14 @@ func (s Status) Valid() bool {
 }
 
 type Cover struct {
-	Language string
-	Type     string
-	URL      string
-	Dims     []int
-	Sexual   int
-	Violence int
-	Masked   bool
+	Language  string
+	Type      string
+	URL       string
+	Dims      []int
+	ThumbHash *string
+	Sexual    int
+	Violence  int
+	Masked    bool
 }
 
 func (c Cover) Rated() bool {

@@ -46,11 +46,12 @@ type Localized struct {
 }
 
 type Media struct {
-	URL      string
-	Width    *int
-	Height   *int
-	Sexual   int
-	Violence int
+	URL       string
+	Width     *int
+	Height    *int
+	ThumbHash *string
+	Sexual    int
+	Violence  int
 }
 
 type Cover struct {

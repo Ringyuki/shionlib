@@ -81,6 +81,20 @@ func (_c *GameCharacterCreate) SetNillableImage(v *string) *GameCharacterCreate 
 	return _c
 }
 
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (_c *GameCharacterCreate) SetImageThumbHash(v string) *GameCharacterCreate {
+	_c.mutation.SetImageThumbHash(v)
+	return _c
+}
+
+// SetNillableImageThumbHash sets the "image_thumb_hash" field if the given value is not nil.
+func (_c *GameCharacterCreate) SetNillableImageThumbHash(v *string) *GameCharacterCreate {
+	if v != nil {
+		_c.SetImageThumbHash(*v)
+	}
+	return _c
+}
+
 // SetNameJp sets the "name_jp" field.
 func (_c *GameCharacterCreate) SetNameJp(v string) *GameCharacterCreate {
 	_c.mutation.SetNameJp(v)
@@ -506,6 +520,10 @@ func (_c *GameCharacterCreate) createSpec() (*GameCharacter, *sqlgraph.CreateSpe
 		_spec.SetField(gamecharacter.FieldImage, field.TypeString, value)
 		_node.Image = &value
 	}
+	if value, ok := _c.mutation.ImageThumbHash(); ok {
+		_spec.SetField(gamecharacter.FieldImageThumbHash, field.TypeString, value)
+		_node.ImageThumbHash = &value
+	}
 	if value, ok := _c.mutation.NameJp(); ok {
 		_spec.SetField(gamecharacter.FieldNameJp, field.TypeString, value)
 		_node.NameJp = value
@@ -741,6 +759,24 @@ func (u *GameCharacterUpsert) UpdateImage() *GameCharacterUpsert {
 // ClearImage clears the value of the "image" field.
 func (u *GameCharacterUpsert) ClearImage() *GameCharacterUpsert {
 	u.SetNull(gamecharacter.FieldImage)
+	return u
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterUpsert) SetImageThumbHash(v string) *GameCharacterUpsert {
+	u.Set(gamecharacter.FieldImageThumbHash, v)
+	return u
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterUpsert) UpdateImageThumbHash() *GameCharacterUpsert {
+	u.SetExcluded(gamecharacter.FieldImageThumbHash)
+	return u
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterUpsert) ClearImageThumbHash() *GameCharacterUpsert {
+	u.SetNull(gamecharacter.FieldImageThumbHash)
 	return u
 }
 
@@ -1213,6 +1249,27 @@ func (u *GameCharacterUpsertOne) UpdateImage() *GameCharacterUpsertOne {
 func (u *GameCharacterUpsertOne) ClearImage() *GameCharacterUpsertOne {
 	return u.Update(func(s *GameCharacterUpsert) {
 		s.ClearImage()
+	})
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterUpsertOne) SetImageThumbHash(v string) *GameCharacterUpsertOne {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.SetImageThumbHash(v)
+	})
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterUpsertOne) UpdateImageThumbHash() *GameCharacterUpsertOne {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.UpdateImageThumbHash()
+	})
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterUpsertOne) ClearImageThumbHash() *GameCharacterUpsertOne {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.ClearImageThumbHash()
 	})
 }
 
@@ -1906,6 +1963,27 @@ func (u *GameCharacterUpsertBulk) UpdateImage() *GameCharacterUpsertBulk {
 func (u *GameCharacterUpsertBulk) ClearImage() *GameCharacterUpsertBulk {
 	return u.Update(func(s *GameCharacterUpsert) {
 		s.ClearImage()
+	})
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterUpsertBulk) SetImageThumbHash(v string) *GameCharacterUpsertBulk {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.SetImageThumbHash(v)
+	})
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterUpsertBulk) UpdateImageThumbHash() *GameCharacterUpsertBulk {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.UpdateImageThumbHash()
+	})
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterUpsertBulk) ClearImageThumbHash() *GameCharacterUpsertBulk {
+	return u.Update(func(s *GameCharacterUpsert) {
+		s.ClearImageThumbHash()
 	})
 }
 

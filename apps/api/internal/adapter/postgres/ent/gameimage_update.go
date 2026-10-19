@@ -57,6 +57,26 @@ func (_u *GameImageUpdate) ClearDims() *GameImageUpdate {
 	return _u
 }
 
+// SetThumbHash sets the "thumb_hash" field.
+func (_u *GameImageUpdate) SetThumbHash(v string) *GameImageUpdate {
+	_u.mutation.SetThumbHash(v)
+	return _u
+}
+
+// SetNillableThumbHash sets the "thumb_hash" field if the given value is not nil.
+func (_u *GameImageUpdate) SetNillableThumbHash(v *string) *GameImageUpdate {
+	if v != nil {
+		_u.SetThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (_u *GameImageUpdate) ClearThumbHash() *GameImageUpdate {
+	_u.mutation.ClearThumbHash()
+	return _u
+}
+
 // SetSexual sets the "sexual" field.
 func (_u *GameImageUpdate) SetSexual(v int) *GameImageUpdate {
 	_u.mutation.ResetSexual()
@@ -266,6 +286,12 @@ func (_u *GameImageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DimsCleared() {
 		_spec.ClearField(gameimage.FieldDims, field.TypeOther)
 	}
+	if value, ok := _u.mutation.ThumbHash(); ok {
+		_spec.SetField(gameimage.FieldThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.ThumbHashCleared() {
+		_spec.ClearField(gameimage.FieldThumbHash, field.TypeString)
+	}
 	if value, ok := _u.mutation.Sexual(); ok {
 		_spec.SetField(gameimage.FieldSexual, field.TypeInt, value)
 	}
@@ -373,6 +399,26 @@ func (_u *GameImageUpdateOne) SetDims(v pgvalue.Ints) *GameImageUpdateOne {
 // ClearDims clears the value of the "dims" field.
 func (_u *GameImageUpdateOne) ClearDims() *GameImageUpdateOne {
 	_u.mutation.ClearDims()
+	return _u
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (_u *GameImageUpdateOne) SetThumbHash(v string) *GameImageUpdateOne {
+	_u.mutation.SetThumbHash(v)
+	return _u
+}
+
+// SetNillableThumbHash sets the "thumb_hash" field if the given value is not nil.
+func (_u *GameImageUpdateOne) SetNillableThumbHash(v *string) *GameImageUpdateOne {
+	if v != nil {
+		_u.SetThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (_u *GameImageUpdateOne) ClearThumbHash() *GameImageUpdateOne {
+	_u.mutation.ClearThumbHash()
 	return _u
 }
 
@@ -614,6 +660,12 @@ func (_u *GameImageUpdateOne) sqlSave(ctx context.Context) (_node *GameImage, er
 	}
 	if _u.mutation.DimsCleared() {
 		_spec.ClearField(gameimage.FieldDims, field.TypeOther)
+	}
+	if value, ok := _u.mutation.ThumbHash(); ok {
+		_spec.SetField(gameimage.FieldThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.ThumbHashCleared() {
+		_spec.ClearField(gameimage.FieldThumbHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.Sexual(); ok {
 		_spec.SetField(gameimage.FieldSexual, field.TypeInt, value)

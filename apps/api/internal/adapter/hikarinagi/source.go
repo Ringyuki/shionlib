@@ -293,7 +293,7 @@ func toCharacterSnapshot(detail characterDetailDTO) catalog.CharacterSnapshot {
 }
 
 func toMedia(media mediaDTO) catalog.Media {
-	return catalog.Media{URL: media.URL, Width: media.Width, Height: media.Height, Sexual: media.Sexual, Violence: media.Violence}
+	return catalog.Media{URL: media.URL, Width: media.Width, Height: media.Height, ThumbHash: media.ThumbHash, Sexual: media.Sexual, Violence: media.Violence}
 }
 
 func optionalMedia(media *mediaDTO) *catalog.Media {

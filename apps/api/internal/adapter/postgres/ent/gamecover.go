@@ -27,6 +27,8 @@ type GameCover struct {
 	Type string `json:"type,omitempty"`
 	// Dims holds the value of the "dims" field.
 	Dims pgvalue.Ints `json:"dims,omitempty"`
+	// ThumbHash holds the value of the "thumb_hash" field.
+	ThumbHash *string `json:"thumb_hash,omitempty"`
 	// Sexual holds the value of the "sexual" field.
 	Sexual int `json:"sexual,omitempty"`
 	// Violence holds the value of the "violence" field.
@@ -78,7 +80,7 @@ func (*GameCover) scanValues(columns []string) ([]any, error) {
 			values[i] = new(pgvalue.Ints)
 		case gamecover.FieldID, gamecover.FieldSexual, gamecover.FieldViolence, gamecover.FieldGameID:
 			values[i] = new(sql.NullInt64)
-		case gamecover.FieldLanguage, gamecover.FieldURL, gamecover.FieldType, gamecover.FieldSource, gamecover.FieldSourceKey, gamecover.FieldSourceURL:
+		case gamecover.FieldLanguage, gamecover.FieldURL, gamecover.FieldType, gamecover.FieldThumbHash, gamecover.FieldSource, gamecover.FieldSourceKey, gamecover.FieldSourceURL:
 			values[i] = new(sql.NullString)
 		case gamecover.FieldCreated, gamecover.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -126,6 +128,13 @@ func (_m *GameCover) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field dims", values[i])
 			} else if value != nil {
 				_m.Dims = *value
+			}
+		case gamecover.FieldThumbHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field thumb_hash", values[i])
+			} else if value.Valid {
+				_m.ThumbHash = new(string)
+				*_m.ThumbHash = value.String
 			}
 		case gamecover.FieldSexual:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -230,6 +239,11 @@ func (_m *GameCover) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("dims=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Dims))
+	builder.WriteString(", ")
+	if v := _m.ThumbHash; v != nil {
+		builder.WriteString("thumb_hash=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("sexual=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Sexual))

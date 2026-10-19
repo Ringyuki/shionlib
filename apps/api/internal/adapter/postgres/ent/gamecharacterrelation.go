@@ -21,6 +21,8 @@ type GameCharacterRelation struct {
 	ID int `json:"id,omitempty"`
 	// Image holds the value of the "image" field.
 	Image *string `json:"image,omitempty"`
+	// ImageThumbHash holds the value of the "image_thumb_hash" field.
+	ImageThumbHash *string `json:"image_thumb_hash,omitempty"`
 	// Actor holds the value of the "actor" field.
 	Actor *string `json:"actor,omitempty"`
 	// Role holds the value of the "role" field.
@@ -79,7 +81,7 @@ func (*GameCharacterRelation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamecharacterrelation.FieldID, gamecharacterrelation.FieldGameID, gamecharacterrelation.FieldCharacterID:
 			values[i] = new(sql.NullInt64)
-		case gamecharacterrelation.FieldImage, gamecharacterrelation.FieldActor, gamecharacterrelation.FieldRole:
+		case gamecharacterrelation.FieldImage, gamecharacterrelation.FieldImageThumbHash, gamecharacterrelation.FieldActor, gamecharacterrelation.FieldRole:
 			values[i] = new(sql.NullString)
 		case gamecharacterrelation.FieldCreated, gamecharacterrelation.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -110,6 +112,13 @@ func (_m *GameCharacterRelation) assignValues(columns []string, values []any) er
 			} else if value.Valid {
 				_m.Image = new(string)
 				*_m.Image = value.String
+			}
+		case gamecharacterrelation.FieldImageThumbHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_thumb_hash", values[i])
+			} else if value.Valid {
+				_m.ImageThumbHash = new(string)
+				*_m.ImageThumbHash = value.String
 			}
 		case gamecharacterrelation.FieldActor:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -197,6 +206,11 @@ func (_m *GameCharacterRelation) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	if v := _m.Image; v != nil {
 		builder.WriteString("image=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.ImageThumbHash; v != nil {
+		builder.WriteString("image_thumb_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

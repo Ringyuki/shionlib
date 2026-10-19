@@ -18,10 +18,11 @@ type adminGameStaffDTO struct {
 }
 
 type adminGameCoverDTO struct {
-	URL      string `json:"url"`
-	Dims     []int  `json:"dims" doc:"Width and height in pixels, empty when unknown"`
-	Sexual   int    `json:"sexual"`
-	Violence int    `json:"violence"`
+	URL       string  `json:"url"`
+	Dims      []int   `json:"dims" doc:"Width and height in pixels, empty when unknown"`
+	ThumbHash *string `json:"thumb_hash" doc:"ThumbHash of the picture in base64, null when unknown"`
+	Sexual    int     `json:"sexual"`
+	Violence  int     `json:"violence"`
 }
 
 type adminGameCreatorDTO struct {
@@ -61,7 +62,7 @@ func toAdminGameItem(entry game.AdminEntry) adminGameItemDTO {
 		if dims == nil {
 			dims = []int{}
 		}
-		covers = append(covers, adminGameCoverDTO{URL: cover.URL, Dims: dims, Sexual: cover.Sexual, Violence: cover.Violence})
+		covers = append(covers, adminGameCoverDTO{URL: cover.URL, Dims: dims, ThumbHash: cover.ThumbHash, Sexual: cover.Sexual, Violence: cover.Violence})
 		coverURL = &cover.URL
 	}
 	dto := adminGameItemDTO{

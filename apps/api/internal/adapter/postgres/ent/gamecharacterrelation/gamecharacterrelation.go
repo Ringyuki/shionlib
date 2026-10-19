@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
+	// FieldImageThumbHash holds the string denoting the image_thumb_hash field in the database.
+	FieldImageThumbHash = "image_thumb_hash"
 	// FieldActor holds the string denoting the actor field in the database.
 	FieldActor = "actor"
 	// FieldRole holds the string denoting the role field in the database.
@@ -55,6 +57,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldImage,
+	FieldImageThumbHash,
 	FieldActor,
 	FieldRole,
 	FieldGameID,
@@ -118,6 +121,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByImage orders the results by the image field.
 func ByImage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldImage, opts...).ToFunc()
+}
+
+// ByImageThumbHash orders the results by the image_thumb_hash field.
+func ByImageThumbHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImageThumbHash, opts...).ToFunc()
 }
 
 // ByActor orders the results by the actor field.

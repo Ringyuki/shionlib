@@ -37,12 +37,13 @@ func toCard(row *ent.Game) game.Card {
 	}
 	for _, cover := range row.Edges.Covers {
 		card.Covers = append(card.Covers, game.Cover{
-			Language: cover.Language,
-			Type:     cover.Type,
-			URL:      cover.URL,
-			Dims:     nonNilInts(cover.Dims),
-			Sexual:   cover.Sexual,
-			Violence: cover.Violence,
+			Language:  cover.Language,
+			Type:      cover.Type,
+			URL:       cover.URL,
+			Dims:      nonNilInts(cover.Dims),
+			ThumbHash: cover.ThumbHash,
+			Sexual:    cover.Sexual,
+			Violence:  cover.Violence,
 		})
 	}
 	for _, relation := range row.Edges.Developers {
@@ -155,7 +156,7 @@ func toDetail(row *ent.Game) game.Detail {
 		Links:          make([]game.Link, 0, len(row.Edges.Link)),
 	}
 	for _, image := range row.Edges.Images {
-		detail.Images = append(detail.Images, game.Image{URL: image.URL, Dims: nonNilInts(image.Dims), Sexual: image.Sexual, Violence: image.Violence})
+		detail.Images = append(detail.Images, game.Image{URL: image.URL, Dims: nonNilInts(image.Dims), ThumbHash: image.ThumbHash, Sexual: image.Sexual, Violence: image.Violence})
 	}
 	for _, link := range row.Edges.Link {
 		detail.Links = append(detail.Links, game.Link{ID: link.ID, Name: link.Name, Label: link.Label, URL: link.URL})
@@ -164,12 +165,12 @@ func toDetail(row *ent.Game) game.Detail {
 		if relation.Edges.Character == nil {
 			continue
 		}
-		credit := game.CharacterCredit{Role: game.CharacterRoleSide, Image: relation.Image, Actor: relation.Actor, Character: ToCharacter(relation.Edges.Character)}
+		credit := game.CharacterCredit{Role: game.CharacterRoleSide, Image: relation.Image, ImageThumbHash: relation.ImageThumbHash, Actor: relation.Actor, Character: ToCharacter(relation.Edges.Character)}
 		if relation.Role != nil {
 			credit.Role = string(*relation.Role)
 		}
 		if credit.Image == nil {
-			credit.Image = credit.Character.Image
+			credit.Image, credit.ImageThumbHash = credit.Character.Image, credit.Character.ImageThumbHash
 		}
 		detail.Characters = append(detail.Characters, credit)
 	}
@@ -188,29 +189,30 @@ func toDetail(row *ent.Game) game.Detail {
 
 func ToCharacter(row *ent.GameCharacter) character.Character {
 	c := character.Character{
-		ID:       row.ID,
-		BID:      row.BID,
-		VID:      row.VID,
-		HID:      row.HID,
-		Image:    row.Image,
-		NameJP:   row.NameJp,
-		NameZH:   row.NameZh,
-		NameEN:   row.NameEn,
-		Aliases:  nonNil(row.Aliases),
-		IntroJP:  row.IntroJp,
-		IntroZH:  row.IntroZh,
-		IntroEN:  row.IntroEn,
-		Height:   row.Height,
-		Weight:   row.Weight,
-		Bust:     row.Bust,
-		Waist:    row.Waist,
-		Hips:     row.Hips,
-		Cup:      row.Cup,
-		Age:      row.Age,
-		Birthday: nonNilInts(row.Birthday),
-		Gender:   nonNil(row.Gender),
-		Created:  row.Created,
-		Updated:  row.Updated,
+		ID:             row.ID,
+		BID:            row.BID,
+		VID:            row.VID,
+		HID:            row.HID,
+		Image:          row.Image,
+		ImageThumbHash: row.ImageThumbHash,
+		NameJP:         row.NameJp,
+		NameZH:         row.NameZh,
+		NameEN:         row.NameEn,
+		Aliases:        nonNil(row.Aliases),
+		IntroJP:        row.IntroJp,
+		IntroZH:        row.IntroZh,
+		IntroEN:        row.IntroEn,
+		Height:         row.Height,
+		Weight:         row.Weight,
+		Bust:           row.Bust,
+		Waist:          row.Waist,
+		Hips:           row.Hips,
+		Cup:            row.Cup,
+		Age:            row.Age,
+		Birthday:       nonNilInts(row.Birthday),
+		Gender:         nonNil(row.Gender),
+		Created:        row.Created,
+		Updated:        row.Updated,
 	}
 	if row.BloodType != nil {
 		bloodType := string(*row.BloodType)

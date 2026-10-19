@@ -20,7 +20,7 @@ func (s *Store) ensureCharacter(ctx context.Context, source string, credit catal
 	if err != nil || ok {
 		return id, !synced, err
 	}
-	seed := catalog.CharacterRecord{HikarinagiID: credit.HikarinagiID, NameJP: credit.NameJP, NameZH: credit.NameZH, NameEN: credit.NameEN, Image: credit.Image}
+	seed := catalog.CharacterRecord{HikarinagiID: credit.HikarinagiID, NameJP: credit.NameJP, NameZH: credit.NameZH, NameEN: credit.NameEN, Image: credit.Image, ImageThumbHash: credit.ImageThumbHash}
 	id, err = s.createCharacter(ctx, seed)
 	if err != nil {
 		return 0, false, err
@@ -54,6 +54,7 @@ func (s *Store) ApplyCharacter(ctx context.Context, source string, record catalo
 	setOrClear(record.NameZH, update.SetNameZh, update.ClearNameZh)
 	setOrClear(record.NameEN, update.SetNameEn, update.ClearNameEn)
 	setOrClear(record.Image, update.SetImage, update.ClearImage)
+	setOrClear(record.ImageThumbHash, update.SetImageThumbHash, update.ClearImageThumbHash)
 	setOrClear(record.Cup, update.SetCup, update.ClearCup)
 	setOrClear(record.Height, update.SetHeight, update.ClearHeight)
 	setOrClear(record.Weight, update.SetWeight, update.ClearWeight)
@@ -132,7 +133,8 @@ func (s *Store) createCharacter(ctx context.Context, record catalog.CharacterRec
 		SetNameJp(record.NameJP).
 		SetNillableNameZh(record.NameZH).
 		SetNillableNameEn(record.NameEN).
-		SetNillableImage(record.Image)
+		SetNillableImage(record.Image).
+		SetNillableImageThumbHash(record.ImageThumbHash)
 	if record.HikarinagiID != nil {
 		id, err := create.SetHID(*record.HikarinagiID).OnConflictColumns(gamecharacter.FieldHID).Ignore().ID(ctx)
 		if err != nil {

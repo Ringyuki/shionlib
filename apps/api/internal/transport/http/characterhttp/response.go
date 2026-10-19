@@ -7,50 +7,52 @@ import (
 )
 
 type characterListItemDTO struct {
-	BID       *string  `json:"b_id"`
-	VID       *string  `json:"v_id"`
-	ID        int      `json:"id"`
-	NameJP    string   `json:"name_jp"`
-	NameZH    *string  `json:"name_zh"`
-	NameEN    *string  `json:"name_en"`
-	Aliases   []string `json:"aliases"`
-	IntroJP   string   `json:"intro_jp"`
-	IntroZH   string   `json:"intro_zh"`
-	IntroEN   string   `json:"intro_en"`
-	Image     *string  `json:"image"`
-	BloodType *string  `json:"blood_type" enum:"a,b,ab,o"`
-	Height    *int     `json:"height"`
-	Weight    *int     `json:"weight"`
-	Bust      *int     `json:"bust"`
-	Waist     *int     `json:"waist"`
-	Hips      *int     `json:"hips"`
-	Cup       *string  `json:"cup"`
-	Age       *int     `json:"age"`
-	Birthday  []int    `json:"birthday"`
-	Gender    []string `json:"gender"`
+	BID            *string  `json:"b_id"`
+	VID            *string  `json:"v_id"`
+	ID             int      `json:"id"`
+	NameJP         string   `json:"name_jp"`
+	NameZH         *string  `json:"name_zh"`
+	NameEN         *string  `json:"name_en"`
+	Aliases        []string `json:"aliases"`
+	IntroJP        string   `json:"intro_jp"`
+	IntroZH        string   `json:"intro_zh"`
+	IntroEN        string   `json:"intro_en"`
+	Image          *string  `json:"image"`
+	ImageThumbHash *string  `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	BloodType      *string  `json:"blood_type" enum:"a,b,ab,o"`
+	Height         *int     `json:"height"`
+	Weight         *int     `json:"weight"`
+	Bust           *int     `json:"bust"`
+	Waist          *int     `json:"waist"`
+	Hips           *int     `json:"hips"`
+	Cup            *string  `json:"cup"`
+	Age            *int     `json:"age"`
+	Birthday       []int    `json:"birthday"`
+	Gender         []string `json:"gender"`
 }
 
 type characterDetailDTO struct {
-	ID        int      `json:"id"`
-	HID       *int     `json:"h_id"`
-	NameJP    string   `json:"name_jp"`
-	NameZH    string   `json:"name_zh"`
-	NameEN    string   `json:"name_en"`
-	Aliases   []string `json:"aliases"`
-	IntroJP   string   `json:"intro_jp"`
-	IntroZH   string   `json:"intro_zh"`
-	IntroEN   string   `json:"intro_en"`
-	Image     *string  `json:"image"`
-	BloodType *string  `json:"blood_type" enum:"a,b,ab,o"`
-	Height    *int     `json:"height"`
-	Weight    *int     `json:"weight"`
-	Bust      *int     `json:"bust"`
-	Waist     *int     `json:"waist"`
-	Hips      *int     `json:"hips"`
-	Cup       *string  `json:"cup"`
-	Age       *int     `json:"age"`
-	Birthday  []int    `json:"birthday"`
-	Gender    []string `json:"gender"`
+	ID             int      `json:"id"`
+	HID            *int     `json:"h_id"`
+	NameJP         string   `json:"name_jp"`
+	NameZH         string   `json:"name_zh"`
+	NameEN         string   `json:"name_en"`
+	Aliases        []string `json:"aliases"`
+	IntroJP        string   `json:"intro_jp"`
+	IntroZH        string   `json:"intro_zh"`
+	IntroEN        string   `json:"intro_en"`
+	Image          *string  `json:"image"`
+	ImageThumbHash *string  `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	BloodType      *string  `json:"blood_type" enum:"a,b,ab,o"`
+	Height         *int     `json:"height"`
+	Weight         *int     `json:"weight"`
+	Bust           *int     `json:"bust"`
+	Waist          *int     `json:"waist"`
+	Hips           *int     `json:"hips"`
+	Cup            *string  `json:"cup"`
+	Age            *int     `json:"age"`
+	Birthday       []int    `json:"birthday"`
+	Gender         []string `json:"gender"`
 
 	Appearances []characterAppearanceDTO `json:"appearances"`
 }
@@ -91,7 +93,7 @@ type deletedCharacterDTO struct {
 func toListItemDTO(c character.Character) characterListItemDTO {
 	return characterListItemDTO{
 		BID: c.BID, VID: c.VID, ID: c.ID, NameJP: c.NameJP, NameZH: c.NameZH, NameEN: c.NameEN, Aliases: nonNil(c.Aliases),
-		IntroJP: c.IntroJP, IntroZH: c.IntroZH, IntroEN: c.IntroEN, Image: c.Image, BloodType: c.BloodType,
+		IntroJP: c.IntroJP, IntroZH: c.IntroZH, IntroEN: c.IntroEN, Image: c.Image, ImageThumbHash: c.ImageThumbHash, BloodType: c.BloodType,
 		Height: c.Height, Weight: c.Weight, Bust: c.Bust, Waist: c.Waist, Hips: c.Hips, Cup: c.Cup, Age: c.Age,
 		Birthday: nonNilInts(c.Birthday), Gender: nonNil(c.Gender),
 	}
@@ -105,7 +107,7 @@ func toDetailDTO(c character.Detail) characterDetailDTO {
 	return characterDetailDTO{
 		Appearances: appearances,
 		ID:          c.ID, HID: c.HID, NameJP: c.NameJP, NameZH: valueOrEmpty(c.NameZH), NameEN: valueOrEmpty(c.NameEN), Aliases: nonNil(c.Aliases),
-		IntroJP: c.IntroJP, IntroZH: c.IntroZH, IntroEN: c.IntroEN, Image: c.Image, BloodType: c.BloodType,
+		IntroJP: c.IntroJP, IntroZH: c.IntroZH, IntroEN: c.IntroEN, Image: c.Image, ImageThumbHash: c.ImageThumbHash, BloodType: c.BloodType,
 		Height: c.Height, Weight: c.Weight, Bust: c.Bust, Waist: c.Waist, Hips: c.Hips, Cup: c.Cup, Age: c.Age,
 		Birthday: nonNilInts(c.Birthday), Gender: nonNil(c.Gender),
 	}

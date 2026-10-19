@@ -31879,6 +31879,7 @@ type GameCharacterMutation struct {
 	h_id              *int
 	addh_id           *int
 	image             *string
+	image_thumb_hash  *string
 	name_jp           *string
 	name_zh           *string
 	name_en           *string
@@ -32235,6 +32236,55 @@ func (m *GameCharacterMutation) ImageCleared() bool {
 func (m *GameCharacterMutation) ResetImage() {
 	m.image = nil
 	delete(m.clearedFields, gamecharacter.FieldImage)
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (m *GameCharacterMutation) SetImageThumbHash(s string) {
+	m.image_thumb_hash = &s
+}
+
+// ImageThumbHash returns the value of the "image_thumb_hash" field in the mutation.
+func (m *GameCharacterMutation) ImageThumbHash() (r string, exists bool) {
+	v := m.image_thumb_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageThumbHash returns the old "image_thumb_hash" field's value of the GameCharacter entity.
+// If the GameCharacter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameCharacterMutation) OldImageThumbHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageThumbHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageThumbHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageThumbHash: %w", err)
+	}
+	return oldValue.ImageThumbHash, nil
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (m *GameCharacterMutation) ClearImageThumbHash() {
+	m.image_thumb_hash = nil
+	m.clearedFields[gamecharacter.FieldImageThumbHash] = struct{}{}
+}
+
+// ImageThumbHashCleared returns if the "image_thumb_hash" field was cleared in this mutation.
+func (m *GameCharacterMutation) ImageThumbHashCleared() bool {
+	_, ok := m.clearedFields[gamecharacter.FieldImageThumbHash]
+	return ok
+}
+
+// ResetImageThumbHash resets all changes to the "image_thumb_hash" field.
+func (m *GameCharacterMutation) ResetImageThumbHash() {
+	m.image_thumb_hash = nil
+	delete(m.clearedFields, gamecharacter.FieldImageThumbHash)
 }
 
 // SetNameJp sets the "name_jp" field.
@@ -33358,7 +33408,7 @@ func (m *GameCharacterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameCharacterMutation) Fields() []string {
-	fields := make([]string, 0, 23)
+	fields := make([]string, 0, 24)
 	if m.b_id != nil {
 		fields = append(fields, gamecharacter.FieldBID)
 	}
@@ -33370,6 +33420,9 @@ func (m *GameCharacterMutation) Fields() []string {
 	}
 	if m.image != nil {
 		fields = append(fields, gamecharacter.FieldImage)
+	}
+	if m.image_thumb_hash != nil {
+		fields = append(fields, gamecharacter.FieldImageThumbHash)
 	}
 	if m.name_jp != nil {
 		fields = append(fields, gamecharacter.FieldNameJp)
@@ -33444,6 +33497,8 @@ func (m *GameCharacterMutation) Field(name string) (ent.Value, bool) {
 		return m.HID()
 	case gamecharacter.FieldImage:
 		return m.Image()
+	case gamecharacter.FieldImageThumbHash:
+		return m.ImageThumbHash()
 	case gamecharacter.FieldNameJp:
 		return m.NameJp()
 	case gamecharacter.FieldNameZh:
@@ -33499,6 +33554,8 @@ func (m *GameCharacterMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldHID(ctx)
 	case gamecharacter.FieldImage:
 		return m.OldImage(ctx)
+	case gamecharacter.FieldImageThumbHash:
+		return m.OldImageThumbHash(ctx)
 	case gamecharacter.FieldNameJp:
 		return m.OldNameJp(ctx)
 	case gamecharacter.FieldNameZh:
@@ -33573,6 +33630,13 @@ func (m *GameCharacterMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImage(v)
+		return nil
+	case gamecharacter.FieldImageThumbHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageThumbHash(v)
 		return nil
 	case gamecharacter.FieldNameJp:
 		v, ok := value.(string)
@@ -33836,6 +33900,9 @@ func (m *GameCharacterMutation) ClearedFields() []string {
 	if m.FieldCleared(gamecharacter.FieldImage) {
 		fields = append(fields, gamecharacter.FieldImage)
 	}
+	if m.FieldCleared(gamecharacter.FieldImageThumbHash) {
+		fields = append(fields, gamecharacter.FieldImageThumbHash)
+	}
 	if m.FieldCleared(gamecharacter.FieldNameZh) {
 		fields = append(fields, gamecharacter.FieldNameZh)
 	}
@@ -33901,6 +33968,9 @@ func (m *GameCharacterMutation) ClearField(name string) error {
 	case gamecharacter.FieldImage:
 		m.ClearImage()
 		return nil
+	case gamecharacter.FieldImageThumbHash:
+		m.ClearImageThumbHash()
+		return nil
 	case gamecharacter.FieldNameZh:
 		m.ClearNameZh()
 		return nil
@@ -33959,6 +34029,9 @@ func (m *GameCharacterMutation) ResetField(name string) error {
 		return nil
 	case gamecharacter.FieldImage:
 		m.ResetImage()
+		return nil
+	case gamecharacter.FieldImageThumbHash:
+		m.ResetImageThumbHash()
 		return nil
 	case gamecharacter.FieldNameJp:
 		m.ResetNameJp()
@@ -34138,6 +34211,7 @@ type GameCharacterRelationMutation struct {
 	typ              string
 	id               *int
 	image            *string
+	image_thumb_hash *string
 	actor            *string
 	role             *gamecharacterrelation.Role
 	created          *time.Time
@@ -34303,6 +34377,55 @@ func (m *GameCharacterRelationMutation) ImageCleared() bool {
 func (m *GameCharacterRelationMutation) ResetImage() {
 	m.image = nil
 	delete(m.clearedFields, gamecharacterrelation.FieldImage)
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (m *GameCharacterRelationMutation) SetImageThumbHash(s string) {
+	m.image_thumb_hash = &s
+}
+
+// ImageThumbHash returns the value of the "image_thumb_hash" field in the mutation.
+func (m *GameCharacterRelationMutation) ImageThumbHash() (r string, exists bool) {
+	v := m.image_thumb_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageThumbHash returns the old "image_thumb_hash" field's value of the GameCharacterRelation entity.
+// If the GameCharacterRelation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameCharacterRelationMutation) OldImageThumbHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageThumbHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageThumbHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageThumbHash: %w", err)
+	}
+	return oldValue.ImageThumbHash, nil
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (m *GameCharacterRelationMutation) ClearImageThumbHash() {
+	m.image_thumb_hash = nil
+	m.clearedFields[gamecharacterrelation.FieldImageThumbHash] = struct{}{}
+}
+
+// ImageThumbHashCleared returns if the "image_thumb_hash" field was cleared in this mutation.
+func (m *GameCharacterRelationMutation) ImageThumbHashCleared() bool {
+	_, ok := m.clearedFields[gamecharacterrelation.FieldImageThumbHash]
+	return ok
+}
+
+// ResetImageThumbHash resets all changes to the "image_thumb_hash" field.
+func (m *GameCharacterRelationMutation) ResetImageThumbHash() {
+	m.image_thumb_hash = nil
+	delete(m.clearedFields, gamecharacterrelation.FieldImageThumbHash)
 }
 
 // SetActor sets the "actor" field.
@@ -34635,9 +34758,12 @@ func (m *GameCharacterRelationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameCharacterRelationMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.image != nil {
 		fields = append(fields, gamecharacterrelation.FieldImage)
+	}
+	if m.image_thumb_hash != nil {
+		fields = append(fields, gamecharacterrelation.FieldImageThumbHash)
 	}
 	if m.actor != nil {
 		fields = append(fields, gamecharacterrelation.FieldActor)
@@ -34667,6 +34793,8 @@ func (m *GameCharacterRelationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case gamecharacterrelation.FieldImage:
 		return m.Image()
+	case gamecharacterrelation.FieldImageThumbHash:
+		return m.ImageThumbHash()
 	case gamecharacterrelation.FieldActor:
 		return m.Actor()
 	case gamecharacterrelation.FieldRole:
@@ -34690,6 +34818,8 @@ func (m *GameCharacterRelationMutation) OldField(ctx context.Context, name strin
 	switch name {
 	case gamecharacterrelation.FieldImage:
 		return m.OldImage(ctx)
+	case gamecharacterrelation.FieldImageThumbHash:
+		return m.OldImageThumbHash(ctx)
 	case gamecharacterrelation.FieldActor:
 		return m.OldActor(ctx)
 	case gamecharacterrelation.FieldRole:
@@ -34717,6 +34847,13 @@ func (m *GameCharacterRelationMutation) SetField(name string, value ent.Value) e
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImage(v)
+		return nil
+	case gamecharacterrelation.FieldImageThumbHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageThumbHash(v)
 		return nil
 	case gamecharacterrelation.FieldActor:
 		v, ok := value.(string)
@@ -34796,6 +34933,9 @@ func (m *GameCharacterRelationMutation) ClearedFields() []string {
 	if m.FieldCleared(gamecharacterrelation.FieldImage) {
 		fields = append(fields, gamecharacterrelation.FieldImage)
 	}
+	if m.FieldCleared(gamecharacterrelation.FieldImageThumbHash) {
+		fields = append(fields, gamecharacterrelation.FieldImageThumbHash)
+	}
 	if m.FieldCleared(gamecharacterrelation.FieldActor) {
 		fields = append(fields, gamecharacterrelation.FieldActor)
 	}
@@ -34819,6 +34959,9 @@ func (m *GameCharacterRelationMutation) ClearField(name string) error {
 	case gamecharacterrelation.FieldImage:
 		m.ClearImage()
 		return nil
+	case gamecharacterrelation.FieldImageThumbHash:
+		m.ClearImageThumbHash()
+		return nil
 	case gamecharacterrelation.FieldActor:
 		m.ClearActor()
 		return nil
@@ -34835,6 +34978,9 @@ func (m *GameCharacterRelationMutation) ResetField(name string) error {
 	switch name {
 	case gamecharacterrelation.FieldImage:
 		m.ResetImage()
+		return nil
+	case gamecharacterrelation.FieldImageThumbHash:
+		m.ResetImageThumbHash()
 		return nil
 	case gamecharacterrelation.FieldActor:
 		m.ResetActor()
@@ -34960,6 +35106,7 @@ type GameCoverMutation struct {
 	url           *string
 	_type         *string
 	dims          *pgvalue.Ints
+	thumb_hash    *string
 	sexual        *int
 	addsexual     *int
 	violence      *int
@@ -35236,6 +35383,55 @@ func (m *GameCoverMutation) DimsCleared() bool {
 func (m *GameCoverMutation) ResetDims() {
 	m.dims = nil
 	delete(m.clearedFields, gamecover.FieldDims)
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (m *GameCoverMutation) SetThumbHash(s string) {
+	m.thumb_hash = &s
+}
+
+// ThumbHash returns the value of the "thumb_hash" field in the mutation.
+func (m *GameCoverMutation) ThumbHash() (r string, exists bool) {
+	v := m.thumb_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbHash returns the old "thumb_hash" field's value of the GameCover entity.
+// If the GameCover object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameCoverMutation) OldThumbHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbHash: %w", err)
+	}
+	return oldValue.ThumbHash, nil
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (m *GameCoverMutation) ClearThumbHash() {
+	m.thumb_hash = nil
+	m.clearedFields[gamecover.FieldThumbHash] = struct{}{}
+}
+
+// ThumbHashCleared returns if the "thumb_hash" field was cleared in this mutation.
+func (m *GameCoverMutation) ThumbHashCleared() bool {
+	_, ok := m.clearedFields[gamecover.FieldThumbHash]
+	return ok
+}
+
+// ResetThumbHash resets all changes to the "thumb_hash" field.
+func (m *GameCoverMutation) ResetThumbHash() {
+	m.thumb_hash = nil
+	delete(m.clearedFields, gamecover.FieldThumbHash)
 }
 
 // SetSexual sets the "sexual" field.
@@ -35666,7 +35862,7 @@ func (m *GameCoverMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameCoverMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.language != nil {
 		fields = append(fields, gamecover.FieldLanguage)
 	}
@@ -35678,6 +35874,9 @@ func (m *GameCoverMutation) Fields() []string {
 	}
 	if m.dims != nil {
 		fields = append(fields, gamecover.FieldDims)
+	}
+	if m.thumb_hash != nil {
+		fields = append(fields, gamecover.FieldThumbHash)
 	}
 	if m.sexual != nil {
 		fields = append(fields, gamecover.FieldSexual)
@@ -35719,6 +35918,8 @@ func (m *GameCoverMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case gamecover.FieldDims:
 		return m.Dims()
+	case gamecover.FieldThumbHash:
+		return m.ThumbHash()
 	case gamecover.FieldSexual:
 		return m.Sexual()
 	case gamecover.FieldViolence:
@@ -35752,6 +35953,8 @@ func (m *GameCoverMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldType(ctx)
 	case gamecover.FieldDims:
 		return m.OldDims(ctx)
+	case gamecover.FieldThumbHash:
+		return m.OldThumbHash(ctx)
 	case gamecover.FieldSexual:
 		return m.OldSexual(ctx)
 	case gamecover.FieldViolence:
@@ -35804,6 +36007,13 @@ func (m *GameCoverMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDims(v)
+		return nil
+	case gamecover.FieldThumbHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbHash(v)
 		return nil
 	case gamecover.FieldSexual:
 		v, ok := value.(int)
@@ -35921,6 +36131,9 @@ func (m *GameCoverMutation) ClearedFields() []string {
 	if m.FieldCleared(gamecover.FieldDims) {
 		fields = append(fields, gamecover.FieldDims)
 	}
+	if m.FieldCleared(gamecover.FieldThumbHash) {
+		fields = append(fields, gamecover.FieldThumbHash)
+	}
 	if m.FieldCleared(gamecover.FieldSource) {
 		fields = append(fields, gamecover.FieldSource)
 	}
@@ -35946,6 +36159,9 @@ func (m *GameCoverMutation) ClearField(name string) error {
 	switch name {
 	case gamecover.FieldDims:
 		m.ClearDims()
+		return nil
+	case gamecover.FieldThumbHash:
+		m.ClearThumbHash()
 		return nil
 	case gamecover.FieldSource:
 		m.ClearSource()
@@ -35975,6 +36191,9 @@ func (m *GameCoverMutation) ResetField(name string) error {
 		return nil
 	case gamecover.FieldDims:
 		m.ResetDims()
+		return nil
+	case gamecover.FieldThumbHash:
+		m.ResetThumbHash()
 		return nil
 	case gamecover.FieldSexual:
 		m.ResetSexual()
@@ -36091,6 +36310,7 @@ type GameDeveloperMutation struct {
 	name                    *string
 	aliases                 *pgvalue.Strings
 	logo                    *string
+	logo_thumb_hash         *string
 	intro_jp                *string
 	intro_zh                *string
 	intro_en                *string
@@ -36520,6 +36740,55 @@ func (m *GameDeveloperMutation) LogoCleared() bool {
 func (m *GameDeveloperMutation) ResetLogo() {
 	m.logo = nil
 	delete(m.clearedFields, gamedeveloper.FieldLogo)
+}
+
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (m *GameDeveloperMutation) SetLogoThumbHash(s string) {
+	m.logo_thumb_hash = &s
+}
+
+// LogoThumbHash returns the value of the "logo_thumb_hash" field in the mutation.
+func (m *GameDeveloperMutation) LogoThumbHash() (r string, exists bool) {
+	v := m.logo_thumb_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogoThumbHash returns the old "logo_thumb_hash" field's value of the GameDeveloper entity.
+// If the GameDeveloper object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDeveloperMutation) OldLogoThumbHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogoThumbHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogoThumbHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogoThumbHash: %w", err)
+	}
+	return oldValue.LogoThumbHash, nil
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (m *GameDeveloperMutation) ClearLogoThumbHash() {
+	m.logo_thumb_hash = nil
+	m.clearedFields[gamedeveloper.FieldLogoThumbHash] = struct{}{}
+}
+
+// LogoThumbHashCleared returns if the "logo_thumb_hash" field was cleared in this mutation.
+func (m *GameDeveloperMutation) LogoThumbHashCleared() bool {
+	_, ok := m.clearedFields[gamedeveloper.FieldLogoThumbHash]
+	return ok
+}
+
+// ResetLogoThumbHash resets all changes to the "logo_thumb_hash" field.
+func (m *GameDeveloperMutation) ResetLogoThumbHash() {
+	m.logo_thumb_hash = nil
+	delete(m.clearedFields, gamedeveloper.FieldLogoThumbHash)
 }
 
 // SetIntroJp sets the "intro_jp" field.
@@ -37088,7 +37357,7 @@ func (m *GameDeveloperMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDeveloperMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.b_id != nil {
 		fields = append(fields, gamedeveloper.FieldBID)
 	}
@@ -37106,6 +37375,9 @@ func (m *GameDeveloperMutation) Fields() []string {
 	}
 	if m.logo != nil {
 		fields = append(fields, gamedeveloper.FieldLogo)
+	}
+	if m.logo_thumb_hash != nil {
+		fields = append(fields, gamedeveloper.FieldLogoThumbHash)
 	}
 	if m.intro_jp != nil {
 		fields = append(fields, gamedeveloper.FieldIntroJp)
@@ -37151,6 +37423,8 @@ func (m *GameDeveloperMutation) Field(name string) (ent.Value, bool) {
 		return m.Aliases()
 	case gamedeveloper.FieldLogo:
 		return m.Logo()
+	case gamedeveloper.FieldLogoThumbHash:
+		return m.LogoThumbHash()
 	case gamedeveloper.FieldIntroJp:
 		return m.IntroJp()
 	case gamedeveloper.FieldIntroZh:
@@ -37188,6 +37462,8 @@ func (m *GameDeveloperMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldAliases(ctx)
 	case gamedeveloper.FieldLogo:
 		return m.OldLogo(ctx)
+	case gamedeveloper.FieldLogoThumbHash:
+		return m.OldLogoThumbHash(ctx)
 	case gamedeveloper.FieldIntroJp:
 		return m.OldIntroJp(ctx)
 	case gamedeveloper.FieldIntroZh:
@@ -37254,6 +37530,13 @@ func (m *GameDeveloperMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLogo(v)
+		return nil
+	case gamedeveloper.FieldLogoThumbHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogoThumbHash(v)
 		return nil
 	case gamedeveloper.FieldIntroJp:
 		v, ok := value.(string)
@@ -37371,6 +37654,9 @@ func (m *GameDeveloperMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedeveloper.FieldLogo) {
 		fields = append(fields, gamedeveloper.FieldLogo)
 	}
+	if m.FieldCleared(gamedeveloper.FieldLogoThumbHash) {
+		fields = append(fields, gamedeveloper.FieldLogoThumbHash)
+	}
 	if m.FieldCleared(gamedeveloper.FieldWebsite) {
 		fields = append(fields, gamedeveloper.FieldWebsite)
 	}
@@ -37409,6 +37695,9 @@ func (m *GameDeveloperMutation) ClearField(name string) error {
 	case gamedeveloper.FieldLogo:
 		m.ClearLogo()
 		return nil
+	case gamedeveloper.FieldLogoThumbHash:
+		m.ClearLogoThumbHash()
+		return nil
 	case gamedeveloper.FieldWebsite:
 		m.ClearWebsite()
 		return nil
@@ -37443,6 +37732,9 @@ func (m *GameDeveloperMutation) ResetField(name string) error {
 		return nil
 	case gamedeveloper.FieldLogo:
 		m.ResetLogo()
+		return nil
+	case gamedeveloper.FieldLogoThumbHash:
+		m.ResetLogoThumbHash()
 		return nil
 	case gamedeveloper.FieldIntroJp:
 		m.ResetIntroJp()
@@ -46926,6 +47218,7 @@ type GameImageMutation struct {
 	id            *int
 	url           *string
 	dims          *pgvalue.Ints
+	thumb_hash    *string
 	sexual        *int
 	addsexual     *int
 	violence      *int
@@ -47130,6 +47423,55 @@ func (m *GameImageMutation) DimsCleared() bool {
 func (m *GameImageMutation) ResetDims() {
 	m.dims = nil
 	delete(m.clearedFields, gameimage.FieldDims)
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (m *GameImageMutation) SetThumbHash(s string) {
+	m.thumb_hash = &s
+}
+
+// ThumbHash returns the value of the "thumb_hash" field in the mutation.
+func (m *GameImageMutation) ThumbHash() (r string, exists bool) {
+	v := m.thumb_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbHash returns the old "thumb_hash" field's value of the GameImage entity.
+// If the GameImage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameImageMutation) OldThumbHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbHash: %w", err)
+	}
+	return oldValue.ThumbHash, nil
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (m *GameImageMutation) ClearThumbHash() {
+	m.thumb_hash = nil
+	m.clearedFields[gameimage.FieldThumbHash] = struct{}{}
+}
+
+// ThumbHashCleared returns if the "thumb_hash" field was cleared in this mutation.
+func (m *GameImageMutation) ThumbHashCleared() bool {
+	_, ok := m.clearedFields[gameimage.FieldThumbHash]
+	return ok
+}
+
+// ResetThumbHash resets all changes to the "thumb_hash" field.
+func (m *GameImageMutation) ResetThumbHash() {
+	m.thumb_hash = nil
+	delete(m.clearedFields, gameimage.FieldThumbHash)
 }
 
 // SetSexual sets the "sexual" field.
@@ -47560,12 +47902,15 @@ func (m *GameImageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameImageMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.url != nil {
 		fields = append(fields, gameimage.FieldURL)
 	}
 	if m.dims != nil {
 		fields = append(fields, gameimage.FieldDims)
+	}
+	if m.thumb_hash != nil {
+		fields = append(fields, gameimage.FieldThumbHash)
 	}
 	if m.sexual != nil {
 		fields = append(fields, gameimage.FieldSexual)
@@ -47603,6 +47948,8 @@ func (m *GameImageMutation) Field(name string) (ent.Value, bool) {
 		return m.URL()
 	case gameimage.FieldDims:
 		return m.Dims()
+	case gameimage.FieldThumbHash:
+		return m.ThumbHash()
 	case gameimage.FieldSexual:
 		return m.Sexual()
 	case gameimage.FieldViolence:
@@ -47632,6 +47979,8 @@ func (m *GameImageMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldURL(ctx)
 	case gameimage.FieldDims:
 		return m.OldDims(ctx)
+	case gameimage.FieldThumbHash:
+		return m.OldThumbHash(ctx)
 	case gameimage.FieldSexual:
 		return m.OldSexual(ctx)
 	case gameimage.FieldViolence:
@@ -47670,6 +48019,13 @@ func (m *GameImageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDims(v)
+		return nil
+	case gameimage.FieldThumbHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbHash(v)
 		return nil
 	case gameimage.FieldSexual:
 		v, ok := value.(int)
@@ -47787,6 +48143,9 @@ func (m *GameImageMutation) ClearedFields() []string {
 	if m.FieldCleared(gameimage.FieldDims) {
 		fields = append(fields, gameimage.FieldDims)
 	}
+	if m.FieldCleared(gameimage.FieldThumbHash) {
+		fields = append(fields, gameimage.FieldThumbHash)
+	}
 	if m.FieldCleared(gameimage.FieldSource) {
 		fields = append(fields, gameimage.FieldSource)
 	}
@@ -47813,6 +48172,9 @@ func (m *GameImageMutation) ClearField(name string) error {
 	case gameimage.FieldDims:
 		m.ClearDims()
 		return nil
+	case gameimage.FieldThumbHash:
+		m.ClearThumbHash()
+		return nil
 	case gameimage.FieldSource:
 		m.ClearSource()
 		return nil
@@ -47835,6 +48197,9 @@ func (m *GameImageMutation) ResetField(name string) error {
 		return nil
 	case gameimage.FieldDims:
 		m.ResetDims()
+		return nil
+	case gameimage.FieldThumbHash:
+		m.ResetThumbHash()
 		return nil
 	case gameimage.FieldSexual:
 		m.ResetSexual()

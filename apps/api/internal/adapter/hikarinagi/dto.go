@@ -53,11 +53,12 @@ func (e *externalSourceDTO) ids() catalog.ExternalIDs {
 }
 
 type mediaDTO struct {
-	URL      string `json:"url"`
-	Width    *int   `json:"width"`
-	Height   *int   `json:"height"`
-	Sexual   int    `json:"sexual"`
-	Violence int    `json:"violence"`
+	URL       string  `json:"url"`
+	Width     *int    `json:"width"`
+	Height    *int    `json:"height"`
+	ThumbHash *string `json:"thumb_hash"`
+	Sexual    int     `json:"sexual"`
+	Violence  int     `json:"violence"`
 }
 
 type coverDTO struct {

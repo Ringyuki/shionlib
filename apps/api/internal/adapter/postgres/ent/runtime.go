@@ -833,33 +833,33 @@ func init() {
 	gamecharacterFields := schema.GameCharacter{}.Fields()
 	_ = gamecharacterFields
 	// gamecharacterDescNameJp is the schema descriptor for name_jp field.
-	gamecharacterDescNameJp := gamecharacterFields[5].Descriptor()
+	gamecharacterDescNameJp := gamecharacterFields[6].Descriptor()
 	// gamecharacter.DefaultNameJp holds the default value on creation for the name_jp field.
 	gamecharacter.DefaultNameJp = gamecharacterDescNameJp.Default.(string)
 	// gamecharacterDescIntroJp is the schema descriptor for intro_jp field.
-	gamecharacterDescIntroJp := gamecharacterFields[9].Descriptor()
+	gamecharacterDescIntroJp := gamecharacterFields[10].Descriptor()
 	// gamecharacter.DefaultIntroJp holds the default value on creation for the intro_jp field.
 	gamecharacter.DefaultIntroJp = gamecharacterDescIntroJp.Default.(string)
 	// gamecharacter.IntroJpValidator is a validator for the "intro_jp" field. It is called by the builders before save.
 	gamecharacter.IntroJpValidator = gamecharacterDescIntroJp.Validators[0].(func(string) error)
 	// gamecharacterDescIntroZh is the schema descriptor for intro_zh field.
-	gamecharacterDescIntroZh := gamecharacterFields[10].Descriptor()
+	gamecharacterDescIntroZh := gamecharacterFields[11].Descriptor()
 	// gamecharacter.DefaultIntroZh holds the default value on creation for the intro_zh field.
 	gamecharacter.DefaultIntroZh = gamecharacterDescIntroZh.Default.(string)
 	// gamecharacter.IntroZhValidator is a validator for the "intro_zh" field. It is called by the builders before save.
 	gamecharacter.IntroZhValidator = gamecharacterDescIntroZh.Validators[0].(func(string) error)
 	// gamecharacterDescIntroEn is the schema descriptor for intro_en field.
-	gamecharacterDescIntroEn := gamecharacterFields[11].Descriptor()
+	gamecharacterDescIntroEn := gamecharacterFields[12].Descriptor()
 	// gamecharacter.DefaultIntroEn holds the default value on creation for the intro_en field.
 	gamecharacter.DefaultIntroEn = gamecharacterDescIntroEn.Default.(string)
 	// gamecharacter.IntroEnValidator is a validator for the "intro_en" field. It is called by the builders before save.
 	gamecharacter.IntroEnValidator = gamecharacterDescIntroEn.Validators[0].(func(string) error)
 	// gamecharacterDescCreated is the schema descriptor for created field.
-	gamecharacterDescCreated := gamecharacterFields[22].Descriptor()
+	gamecharacterDescCreated := gamecharacterFields[23].Descriptor()
 	// gamecharacter.DefaultCreated holds the default value on creation for the created field.
 	gamecharacter.DefaultCreated = gamecharacterDescCreated.Default.(func() time.Time)
 	// gamecharacterDescUpdated is the schema descriptor for updated field.
-	gamecharacterDescUpdated := gamecharacterFields[23].Descriptor()
+	gamecharacterDescUpdated := gamecharacterFields[24].Descriptor()
 	// gamecharacter.DefaultUpdated holds the default value on creation for the updated field.
 	gamecharacter.DefaultUpdated = gamecharacterDescUpdated.Default.(func() time.Time)
 	// gamecharacter.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -867,11 +867,11 @@ func init() {
 	gamecharacterrelationFields := schema.GameCharacterRelation{}.Fields()
 	_ = gamecharacterrelationFields
 	// gamecharacterrelationDescCreated is the schema descriptor for created field.
-	gamecharacterrelationDescCreated := gamecharacterrelationFields[6].Descriptor()
+	gamecharacterrelationDescCreated := gamecharacterrelationFields[7].Descriptor()
 	// gamecharacterrelation.DefaultCreated holds the default value on creation for the created field.
 	gamecharacterrelation.DefaultCreated = gamecharacterrelationDescCreated.Default.(func() time.Time)
 	// gamecharacterrelationDescUpdated is the schema descriptor for updated field.
-	gamecharacterrelationDescUpdated := gamecharacterrelationFields[7].Descriptor()
+	gamecharacterrelationDescUpdated := gamecharacterrelationFields[8].Descriptor()
 	// gamecharacterrelation.DefaultUpdated holds the default value on creation for the updated field.
 	gamecharacterrelation.DefaultUpdated = gamecharacterrelationDescUpdated.Default.(func() time.Time)
 	// gamecharacterrelation.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -879,11 +879,11 @@ func init() {
 	gamecoverFields := schema.GameCover{}.Fields()
 	_ = gamecoverFields
 	// gamecoverDescCreated is the schema descriptor for created field.
-	gamecoverDescCreated := gamecoverFields[10].Descriptor()
+	gamecoverDescCreated := gamecoverFields[11].Descriptor()
 	// gamecover.DefaultCreated holds the default value on creation for the created field.
 	gamecover.DefaultCreated = gamecoverDescCreated.Default.(func() time.Time)
 	// gamecoverDescUpdated is the schema descriptor for updated field.
-	gamecoverDescUpdated := gamecoverFields[11].Descriptor()
+	gamecoverDescUpdated := gamecoverFields[12].Descriptor()
 	// gamecover.DefaultUpdated holds the default value on creation for the updated field.
 	gamecover.DefaultUpdated = gamecoverDescUpdated.Default.(func() time.Time)
 	// gamecover.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -897,29 +897,29 @@ func init() {
 	// gamedeveloper.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	gamedeveloper.NameValidator = gamedeveloperDescName.Validators[0].(func(string) error)
 	// gamedeveloperDescIntroJp is the schema descriptor for intro_jp field.
-	gamedeveloperDescIntroJp := gamedeveloperFields[7].Descriptor()
+	gamedeveloperDescIntroJp := gamedeveloperFields[8].Descriptor()
 	// gamedeveloper.DefaultIntroJp holds the default value on creation for the intro_jp field.
 	gamedeveloper.DefaultIntroJp = gamedeveloperDescIntroJp.Default.(string)
 	// gamedeveloper.IntroJpValidator is a validator for the "intro_jp" field. It is called by the builders before save.
 	gamedeveloper.IntroJpValidator = gamedeveloperDescIntroJp.Validators[0].(func(string) error)
 	// gamedeveloperDescIntroZh is the schema descriptor for intro_zh field.
-	gamedeveloperDescIntroZh := gamedeveloperFields[8].Descriptor()
+	gamedeveloperDescIntroZh := gamedeveloperFields[9].Descriptor()
 	// gamedeveloper.DefaultIntroZh holds the default value on creation for the intro_zh field.
 	gamedeveloper.DefaultIntroZh = gamedeveloperDescIntroZh.Default.(string)
 	// gamedeveloper.IntroZhValidator is a validator for the "intro_zh" field. It is called by the builders before save.
 	gamedeveloper.IntroZhValidator = gamedeveloperDescIntroZh.Validators[0].(func(string) error)
 	// gamedeveloperDescIntroEn is the schema descriptor for intro_en field.
-	gamedeveloperDescIntroEn := gamedeveloperFields[9].Descriptor()
+	gamedeveloperDescIntroEn := gamedeveloperFields[10].Descriptor()
 	// gamedeveloper.DefaultIntroEn holds the default value on creation for the intro_en field.
 	gamedeveloper.DefaultIntroEn = gamedeveloperDescIntroEn.Default.(string)
 	// gamedeveloper.IntroEnValidator is a validator for the "intro_en" field. It is called by the builders before save.
 	gamedeveloper.IntroEnValidator = gamedeveloperDescIntroEn.Validators[0].(func(string) error)
 	// gamedeveloperDescCreated is the schema descriptor for created field.
-	gamedeveloperDescCreated := gamedeveloperFields[13].Descriptor()
+	gamedeveloperDescCreated := gamedeveloperFields[14].Descriptor()
 	// gamedeveloper.DefaultCreated holds the default value on creation for the created field.
 	gamedeveloper.DefaultCreated = gamedeveloperDescCreated.Default.(func() time.Time)
 	// gamedeveloperDescUpdated is the schema descriptor for updated field.
-	gamedeveloperDescUpdated := gamedeveloperFields[14].Descriptor()
+	gamedeveloperDescUpdated := gamedeveloperFields[15].Descriptor()
 	// gamedeveloper.DefaultUpdated holds the default value on creation for the updated field.
 	gamedeveloper.DefaultUpdated = gamedeveloperDescUpdated.Default.(func() time.Time)
 	// gamedeveloper.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -1081,11 +1081,11 @@ func init() {
 	gameimageFields := schema.GameImage{}.Fields()
 	_ = gameimageFields
 	// gameimageDescCreated is the schema descriptor for created field.
-	gameimageDescCreated := gameimageFields[8].Descriptor()
+	gameimageDescCreated := gameimageFields[9].Descriptor()
 	// gameimage.DefaultCreated holds the default value on creation for the created field.
 	gameimage.DefaultCreated = gameimageDescCreated.Default.(func() time.Time)
 	// gameimageDescUpdated is the schema descriptor for updated field.
-	gameimageDescUpdated := gameimageFields[9].Descriptor()
+	gameimageDescUpdated := gameimageFields[10].Descriptor()
 	// gameimage.DefaultUpdated holds the default value on creation for the updated field.
 	gameimage.DefaultUpdated = gameimageDescUpdated.Default.(func() time.Time)
 	// gameimage.UpdateDefaultUpdated holds the default value on update for the updated field.

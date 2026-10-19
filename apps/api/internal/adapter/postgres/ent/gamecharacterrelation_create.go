@@ -38,6 +38,20 @@ func (_c *GameCharacterRelationCreate) SetNillableImage(v *string) *GameCharacte
 	return _c
 }
 
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (_c *GameCharacterRelationCreate) SetImageThumbHash(v string) *GameCharacterRelationCreate {
+	_c.mutation.SetImageThumbHash(v)
+	return _c
+}
+
+// SetNillableImageThumbHash sets the "image_thumb_hash" field if the given value is not nil.
+func (_c *GameCharacterRelationCreate) SetNillableImageThumbHash(v *string) *GameCharacterRelationCreate {
+	if v != nil {
+		_c.SetImageThumbHash(*v)
+	}
+	return _c
+}
+
 // SetActor sets the "actor" field.
 func (_c *GameCharacterRelationCreate) SetActor(v string) *GameCharacterRelationCreate {
 	_c.mutation.SetActor(v)
@@ -226,6 +240,10 @@ func (_c *GameCharacterRelationCreate) createSpec() (*GameCharacterRelation, *sq
 		_spec.SetField(gamecharacterrelation.FieldImage, field.TypeString, value)
 		_node.Image = &value
 	}
+	if value, ok := _c.mutation.ImageThumbHash(); ok {
+		_spec.SetField(gamecharacterrelation.FieldImageThumbHash, field.TypeString, value)
+		_node.ImageThumbHash = &value
+	}
 	if value, ok := _c.mutation.Actor(); ok {
 		_spec.SetField(gamecharacterrelation.FieldActor, field.TypeString, value)
 		_node.Actor = &value
@@ -343,6 +361,24 @@ func (u *GameCharacterRelationUpsert) UpdateImage() *GameCharacterRelationUpsert
 // ClearImage clears the value of the "image" field.
 func (u *GameCharacterRelationUpsert) ClearImage() *GameCharacterRelationUpsert {
 	u.SetNull(gamecharacterrelation.FieldImage)
+	return u
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsert) SetImageThumbHash(v string) *GameCharacterRelationUpsert {
+	u.Set(gamecharacterrelation.FieldImageThumbHash, v)
+	return u
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterRelationUpsert) UpdateImageThumbHash() *GameCharacterRelationUpsert {
+	u.SetExcluded(gamecharacterrelation.FieldImageThumbHash)
+	return u
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsert) ClearImageThumbHash() *GameCharacterRelationUpsert {
+	u.SetNull(gamecharacterrelation.FieldImageThumbHash)
 	return u
 }
 
@@ -487,6 +523,27 @@ func (u *GameCharacterRelationUpsertOne) UpdateImage() *GameCharacterRelationUps
 func (u *GameCharacterRelationUpsertOne) ClearImage() *GameCharacterRelationUpsertOne {
 	return u.Update(func(s *GameCharacterRelationUpsert) {
 		s.ClearImage()
+	})
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsertOne) SetImageThumbHash(v string) *GameCharacterRelationUpsertOne {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.SetImageThumbHash(v)
+	})
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterRelationUpsertOne) UpdateImageThumbHash() *GameCharacterRelationUpsertOne {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.UpdateImageThumbHash()
+	})
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsertOne) ClearImageThumbHash() *GameCharacterRelationUpsertOne {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.ClearImageThumbHash()
 	})
 }
 
@@ -809,6 +866,27 @@ func (u *GameCharacterRelationUpsertBulk) UpdateImage() *GameCharacterRelationUp
 func (u *GameCharacterRelationUpsertBulk) ClearImage() *GameCharacterRelationUpsertBulk {
 	return u.Update(func(s *GameCharacterRelationUpsert) {
 		s.ClearImage()
+	})
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsertBulk) SetImageThumbHash(v string) *GameCharacterRelationUpsertBulk {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.SetImageThumbHash(v)
+	})
+}
+
+// UpdateImageThumbHash sets the "image_thumb_hash" field to the value that was provided on create.
+func (u *GameCharacterRelationUpsertBulk) UpdateImageThumbHash() *GameCharacterRelationUpsertBulk {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.UpdateImageThumbHash()
+	})
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (u *GameCharacterRelationUpsertBulk) ClearImageThumbHash() *GameCharacterRelationUpsertBulk {
+	return u.Update(func(s *GameCharacterRelationUpsert) {
+		s.ClearImageThumbHash()
 	})
 }
 

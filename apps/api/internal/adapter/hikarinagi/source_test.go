@@ -103,8 +103,8 @@ const galgameDetail = `{
   "origin_intro": "あらすじ", "trans_intro": "简介", "en_intro": null,
   "aliases": ["sakuuta"], "adv_type": "ADV", "platforms": ["win"], "nsfw": true,
   "release_date": "2015-10-23T00:00:00.000Z", "release_date_tbd": false,
-  "covers": [{"url": "https://cdn.test/c.webp", "width": 800, "height": 1200, "sexual": 0, "violence": 0, "votes": 3, "language": "ja", "kind": "PKGFRONT"}],
-  "images": [{"url": "https://cdn.test/s.webp", "width": null, "height": null, "sexual": 1, "violence": 0}],
+  "covers": [{"url": "https://cdn.test/c.webp", "width": 800, "height": 1200, "thumb_hash": "1QcSHQRnh493V4dIh4eXh1h4kJUI", "sexual": 0, "violence": 0, "votes": 3, "language": "ja", "kind": "PKGFRONT"}],
+  "images": [{"url": "https://cdn.test/s.webp", "width": null, "height": null, "thumb_hash": null, "sexual": 1, "violence": 0}],
   "tags": [{"name": "纯爱", "likes": 3}],
   "external_links": [{"name": "official", "label": "官网", "url": "https://example.test"}],
   "external_source": {"vndb": "v4242", "bangumi": "1234"},
@@ -132,10 +132,10 @@ func TestGameCombinesDetailAndSubresources(t *testing.T) {
 	if *snapshot.External.VNDB != "v4242" || *snapshot.External.Bangumi != "1234" {
 		t.Fatalf("external ids %+v", snapshot.External)
 	}
-	if len(snapshot.Covers) != 1 || snapshot.Covers[0].Kind != "PKGFRONT" || snapshot.Covers[0].Language != "ja" || *snapshot.Covers[0].Width != 800 || snapshot.Covers[0].Votes != 3 {
+	if len(snapshot.Covers) != 1 || snapshot.Covers[0].Kind != "PKGFRONT" || snapshot.Covers[0].Language != "ja" || *snapshot.Covers[0].Width != 800 || *snapshot.Covers[0].ThumbHash != "1QcSHQRnh493V4dIh4eXh1h4kJUI" || snapshot.Covers[0].Votes != 3 {
 		t.Fatalf("covers %+v", snapshot.Covers)
 	}
-	if len(snapshot.Images) != 1 || snapshot.Images[0].Sexual != 1 || !slices.Equal(snapshot.Tags, []string{"纯爱"}) || snapshot.Links[0].Label != "官网" {
+	if len(snapshot.Images) != 1 || snapshot.Images[0].Sexual != 1 || snapshot.Images[0].ThumbHash != nil || !slices.Equal(snapshot.Tags, []string{"纯爱"}) || snapshot.Links[0].Label != "官网" {
 		t.Fatalf("media %+v %+v %+v", snapshot.Images, snapshot.Tags, snapshot.Links)
 	}
 	staff := []catalog.Staff{{Name: "すかぢ", Role: "剧本"}, {Name: "謎", Role: "NEW_ROLE"}, {Name: "無", Role: ""}}

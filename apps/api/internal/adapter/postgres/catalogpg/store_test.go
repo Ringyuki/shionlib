@@ -52,14 +52,14 @@ func fullGame() catalog.GameRecord {
 		NSFW:         true,
 		Staffs:       []catalog.Staff{{Name: "すかぢ", Role: "剧本"}},
 		Covers: []catalog.CoverRecord{
-			{Language: "jp", Type: "pkgfront", URL: "https://cdn.test/a.webp", Dims: []int{800, 1200}, SourceKey: "0"},
+			{Language: "jp", Type: "pkgfront", URL: "https://cdn.test/a.webp", Dims: []int{800, 1200}, ThumbHash: ptr("cover-hash"), SourceKey: "0"},
 			{Language: "zh", Type: "dig", URL: "https://cdn.test/b.webp", Sexual: 2, SourceKey: "1"},
 		},
-		Images:     []catalog.ImageRecord{{URL: "https://cdn.test/s1.webp", Dims: []int{1280, 720}, SourceKey: "0"}},
+		Images:     []catalog.ImageRecord{{URL: "https://cdn.test/s1.webp", Dims: []int{1280, 720}, ThumbHash: ptr("image-hash"), SourceKey: "0"}},
 		Links:      []catalog.Link{{Name: "official", Label: "官网", URL: "https://example.test"}},
 		Tags:       []string{"纯爱", "艺术"},
-		Developers: []catalog.DeveloperLink{{ExternalID: "5", HikarinagiID: ptr(5), Name: "枕", Role: "开发"}},
-		Characters: []catalog.CharacterLink{{ExternalID: "9", HikarinagiID: ptr(9), NameJP: "御桜稟", NameZH: ptr("御樱禀"), Image: ptr("https://cdn.test/c.webp"), Role: "main", Actor: ptr("有栖川みや美")}},
+		Developers: []catalog.DeveloperLink{{ExternalID: "5", HikarinagiID: ptr(5), Name: "枕", LogoThumbHash: ptr("logo-hash"), Role: "开发"}},
+		Characters: []catalog.CharacterLink{{ExternalID: "9", HikarinagiID: ptr(9), NameJP: "御桜稟", NameZH: ptr("御樱禀"), Image: ptr("https://cdn.test/c.webp"), ImageThumbHash: ptr("character-hash"), Role: "main", Actor: ptr("有栖川みや美")}},
 		Revision:   "2026-09-01T00:00:00Z",
 	}
 }
@@ -114,18 +114,21 @@ func TestApplyGameWritesTheWholeCatalogEntry(t *testing.T) {
 	if len(row.Edges.Images) != 1 || len(row.Edges.Link) != 1 || row.Edges.Link[0].Label != "官网" {
 		t.Fatalf("images/links %+v %+v", row.Edges.Images, row.Edges.Link)
 	}
+	if *covers[0].ThumbHash != "cover-hash" || covers[1].ThumbHash != nil || *row.Edges.Images[0].ThumbHash != "image-hash" {
+		t.Fatalf("thumbhashes %+v %+v", covers, row.Edges.Images)
+	}
 	if len(row.Edges.Tags) != 2 {
 		t.Fatalf("tags %+v", row.Edges.Tags)
 	}
 	developers := row.Edges.Developers
-	if len(developers) != 1 || *developers[0].Role != "开发" || developers[0].Edges.Developer.Name != "枕" || *developers[0].Edges.Developer.HID != 5 {
+	if len(developers) != 1 || *developers[0].Role != "开发" || developers[0].Edges.Developer.Name != "枕" || *developers[0].Edges.Developer.HID != 5 || *developers[0].Edges.Developer.LogoThumbHash != "logo-hash" {
 		t.Fatalf("developers %+v", developers)
 	}
 	characters := row.Edges.Characters
-	if len(characters) != 1 || *characters[0].Role != gamecharacterrelation.RoleMain || *characters[0].Actor != "有栖川みや美" || *characters[0].Image != "https://cdn.test/c.webp" {
+	if len(characters) != 1 || *characters[0].Role != gamecharacterrelation.RoleMain || *characters[0].Actor != "有栖川みや美" || *characters[0].Image != "https://cdn.test/c.webp" || *characters[0].ImageThumbHash != "character-hash" {
 		t.Fatalf("characters %+v", characters)
 	}
-	if character := characters[0].Edges.Character; character.NameJp != "御桜稟" || *character.NameZh != "御樱禀" || *character.HID != 9 {
+	if character := characters[0].Edges.Character; character.NameJp != "御桜稟" || *character.NameZh != "御樱禀" || *character.HID != 9 || *character.ImageThumbHash != "character-hash" {
 		t.Fatalf("character placeholder %+v", character)
 	}
 	link, err := db.Ent.CatalogSourceLink.Query().Where(catalogsourcelink.Entity("game"), catalogsourcelink.ExternalID("77")).Only(ctx)

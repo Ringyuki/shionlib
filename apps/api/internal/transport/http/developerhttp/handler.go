@@ -32,7 +32,7 @@ func (h *Handler) list(ctx context.Context, in *listDevelopersInput) (*response.
 		return nil, err
 	}
 	page := response.MapPage(items, total, in.PageSize, in.Page, func(s developer.Summary) developerListItemDTO {
-		return developerListItemDTO{ID: s.ID, Name: s.Name, Aliases: nonNil(s.Aliases), Logo: s.Logo, WorksCount: s.WorksCount}
+		return developerListItemDTO{ID: s.ID, Name: s.Name, Aliases: nonNil(s.Aliases), Logo: s.Logo, LogoThumbHash: s.LogoThumbHash, WorksCount: s.WorksCount}
 	})
 	return response.OK(ctx, h.resp, page), nil
 }
@@ -47,7 +47,7 @@ func (h *Handler) get(ctx context.Context, in *developerPathInput) (*response.Ou
 		extra[i] = developerExtraInfoDTO(entry)
 	}
 	return response.OK(ctx, h.resp, developerDetailDTO{
-		ID: found.ID, HID: found.HID, Name: found.Name, Aliases: nonNil(found.Aliases), Logo: found.Logo,
+		ID: found.ID, HID: found.HID, Name: found.Name, Aliases: nonNil(found.Aliases), Logo: found.Logo, LogoThumbHash: found.LogoThumbHash,
 		IntroJP: found.IntroJP, IntroZH: found.IntroZH, IntroEN: found.IntroEN, Website: found.Website, ExtraInfo: extra,
 	}), nil
 }

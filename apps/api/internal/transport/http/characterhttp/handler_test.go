@@ -35,7 +35,7 @@ func TestListAndDetailShapes(t *testing.T) {
 	server, repo := setup(t)
 	sora := repo.Seed(character.Character{
 		BID: ptr("12"), HID: ptr(77), NameJP: "穹", NameEN: ptr("Sora"), Aliases: []string{"ソラ"}, IntroJP: "intro",
-		Image: ptr("c.webp"), BloodType: ptr("ab"), Height: ptr(150), Cup: ptr("A"), Birthday: []int{3, 14}, Gender: []string{"f"},
+		Image: ptr("c.webp"), ImageThumbHash: ptr("c-hash"), BloodType: ptr("ab"), Height: ptr(150), Cup: ptr("A"), Birthday: []int{3, 14}, Gender: []string{"f"},
 	})
 	repo.Seed(character.Character{NameJP: "other"})
 	repo.Appear(sora.ID, ptr("main"), ptr("田口宏子"), false)
@@ -43,14 +43,14 @@ func TestListAndDetailShapes(t *testing.T) {
 
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/character/list?q=sora&pageSize=5"})
 	server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"b_id":"12","v_id":null,"id":1,"name_jp":"穹","name_zh":null,"name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[{"b_id":"12","v_id":null,"id":1,"name_jp":"穹","name_zh":null,"name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","image_thumb_hash":"c-hash","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
 	}
 
 	resp = server.Do(apitest.Request{Method: http.MethodGet, Path: "/character/" + strconv.Itoa(sora.ID)})
 	server.Expect(resp, http.StatusOK, 0)
-	want = `{"id":1,"h_id":77,"name_jp":"穹","name_zh":"","name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"],"appearances":[{"game_id":1,"role":"main","actor":"田口宏子"}]}`
+	want = `{"id":1,"h_id":77,"name_jp":"穹","name_zh":"","name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","image_thumb_hash":"c-hash","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"],"appearances":[{"game_id":1,"role":"main","actor":"田口宏子"}]}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected detail\n got %s\nwant %s", resp.Data, want)
 	}
