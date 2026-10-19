@@ -13,11 +13,12 @@ type searchGameSectionDTO struct {
 }
 
 type searchDeveloperDTO struct {
-	ID         int      `json:"id"`
-	Name       string   `json:"name"`
-	Aliases    []string `json:"aliases"`
-	Logo       *string  `json:"logo"`
-	WorksCount int      `json:"works_count"`
+	ID            int      `json:"id"`
+	Name          string   `json:"name"`
+	Aliases       []string `json:"aliases"`
+	Logo          *string  `json:"logo"`
+	LogoThumbHash *string  `json:"logo_thumb_hash" doc:"ThumbHash of the logo in base64, null when unknown"`
+	WorksCount    int      `json:"works_count"`
 }
 
 type searchDeveloperSectionDTO struct {
@@ -34,13 +35,14 @@ type searchCharacterGameDTO struct {
 }
 
 type searchCharacterDTO struct {
-	ID      int                     `json:"id"`
-	Image   *string                 `json:"image"`
-	NameJP  string                  `json:"name_jp"`
-	NameZH  *string                 `json:"name_zh"`
-	NameEN  *string                 `json:"name_en"`
-	Aliases []string                `json:"aliases"`
-	Game    *searchCharacterGameDTO `json:"game" doc:"First visible game the character appears in"`
+	ID             int                     `json:"id"`
+	Image          *string                 `json:"image"`
+	ImageThumbHash *string                 `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	NameJP         string                  `json:"name_jp"`
+	NameZH         *string                 `json:"name_zh"`
+	NameEN         *string                 `json:"name_en"`
+	Aliases        []string                `json:"aliases"`
+	Game           *searchCharacterGameDTO `json:"game" doc:"First visible game the character appears in"`
 }
 
 type searchCharacterSectionDTO struct {
@@ -67,12 +69,13 @@ type searchImageBoxDTO struct {
 }
 
 type searchImageCharacterDTO struct {
-	_      struct{} `nullable:"true"`
-	ID     int      `json:"id"`
-	Image  *string  `json:"image"`
-	NameJP string   `json:"name_jp"`
-	NameZH *string  `json:"name_zh"`
-	NameEN *string  `json:"name_en"`
+	_              struct{} `nullable:"true"`
+	ID             int      `json:"id"`
+	Image          *string  `json:"image"`
+	ImageThumbHash *string  `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	NameJP         string   `json:"name_jp"`
+	NameZH         *string  `json:"name_zh"`
+	NameEN         *string  `json:"name_en"`
 }
 
 type searchSightingDTO struct {
@@ -141,18 +144,18 @@ func toImageDTO(results search.ImageResults) searchImageDTO {
 			GameID: spotted.GameID,
 		}
 		if found := spotted.Character; found != nil {
-			out.Characters[i].Character = &searchImageCharacterDTO{ID: found.ID, Image: found.Image, NameJP: found.NameJP, NameZH: found.NameZH, NameEN: found.NameEN}
+			out.Characters[i].Character = &searchImageCharacterDTO{ID: found.ID, Image: found.Image, ImageThumbHash: found.ImageThumbHash, NameJP: found.NameJP, NameZH: found.NameZH, NameEN: found.NameEN}
 		}
 	}
 	return out
 }
 
 func toDeveloperDTO(summary developer.Summary) searchDeveloperDTO {
-	return searchDeveloperDTO{ID: summary.ID, Name: summary.Name, Aliases: nonNil(summary.Aliases), Logo: summary.Logo, WorksCount: summary.WorksCount}
+	return searchDeveloperDTO{ID: summary.ID, Name: summary.Name, Aliases: nonNil(summary.Aliases), Logo: summary.Logo, LogoThumbHash: summary.LogoThumbHash, WorksCount: summary.WorksCount}
 }
 
 func toCharacterDTO(summary character.Summary) searchCharacterDTO {
-	out := searchCharacterDTO{ID: summary.ID, Image: summary.Image, NameJP: summary.NameJP, NameZH: summary.NameZH, NameEN: summary.NameEN, Aliases: nonNil(summary.Aliases)}
+	out := searchCharacterDTO{ID: summary.ID, Image: summary.Image, ImageThumbHash: summary.ImageThumbHash, NameJP: summary.NameJP, NameZH: summary.NameZH, NameEN: summary.NameEN, Aliases: nonNil(summary.Aliases)}
 	if summary.Game != nil {
 		out.Game = &searchCharacterGameDTO{ID: summary.Game.ID, TitleJP: summary.Game.TitleJP, TitleZH: summary.Game.TitleZH, TitleEN: summary.Game.TitleEN}
 	}

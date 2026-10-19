@@ -22,6 +22,8 @@ const (
 	FieldType = "type"
 	// FieldDims holds the string denoting the dims field in the database.
 	FieldDims = "dims"
+	// FieldThumbHash holds the string denoting the thumb_hash field in the database.
+	FieldThumbHash = "thumb_hash"
 	// FieldSexual holds the string denoting the sexual field in the database.
 	FieldSexual = "sexual"
 	// FieldViolence holds the string denoting the violence field in the database.
@@ -58,6 +60,7 @@ var Columns = []string{
 	FieldURL,
 	FieldType,
 	FieldDims,
+	FieldThumbHash,
 	FieldSexual,
 	FieldViolence,
 	FieldSource,
@@ -113,6 +116,11 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 // ByDims orders the results by the dims field.
 func ByDims(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDims, opts...).ToFunc()
+}
+
+// ByThumbHash orders the results by the thumb_hash field.
+func ByThumbHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldThumbHash, opts...).ToFunc()
 }
 
 // BySexual orders the results by the sexual field.

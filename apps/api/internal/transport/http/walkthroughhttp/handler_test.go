@@ -35,7 +35,7 @@ const (
 	routesStored = `[` +
 		`{"key":"a1","name":"Mugi","characters":[7,9],"requires":[],"condition":"","ending":"Mugi END","steps":[{"kind":"note","text":"START","remark":"","slot":""},{"kind":"choice","text":"Left","remark":"","slot":""},{"kind":"save","text":"","remark":"","slot":"01"},{"kind":"gap","text":"","remark":"","slot":""},{"kind":"choice","text":"Maid","remark":"Mugi and Hibana","slot":""}]},` +
 		`{"key":"b2","name":"Harem","characters":[],"requires":["a1"],"condition":"Three points each","ending":"","steps":[{"kind":"load","text":"","remark":"","slot":"01"}]}]`
-	gameCard = `"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0,"masked":false}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]}`
+	gameCard = `"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"thumb_hash":null,"sexual":0,"violence":0,"masked":false}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]}`
 )
 
 type env struct {

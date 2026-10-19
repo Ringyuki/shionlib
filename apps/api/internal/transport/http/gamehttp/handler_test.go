@@ -47,11 +47,11 @@ func detailed() gametest.Entry {
 		ReleaseDate: &released, ReleaseDateTBA: false, Type: ptr("adv"), Platforms: []string{"win"},
 		ExtraInfo:  []game.ExtraInfo{{Key: "官网", Value: "https://example.test"}},
 		Staffs:     []game.Staff{{Name: "Writer", Role: "剧本"}},
-		Covers:     []game.Cover{{Language: "jp", Type: "pkgfront", URL: "c.webp", Dims: []int{1, 2}}},
-		Images:     []game.Image{{URL: "safe.webp", Dims: []int{3, 4}}, {URL: "rated.webp", Sexual: 2}},
+		Covers:     []game.Cover{{Language: "jp", Type: "pkgfront", URL: "c.webp", Dims: []int{1, 2}, ThumbHash: ptr("c-hash")}},
+		Images:     []game.Image{{URL: "safe.webp", Dims: []int{3, 4}, ThumbHash: ptr("safe-hash")}, {URL: "rated.webp", Sexual: 2}},
 		Developers: []game.Credit{{Role: "开发", Developer: game.DeveloperRef{ID: 5, Name: "Yuzu", Aliases: []string{"柚子社"}}}},
-		Characters: []game.CharacterCredit{{Role: "main", Image: ptr("ch.webp"), Actor: ptr("CV"), Character: character.Character{
-			ID: 8, Image: ptr("ch.webp"), NameJP: "穹", NameZH: ptr("穹"), Aliases: []string{}, BloodType: ptr("ab"), Height: ptr(150), Birthday: []int{3, 14}, Gender: []string{"f"},
+		Characters: []game.CharacterCredit{{Role: "main", Image: ptr("ch.webp"), ImageThumbHash: ptr("ch-hash"), Actor: ptr("CV"), Character: character.Character{
+			ID: 8, Image: ptr("ch.webp"), ImageThumbHash: ptr("ch-hash"), NameJP: "穹", NameZH: ptr("穹"), Aliases: []string{}, BloodType: ptr("ab"), Height: ptr(150), Birthday: []int{3, 14}, Gender: []string{"f"},
 		}}},
 		Tags:      []game.TagLink{{Tag: game.Tag{ID: 3, Name: "school", Aliases: []string{"学园"}, Count: 9}}},
 		Links:     []game.Link{{ID: 4, Name: "official", Label: "Official", URL: "https://example.test"}},
@@ -168,9 +168,9 @@ func TestDetailEndpoints(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/1", As: &strict})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"title_jp":"タイトル","title_zh":"标题","title_en":"","intro_jp":"紹介","intro_zh":"简介","intro_en":"",` +
-		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0,"masked":false}],` +
+		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"thumb_hash":"c-hash","sexual":0,"violence":0,"masked":false}],` +
 		`"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
-		`"characters":[{"role":"main","image":"ch.webp","actor":"CV","character":{"id":8,"image":"ch.webp","name_jp":"穹","name_zh":"穹","name_en":"","aliases":[],"intro_jp":"","intro_zh":"","intro_en":"","gender":["f"],"blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":null,"age":null,"birthday":[3,14]}}],` +
+		`"characters":[{"role":"main","image":"ch.webp","image_thumb_hash":"ch-hash","actor":"CV","character":{"id":8,"image":"ch.webp","image_thumb_hash":"ch-hash","name_jp":"穹","name_zh":"穹","name_en":"","aliases":[],"intro_jp":"","intro_zh":"","intro_en":"","gender":["f"],"blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":null,"age":null,"birthday":[3,14]}}],` +
 		`"staffs":[{"name":"Writer","role":"剧本"}],"tags":[{"tag_alias":null,"tag":{"id":3,"name":"school","aliases":["学园"],"count":9}}],"content_limit":1}`
 	if string(resp.Data) != want {
 		t.Fatalf("strict overview omits images\n got %s\nwant %s", resp.Data, want)
@@ -185,7 +185,7 @@ func TestDetailEndpoints(t *testing.T) {
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/1/header"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want = `{"id":1,"v_id":"v17","b_id":"42","h_id":900,"extra_info":[{"key":"官网","value":"https://example.test"}],"title_jp":"タイトル","title_zh":"标题","title_en":"","aliases":["alias"],` +
-		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0,"masked":false}],"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
+		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"thumb_hash":"c-hash","sexual":0,"violence":0,"masked":false}],"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
 		`"release_date":"2024-05-01T00:00:00.000Z","release_date_tba":false,"type":"adv","platform":["win"],"content_limit":0}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected header\n got %s\nwant %s", resp.Data, want)
@@ -194,7 +194,7 @@ func TestDetailEndpoints(t *testing.T) {
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/1/details"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want = `{"id":1,"extra_info":[{"key":"官网","value":"https://example.test"}],"tags":[{"tag_alias":null,"tag":{"id":3,"name":"school","aliases":["学园"],"count":9}}],` +
-		`"intro_jp":"紹介","intro_zh":"简介","intro_en":"","images":[{"url":"safe.webp","dims":[3,4],"sexual":0,"violence":0}],"staffs":[{"name":"Writer","role":"剧本"}],"nsfw":false,` +
+		`"intro_jp":"紹介","intro_zh":"简介","intro_en":"","images":[{"url":"safe.webp","dims":[3,4],"thumb_hash":"safe-hash","sexual":0,"violence":0}],"staffs":[{"name":"Writer","role":"剧本"}],"nsfw":false,` +
 		`"link":[{"id":4,"name":"official","label":"Official","url":"https://example.test"}],` +
 		`"relations_from":[{"id":6,"relation":"SEQUEL","to_game_id":2,"to_game":` + sequelCard + `}],"content_limit":0}`
 	if string(resp.Data) != want {

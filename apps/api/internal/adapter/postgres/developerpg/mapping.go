@@ -10,17 +10,18 @@ import (
 
 func toDeveloper(row *ent.GameDeveloper) developer.Developer {
 	return developer.Developer{
-		ID:        row.ID,
-		HID:       row.HID,
-		Name:      row.Name,
-		Aliases:   nonNil(row.Aliases),
-		Logo:      row.Logo,
-		IntroJP:   row.IntroJp,
-		IntroZH:   row.IntroZh,
-		IntroEN:   row.IntroEn,
-		Website:   row.Website,
-		ExtraInfo: decodeExtraInfo(row.ExtraInfo),
-		ParentID:  row.ParentDeveloperID,
+		ID:            row.ID,
+		HID:           row.HID,
+		Name:          row.Name,
+		Aliases:       nonNil(row.Aliases),
+		Logo:          row.Logo,
+		LogoThumbHash: row.LogoThumbHash,
+		IntroJP:       row.IntroJp,
+		IntroZH:       row.IntroZh,
+		IntroEN:       row.IntroEn,
+		Website:       row.Website,
+		ExtraInfo:     decodeExtraInfo(row.ExtraInfo),
+		ParentID:      row.ParentDeveloperID,
 	}
 }
 

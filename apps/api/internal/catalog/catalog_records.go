@@ -23,6 +23,7 @@ type CoverRecord struct {
 	Type      string
 	URL       string
 	Dims      []int
+	ThumbHash *string
 	Sexual    int
 	Violence  int
 	SourceKey string
@@ -31,29 +32,32 @@ type CoverRecord struct {
 type ImageRecord struct {
 	URL       string
 	Dims      []int
+	ThumbHash *string
 	Sexual    int
 	Violence  int
 	SourceKey string
 }
 
 type DeveloperLink struct {
-	ExternalID   string
-	HikarinagiID *int
-	Name         string
-	Aliases      []string
-	Logo         *string
-	Role         string
+	ExternalID    string
+	HikarinagiID  *int
+	Name          string
+	Aliases       []string
+	Logo          *string
+	LogoThumbHash *string
+	Role          string
 }
 
 type CharacterLink struct {
-	ExternalID   string
-	HikarinagiID *int
-	NameJP       string
-	NameZH       *string
-	NameEN       *string
-	Image        *string
-	Role         string
-	Actor        *string
+	ExternalID     string
+	HikarinagiID   *int
+	NameJP         string
+	NameZH         *string
+	NameEN         *string
+	Image          *string
+	ImageThumbHash *string
+	Role           string
+	Actor          *string
 }
 
 type RelationLink struct {
@@ -95,45 +99,47 @@ type KeyValue struct {
 }
 
 type DeveloperRecord struct {
-	ExternalID   string
-	HikarinagiID *int
-	VID          *string
-	BID          *string
-	Name         string
-	Aliases      []string
-	Logo         *string
-	IntroJP      string
-	IntroZH      string
-	IntroEN      string
-	Website      *string
-	Extra        []KeyValue
-	Revision     string
+	ExternalID    string
+	HikarinagiID  *int
+	VID           *string
+	BID           *string
+	Name          string
+	Aliases       []string
+	Logo          *string
+	LogoThumbHash *string
+	IntroJP       string
+	IntroZH       string
+	IntroEN       string
+	Website       *string
+	Extra         []KeyValue
+	Revision      string
 }
 
 type CharacterRecord struct {
-	ExternalID   string
-	HikarinagiID *int
-	VID          *string
-	BID          *string
-	NameJP       string
-	NameZH       *string
-	NameEN       *string
-	Aliases      []string
-	IntroJP      string
-	IntroZH      string
-	IntroEN      string
-	Image        *string
-	BloodType    *string
-	Height       *int
-	Weight       *int
-	Bust         *int
-	Waist        *int
-	Hips         *int
-	Cup          *string
-	Age          *int
-	Birthday     []int
-	Gender       []string
-	Revision     string
+	ExternalID     string
+	HikarinagiID   *int
+	VID            *string
+	BID            *string
+	NameJP         string
+	NameZH         *string
+	NameEN         *string
+	Aliases        []string
+	IntroJP        string
+	IntroZH        string
+	IntroEN        string
+	Image          *string
+	ImageThumbHash *string
+	BloodType      *string
+	Height         *int
+	Weight         *int
+	Bust           *int
+	Waist          *int
+	Hips           *int
+	Cup            *string
+	Age            *int
+	Birthday       []int
+	Gender         []string
+	Revision       string
 }
 
 var relationTypes = []string{
@@ -194,35 +200,38 @@ func ToGameRecord(source string, s GameSnapshot) GameRecord {
 			Type:      CoverType(cover.Kind),
 			URL:       cover.URL,
 			Dims:      dims(cover.Media),
+			ThumbHash: thumbHash(&cover.Media),
 			Sexual:    cover.Sexual,
 			Violence:  cover.Violence,
 			SourceKey: strconv.Itoa(i),
 		})
 	}
 	for i, image := range s.Images {
-		record.Images = append(record.Images, ImageRecord{URL: image.URL, Dims: dims(image), Sexual: image.Sexual, Violence: image.Violence, SourceKey: strconv.Itoa(i)})
+		record.Images = append(record.Images, ImageRecord{URL: image.URL, Dims: dims(image), ThumbHash: thumbHash(&image), Sexual: image.Sexual, Violence: image.Violence, SourceKey: strconv.Itoa(i)})
 	}
 	for _, credit := range s.Developers {
 		if !IsDeveloperRole(credit.Role) {
 			continue
 		}
 		record.Developers = append(record.Developers, DeveloperLink{
-			ExternalID:   credit.ExternalID,
-			HikarinagiID: hikarinagiID(source, credit.ExternalID),
-			Name:         truncate(credit.Name, maxNameLength),
-			Aliases:      unique(credit.Aliases),
-			Logo:         mediaURL(credit.Logo),
-			Role:         ProducerRole(credit.Role),
+			ExternalID:    credit.ExternalID,
+			HikarinagiID:  hikarinagiID(source, credit.ExternalID),
+			Name:          truncate(credit.Name, maxNameLength),
+			Aliases:       unique(credit.Aliases),
+			Logo:          mediaURL(credit.Logo),
+			LogoThumbHash: thumbHash(credit.Logo),
+			Role:          ProducerRole(credit.Role),
 		})
 	}
 	for _, credit := range s.Characters {
 		link := CharacterLink{
-			ExternalID:   credit.ExternalID,
-			HikarinagiID: hikarinagiID(source, credit.ExternalID),
-			NameJP:       credit.Name,
-			NameZH:       credit.Translated,
-			Image:        mediaURL(credit.Image),
-			Role:         CharacterRole(credit.Role),
+			ExternalID:     credit.ExternalID,
+			HikarinagiID:   hikarinagiID(source, credit.ExternalID),
+			NameJP:         credit.Name,
+			NameZH:         credit.Translated,
+			Image:          mediaURL(credit.Image),
+			ImageThumbHash: thumbHash(credit.Image),
+			Role:           CharacterRole(credit.Role),
 		}
 		if len(credit.Actors) > 0 {
 			actor := strings.Join(credit.Actors, ", ")
@@ -241,48 +250,50 @@ func ToGameRecord(source string, s GameSnapshot) GameRecord {
 func ToDeveloperRecord(source string, s DeveloperSnapshot) DeveloperRecord {
 	introJP, introZH, introEN := localize(s.Intro)
 	return DeveloperRecord{
-		ExternalID:   s.ExternalID,
-		HikarinagiID: hikarinagiID(source, s.ExternalID),
-		VID:          trimmed(s.External.VNDB),
-		BID:          trimmed(s.External.Bangumi),
-		Name:         truncate(s.Name, maxNameLength),
-		Aliases:      unique(s.Aliases),
-		Logo:         mediaURL(s.Logo),
-		IntroJP:      truncate(introJP, maxIntroLength),
-		IntroZH:      truncate(introZH, maxIntroLength),
-		IntroEN:      truncate(introEN, maxIntroLength),
-		Website:      trimmed(s.Website),
-		Extra:        s.Extra,
-		Revision:     s.Revision,
+		ExternalID:    s.ExternalID,
+		HikarinagiID:  hikarinagiID(source, s.ExternalID),
+		VID:           trimmed(s.External.VNDB),
+		BID:           trimmed(s.External.Bangumi),
+		Name:          truncate(s.Name, maxNameLength),
+		Aliases:       unique(s.Aliases),
+		Logo:          mediaURL(s.Logo),
+		LogoThumbHash: thumbHash(s.Logo),
+		IntroJP:       truncate(introJP, maxIntroLength),
+		IntroZH:       truncate(introZH, maxIntroLength),
+		IntroEN:       truncate(introEN, maxIntroLength),
+		Website:       trimmed(s.Website),
+		Extra:         s.Extra,
+		Revision:      s.Revision,
 	}
 }
 
 func ToCharacterRecord(source string, s CharacterSnapshot) CharacterRecord {
 	introJP, introZH, introEN := localizeAsOrigin(s.Intro)
 	return CharacterRecord{
-		ExternalID:   s.ExternalID,
-		HikarinagiID: hikarinagiID(source, s.ExternalID),
-		VID:          trimmed(s.External.VNDB),
-		BID:          trimmed(s.External.Bangumi),
-		NameJP:       s.Name.Origin,
-		NameZH:       s.Name.Translated,
-		NameEN:       s.Name.English,
-		Aliases:      unique(s.Aliases),
-		IntroJP:      truncate(introJP, maxIntroLength),
-		IntroZH:      truncate(introZH, maxIntroLength),
-		IntroEN:      truncate(introEN, maxIntroLength),
-		Image:        mediaURL(s.Image),
-		BloodType:    BloodType(s.BloodType),
-		Height:       s.Height,
-		Weight:       s.Weight,
-		Bust:         s.Bust,
-		Waist:        s.Waist,
-		Hips:         s.Hips,
-		Cup:          s.Cup,
-		Age:          s.Age,
-		Birthday:     birthday(s.Birthday),
-		Gender:       Genders(s.Gender),
-		Revision:     s.Revision,
+		ExternalID:     s.ExternalID,
+		HikarinagiID:   hikarinagiID(source, s.ExternalID),
+		VID:            trimmed(s.External.VNDB),
+		BID:            trimmed(s.External.Bangumi),
+		NameJP:         s.Name.Origin,
+		NameZH:         s.Name.Translated,
+		NameEN:         s.Name.English,
+		Aliases:        unique(s.Aliases),
+		IntroJP:        truncate(introJP, maxIntroLength),
+		IntroZH:        truncate(introZH, maxIntroLength),
+		IntroEN:        truncate(introEN, maxIntroLength),
+		Image:          mediaURL(s.Image),
+		ImageThumbHash: thumbHash(s.Image),
+		BloodType:      BloodType(s.BloodType),
+		Height:         s.Height,
+		Weight:         s.Weight,
+		Bust:           s.Bust,
+		Waist:          s.Waist,
+		Hips:           s.Hips,
+		Cup:            s.Cup,
+		Age:            s.Age,
+		Birthday:       birthday(s.Birthday),
+		Gender:         Genders(s.Gender),
+		Revision:       s.Revision,
 	}
 }
 
@@ -426,6 +437,13 @@ func mediaURL(media *Media) *string {
 	}
 	url := media.URL
 	return &url
+}
+
+func thumbHash(media *Media) *string {
+	if media == nil || media.URL == "" {
+		return nil
+	}
+	return trimmed(media.ThumbHash)
 }
 
 func dims(media Media) []int {

@@ -42,7 +42,7 @@ func (r *Repository) Search(ctx context.Context, filter developer.AdminFilter, p
 		order = ent.Desc
 	}
 	rows, err := query.
-		Select(gamedeveloper.FieldID, gamedeveloper.FieldName, gamedeveloper.FieldLogo, gamedeveloper.FieldCreated, gamedeveloper.FieldUpdated).
+		Select(gamedeveloper.FieldID, gamedeveloper.FieldName, gamedeveloper.FieldLogo, gamedeveloper.FieldLogoThumbHash, gamedeveloper.FieldCreated, gamedeveloper.FieldUpdated).
 		Order(order(field), order(gamedeveloper.FieldID)).
 		Offset(page.Offset()).
 		Limit(page.Size).
@@ -57,12 +57,13 @@ func (r *Repository) Search(ctx context.Context, filter developer.AdminFilter, p
 	entries := make([]developer.AdminEntry, len(rows))
 	for i, row := range rows {
 		entries[i] = developer.AdminEntry{
-			ID:         row.ID,
-			Name:       row.Name,
-			Logo:       row.Logo,
-			GamesCount: counts[row.ID],
-			Created:    row.Created,
-			Updated:    row.Updated,
+			ID:            row.ID,
+			Name:          row.Name,
+			Logo:          row.Logo,
+			LogoThumbHash: row.LogoThumbHash,
+			GamesCount:    counts[row.ID],
+			Created:       row.Created,
+			Updated:       row.Updated,
 		}
 	}
 	return entries, total, nil
@@ -137,7 +138,7 @@ func (r *Repository) List(ctx context.Context, query string, page developer.Page
 	}
 	summaries := make([]developer.Summary, len(rows))
 	for i, row := range rows {
-		summaries[i] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, WorksCount: works[row.ID]}
+		summaries[i] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, LogoThumbHash: row.LogoThumbHash, WorksCount: works[row.ID]}
 	}
 	return summaries, total, nil
 }
@@ -173,7 +174,7 @@ func (r *Repository) Summaries(ctx context.Context, ids []int) (map[int]develope
 		return nil, err
 	}
 	for _, row := range rows {
-		summaries[row.ID] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, WorksCount: works[row.ID]}
+		summaries[row.ID] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, LogoThumbHash: row.LogoThumbHash, WorksCount: works[row.ID]}
 	}
 	return summaries, nil
 }

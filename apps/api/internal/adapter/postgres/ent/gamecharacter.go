@@ -26,6 +26,8 @@ type GameCharacter struct {
 	HID *int `json:"h_id,omitempty"`
 	// Image holds the value of the "image" field.
 	Image *string `json:"image,omitempty"`
+	// ImageThumbHash holds the value of the "image_thumb_hash" field.
+	ImageThumbHash *string `json:"image_thumb_hash,omitempty"`
 	// NameJp holds the value of the "name_jp" field.
 	NameJp string `json:"name_jp,omitempty"`
 	// NameZh holds the value of the "name_zh" field.
@@ -110,7 +112,7 @@ func (*GameCharacter) scanValues(columns []string) ([]any, error) {
 			values[i] = new(pgvalue.Strings)
 		case gamecharacter.FieldID, gamecharacter.FieldHID, gamecharacter.FieldHeight, gamecharacter.FieldWeight, gamecharacter.FieldBust, gamecharacter.FieldWaist, gamecharacter.FieldHips, gamecharacter.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case gamecharacter.FieldBID, gamecharacter.FieldVID, gamecharacter.FieldImage, gamecharacter.FieldNameJp, gamecharacter.FieldNameZh, gamecharacter.FieldNameEn, gamecharacter.FieldIntroJp, gamecharacter.FieldIntroZh, gamecharacter.FieldIntroEn, gamecharacter.FieldBloodType, gamecharacter.FieldCup:
+		case gamecharacter.FieldBID, gamecharacter.FieldVID, gamecharacter.FieldImage, gamecharacter.FieldImageThumbHash, gamecharacter.FieldNameJp, gamecharacter.FieldNameZh, gamecharacter.FieldNameEn, gamecharacter.FieldIntroJp, gamecharacter.FieldIntroZh, gamecharacter.FieldIntroEn, gamecharacter.FieldBloodType, gamecharacter.FieldCup:
 			values[i] = new(sql.NullString)
 		case gamecharacter.FieldCreated, gamecharacter.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -162,6 +164,13 @@ func (_m *GameCharacter) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Image = new(string)
 				*_m.Image = value.String
+			}
+		case gamecharacter.FieldImageThumbHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_thumb_hash", values[i])
+			} else if value.Valid {
+				_m.ImageThumbHash = new(string)
+				*_m.ImageThumbHash = value.String
 			}
 		case gamecharacter.FieldNameJp:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -350,6 +359,11 @@ func (_m *GameCharacter) String() string {
 	builder.WriteString(", ")
 	if v := _m.Image; v != nil {
 		builder.WriteString("image=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.ImageThumbHash; v != nil {
+		builder.WriteString("image_thumb_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

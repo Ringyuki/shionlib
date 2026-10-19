@@ -22,6 +22,7 @@ func (GameImage) Fields() []ent.Field {
 		serialID(),
 		field.Text("url"),
 		field.Other("dims", intsType).SchemaType(intArray).Optional(),
+		field.Text("thumb_hash").Optional().Nillable(),
 		field.Int("sexual").SchemaType(pg("integer")),
 		field.Int("violence").SchemaType(pg("integer")),
 		field.Text("source").Optional().Nillable(),

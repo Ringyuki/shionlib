@@ -26,6 +26,8 @@ const (
 	FieldAliases = "aliases"
 	// FieldLogo holds the string denoting the logo field in the database.
 	FieldLogo = "logo"
+	// FieldLogoThumbHash holds the string denoting the logo_thumb_hash field in the database.
+	FieldLogoThumbHash = "logo_thumb_hash"
 	// FieldIntroJp holds the string denoting the intro_jp field in the database.
 	FieldIntroJp = "intro_jp"
 	// FieldIntroZh holds the string denoting the intro_zh field in the database.
@@ -85,6 +87,7 @@ var Columns = []string{
 	FieldName,
 	FieldAliases,
 	FieldLogo,
+	FieldLogoThumbHash,
 	FieldIntroJp,
 	FieldIntroZh,
 	FieldIntroEn,
@@ -166,6 +169,11 @@ func ByAliases(opts ...sql.OrderTermOption) OrderOption {
 // ByLogo orders the results by the logo field.
 func ByLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLogo, opts...).ToFunc()
+}
+
+// ByLogoThumbHash orders the results by the logo_thumb_hash field.
+func ByLogoThumbHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogoThumbHash, opts...).ToFunc()
 }
 
 // ByIntroJp orders the results by the intro_jp field.

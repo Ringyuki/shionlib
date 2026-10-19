@@ -1,4 +1,4 @@
-import { characterName } from '~/features/character'
+import { castPicture, characterName } from '~/features/character'
 import { gamePath } from '~/features/game'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
@@ -13,12 +13,14 @@ export type UserWalkthrough = Schema<'UserWalkthroughDTO'>
 
 type Portrayed = Pick<
   Schema<'GameCharacterDTO'>,
-  'id' | 'name_jp' | 'name_zh' | 'name_en' | 'image'
+  'id' | 'name_jp' | 'name_zh' | 'name_en' | 'image' | 'image_thumb_hash'
 >
 
-export type Credit = Pick<Schema<'GameCharacterCreditDTO'>, 'image'> & { character: Portrayed }
+export type Credit = Pick<Schema<'GameCharacterCreditDTO'>, 'image' | 'image_thumb_hash'> & {
+  character: Portrayed
+}
 
-export type Face = { id: number; name: string; picture: string | undefined }
+export type Face = { id: number; name: string; picture: string | undefined; thumbhash?: string }
 
 export type Portrait = { id: number; picture: string }
 
@@ -88,11 +90,15 @@ export function writtenBy(
 }
 
 export function facesOf(credits: readonly Credit[], locale: Locale): Face[] {
-  return credits.map(credit => ({
-    id: credit.character.id,
-    name: characterName(credit.character, locale),
-    picture: credit.image ?? credit.character.image ?? undefined,
-  }))
+  return credits.map(credit => {
+    const { src, thumbhash } = castPicture(credit)
+    return {
+      id: credit.character.id,
+      name: characterName(credit.character, locale),
+      picture: src,
+      thumbhash,
+    }
+  })
 }
 
 export function facesIn(route: Pick<Route, 'characters'>, faces: readonly Face[]): Face[] {

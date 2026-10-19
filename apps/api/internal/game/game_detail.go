@@ -11,10 +11,11 @@ import (
 const CharacterRoleSide = "side"
 
 type Image struct {
-	URL      string
-	Dims     []int
-	Sexual   int
-	Violence int
+	URL       string
+	Dims      []int
+	ThumbHash *string
+	Sexual    int
+	Violence  int
 }
 
 func (i Image) Rated() bool {
@@ -51,10 +52,11 @@ type Link struct {
 }
 
 type CharacterCredit struct {
-	Role      string
-	Image     *string
-	Actor     *string
-	Character character.Character
+	Role           string
+	Image          *string
+	ImageThumbHash *string
+	Actor          *string
+	Character      character.Character
 }
 
 type Relation struct {

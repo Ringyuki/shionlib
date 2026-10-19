@@ -21,7 +21,7 @@ func (s *Store) ensureDeveloper(ctx context.Context, source string, credit catal
 	if err != nil || ok {
 		return id, !synced, err
 	}
-	id, err = s.createDeveloper(ctx, credit.HikarinagiID, credit.Name, credit.Aliases, credit.Logo)
+	id, err = s.createDeveloper(ctx, credit.HikarinagiID, credit.Name, credit.Aliases, credit.Logo, credit.LogoThumbHash)
 	if err != nil {
 		return 0, false, err
 	}
@@ -54,11 +54,8 @@ func (s *Store) ApplyDeveloper(ctx context.Context, source string, record catalo
 		SetIntroZh(record.IntroZH).
 		SetIntroEn(record.IntroEN).
 		SetExtraInfo(extra)
-	if record.Logo != nil {
-		update.SetLogo(*record.Logo)
-	} else {
-		update.ClearLogo()
-	}
+	setOrClear(record.Logo, update.SetLogo, update.ClearLogo)
+	setOrClear(record.LogoThumbHash, update.SetLogoThumbHash, update.ClearLogoThumbHash)
 	if record.Website != nil {
 		update.SetWebsite(*record.Website)
 	} else {
@@ -118,18 +115,19 @@ func (s *Store) adoptDeveloper(ctx context.Context, ref catalog.Ref, record cata
 			}
 		}
 	}
-	id, err := s.createDeveloper(ctx, record.HikarinagiID, record.Name, record.Aliases, record.Logo)
+	id, err := s.createDeveloper(ctx, record.HikarinagiID, record.Name, record.Aliases, record.Logo, record.LogoThumbHash)
 	if err != nil {
 		return 0, err
 	}
 	return s.insertLink(ctx, ref, id)
 }
 
-func (s *Store) createDeveloper(ctx context.Context, hikarinagiID *int, name string, aliases []string, logo *string) (int, error) {
+func (s *Store) createDeveloper(ctx context.Context, hikarinagiID *int, name string, aliases []string, logo, logoThumbHash *string) (int, error) {
 	create := s.db(ctx).GameDeveloper.Create().
 		SetName(name).
 		SetAliases(pgvalue.Strings(aliases)).
-		SetNillableLogo(logo)
+		SetNillableLogo(logo).
+		SetNillableLogoThumbHash(logoThumbHash)
 	if hikarinagiID != nil {
 		id, err := create.SetHID(*hikarinagiID).OnConflictColumns(gamedeveloper.FieldHID).Ignore().ID(ctx)
 		if err != nil {

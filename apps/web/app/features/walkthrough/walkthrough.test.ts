@@ -81,13 +81,21 @@ describe('writtenBy', () => {
 describe('faces', () => {
   const credit = (id: number, name: string, image: string | null): Credit => ({
     image,
-    character: { id, name_jp: name, name_zh: '', name_en: '', image: 'portrait.webp' },
+    image_thumb_hash: image === null ? null : 'in-game-hash',
+    character: {
+      id,
+      name_jp: name,
+      name_zh: '',
+      name_en: '',
+      image: 'portrait.webp',
+      image_thumb_hash: 'portrait-hash',
+    },
   })
 
   it('takes the name in the reader’s language and the picture used in this game', () => {
     expect(facesOf([credit(7, 'むぎ', 'in-game.webp'), credit(9, '緋華', null)], 'zh')).toEqual([
-      { id: 7, name: 'むぎ', picture: 'in-game.webp' },
-      { id: 9, name: '緋華', picture: 'portrait.webp' },
+      { id: 7, name: 'むぎ', picture: 'in-game.webp', thumbhash: 'in-game-hash' },
+      { id: 9, name: '緋華', picture: 'portrait.webp', thumbhash: 'portrait-hash' },
     ])
   })
 

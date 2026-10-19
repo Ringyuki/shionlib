@@ -102,6 +102,20 @@ func (_c *GameDeveloperCreate) SetNillableLogo(v *string) *GameDeveloperCreate {
 	return _c
 }
 
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (_c *GameDeveloperCreate) SetLogoThumbHash(v string) *GameDeveloperCreate {
+	_c.mutation.SetLogoThumbHash(v)
+	return _c
+}
+
+// SetNillableLogoThumbHash sets the "logo_thumb_hash" field if the given value is not nil.
+func (_c *GameDeveloperCreate) SetNillableLogoThumbHash(v *string) *GameDeveloperCreate {
+	if v != nil {
+		_c.SetLogoThumbHash(*v)
+	}
+	return _c
+}
+
 // SetIntroJp sets the "intro_jp" field.
 func (_c *GameDeveloperCreate) SetIntroJp(v string) *GameDeveloperCreate {
 	_c.mutation.SetIntroJp(v)
@@ -417,6 +431,10 @@ func (_c *GameDeveloperCreate) createSpec() (*GameDeveloper, *sqlgraph.CreateSpe
 		_spec.SetField(gamedeveloper.FieldLogo, field.TypeString, value)
 		_node.Logo = &value
 	}
+	if value, ok := _c.mutation.LogoThumbHash(); ok {
+		_spec.SetField(gamedeveloper.FieldLogoThumbHash, field.TypeString, value)
+		_node.LogoThumbHash = &value
+	}
 	if value, ok := _c.mutation.IntroJp(); ok {
 		_spec.SetField(gamedeveloper.FieldIntroJp, field.TypeString, value)
 		_node.IntroJp = value
@@ -667,6 +685,24 @@ func (u *GameDeveloperUpsert) UpdateLogo() *GameDeveloperUpsert {
 // ClearLogo clears the value of the "logo" field.
 func (u *GameDeveloperUpsert) ClearLogo() *GameDeveloperUpsert {
 	u.SetNull(gamedeveloper.FieldLogo)
+	return u
+}
+
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsert) SetLogoThumbHash(v string) *GameDeveloperUpsert {
+	u.Set(gamedeveloper.FieldLogoThumbHash, v)
+	return u
+}
+
+// UpdateLogoThumbHash sets the "logo_thumb_hash" field to the value that was provided on create.
+func (u *GameDeveloperUpsert) UpdateLogoThumbHash() *GameDeveloperUpsert {
+	u.SetExcluded(gamedeveloper.FieldLogoThumbHash)
+	return u
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsert) ClearLogoThumbHash() *GameDeveloperUpsert {
+	u.SetNull(gamedeveloper.FieldLogoThumbHash)
 	return u
 }
 
@@ -946,6 +982,27 @@ func (u *GameDeveloperUpsertOne) UpdateLogo() *GameDeveloperUpsertOne {
 func (u *GameDeveloperUpsertOne) ClearLogo() *GameDeveloperUpsertOne {
 	return u.Update(func(s *GameDeveloperUpsert) {
 		s.ClearLogo()
+	})
+}
+
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsertOne) SetLogoThumbHash(v string) *GameDeveloperUpsertOne {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.SetLogoThumbHash(v)
+	})
+}
+
+// UpdateLogoThumbHash sets the "logo_thumb_hash" field to the value that was provided on create.
+func (u *GameDeveloperUpsertOne) UpdateLogoThumbHash() *GameDeveloperUpsertOne {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.UpdateLogoThumbHash()
+	})
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsertOne) ClearLogoThumbHash() *GameDeveloperUpsertOne {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.ClearLogoThumbHash()
 	})
 }
 
@@ -1408,6 +1465,27 @@ func (u *GameDeveloperUpsertBulk) UpdateLogo() *GameDeveloperUpsertBulk {
 func (u *GameDeveloperUpsertBulk) ClearLogo() *GameDeveloperUpsertBulk {
 	return u.Update(func(s *GameDeveloperUpsert) {
 		s.ClearLogo()
+	})
+}
+
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsertBulk) SetLogoThumbHash(v string) *GameDeveloperUpsertBulk {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.SetLogoThumbHash(v)
+	})
+}
+
+// UpdateLogoThumbHash sets the "logo_thumb_hash" field to the value that was provided on create.
+func (u *GameDeveloperUpsertBulk) UpdateLogoThumbHash() *GameDeveloperUpsertBulk {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.UpdateLogoThumbHash()
+	})
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (u *GameDeveloperUpsertBulk) ClearLogoThumbHash() *GameDeveloperUpsertBulk {
+	return u.Update(func(s *GameDeveloperUpsert) {
+		s.ClearLogoThumbHash()
 	})
 }
 

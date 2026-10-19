@@ -24,6 +24,7 @@ func (GameCharacter) Fields() []ent.Field {
 		field.Text("v_id").Optional().Nillable(),
 		field.Int("h_id").SchemaType(pg("integer")).Unique().Optional().Nillable(),
 		field.Text("image").Optional().Nillable(),
+		field.Text("image_thumb_hash").Optional().Nillable(),
 		field.Text("name_jp").Default(""),
 		field.Text("name_zh").Optional().Nillable(),
 		field.Text("name_en").Optional().Nillable(),

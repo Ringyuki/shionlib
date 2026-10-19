@@ -81,7 +81,14 @@ describe('listedSightings', () => {
     character:
       characterId === null
         ? null
-        : { id: characterId, image: null, name_jp: name, name_zh: null, name_en: null },
+        : {
+            id: characterId,
+            image: null,
+            image_thumb_hash: null,
+            name_jp: name,
+            name_zh: null,
+            name_en: null,
+          },
   })
 
   it('lists each character once and keeps where it was first seen', () => {

@@ -36,6 +36,7 @@ func setup(t *testing.T) env {
 	)
 	e := env{server: server, catalog: searchtest.NewCatalog(), queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics()}
 	logo := "m.webp"
+	logoHash := "m-hash"
 	zh := "稟"
 	service := search.NewService(search.Deps{
 		Source:      catalog.SourceHikarinagi,
@@ -43,7 +44,7 @@ func setup(t *testing.T) env {
 		Games:       games,
 		Cards:       game.NewCardService(games, gametest.Masker{}),
 		Preferences: gametest.Preferences{permissive.UserID: false},
-		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, WorksCount: 3}},
+		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, LogoThumbHash: &logoHash, WorksCount: 3}},
 		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", NameZH: &zh, Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}},
 		Titles:      &searchtest.Titles{Known: []string{"千恋＊万花", "千の刃濤"}},
 		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
@@ -91,10 +92,10 @@ func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 	if len(got.Games.Items) != 1 || got.Games.Items[0].ID != 1 || got.Games.Items[0].TitleJP != "千恋＊万花" || got.Games.Total != 1 {
 		t.Fatalf("guests only get safe games with resources, in source order: %s", resp.Data)
 	}
-	if string(got.Developers) != `{"items":[{"id":50,"name":"枕","aliases":[],"logo":"m.webp","works_count":3}],"total":1}` {
+	if string(got.Developers) != `{"items":[{"id":50,"name":"枕","aliases":[],"logo":"m.webp","logo_thumb_hash":"m-hash","works_count":3}],"total":1}` {
 		t.Fatalf("developers %s", got.Developers)
 	}
-	if string(got.Characters) != `{"items":[{"id":90,"image":null,"name_jp":"御桜稟","name_zh":"稟","name_en":null,"aliases":[],"game":{"id":1,"title_jp":"サクラノ詩","title_zh":"","title_en":""}}],"total":1}` {
+	if string(got.Characters) != `{"items":[{"id":90,"image":null,"image_thumb_hash":null,"name_jp":"御桜稟","name_zh":"稟","name_en":null,"aliases":[],"game":{"id":1,"title_jp":"サクラノ詩","title_zh":"","title_en":""}}],"total":1}` {
 		t.Fatalf("characters %s", got.Characters)
 	}
 	if !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:100") {

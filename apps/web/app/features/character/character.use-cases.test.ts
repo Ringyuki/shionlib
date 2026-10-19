@@ -14,6 +14,7 @@ const character: ApiData<'/character/{id}', 'get'> = {
   intro_zh: '',
   intro_en: '',
   image: null,
+  image_thumb_hash: null,
   blood_type: null,
   height: 155,
   weight: null,

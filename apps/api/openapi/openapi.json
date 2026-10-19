@@ -859,6 +859,10 @@
           "image": {
             "type": "string"
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64",
+            "type": "string"
+          },
           "name_en": {
             "type": [
               "string",
@@ -1303,6 +1307,10 @@
           "logo": {
             "type": "string"
           },
+          "logo_thumb_hash": {
+            "description": "ThumbHash of the logo in base64",
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -1338,6 +1346,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "thumb_hash": {
+            "description": "ThumbHash of the picture in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "url": {
             "type": "string"
           },
@@ -1349,6 +1364,7 @@
         "required": [
           "url",
           "dims",
+          "thumb_hash",
           "sexual",
           "violence"
         ],
@@ -7774,6 +7790,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "intro_en": {
             "type": "string"
           },
@@ -7818,6 +7841,7 @@
           "intro_zh",
           "intro_en",
           "image",
+          "image_thumb_hash",
           "blood_type",
           "height",
           "weight",
@@ -7925,6 +7949,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "intro_en": {
             "type": "string"
           },
@@ -7982,6 +8013,7 @@
           "intro_zh",
           "intro_en",
           "image",
+          "image_thumb_hash",
           "blood_type",
           "height",
           "weight",
@@ -9804,6 +9836,13 @@
               "null"
             ]
           },
+          "logo_thumb_hash": {
+            "description": "ThumbHash of the logo in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name": {
             "type": "string"
           },
@@ -9820,6 +9859,7 @@
           "name",
           "aliases",
           "logo",
+          "logo_thumb_hash",
           "intro_jp",
           "intro_zh",
           "intro_en",
@@ -9866,6 +9906,13 @@
               "null"
             ]
           },
+          "logo_thumb_hash": {
+            "description": "ThumbHash of the logo in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name": {
             "type": "string"
           },
@@ -9879,6 +9926,7 @@
           "name",
           "aliases",
           "logo",
+          "logo_thumb_hash",
           "works_count"
         ],
         "type": "object"
@@ -18779,6 +18827,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "role": {
             "enum": [
               "main",
@@ -18792,6 +18847,7 @@
         "required": [
           "role",
           "image",
+          "image_thumb_hash",
           "actor",
           "character"
         ],
@@ -18878,6 +18934,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "intro_en": {
             "type": "string"
           },
@@ -18914,6 +18977,7 @@
         "required": [
           "id",
           "image",
+          "image_thumb_hash",
           "name_jp",
           "name_zh",
           "name_en",
@@ -18987,6 +19051,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "thumb_hash": {
+            "description": "ThumbHash of the picture in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "type": {
             "enum": [
               "pkgfront",
@@ -19007,6 +19078,7 @@
           "type",
           "url",
           "dims",
+          "thumb_hash",
           "sexual",
           "violence",
           "masked"
@@ -19398,6 +19470,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "thumb_hash": {
+            "description": "ThumbHash of the picture in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "url": {
             "type": "string"
           },
@@ -19409,6 +19488,7 @@
         "required": [
           "url",
           "dims",
+          "thumb_hash",
           "sexual",
           "violence"
         ],
@@ -24017,6 +24097,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name_en": {
             "type": [
               "string",
@@ -24036,6 +24123,7 @@
         "required": [
           "id",
           "image",
+          "image_thumb_hash",
           "name_jp",
           "name_zh",
           "name_en",
@@ -24118,6 +24206,13 @@
               "null"
             ]
           },
+          "logo_thumb_hash": {
+            "description": "ThumbHash of the logo in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name": {
             "type": "string"
           },
@@ -24131,6 +24226,7 @@
           "name",
           "aliases",
           "logo",
+          "logo_thumb_hash",
           "works_count"
         ],
         "type": "object"
@@ -24236,6 +24332,13 @@
               "null"
             ]
           },
+          "image_thumb_hash": {
+            "description": "ThumbHash of the image in base64, null when unknown",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name_en": {
             "type": [
               "string",
@@ -24255,6 +24358,7 @@
         "required": [
           "id",
           "image",
+          "image_thumb_hash",
           "name_jp",
           "name_zh",
           "name_en"

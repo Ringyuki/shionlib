@@ -39,6 +39,7 @@ export function PictureOption({ name, detail, picture, note }: PictureOptionProp
       ) : (
         <Image
           src={picture.src}
+          thumbhash={picture.thumbhash}
           alt=""
           ratio={frame.ratio}
           fit={frame.fit}

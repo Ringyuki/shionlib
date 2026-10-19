@@ -1,7 +1,14 @@
 import { Card, Empty, Image, Section, SimpleGrid, Stack, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { characterName, characterPath, groupCast, voiceOf, type CastCredit } from '../character'
+import {
+  castPicture,
+  characterName,
+  characterPath,
+  groupCast,
+  voiceOf,
+  type CastCredit,
+} from '../character'
 
 export function Cast({ credits }: { credits: readonly CastCredit[] }) {
   const t = useTranslations('character.cast')
@@ -29,11 +36,13 @@ function CastCard({ credit }: { credit: CastCredit }) {
   const locale = useLocale()
   const name = characterName(credit.character, locale)
   const voice = voiceOf(credit)
+  const picture = castPicture(credit)
   return (
     <Card padded={false} className="hn-interactive overflow-hidden">
       <Link to={characterPath(locale, credit.character.id)} prefetch="intent">
         <Image
-          src={credit.image ?? credit.character.image ?? undefined}
+          src={picture.src}
+          thumbhash={picture.thumbhash}
           alt={name}
           ratio={3 / 4}
           fit="cover"

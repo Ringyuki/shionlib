@@ -51,6 +51,26 @@ func (_u *GameCharacterRelationUpdate) ClearImage() *GameCharacterRelationUpdate
 	return _u
 }
 
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (_u *GameCharacterRelationUpdate) SetImageThumbHash(v string) *GameCharacterRelationUpdate {
+	_u.mutation.SetImageThumbHash(v)
+	return _u
+}
+
+// SetNillableImageThumbHash sets the "image_thumb_hash" field if the given value is not nil.
+func (_u *GameCharacterRelationUpdate) SetNillableImageThumbHash(v *string) *GameCharacterRelationUpdate {
+	if v != nil {
+		_u.SetImageThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (_u *GameCharacterRelationUpdate) ClearImageThumbHash() *GameCharacterRelationUpdate {
+	_u.mutation.ClearImageThumbHash()
+	return _u
+}
+
 // SetActor sets the "actor" field.
 func (_u *GameCharacterRelationUpdate) SetActor(v string) *GameCharacterRelationUpdate {
 	_u.mutation.SetActor(v)
@@ -228,6 +248,12 @@ func (_u *GameCharacterRelationUpdate) sqlSave(ctx context.Context) (_node int, 
 	if _u.mutation.ImageCleared() {
 		_spec.ClearField(gamecharacterrelation.FieldImage, field.TypeString)
 	}
+	if value, ok := _u.mutation.ImageThumbHash(); ok {
+		_spec.SetField(gamecharacterrelation.FieldImageThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.ImageThumbHashCleared() {
+		_spec.ClearField(gamecharacterrelation.FieldImageThumbHash, field.TypeString)
+	}
 	if value, ok := _u.mutation.Actor(); ok {
 		_spec.SetField(gamecharacterrelation.FieldActor, field.TypeString, value)
 	}
@@ -340,6 +366,26 @@ func (_u *GameCharacterRelationUpdateOne) SetNillableImage(v *string) *GameChara
 // ClearImage clears the value of the "image" field.
 func (_u *GameCharacterRelationUpdateOne) ClearImage() *GameCharacterRelationUpdateOne {
 	_u.mutation.ClearImage()
+	return _u
+}
+
+// SetImageThumbHash sets the "image_thumb_hash" field.
+func (_u *GameCharacterRelationUpdateOne) SetImageThumbHash(v string) *GameCharacterRelationUpdateOne {
+	_u.mutation.SetImageThumbHash(v)
+	return _u
+}
+
+// SetNillableImageThumbHash sets the "image_thumb_hash" field if the given value is not nil.
+func (_u *GameCharacterRelationUpdateOne) SetNillableImageThumbHash(v *string) *GameCharacterRelationUpdateOne {
+	if v != nil {
+		_u.SetImageThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearImageThumbHash clears the value of the "image_thumb_hash" field.
+func (_u *GameCharacterRelationUpdateOne) ClearImageThumbHash() *GameCharacterRelationUpdateOne {
+	_u.mutation.ClearImageThumbHash()
 	return _u
 }
 
@@ -549,6 +595,12 @@ func (_u *GameCharacterRelationUpdateOne) sqlSave(ctx context.Context) (_node *G
 	}
 	if _u.mutation.ImageCleared() {
 		_spec.ClearField(gamecharacterrelation.FieldImage, field.TypeString)
+	}
+	if value, ok := _u.mutation.ImageThumbHash(); ok {
+		_spec.SetField(gamecharacterrelation.FieldImageThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.ImageThumbHashCleared() {
+		_spec.ClearField(gamecharacterrelation.FieldImageThumbHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.Actor(); ok {
 		_spec.SetField(gamecharacterrelation.FieldActor, field.TypeString, value)

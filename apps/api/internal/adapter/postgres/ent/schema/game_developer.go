@@ -26,6 +26,7 @@ func (GameDeveloper) Fields() []ent.Field {
 		field.String("name").MaxRuneLen(255).SchemaType(varchar(255)).Default(""),
 		field.Other("aliases", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.Text("logo").Optional().Nillable(),
+		field.Text("logo_thumb_hash").Optional().Nillable(),
 		field.String("intro_jp").MaxRuneLen(20000).SchemaType(varchar(20000)).Default(""),
 		field.String("intro_zh").MaxRuneLen(20000).SchemaType(varchar(20000)).Default(""),
 		field.String("intro_en").MaxRuneLen(20000).SchemaType(varchar(20000)).Default(""),

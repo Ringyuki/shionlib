@@ -108,7 +108,7 @@ func TestImageSearchAnswersWithTheLibrarysEntries(t *testing.T) {
 	if got.Source.Name != "Recognizer" || got.Source.URL != "https://recognizer.test/" || len(got.Games) != 1 || got.Games[0].ID != 1 || got.Unlisted == nil || len(got.Unlisted) != 0 {
 		t.Fatalf("source, games and works outside the library: %s", resp.Data)
 	}
-	want := `{"box":{"left":0.69,"top":0.23,"right":0.83,"bottom":0.49},"name":"レナ・リヒテナウアー","work":"千恋＊万花","unsure":false,"game_id":1,"character":{"id":92,"image":null,"name_jp":"レナ・リヒテナウアー","name_zh":"蕾娜·莉希特娜瓦","name_en":null}}`
+	want := `{"box":{"left":0.69,"top":0.23,"right":0.83,"bottom":0.49},"name":"レナ・リヒテナウアー","work":"千恋＊万花","unsure":false,"game_id":1,"character":{"id":92,"image":null,"image_thumb_hash":null,"name_jp":"レナ・リヒテナウアー","name_zh":"蕾娜·莉希特娜瓦","name_en":null}}`
 	if len(got.Characters) != 1 || string(got.Characters[0]) != want {
 		t.Fatalf("characters: %s", resp.Data)
 	}

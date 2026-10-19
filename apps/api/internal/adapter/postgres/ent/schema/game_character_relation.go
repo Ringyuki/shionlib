@@ -21,6 +21,7 @@ func (GameCharacterRelation) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Text("image").Optional().Nillable(),
+		field.Text("image_thumb_hash").Optional().Nillable(),
 		field.Text("actor").Optional().Nillable(),
 		field.Enum("role").Values("main", "primary", "side", "appears").SchemaType(pgEnum("game_character_role")).Optional().Nillable(),
 		field.Int("game_id").SchemaType(pg("integer")),

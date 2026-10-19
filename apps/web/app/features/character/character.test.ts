@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   appearanceIn,
   birthdayOf,
+  castPicture,
   characterName,
   characterPath,
   gendersOf,
@@ -18,12 +19,14 @@ const credit = (id: number, role: CastCredit['role']): CastCredit => ({
   role,
   actor: null,
   image: null,
+  image_thumb_hash: null,
   character: {
     id,
     name_jp: `キャラ${id}`,
     name_zh: '',
     name_en: '',
     image: null,
+    image_thumb_hash: null,
     intro_jp: '',
     intro_zh: '',
     intro_en: '',
@@ -71,6 +74,23 @@ describe('groupCast', () => {
       ['main', [2]],
       ['side', [1, 3]],
     ])
+  })
+})
+
+describe('castPicture', () => {
+  const portrait = { image: 'portrait.webp', image_thumb_hash: 'portrait-hash' }
+
+  it('shows the picture used in the game with its own thumbhash', () => {
+    expect(
+      castPicture({ image: 'in-game.webp', image_thumb_hash: null, character: portrait }),
+    ).toEqual({ src: 'in-game.webp', thumbhash: undefined })
+  })
+
+  it('falls back to the portrait of the character and its thumbhash', () => {
+    expect(castPicture({ image: null, image_thumb_hash: null, character: portrait })).toEqual({
+      src: 'portrait.webp',
+      thumbhash: 'portrait-hash',
+    })
   })
 })
 

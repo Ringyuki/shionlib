@@ -48,6 +48,20 @@ func (_c *GameCoverCreate) SetDims(v pgvalue.Ints) *GameCoverCreate {
 	return _c
 }
 
+// SetThumbHash sets the "thumb_hash" field.
+func (_c *GameCoverCreate) SetThumbHash(v string) *GameCoverCreate {
+	_c.mutation.SetThumbHash(v)
+	return _c
+}
+
+// SetNillableThumbHash sets the "thumb_hash" field if the given value is not nil.
+func (_c *GameCoverCreate) SetNillableThumbHash(v *string) *GameCoverCreate {
+	if v != nil {
+		_c.SetThumbHash(*v)
+	}
+	return _c
+}
+
 // SetSexual sets the "sexual" field.
 func (_c *GameCoverCreate) SetSexual(v int) *GameCoverCreate {
 	_c.mutation.SetSexual(v)
@@ -267,6 +281,10 @@ func (_c *GameCoverCreate) createSpec() (*GameCover, *sqlgraph.CreateSpec) {
 		_spec.SetField(gamecover.FieldDims, field.TypeOther, value)
 		_node.Dims = value
 	}
+	if value, ok := _c.mutation.ThumbHash(); ok {
+		_spec.SetField(gamecover.FieldThumbHash, field.TypeString, value)
+		_node.ThumbHash = &value
+	}
 	if value, ok := _c.mutation.Sexual(); ok {
 		_spec.SetField(gamecover.FieldSexual, field.TypeInt, value)
 		_node.Sexual = value
@@ -415,6 +433,24 @@ func (u *GameCoverUpsert) UpdateDims() *GameCoverUpsert {
 // ClearDims clears the value of the "dims" field.
 func (u *GameCoverUpsert) ClearDims() *GameCoverUpsert {
 	u.SetNull(gamecover.FieldDims)
+	return u
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (u *GameCoverUpsert) SetThumbHash(v string) *GameCoverUpsert {
+	u.Set(gamecover.FieldThumbHash, v)
+	return u
+}
+
+// UpdateThumbHash sets the "thumb_hash" field to the value that was provided on create.
+func (u *GameCoverUpsert) UpdateThumbHash() *GameCoverUpsert {
+	u.SetExcluded(gamecover.FieldThumbHash)
+	return u
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (u *GameCoverUpsert) ClearThumbHash() *GameCoverUpsert {
+	u.SetNull(gamecover.FieldThumbHash)
 	return u
 }
 
@@ -643,6 +679,27 @@ func (u *GameCoverUpsertOne) UpdateDims() *GameCoverUpsertOne {
 func (u *GameCoverUpsertOne) ClearDims() *GameCoverUpsertOne {
 	return u.Update(func(s *GameCoverUpsert) {
 		s.ClearDims()
+	})
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (u *GameCoverUpsertOne) SetThumbHash(v string) *GameCoverUpsertOne {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.SetThumbHash(v)
+	})
+}
+
+// UpdateThumbHash sets the "thumb_hash" field to the value that was provided on create.
+func (u *GameCoverUpsertOne) UpdateThumbHash() *GameCoverUpsertOne {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.UpdateThumbHash()
+	})
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (u *GameCoverUpsertOne) ClearThumbHash() *GameCoverUpsertOne {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.ClearThumbHash()
 	})
 }
 
@@ -1056,6 +1113,27 @@ func (u *GameCoverUpsertBulk) UpdateDims() *GameCoverUpsertBulk {
 func (u *GameCoverUpsertBulk) ClearDims() *GameCoverUpsertBulk {
 	return u.Update(func(s *GameCoverUpsert) {
 		s.ClearDims()
+	})
+}
+
+// SetThumbHash sets the "thumb_hash" field.
+func (u *GameCoverUpsertBulk) SetThumbHash(v string) *GameCoverUpsertBulk {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.SetThumbHash(v)
+	})
+}
+
+// UpdateThumbHash sets the "thumb_hash" field to the value that was provided on create.
+func (u *GameCoverUpsertBulk) UpdateThumbHash() *GameCoverUpsertBulk {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.UpdateThumbHash()
+	})
+}
+
+// ClearThumbHash clears the value of the "thumb_hash" field.
+func (u *GameCoverUpsertBulk) ClearThumbHash() *GameCoverUpsertBulk {
+	return u.Update(func(s *GameCoverUpsert) {
+		s.ClearThumbHash()
 	})
 }
 

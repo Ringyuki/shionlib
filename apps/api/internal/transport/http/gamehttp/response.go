@@ -11,13 +11,14 @@ import (
 type randomGameIDDTO *int
 
 type GameCoverDTO struct {
-	Language string `json:"language" enum:"jp,en,zh,unknown"`
-	Type     string `json:"type" enum:"pkgfront,dig"`
-	URL      string `json:"url"`
-	Dims     []int  `json:"dims"`
-	Sexual   int    `json:"sexual"`
-	Violence int    `json:"violence"`
-	Masked   bool   `json:"masked" doc:"The picture was blurred for a viewer who does not see adult pictures; url is the blurred copy"`
+	Language  string  `json:"language" enum:"jp,en,zh,unknown"`
+	Type      string  `json:"type" enum:"pkgfront,dig"`
+	URL       string  `json:"url"`
+	Dims      []int   `json:"dims"`
+	ThumbHash *string `json:"thumb_hash" doc:"ThumbHash of the picture in base64, null when unknown"`
+	Sexual    int     `json:"sexual"`
+	Violence  int     `json:"violence"`
+	Masked    bool    `json:"masked" doc:"The picture was blurred for a viewer who does not see adult pictures; url is the blurred copy"`
 }
 
 type GameDeveloperRefDTO struct {
@@ -105,13 +106,14 @@ func ToGameCard(card game.Card) GameCardDTO {
 	}
 	for i, cover := range card.Covers {
 		out.Covers[i] = GameCoverDTO{
-			Language: cover.Language,
-			Type:     cover.Type,
-			URL:      cover.URL,
-			Dims:     nonNilInts(cover.Dims),
-			Sexual:   cover.Sexual,
-			Violence: cover.Violence,
-			Masked:   cover.Masked,
+			Language:  cover.Language,
+			Type:      cover.Type,
+			URL:       cover.URL,
+			Dims:      nonNilInts(cover.Dims),
+			ThumbHash: cover.ThumbHash,
+			Sexual:    cover.Sexual,
+			Violence:  cover.Violence,
+			Masked:    cover.Masked,
 		}
 	}
 	for i, credit := range card.Developers {
@@ -166,10 +168,11 @@ type gameListPageDTO struct {
 }
 
 type gameImageDTO struct {
-	URL      string `json:"url"`
-	Dims     []int  `json:"dims"`
-	Sexual   int    `json:"sexual"`
-	Violence int    `json:"violence"`
+	URL       string  `json:"url"`
+	Dims      []int   `json:"dims"`
+	ThumbHash *string `json:"thumb_hash" doc:"ThumbHash of the picture in base64, null when unknown"`
+	Sexual    int     `json:"sexual"`
+	Violence  int     `json:"violence"`
 }
 
 type gameTagDTO struct {
@@ -202,32 +205,34 @@ type gameLinkDTO struct {
 }
 
 type gameCharacterDTO struct {
-	ID        int      `json:"id"`
-	Image     *string  `json:"image"`
-	NameJP    string   `json:"name_jp"`
-	NameZH    string   `json:"name_zh"`
-	NameEN    string   `json:"name_en"`
-	Aliases   []string `json:"aliases"`
-	IntroJP   string   `json:"intro_jp"`
-	IntroZH   string   `json:"intro_zh"`
-	IntroEN   string   `json:"intro_en"`
-	Gender    []string `json:"gender"`
-	BloodType *string  `json:"blood_type"`
-	Height    *int     `json:"height"`
-	Weight    *int     `json:"weight"`
-	Bust      *int     `json:"bust"`
-	Waist     *int     `json:"waist"`
-	Hips      *int     `json:"hips"`
-	Cup       *string  `json:"cup"`
-	Age       *int     `json:"age"`
-	Birthday  []int    `json:"birthday"`
+	ID             int      `json:"id"`
+	Image          *string  `json:"image"`
+	ImageThumbHash *string  `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	NameJP         string   `json:"name_jp"`
+	NameZH         string   `json:"name_zh"`
+	NameEN         string   `json:"name_en"`
+	Aliases        []string `json:"aliases"`
+	IntroJP        string   `json:"intro_jp"`
+	IntroZH        string   `json:"intro_zh"`
+	IntroEN        string   `json:"intro_en"`
+	Gender         []string `json:"gender"`
+	BloodType      *string  `json:"blood_type"`
+	Height         *int     `json:"height"`
+	Weight         *int     `json:"weight"`
+	Bust           *int     `json:"bust"`
+	Waist          *int     `json:"waist"`
+	Hips           *int     `json:"hips"`
+	Cup            *string  `json:"cup"`
+	Age            *int     `json:"age"`
+	Birthday       []int    `json:"birthday"`
 }
 
 type gameCharacterCreditDTO struct {
-	Role      string           `json:"role" enum:"main,primary,side,appears"`
-	Image     *string          `json:"image"`
-	Actor     *string          `json:"actor"`
-	Character gameCharacterDTO `json:"character"`
+	Role           string           `json:"role" enum:"main,primary,side,appears"`
+	Image          *string          `json:"image"`
+	ImageThumbHash *string          `json:"image_thumb_hash" doc:"ThumbHash of the image in base64, null when unknown"`
+	Actor          *string          `json:"actor"`
+	Character      gameCharacterDTO `json:"character"`
 }
 
 type gameRelationDTO struct {
@@ -312,7 +317,7 @@ type vndbScoreDTO struct {
 }
 
 func toImageDTO(image game.Image) gameImageDTO {
-	return gameImageDTO{URL: image.URL, Dims: nonNilInts(image.Dims), Sexual: image.Sexual, Violence: image.Violence}
+	return gameImageDTO{URL: image.URL, Dims: nonNilInts(image.Dims), ThumbHash: image.ThumbHash, Sexual: image.Sexual, Violence: image.Violence}
 }
 
 func toTagLinkDTO(link game.TagLink) gameTagLinkDTO {
@@ -341,30 +346,31 @@ func toCreditDTOs(credits []game.Credit) []GameCreditDTO {
 
 func toCharacterDTO(c character.Character) gameCharacterDTO {
 	return gameCharacterDTO{
-		ID:        c.ID,
-		Image:     c.Image,
-		NameJP:    c.NameJP,
-		NameZH:    valueOrEmpty(c.NameZH),
-		NameEN:    valueOrEmpty(c.NameEN),
-		Aliases:   nonNil(c.Aliases),
-		IntroJP:   c.IntroJP,
-		IntroZH:   c.IntroZH,
-		IntroEN:   c.IntroEN,
-		Gender:    nonNil(c.Gender),
-		BloodType: c.BloodType,
-		Height:    c.Height,
-		Weight:    c.Weight,
-		Bust:      c.Bust,
-		Waist:     c.Waist,
-		Hips:      c.Hips,
-		Cup:       c.Cup,
-		Age:       c.Age,
-		Birthday:  nonNilInts(c.Birthday),
+		ID:             c.ID,
+		Image:          c.Image,
+		ImageThumbHash: c.ImageThumbHash,
+		NameJP:         c.NameJP,
+		NameZH:         valueOrEmpty(c.NameZH),
+		NameEN:         valueOrEmpty(c.NameEN),
+		Aliases:        nonNil(c.Aliases),
+		IntroJP:        c.IntroJP,
+		IntroZH:        c.IntroZH,
+		IntroEN:        c.IntroEN,
+		Gender:         nonNil(c.Gender),
+		BloodType:      c.BloodType,
+		Height:         c.Height,
+		Weight:         c.Weight,
+		Bust:           c.Bust,
+		Waist:          c.Waist,
+		Hips:           c.Hips,
+		Cup:            c.Cup,
+		Age:            c.Age,
+		Birthday:       nonNilInts(c.Birthday),
 	}
 }
 
 func toCharacterCreditDTO(credit game.CharacterCredit) gameCharacterCreditDTO {
-	return gameCharacterCreditDTO{Role: credit.Role, Image: credit.Image, Actor: credit.Actor, Character: toCharacterDTO(credit.Character)}
+	return gameCharacterCreditDTO{Role: credit.Role, Image: credit.Image, ImageThumbHash: credit.ImageThumbHash, Actor: credit.Actor, Character: toCharacterDTO(credit.Character)}
 }
 
 func toRelationDTO(relation game.Relation) gameRelationDTO {

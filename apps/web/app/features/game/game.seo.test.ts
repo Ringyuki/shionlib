@@ -19,6 +19,7 @@ const header: GameHeader = {
       type: 'dig',
       url: 'https://images.example/cover.webp',
       dims: [500, 709],
+      thumb_hash: null,
       sexual: 0,
       violence: 0,
       masked: false,

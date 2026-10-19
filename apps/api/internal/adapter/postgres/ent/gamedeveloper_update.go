@@ -147,6 +147,26 @@ func (_u *GameDeveloperUpdate) ClearLogo() *GameDeveloperUpdate {
 	return _u
 }
 
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (_u *GameDeveloperUpdate) SetLogoThumbHash(v string) *GameDeveloperUpdate {
+	_u.mutation.SetLogoThumbHash(v)
+	return _u
+}
+
+// SetNillableLogoThumbHash sets the "logo_thumb_hash" field if the given value is not nil.
+func (_u *GameDeveloperUpdate) SetNillableLogoThumbHash(v *string) *GameDeveloperUpdate {
+	if v != nil {
+		_u.SetLogoThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (_u *GameDeveloperUpdate) ClearLogoThumbHash() *GameDeveloperUpdate {
+	_u.mutation.ClearLogoThumbHash()
+	return _u
+}
+
 // SetIntroJp sets the "intro_jp" field.
 func (_u *GameDeveloperUpdate) SetIntroJp(v string) *GameDeveloperUpdate {
 	_u.mutation.SetIntroJp(v)
@@ -492,6 +512,12 @@ func (_u *GameDeveloperUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.LogoCleared() {
 		_spec.ClearField(gamedeveloper.FieldLogo, field.TypeString)
 	}
+	if value, ok := _u.mutation.LogoThumbHash(); ok {
+		_spec.SetField(gamedeveloper.FieldLogoThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.LogoThumbHashCleared() {
+		_spec.ClearField(gamedeveloper.FieldLogoThumbHash, field.TypeString)
+	}
 	if value, ok := _u.mutation.IntroJp(); ok {
 		_spec.SetField(gamedeveloper.FieldIntroJp, field.TypeString, value)
 	}
@@ -817,6 +843,26 @@ func (_u *GameDeveloperUpdateOne) SetNillableLogo(v *string) *GameDeveloperUpdat
 // ClearLogo clears the value of the "logo" field.
 func (_u *GameDeveloperUpdateOne) ClearLogo() *GameDeveloperUpdateOne {
 	_u.mutation.ClearLogo()
+	return _u
+}
+
+// SetLogoThumbHash sets the "logo_thumb_hash" field.
+func (_u *GameDeveloperUpdateOne) SetLogoThumbHash(v string) *GameDeveloperUpdateOne {
+	_u.mutation.SetLogoThumbHash(v)
+	return _u
+}
+
+// SetNillableLogoThumbHash sets the "logo_thumb_hash" field if the given value is not nil.
+func (_u *GameDeveloperUpdateOne) SetNillableLogoThumbHash(v *string) *GameDeveloperUpdateOne {
+	if v != nil {
+		_u.SetLogoThumbHash(*v)
+	}
+	return _u
+}
+
+// ClearLogoThumbHash clears the value of the "logo_thumb_hash" field.
+func (_u *GameDeveloperUpdateOne) ClearLogoThumbHash() *GameDeveloperUpdateOne {
+	_u.mutation.ClearLogoThumbHash()
 	return _u
 }
 
@@ -1194,6 +1240,12 @@ func (_u *GameDeveloperUpdateOne) sqlSave(ctx context.Context) (_node *GameDevel
 	}
 	if _u.mutation.LogoCleared() {
 		_spec.ClearField(gamedeveloper.FieldLogo, field.TypeString)
+	}
+	if value, ok := _u.mutation.LogoThumbHash(); ok {
+		_spec.SetField(gamedeveloper.FieldLogoThumbHash, field.TypeString, value)
+	}
+	if _u.mutation.LogoThumbHashCleared() {
+		_spec.ClearField(gamedeveloper.FieldLogoThumbHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.IntroJp(); ok {
 		_spec.SetField(gamedeveloper.FieldIntroJp, field.TypeString, value)

@@ -25,6 +25,7 @@ export function GameBanner({ images, className }: GameBannerProps) {
     <>
       <GalleryThumb
         src={image.url}
+        thumbhash={image.thumb_hash ?? undefined}
         label={t('viewScreenshot', { index: index + 1 })}
         data={thumb(index)}
         onOpen={() => show(index)}

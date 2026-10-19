@@ -24,6 +24,7 @@ func (GameCover) Fields() []ent.Field {
 		field.Text("url"),
 		field.Text("type"),
 		field.Other("dims", intsType).SchemaType(intArray).Optional(),
+		field.Text("thumb_hash").Optional().Nillable(),
 		field.Int("sexual").SchemaType(pg("integer")),
 		field.Int("violence").SchemaType(pg("integer")),
 		field.Text("source").Optional().Nillable(),

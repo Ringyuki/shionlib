@@ -66,6 +66,11 @@ func Dims(v pgvalue.Ints) predicate.GameImage {
 	return predicate.GameImage(sql.FieldEQ(FieldDims, v))
 }
 
+// ThumbHash applies equality check predicate on the "thumb_hash" field. It's identical to ThumbHashEQ.
+func ThumbHash(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldEQ(FieldThumbHash, v))
+}
+
 // Sexual applies equality check predicate on the "sexual" field. It's identical to SexualEQ.
 func Sexual(v int) predicate.GameImage {
 	return predicate.GameImage(sql.FieldEQ(FieldSexual, v))
@@ -219,6 +224,81 @@ func DimsIsNil() predicate.GameImage {
 // DimsNotNil applies the NotNil predicate on the "dims" field.
 func DimsNotNil() predicate.GameImage {
 	return predicate.GameImage(sql.FieldNotNull(FieldDims))
+}
+
+// ThumbHashEQ applies the EQ predicate on the "thumb_hash" field.
+func ThumbHashEQ(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldEQ(FieldThumbHash, v))
+}
+
+// ThumbHashNEQ applies the NEQ predicate on the "thumb_hash" field.
+func ThumbHashNEQ(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldNEQ(FieldThumbHash, v))
+}
+
+// ThumbHashIn applies the In predicate on the "thumb_hash" field.
+func ThumbHashIn(vs ...string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldIn(FieldThumbHash, vs...))
+}
+
+// ThumbHashNotIn applies the NotIn predicate on the "thumb_hash" field.
+func ThumbHashNotIn(vs ...string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldNotIn(FieldThumbHash, vs...))
+}
+
+// ThumbHashGT applies the GT predicate on the "thumb_hash" field.
+func ThumbHashGT(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldGT(FieldThumbHash, v))
+}
+
+// ThumbHashGTE applies the GTE predicate on the "thumb_hash" field.
+func ThumbHashGTE(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldGTE(FieldThumbHash, v))
+}
+
+// ThumbHashLT applies the LT predicate on the "thumb_hash" field.
+func ThumbHashLT(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldLT(FieldThumbHash, v))
+}
+
+// ThumbHashLTE applies the LTE predicate on the "thumb_hash" field.
+func ThumbHashLTE(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldLTE(FieldThumbHash, v))
+}
+
+// ThumbHashContains applies the Contains predicate on the "thumb_hash" field.
+func ThumbHashContains(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldContains(FieldThumbHash, v))
+}
+
+// ThumbHashHasPrefix applies the HasPrefix predicate on the "thumb_hash" field.
+func ThumbHashHasPrefix(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldHasPrefix(FieldThumbHash, v))
+}
+
+// ThumbHashHasSuffix applies the HasSuffix predicate on the "thumb_hash" field.
+func ThumbHashHasSuffix(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldHasSuffix(FieldThumbHash, v))
+}
+
+// ThumbHashIsNil applies the IsNil predicate on the "thumb_hash" field.
+func ThumbHashIsNil() predicate.GameImage {
+	return predicate.GameImage(sql.FieldIsNull(FieldThumbHash))
+}
+
+// ThumbHashNotNil applies the NotNil predicate on the "thumb_hash" field.
+func ThumbHashNotNil() predicate.GameImage {
+	return predicate.GameImage(sql.FieldNotNull(FieldThumbHash))
+}
+
+// ThumbHashEqualFold applies the EqualFold predicate on the "thumb_hash" field.
+func ThumbHashEqualFold(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldEqualFold(FieldThumbHash, v))
+}
+
+// ThumbHashContainsFold applies the ContainsFold predicate on the "thumb_hash" field.
+func ThumbHashContainsFold(v string) predicate.GameImage {
+	return predicate.GameImage(sql.FieldContainsFold(FieldThumbHash, v))
 }
 
 // SexualEQ applies the EQ predicate on the "sexual" field.

@@ -23,6 +23,8 @@ const (
 	FieldHID = "h_id"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
+	// FieldImageThumbHash holds the string denoting the image_thumb_hash field in the database.
+	FieldImageThumbHash = "image_thumb_hash"
 	// FieldNameJp holds the string denoting the name_jp field in the database.
 	FieldNameJp = "name_jp"
 	// FieldNameZh holds the string denoting the name_zh field in the database.
@@ -90,6 +92,7 @@ var Columns = []string{
 	FieldVID,
 	FieldHID,
 	FieldImage,
+	FieldImageThumbHash,
 	FieldNameJp,
 	FieldNameZh,
 	FieldNameEn,
@@ -195,6 +198,11 @@ func ByHID(opts ...sql.OrderTermOption) OrderOption {
 // ByImage orders the results by the image field.
 func ByImage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldImage, opts...).ToFunc()
+}
+
+// ByImageThumbHash orders the results by the image_thumb_hash field.
+func ByImageThumbHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImageThumbHash, opts...).ToFunc()
 }
 
 // ByNameJp orders the results by the name_jp field.
