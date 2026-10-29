@@ -159,6 +159,7 @@ test.describe('as an uploader', () => {
     await page.getByLabel('补丁版本').fill('v1.1')
     await page.getByLabel('发布页').fill('example.org/patch')
     await page.getByRole('group', { name: '形态' }).getByRole('button', { name: '免安装' }).click()
+    await expect(page.getByText('请选择形态')).toBeHidden()
     await page
       .getByRole('group', { name: '附带内容' })
       .getByRole('button', { name: '全CG存档' })
