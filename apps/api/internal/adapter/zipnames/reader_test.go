@@ -78,6 +78,21 @@ func TestLegacyNamesDecodesNamesStoredInAChineseCodePage(t *testing.T) {
 	}
 }
 
+func TestLegacyNamesReadsAJapaneseTitleWrittenInAChineseCodePage(t *testing.T) {
+	names := []string{"絆きらめく恋いろは/", "絆きらめく恋いろは/汉化补丁备份/", "絆きらめく恋いろは/全CG存档/存档位置.txt", "絆きらめく恋いろは/中文攻略.txt"}
+	entries := make([]entry, len(names))
+	for i, name := range names {
+		entries[i] = entry{name, simplifiedchinese.GBK}
+	}
+	got, err := zipnames.NewReader().LegacyNames(context.Background(), archive(t, entries...))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Encoding != "gbk" || !slices.Equal(got.Names, names) {
+		t.Fatalf("unexpected names %+v", got)
+	}
+}
+
 func TestLegacyNamesLeavesUnicodeArchivesAlone(t *testing.T) {
 	path := archive(t, entry{"ゲーム/readme.txt", nil}, entry{"setup.exe", nil})
 	got, err := zipnames.NewReader().LegacyNames(context.Background(), path)
