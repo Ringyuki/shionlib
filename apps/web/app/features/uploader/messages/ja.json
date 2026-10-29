@@ -36,7 +36,8 @@
       "translation": "翻訳が未記入",
       "form": "形態が未記入"
     },
-    "estimate": "約 {size}"
+    "estimate": "約 {size}",
+    "patch": "パッチ：{name}"
   },
   "account": {
     "title": "ストレージとダウンロード数",

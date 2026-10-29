@@ -14,6 +14,7 @@ import {
 import { useUploadTermination } from '../use-upload-termination'
 import { UploadFacts } from './upload-facts'
 import { UploadFailures } from './upload-failures'
+import { UploadComposition } from './upload-composition'
 import { UploadTarget } from './upload-target'
 
 type UploadPaneProps = {
@@ -57,6 +58,11 @@ export function UploadPane({ opened, onClose }: UploadPaneProps) {
               {shown.target !== null && (
                 <PaneSection label={t('pane.target')}>
                   <UploadTarget detail={shown} target={shown.target} />
+                </PaneSection>
+              )}
+              {shown.composition !== null && (
+                <PaneSection label={t('pane.composition')}>
+                  <UploadComposition detail={shown} composition={shown.composition} />
                 </PaneSection>
               )}
               <PaneSection

@@ -63,3 +63,51 @@ test.describe('composing with a patch', () => {
     await expect(entry.getByText(/^(排队中|合成中|合成失败)$/)).toBeVisible()
   })
 })
+
+test.describe('a composition that has not started', () => {
+  test.use({ storageState: sessionFile('member') })
+
+  test('waits among the uploads and is offered again before a new one', async ({
+    page,
+  }, testInfo) => {
+    const patch = testInfo.outputPath('e2e-草稿补丁.zip')
+    await writeFile(patch, storedZip({ '汉化补丁/patch.xp3': 'draft script' }))
+    await page.goto('/zh/upload?game=4&mode=compose')
+    await page.getByRole('button', { name: '下一步' }).click()
+    await expect(page).toHaveURL(/step=patch/)
+    await page.locator('input[type="file"]').setInputFiles(patch)
+    await page.getByRole('group', { name: '语言' }).getByRole('button', { name: '简中' }).click()
+    await page.getByRole('group', { name: '翻译' }).getByRole('button', { name: '汉化组' }).click()
+    const translators = page.getByRole('combobox', { name: '汉化组' })
+    await translators.fill('green')
+    await page.getByRole('option', { name: /绿茶汉化组/ }).click()
+    await page.getByRole('button', { name: '下一步' }).click()
+    await expect(page).toHaveURL(/step=files/)
+    await expect(page.getByText(/合成后共 \d+ 个文件/)).toBeVisible({ timeout: 60_000 })
+
+    await page.goto('/zh/user/uploads?status=uploading')
+    const entry = page.locator('article').filter({ hasText: /\[绿茶汉化组\] \(files\)\.7z/ })
+    await expect(entry.getByText('未开始', { exact: true })).toBeVisible()
+    await expect(entry.getByText('补丁：e2e-草稿补丁.zip')).toBeVisible()
+    await expect(entry.getByText(/^将于 .+ 清除$/)).toBeVisible()
+    await expect(page.getByText('上传中 1')).toBeVisible()
+
+    await page.goto('/zh/upload?game=4&mode=compose')
+    const prompt = page.getByRole('dialog', { name: '这个游戏有尚未开始的合成' })
+    await expect(prompt.getByText('补丁：e2e-草稿补丁.zip', { exact: false })).toBeVisible()
+    await prompt.getByRole('button', { name: '新建合成' }).click()
+    await expect(prompt).toBeHidden()
+    await expect(page).not.toHaveURL(/composition=/)
+
+    await page.reload()
+    await expect(prompt).toBeVisible()
+    await prompt.getByRole('link', { name: '继续合成' }).click()
+    await expect(page).toHaveURL(/composition=\d+&step=extras$/)
+    await expect(prompt).toBeHidden()
+
+    await page.goto('/zh/user/uploads?status=uploading')
+    await entry.getByRole('button', { name: '删除' }).click()
+    await page.getByRole('button', { name: '确定' }).click()
+    await expect(entry).toHaveCount(0)
+  })
+})

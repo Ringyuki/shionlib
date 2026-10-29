@@ -366,7 +366,8 @@
     "run": {
       "queued": "Queued",
       "running": "Composing",
-      "failed": "Composing failed"
+      "failed": "Composing failed",
+      "draft": "Not started"
     },
     "ahead": "{count, plural, =0 {Next in line} one {# task ahead} other {# tasks ahead}}",
     "progress": "{step}, step {at} of {total}",
@@ -426,7 +427,16 @@
       "start": "Upload"
     },
     "confirm": "OK",
-    "stepsLabel": "Composition progress"
+    "stepsLabel": "Composition progress",
+    "continue": "Continue composing",
+    "discardDraft": "The patch uploaded for it is deleted too",
+    "discardAt": "Cleared on {time}",
+    "draftPrompt": {
+      "title": "This game has a composition that has not started",
+      "new": "New composition",
+      "base": "Original: {name}",
+      "patch": "Patch: {name} ({size})"
+    }
   },
   "seo": {
     "download": "{words} download",

@@ -39,6 +39,7 @@ export type ComposeMode = (typeof composeModes)[number]
 export type Composer = {
   composition: Composition | null
   bases: CompositionBase[]
+  drafts: Composition[]
   step: WizardStep
 }
 

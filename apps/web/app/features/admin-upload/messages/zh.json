@@ -10,7 +10,8 @@
     "published": "已发布",
     "rejected": "未通过检查",
     "canceled": "已取消",
-    "expired": "已过期"
+    "expired": "已过期",
+    "composed": "用于合成"
   },
   "search": "搜索文件名或上传者",
   "byUser": "上传者：{name}",
@@ -54,7 +55,8 @@
     "title": "上传详情",
     "facts": "概况",
     "target": "资源",
-    "failures": "失败记录"
+    "failures": "失败记录",
+    "composition": "合成"
   },
   "notice": {
     "allReceived": "{chunks, number} 个分片已全部收到，但没有提交成资源，过期后文件已清除",
@@ -138,5 +140,19 @@
   "terminate": "终止上传",
   "terminateConfirm": "确定要终止这个上传吗？",
   "terminateDescription": "已上传的部分将被丢弃，上传者需要重新上传这个文件",
-  "terminated": "上传已终止"
+  "terminated": "上传已终止",
+  "composition": {
+    "game": "游戏",
+    "id": "合成",
+    "state": "状态",
+    "resource": "资源",
+    "deleted": "合成已删除",
+    "stateName": {
+      "draft": "未开始",
+      "queued": "排队中",
+      "running": "合成中",
+      "done": "已完成",
+      "failed": "合成失败"
+    }
+  }
 }

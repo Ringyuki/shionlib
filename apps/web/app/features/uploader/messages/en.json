@@ -36,7 +36,8 @@
       "translation": "Translation not stated",
       "form": "Form not stated"
     },
-    "estimate": "About {size}"
+    "estimate": "About {size}",
+    "patch": "Patch: {name}"
   },
   "account": {
     "title": "Storage and downloads",

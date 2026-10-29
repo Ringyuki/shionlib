@@ -43,6 +43,7 @@ const ended: UploadDetail = {
     updated: '2026-10-14T09:20:00Z',
   },
   target: null,
+  composition: null,
   held: false,
   failures: null,
 }

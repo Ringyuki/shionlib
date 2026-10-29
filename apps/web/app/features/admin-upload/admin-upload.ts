@@ -16,6 +16,7 @@ export const stages = [
   'pending',
   'processing',
   'published',
+  'composed',
   'rejected',
   'canceled',
   'expired',

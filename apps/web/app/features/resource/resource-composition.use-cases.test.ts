@@ -22,7 +22,12 @@ describe('loadComposer', () => {
       .on('get', '/game/{gameId}/composition/bases', [disc, base(31)])
     await expect(
       loadComposer(fake.api, { gameId: 99, compositionId: 4, step: 'files' }),
-    ).resolves.toEqual({ composition: composition(), bases: [base(31), disc], step: 'files' })
+    ).resolves.toEqual({
+      composition: composition(),
+      bases: [base(31), disc],
+      drafts: [],
+      step: 'files',
+    })
     expect(paths(fake.requests)).toEqual(['GET /composition/4', 'GET /game/10/composition/bases'])
   })
 
@@ -34,9 +39,27 @@ describe('loadComposer', () => {
     await expect(loadComposer(fake.api, { gameId: undefined, compositionId: 4 })).resolves.toEqual({
       composition: null,
       bases: [],
+      drafts: [],
       step: 'base',
     })
     expect(paths(fake.requests)).toEqual(['GET /composition/4'])
+  })
+
+  it('offers the unstarted drafts of the game when a new composition begins', async () => {
+    const waiting = composition({ id: 7, state: 'draft', resource_id: null })
+    const fake = fakeApi()
+      .on('get', '/game/{gameId}/composition/bases', [base(31)])
+      .on('get', '/composition/mine', [
+        waiting,
+        composition({ id: 8, state: 'draft', resource_id: null, game_id: 11 }),
+        composition({ id: 9, state: 'queued', resource_id: 40 }),
+      ])
+    const composer = await loadComposer(fake.api, { gameId: 10 })
+    expect(composer.drafts).toEqual([waiting])
+    expect(paths(fake.requests).toSorted()).toEqual([
+      'GET /composition/mine',
+      'GET /game/10/composition/bases',
+    ])
   })
 })
 

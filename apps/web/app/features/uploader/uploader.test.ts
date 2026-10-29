@@ -4,6 +4,7 @@ import type { Submission, Upload } from '~/features/upload'
 import {
   emptinessOf,
   entriesOf,
+  matchingDrafts,
   firstListing,
   heldSince,
   listingSearch,
@@ -42,6 +43,22 @@ const owned = (id: number) => ({ resource: { id } })
 const queue = [
   transferOf('a', 'Sakura no Uta', 'uta.part1.rar'),
   transferOf('b', 'ATRI', 'atri.7z'),
+]
+
+const waiting = [
+  {
+    composition: {
+      id: 7,
+      file_name: '',
+      patch: { name: '甜蜜女友ss R18补丁（去除哔声）.zip' },
+      save: null,
+    },
+    game: {
+      title_zh: '甜蜜女友～Second Season～',
+      title_jp: 'アマカノ～Second Season～',
+      title_en: '',
+    },
+  },
 ]
 
 const none = { processing: 0, published: 0 }
@@ -86,24 +103,39 @@ describe('matchingTransfers', () => {
 
 describe('entriesOf', () => {
   it('lists what is uploading before the resources of the first page', () => {
-    expect(entriesOf(firstListing, queue, [owned(7)]).map(entry => entry.key)).toEqual([
+    expect(entriesOf(firstListing, queue, waiting, [owned(7)]).map(entry => entry.key)).toEqual([
       'transfer:a',
       'transfer:b',
+      'draft:7',
       'resource:7',
     ])
   })
 
-  it('leaves transfers out of later pages and of the stages on the server', () => {
+  it('leaves transfers and drafts out of later pages and of the stages on the server', () => {
     const keys = (changes: Partial<typeof firstListing>) =>
-      entriesOf({ ...firstListing, ...changes }, queue, [owned(7)]).map(entry => entry.key)
+      entriesOf({ ...firstListing, ...changes }, queue, waiting, [owned(7)]).map(entry => entry.key)
     expect(keys({ page: 2 })).toEqual(['resource:7'])
     expect(keys({ stage: 'processing' })).toEqual(['resource:7'])
     expect(keys({ stage: 'published' })).toEqual(['resource:7'])
   })
 
-  it('narrows transfers by the search as well', () => {
-    const entries = entriesOf({ ...firstListing, stage: 'uploading', search: 'atri' }, queue, [])
+  it('narrows transfers and drafts by the search as well', () => {
+    const entries = entriesOf(
+      { ...firstListing, stage: 'uploading', search: 'atri' },
+      queue,
+      waiting,
+      [],
+    )
     expect(entries.map(entry => entry.key)).toEqual(['transfer:b'])
+  })
+})
+
+describe('matchingDrafts', () => {
+  it('matches the result, the patch or the game, whatever the case', () => {
+    expect(matchingDrafts(waiting, '')).toEqual(waiting)
+    expect(matchingDrafts(waiting, 'R18补丁')).toEqual(waiting)
+    expect(matchingDrafts(waiting, 'second season')).toEqual(waiting)
+    expect(matchingDrafts(waiting, 'atri')).toEqual([])
   })
 })
 

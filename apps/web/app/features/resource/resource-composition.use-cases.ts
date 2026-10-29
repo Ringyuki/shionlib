@@ -2,6 +2,7 @@ import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import type { Composer, Composition, WizardStep } from './resource-composition'
 import { reachedStep, usableFirst } from './resource-composition'
+import { draftsOfGame } from './resource-composition-draft'
 import type { CompositionCommand, CompositionEdit } from './resource-composition.schema'
 
 type ComposerQuery = { gameId: number | undefined; compositionId?: number; step?: WizardStep }
@@ -21,15 +22,16 @@ export async function loadComposer(api: ApiClient, query: ComposerQuery): Promis
           .get('/composition/{id}', { params: { path: { id: query.compositionId } } })
           .catch(absent)
   const gameId = composition?.game_id ?? query.gameId
-  const bases =
+  const [bases, own] = await Promise.all([
     gameId === undefined
       ? null
-      : await api
-          .get('/game/{gameId}/composition/bases', { params: { path: { gameId } } })
-          .catch(absent)
+      : api.get('/game/{gameId}/composition/bases', { params: { path: { gameId } } }).catch(absent),
+    gameId === undefined || composition !== null ? [] : loadOwnCompositions(api),
+  ])
   return {
     composition,
     bases: usableFirst(bases ?? []),
+    drafts: gameId === undefined ? [] : draftsOfGame(own, gameId),
     step: reachedStep(query.step, composition),
   }
 }

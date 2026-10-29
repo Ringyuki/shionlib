@@ -366,7 +366,8 @@
     "run": {
       "queued": "排队中",
       "running": "合成中",
-      "failed": "合成失败"
+      "failed": "合成失败",
+      "draft": "未开始"
     },
     "ahead": "前面还有 {count} 个任务",
     "progress": "正在{step}，第 {at} 步，共 {total} 步",
@@ -426,7 +427,16 @@
       "start": "开始上传"
     },
     "confirm": "确定",
-    "stepsLabel": "合成进度"
+    "stepsLabel": "合成进度",
+    "continue": "继续合成",
+    "discardDraft": "已上传的补丁将一并删除",
+    "discardAt": "将于 {time} 清除",
+    "draftPrompt": {
+      "title": "这个游戏有尚未开始的合成",
+      "new": "新建合成",
+      "base": "原版：{name}",
+      "patch": "补丁：{name}（{size}）"
+    }
   },
   "seo": {
     "download": "{words} 下载",

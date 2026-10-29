@@ -366,7 +366,8 @@
     "run": {
       "queued": "待機中",
       "running": "合成中",
-      "failed": "合成に失敗"
+      "failed": "合成に失敗",
+      "draft": "未開始"
     },
     "ahead": "前に {count} 件のタスクがあります",
     "progress": "{step}（{total} 段階中 {at} 段階目）",
@@ -426,7 +427,16 @@
       "start": "アップロード"
     },
     "confirm": "OK",
-    "stepsLabel": "合成の進行状況"
+    "stepsLabel": "合成の進行状況",
+    "continue": "合成を続ける",
+    "discardDraft": "アップロード済みのパッチも削除されます",
+    "discardAt": "{time} に削除されます",
+    "draftPrompt": {
+      "title": "このゲームには開始していない合成があります",
+      "new": "新しく合成する",
+      "base": "元のファイル：{name}",
+      "patch": "パッチ：{name}（{size}）"
+    }
   },
   "seo": {
     "download": "{words} ダウンロード",

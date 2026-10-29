@@ -7,6 +7,7 @@ import type { Allowance } from '~/features/upload'
 import { Button } from '~/shared/ui/button'
 import { composeModes, type ComposeMode, type Composer } from '../resource-composition'
 import { CompositionWizard } from './composition-wizard'
+import { DraftPrompt } from './draft-prompt'
 import { UploadForm } from './upload-form'
 
 type UploadPageProps = {
@@ -71,6 +72,11 @@ export function UploadPage({ game, allowance, mode, composer }: UploadPageProps)
       ) : (
         <UploadForm game={game} allowance={allowance} />
       )}
+      <DraftPrompt
+        key={game?.id ?? 'none'}
+        drafts={composer?.drafts ?? []}
+        asking={mode === 'compose' && composer !== null && composer.composition === null}
+      />
     </Stack>
   )
 }
