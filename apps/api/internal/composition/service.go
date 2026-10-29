@@ -240,6 +240,8 @@ func (s *Service) view(ctx context.Context, who actor.Actor, composition Composi
 			return View{}, err
 		}
 		view.FileName = name
+		discardAt := composition.Updated.Add(DraftTTL.Read(s.settings))
+		view.DiscardAt = &discardAt
 	}
 	if composition.State == StateQueued {
 		ahead, err := s.repo.Ahead(ctx, composition.ID)
@@ -356,7 +358,7 @@ func (s *Service) receive(ctx context.Context, who actor.Actor, composition *Com
 		name = string(role)
 	}
 	target := filepath.Join(dir, inputsDir, string(role), name)
-	session, err := s.uploads.Take(ctx, who, upload.SessionID, target)
+	session, err := s.uploads.Take(ctx, who, upload.SessionID, target, composition.ID)
 	if err != nil {
 		return err
 	}

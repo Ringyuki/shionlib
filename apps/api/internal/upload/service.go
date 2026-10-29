@@ -381,7 +381,7 @@ func (s *Service) Terminate(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s *Service) Take(ctx context.Context, who actor.Actor, id int, target string) (Session, error) {
+func (s *Service) Take(ctx context.Context, who actor.Actor, id int, target string, compositionID int) (Session, error) {
 	if !s.spool.Owns(target) {
 		return Session{}, fmt.Errorf("take upload %d: %s is outside the spool", id, target)
 	}
@@ -399,6 +399,9 @@ func (s *Service) Take(ctx context.Context, who actor.Actor, id int, target stri
 			return ErrSessionAlreadyUsed
 		}
 		if _, err := s.repo.SetStatus(ctx, id, StatusCompleted, StatusExpired); err != nil {
+			return err
+		}
+		if err := s.repo.MarkComposed(ctx, id, compositionID); err != nil {
 			return err
 		}
 		taken = session

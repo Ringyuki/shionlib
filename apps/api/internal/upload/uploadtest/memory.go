@@ -202,6 +202,13 @@ func (r *MemoryRepository) MarkSubmitted(_ context.Context, id int) error {
 	})
 }
 
+func (r *MemoryRepository) MarkComposed(_ context.Context, id, compositionID int) error {
+	return r.mutate(id, func(s *upload.Session) bool {
+		s.CompositionID = &compositionID
+		return true
+	})
+}
+
 func (r *MemoryRepository) ListStale(_ context.Context, now, before time.Time, limit int) ([]upload.Session, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

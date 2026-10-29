@@ -46,7 +46,7 @@ type Listings interface {
 }
 
 type Uploads interface {
-	Take(ctx context.Context, who actor.Actor, sessionID int, target string) (upload.Session, error)
+	Take(ctx context.Context, who actor.Actor, sessionID int, target string, compositionID int) (upload.Session, error)
 }
 
 type Quota interface {

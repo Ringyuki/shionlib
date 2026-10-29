@@ -42,6 +42,7 @@ func toSession(row *ent.GameUploadSession) upload.Session {
 		LastChunkAt:    row.LastChunkAt,
 		CompletedAt:    row.CompletedAt,
 		SubmittedAt:    row.SubmittedAt,
+		CompositionID:  row.CompositionID,
 		AbortedAt:      row.AbortedAt,
 		EndedAt:        row.EndedAt,
 		Created:        row.Created,
@@ -61,6 +62,8 @@ type uploadRow struct {
 	status, hashAlgorithm, fileHash, fileLabel, titleJP, titleZH, titleEN         sql.NullString
 	chunkSize, totalChunks, fileID, fileType, fileStatus, checkStatus, inspection sql.NullInt64
 	resourceID, resourceStatus, gameID                                            sql.NullInt64
+	compositionID, compositionResourceID                                          sql.NullInt64
+	compositionState                                                              sql.NullString
 	received                                                                      pgvalue.Ints
 	failures, total                                                               int
 	expiresAt, lastChunkAt, completedAt, submittedAt, abortedAt, endedAt, updated sql.NullTime
@@ -73,7 +76,8 @@ func scanUpload(scanner rowScanner) (download.Upload, int, error) {
 		&r.received, &r.hashAlgorithm, &r.fileHash, &r.expiresAt, &r.lastChunkAt, &r.completedAt, &r.submittedAt,
 		&r.abortedAt, &r.endedAt, &r.updated, &r.fileID, &r.fileType, &r.fileStatus, &r.checkStatus,
 		&r.inspection, &r.fileLabel, &r.resourceID, &r.resourceStatus, &r.publishedAt, &r.gameID,
-		&r.titleJP, &r.titleZH, &r.titleEN, &r.failures, &r.total)
+		&r.titleJP, &r.titleZH, &r.titleEN, &r.compositionID, &r.compositionState, &r.compositionResourceID,
+		&r.failures, &r.total)
 	if err != nil {
 		return download.Upload{}, 0, fmt.Errorf("scan an upload: %w", err)
 	}
@@ -105,6 +109,7 @@ func scanUpload(scanner rowScanner) (download.Upload, int, error) {
 			SubmittedAt:    timeOf(r.submittedAt),
 			AbortedAt:      timeOf(r.abortedAt),
 			EndedAt:        timeOf(r.endedAt),
+			CompositionID:  intOf(r.compositionID),
 			Created:        r.started,
 			Updated:        r.updated.Time,
 		}
@@ -131,6 +136,17 @@ func scanUpload(scanner rowScanner) (download.Upload, int, error) {
 				InspectionID: inspection,
 			},
 			Game: download.UploadGame{ID: int(r.gameID.Int64), TitleJP: r.titleJP.String, TitleZH: r.titleZH.String, TitleEN: r.titleEN.String},
+		}
+	}
+	if r.compositionID.Valid {
+		entry.Composition = &download.UploadComposition{
+			ID:    int(r.compositionID.Int64),
+			State: r.compositionState.String,
+			Game:  download.UploadGame{ID: int(r.gameID.Int64), TitleJP: r.titleJP.String, TitleZH: r.titleZH.String, TitleEN: r.titleEN.String},
+		}
+		if r.compositionResourceID.Valid {
+			resource := int(r.compositionResourceID.Int64)
+			entry.Composition.ResourceID = &resource
 		}
 	}
 	return entry, r.total, nil
@@ -184,4 +200,12 @@ func toFailure(row *ent.UploadFailure) (upload.Failure, error) {
 
 func (r clientErrorRecord) clientError() upload.ClientError {
 	return upload.ClientError{Name: r.Name, Message: r.Message, Status: r.Status, Code: r.Code, RequestID: r.RequestID, Ray: r.Ray}
+}
+
+func intOf(value sql.NullInt64) *int {
+	if !value.Valid {
+		return nil
+	}
+	id := int(value.Int64)
+	return &id
 }

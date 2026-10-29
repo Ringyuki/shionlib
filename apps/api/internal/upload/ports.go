@@ -16,6 +16,7 @@ type Repository interface {
 	SetStatus(ctx context.Context, id int, from, to SessionStatus) (bool, error)
 	Complete(ctx context.Context, id int, hash, mimeType string) (bool, error)
 	MarkSubmitted(ctx context.Context, id int) error
+	MarkComposed(ctx context.Context, id, compositionID int) error
 	ListStale(ctx context.Context, now, before time.Time, limit int) ([]Session, error)
 	HasFile(ctx context.Context, sessionID int) (bool, error)
 	HasLiveUpload(ctx context.Context, creatorID int, now time.Time) (bool, error)

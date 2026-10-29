@@ -1,0 +1,4 @@
+-- modify "game_upload_sessions" table
+ALTER TABLE "game_upload_sessions" ADD COLUMN "composition_id" integer NULL;
+-- earlier uploads a composition took: the composition by the same uploader, begun before the upload was taken, whose patch or saved games has the name and the size of the upload
+UPDATE "game_upload_sessions" AS s SET "composition_id" = c."id" FROM "resource_compositions" AS c WHERE s."composition_id" IS NULL AND s."submitted_at" IS NOT NULL AND s."creator_id" = c."creator_id" AND c."created" <= s."submitted_at" AND NOT EXISTS (SELECT 1 FROM "game_download_resource_files" AS f WHERE f."upload_session_id" = s."id") AND EXISTS (SELECT 1 FROM jsonb_array_elements(jsonb_build_array(c."patch", c."save")) AS input WHERE jsonb_typeof(input) = 'object' AND input->>'name' = regexp_replace(replace(btrim(s."file_name"), '\', '/'), '^.*/', '') AND (input->>'size')::bigint = s."total_size");

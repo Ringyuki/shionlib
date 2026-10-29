@@ -2,6 +2,7 @@ package uploadpg_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -74,6 +75,10 @@ func TestUploadsAreListedInTheStageTheRuleGivesThem(t *testing.T) {
 	f.file(t, stored, download.FileInObjectStore, int(download.CheckOK))
 	encrypted := f.session(t, "encrypted.7z", func(u *ent.GameUploadSessionUpdateOne) { u.SetStatus("COMPLETED").SetSubmittedAt(past) })
 	f.file(t, encrypted, download.FileOnServer, int(download.CheckEncrypted))
+	draft := f.db.Ent.Composition.Create().SetGameID(f.game).SetCreatorID(f.user).SetBase(json.RawMessage(`{}`)).SetDetails(json.RawMessage(`{}`)).SetState("draft").SaveX(f.ctx)
+	f.session(t, "patch.zip", func(u *ent.GameUploadSessionUpdateOne) {
+		u.SetStatus("EXPIRED").SetSubmittedAt(past).SetEndedAt(past).SetCompositionID(draft.ID)
+	})
 	if _, err := f.repo.RecordFailure(f.ctx, f.user, upload.FailureReport{Stage: upload.FailureReading, Reason: "unreadable", Error: upload.ClientError{Name: "NotFoundError"}, FileName: "unread.7z", FileSize: 5}, base.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +86,7 @@ func TestUploadsAreListedInTheStageTheRuleGivesThem(t *testing.T) {
 	now := time.Now()
 	page := download.Page{Number: 1, Size: 50}
 	all, total, err := f.store.Uploads(f.ctx, download.UploadFilter{Now: now}, page)
-	if err != nil || total != 11 || len(all) != 11 {
+	if err != nil || total != 12 || len(all) != 12 {
 		t.Fatalf("all %d %d %v", len(all), total, err)
 	}
 	if all[0].Kind != download.UploadAttempt || all[0].FileName != "unread.7z" || all[0].FailureCount != 1 || all[0].Session != nil {
@@ -89,7 +94,7 @@ func TestUploadsAreListedInTheStageTheRuleGivesThem(t *testing.T) {
 	}
 	want := map[download.UploadStage]int{
 		download.UploadNotStarted: 1, download.UploadUploading: 1, download.UploadExpired: 2, download.UploadPending: 1, download.UploadCanceled: 1,
-		download.UploadPublished: 2, download.UploadProcessing: 2, download.UploadRejected: 1,
+		download.UploadPublished: 2, download.UploadProcessing: 2, download.UploadRejected: 1, download.UploadComposed: 1,
 	}
 	for _, stage := range download.UploadStages() {
 		listed, count, err := f.store.Uploads(f.ctx, download.UploadFilter{Stage: &stage, Now: now}, page)
@@ -101,6 +106,16 @@ func TestUploadsAreListedInTheStageTheRuleGivesThem(t *testing.T) {
 				t.Fatalf("%s listed under %s, but the rule gives %s", entry.FileName, stage, got)
 			}
 		}
+	}
+	composed := download.UploadComposed
+	taken, _, err := f.store.Uploads(f.ctx, download.UploadFilter{Stage: &composed, Now: now}, page)
+	if err != nil || len(taken) != 1 || taken[0].Composition == nil || taken[0].Composition.ID != draft.ID || taken[0].Composition.State != "draft" || taken[0].Composition.Game.ID != f.game {
+		t.Fatalf("an upload a composition took names the composition and its game: %+v %v", taken, err)
+	}
+	f.db.Ent.Composition.DeleteOneID(draft.ID).ExecX(f.ctx)
+	taken, _, err = f.store.Uploads(f.ctx, download.UploadFilter{Stage: &composed, Now: now}, page)
+	if err != nil || len(taken) != 1 || taken[0].Composition == nil || taken[0].Composition.ID != draft.ID || taken[0].Composition.State != "" {
+		t.Fatalf("it stays with the composition once the composition is gone: %+v %v", taken, err)
 	}
 }
 

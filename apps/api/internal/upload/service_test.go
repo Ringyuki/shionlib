@@ -330,13 +330,13 @@ func TestAFinishedUploadIsHandedOverOnceAndLeavesTheSpoolRoot(t *testing.T) {
 	}
 	target := uploadtest.SpoolRoot + ".compose/7/inputs/patch.zip"
 
-	if _, err := f.service.Take(ctx, uploader, finished.ID, "/elsewhere/patch.zip"); err == nil {
+	if _, err := f.service.Take(ctx, uploader, finished.ID, "/elsewhere/patch.zip", 7); err == nil {
 		t.Fatal("a file is never moved out of the spool")
 	}
-	_, err := f.service.Take(ctx, stranger, finished.ID, target)
+	_, err := f.service.Take(ctx, stranger, finished.ID, target, 7)
 	expectCode(t, err, upload.ErrSessionNotOwner)
 
-	taken, err := f.service.Take(ctx, uploader, finished.ID, target)
+	taken, err := f.service.Take(ctx, uploader, finished.ID, target, 7)
 	if err != nil || taken.ID != finished.ID || taken.TotalSize != int64(len(content)) {
 		t.Fatalf("taken: %+v %v", taken, err)
 	}
@@ -346,15 +346,15 @@ func TestAFinishedUploadIsHandedOverOnceAndLeavesTheSpoolRoot(t *testing.T) {
 	if _, still := f.spool.Content(finished.StoragePath); still {
 		t.Fatal("nothing is left at the old place")
 	}
-	if got, _ := f.repo.GetSession(ctx, finished.ID); got.Status != upload.StatusExpired {
-		t.Fatalf("a handed over upload is used up: %+v", got)
+	if got, _ := f.repo.GetSession(ctx, finished.ID); got.Status != upload.StatusExpired || got.CompositionID == nil || *got.CompositionID != 7 {
+		t.Fatalf("a handed over upload is used up by the composition that took it: %+v", got)
 	}
-	_, err = f.service.Take(ctx, uploader, finished.ID, target)
+	_, err = f.service.Take(ctx, uploader, finished.ID, target, 7)
 	expectCode(t, err, upload.ErrInvalidSessionStatus)
 
 	attached := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: uploadtest.SpoolRoot + "9.part"})
 	f.repo.AttachFile(attached.ID, attached.StoragePath)
-	_, err = f.service.Take(ctx, uploader, attached.ID, target)
+	_, err = f.service.Take(ctx, uploader, attached.ID, target, 7)
 	expectCode(t, err, upload.ErrSessionAlreadyUsed)
 }
 

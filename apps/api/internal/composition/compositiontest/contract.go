@@ -213,6 +213,15 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			return created
 		}
 		draft := make(1, nil, nil, composition.StateDraft, nil)
+		patched := make(1, nil, nil, composition.StateDraft, nil)
+		patched.Patch = &composition.Input{Name: "patch.zip", State: composition.InputReady}
+		saved := make(1, nil, nil, composition.StateDraft, nil)
+		saved.Save = &composition.Input{Name: "save.zip", State: composition.InputReady}
+		for _, holding := range []composition.Composition{patched, saved} {
+			if err := env.Repo.Save(ctx, holding); err != nil {
+				t.Fatal(err)
+			}
+		}
 		done := make(1, &first, nil, composition.StateDone, nil)
 		rebuilding := make(1, &first, ptr(5010), composition.StateDraft, nil)
 		running := make(1, &second, nil, composition.StateRunning, ptr(at))
@@ -222,8 +231,8 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		failed := make(1, nil, nil, composition.StateFailed, nil)
 
 		active, err := env.Repo.ListActive(ctx, 1, 10)
-		if err != nil || !slices.Equal(ids(active), []int{failed.ID, early.ID, running.ID, rebuilding.ID}) {
-			t.Fatalf("what a user has in hand, newest first, without plain drafts (%d) and finished work (%d): %v %v", draft.ID, done.ID, ids(active), err)
+		if err != nil || !slices.Equal(ids(active), []int{failed.ID, early.ID, running.ID, rebuilding.ID, saved.ID, patched.ID}) {
+			t.Fatalf("what a user has in hand, newest first, without drafts that hold nothing (%d) and finished work (%d): %v %v", draft.ID, done.ID, ids(active), err)
 		}
 		if few, _ := env.Repo.ListActive(ctx, 1, 2); !slices.Equal(ids(few), []int{failed.ID, early.ID}) {
 			t.Fatalf("limited: %v", ids(few))

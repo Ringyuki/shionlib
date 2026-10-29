@@ -50802,6 +50802,8 @@ type GameUploadSessionMutation struct {
 	submitted_at                       *time.Time
 	aborted_at                         *time.Time
 	ended_at                           *time.Time
+	composition_id                     *int
+	addcomposition_id                  *int
 	created                            *time.Time
 	updated                            *time.Time
 	clearedFields                      map[string]struct{}
@@ -51687,6 +51689,76 @@ func (m *GameUploadSessionMutation) ResetEndedAt() {
 	delete(m.clearedFields, gameuploadsession.FieldEndedAt)
 }
 
+// SetCompositionID sets the "composition_id" field.
+func (m *GameUploadSessionMutation) SetCompositionID(i int) {
+	m.composition_id = &i
+	m.addcomposition_id = nil
+}
+
+// CompositionID returns the value of the "composition_id" field in the mutation.
+func (m *GameUploadSessionMutation) CompositionID() (r int, exists bool) {
+	v := m.composition_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompositionID returns the old "composition_id" field's value of the GameUploadSession entity.
+// If the GameUploadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameUploadSessionMutation) OldCompositionID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompositionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompositionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompositionID: %w", err)
+	}
+	return oldValue.CompositionID, nil
+}
+
+// AddCompositionID adds i to the "composition_id" field.
+func (m *GameUploadSessionMutation) AddCompositionID(i int) {
+	if m.addcomposition_id != nil {
+		*m.addcomposition_id += i
+	} else {
+		m.addcomposition_id = &i
+	}
+}
+
+// AddedCompositionID returns the value that was added to the "composition_id" field in this mutation.
+func (m *GameUploadSessionMutation) AddedCompositionID() (r int, exists bool) {
+	v := m.addcomposition_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (m *GameUploadSessionMutation) ClearCompositionID() {
+	m.composition_id = nil
+	m.addcomposition_id = nil
+	m.clearedFields[gameuploadsession.FieldCompositionID] = struct{}{}
+}
+
+// CompositionIDCleared returns if the "composition_id" field was cleared in this mutation.
+func (m *GameUploadSessionMutation) CompositionIDCleared() bool {
+	_, ok := m.clearedFields[gameuploadsession.FieldCompositionID]
+	return ok
+}
+
+// ResetCompositionID resets all changes to the "composition_id" field.
+func (m *GameUploadSessionMutation) ResetCompositionID() {
+	m.composition_id = nil
+	m.addcomposition_id = nil
+	delete(m.clearedFields, gameuploadsession.FieldCompositionID)
+}
+
 // SetCreated sets the "created" field.
 func (m *GameUploadSessionMutation) SetCreated(t time.Time) {
 	m.created = &t
@@ -51967,7 +52039,7 @@ func (m *GameUploadSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameUploadSessionMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.file_name != nil {
 		fields = append(fields, gameuploadsession.FieldFileName)
 	}
@@ -52019,6 +52091,9 @@ func (m *GameUploadSessionMutation) Fields() []string {
 	if m.ended_at != nil {
 		fields = append(fields, gameuploadsession.FieldEndedAt)
 	}
+	if m.composition_id != nil {
+		fields = append(fields, gameuploadsession.FieldCompositionID)
+	}
 	if m.created != nil {
 		fields = append(fields, gameuploadsession.FieldCreated)
 	}
@@ -52067,6 +52142,8 @@ func (m *GameUploadSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.AbortedAt()
 	case gameuploadsession.FieldEndedAt:
 		return m.EndedAt()
+	case gameuploadsession.FieldCompositionID:
+		return m.CompositionID()
 	case gameuploadsession.FieldCreated:
 		return m.Created()
 	case gameuploadsession.FieldUpdated:
@@ -52114,6 +52191,8 @@ func (m *GameUploadSessionMutation) OldField(ctx context.Context, name string) (
 		return m.OldAbortedAt(ctx)
 	case gameuploadsession.FieldEndedAt:
 		return m.OldEndedAt(ctx)
+	case gameuploadsession.FieldCompositionID:
+		return m.OldCompositionID(ctx)
 	case gameuploadsession.FieldCreated:
 		return m.OldCreated(ctx)
 	case gameuploadsession.FieldUpdated:
@@ -52246,6 +52325,13 @@ func (m *GameUploadSessionMutation) SetField(name string, value ent.Value) error
 		}
 		m.SetEndedAt(v)
 		return nil
+	case gameuploadsession.FieldCompositionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompositionID(v)
+		return nil
 	case gameuploadsession.FieldCreated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -52277,6 +52363,9 @@ func (m *GameUploadSessionMutation) AddedFields() []string {
 	if m.addtotal_chunks != nil {
 		fields = append(fields, gameuploadsession.FieldTotalChunks)
 	}
+	if m.addcomposition_id != nil {
+		fields = append(fields, gameuploadsession.FieldCompositionID)
+	}
 	return fields
 }
 
@@ -52291,6 +52380,8 @@ func (m *GameUploadSessionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedChunkSize()
 	case gameuploadsession.FieldTotalChunks:
 		return m.AddedTotalChunks()
+	case gameuploadsession.FieldCompositionID:
+		return m.AddedCompositionID()
 	}
 	return nil, false
 }
@@ -52321,6 +52412,13 @@ func (m *GameUploadSessionMutation) AddField(name string, value ent.Value) error
 		}
 		m.AddTotalChunks(v)
 		return nil
+	case gameuploadsession.FieldCompositionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCompositionID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown GameUploadSession numeric field %s", name)
 }
@@ -52349,6 +52447,9 @@ func (m *GameUploadSessionMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(gameuploadsession.FieldEndedAt) {
 		fields = append(fields, gameuploadsession.FieldEndedAt)
+	}
+	if m.FieldCleared(gameuploadsession.FieldCompositionID) {
+		fields = append(fields, gameuploadsession.FieldCompositionID)
 	}
 	return fields
 }
@@ -52384,6 +52485,9 @@ func (m *GameUploadSessionMutation) ClearField(name string) error {
 		return nil
 	case gameuploadsession.FieldEndedAt:
 		m.ClearEndedAt()
+		return nil
+	case gameuploadsession.FieldCompositionID:
+		m.ClearCompositionID()
 		return nil
 	}
 	return fmt.Errorf("unknown GameUploadSession nullable field %s", name)
@@ -52443,6 +52547,9 @@ func (m *GameUploadSessionMutation) ResetField(name string) error {
 		return nil
 	case gameuploadsession.FieldEndedAt:
 		m.ResetEndedAt()
+		return nil
+	case gameuploadsession.FieldCompositionID:
+		m.ResetCompositionID()
 		return nil
 	case gameuploadsession.FieldCreated:
 		m.ResetCreated()

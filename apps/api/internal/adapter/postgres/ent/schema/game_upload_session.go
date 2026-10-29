@@ -37,6 +37,7 @@ func (GameUploadSession) Fields() []ent.Field {
 		field.Time("submitted_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("aborted_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("ended_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Int("composition_id").SchemaType(pg("integer")).Optional().Nillable(),
 		created(),
 		updated(),
 	}

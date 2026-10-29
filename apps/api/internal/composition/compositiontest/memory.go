@@ -180,7 +180,7 @@ func (r *MemoryRepository) ListActive(_ context.Context, creatorID, limit int) (
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	found := r.selected(func(item composition.Composition) bool {
-		return item.CreatorID == creatorID && (item.Active() || item.State == composition.StateFailed || (item.State == composition.StateDraft && item.Rebuild()))
+		return item.CreatorID == creatorID && (item.Active() || item.State == composition.StateFailed || (item.State == composition.StateDraft && (item.Rebuild() || item.Patch != nil || item.Save != nil)))
 	})
 	return found[:min(len(found), limit)], nil
 }

@@ -372,10 +372,11 @@ func (c Composition) Progress(now time.Time) []Progress {
 
 type View struct {
 	Composition
-	Folders  []Folder
-	FileName string
-	Ahead    int
-	Steps    []Progress
+	Folders   []Folder
+	FileName  string
+	Ahead     int
+	Steps     []Progress
+	DiscardAt *time.Time
 }
 
 type NewComposition struct {

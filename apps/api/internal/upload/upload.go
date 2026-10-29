@@ -49,6 +49,7 @@ type Session struct {
 	SubmittedAt    *time.Time
 	AbortedAt      *time.Time
 	EndedAt        *time.Time
+	CompositionID  *int
 	Created        time.Time
 	Updated        time.Time
 }

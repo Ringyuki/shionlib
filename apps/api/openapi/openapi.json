@@ -2392,12 +2392,63 @@
         ],
         "type": "object"
       },
+      "AdminUploadCompositionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resource_id": {
+            "description": "The resource the composition made; null until it has started",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "state": {
+            "description": "Null once the composition has been deleted",
+            "enum": [
+              "draft",
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "resource_id"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "AdminUploadDTO": {
         "additionalProperties": false,
         "properties": {
           "chunks": {
             "format": "int64",
             "type": "integer"
+          },
+          "composition": {
+            "description": "The composition that took the upload as its patch or saved games; null for any other upload",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminUploadCompositionDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "failure_count": {
             "format": "int64",
@@ -2495,6 +2546,7 @@
               "pending",
               "processing",
               "published",
+              "composed",
               "rejected",
               "canceled",
               "expired"
@@ -2523,6 +2575,7 @@
         "required": [
           "session",
           "target",
+          "composition",
           "held",
           "failures",
           "kind",
@@ -2784,6 +2837,7 @@
               "pending",
               "processing",
               "published",
+              "composed",
               "rejected",
               "canceled",
               "expired"
@@ -8735,6 +8789,14 @@
           "details": {
             "$ref": "#/components/schemas/CompositionDetailsDTO"
           },
+          "discard_at": {
+            "description": "When a composition that has not started is cleared with what was uploaded for it; null once it has started",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "estimated_size": {
             "format": "int64",
             "type": "integer"
@@ -8950,7 +9012,8 @@
           "queued_at",
           "started_at",
           "finished_at",
-          "updated"
+          "updated",
+          "discard_at"
         ],
         "type": "object"
       },
@@ -34583,6 +34646,7 @@
                 "pending",
                 "processing",
                 "published",
+                "composed",
                 "rejected",
                 "canceled",
                 "expired"

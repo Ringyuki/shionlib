@@ -131,6 +131,11 @@ func EndedAt(v time.Time) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldEQ(FieldEndedAt, v))
 }
 
+// CompositionID applies equality check predicate on the "composition_id" field. It's identical to CompositionIDEQ.
+func CompositionID(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldCompositionID, v))
+}
+
 // Created applies equality check predicate on the "created" field. It's identical to CreatedEQ.
 func Created(v time.Time) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldEQ(FieldCreated, v))
@@ -929,6 +934,56 @@ func EndedAtIsNil() predicate.GameUploadSession {
 // EndedAtNotNil applies the NotNil predicate on the "ended_at" field.
 func EndedAtNotNil() predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldNotNull(FieldEndedAt))
+}
+
+// CompositionIDEQ applies the EQ predicate on the "composition_id" field.
+func CompositionIDEQ(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldEQ(FieldCompositionID, v))
+}
+
+// CompositionIDNEQ applies the NEQ predicate on the "composition_id" field.
+func CompositionIDNEQ(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNEQ(FieldCompositionID, v))
+}
+
+// CompositionIDIn applies the In predicate on the "composition_id" field.
+func CompositionIDIn(vs ...int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIn(FieldCompositionID, vs...))
+}
+
+// CompositionIDNotIn applies the NotIn predicate on the "composition_id" field.
+func CompositionIDNotIn(vs ...int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotIn(FieldCompositionID, vs...))
+}
+
+// CompositionIDGT applies the GT predicate on the "composition_id" field.
+func CompositionIDGT(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGT(FieldCompositionID, v))
+}
+
+// CompositionIDGTE applies the GTE predicate on the "composition_id" field.
+func CompositionIDGTE(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldGTE(FieldCompositionID, v))
+}
+
+// CompositionIDLT applies the LT predicate on the "composition_id" field.
+func CompositionIDLT(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLT(FieldCompositionID, v))
+}
+
+// CompositionIDLTE applies the LTE predicate on the "composition_id" field.
+func CompositionIDLTE(v int) predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldLTE(FieldCompositionID, v))
+}
+
+// CompositionIDIsNil applies the IsNil predicate on the "composition_id" field.
+func CompositionIDIsNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldIsNull(FieldCompositionID))
+}
+
+// CompositionIDNotNil applies the NotNil predicate on the "composition_id" field.
+func CompositionIDNotNil() predicate.GameUploadSession {
+	return predicate.GameUploadSession(sql.FieldNotNull(FieldCompositionID))
 }
 
 // CreatedEQ applies the EQ predicate on the "created" field.

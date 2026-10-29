@@ -7,7 +7,7 @@ import (
 
 type adminUploadListInput struct {
 	httpapi.PageQuery
-	Stage  string `query:"stage" enum:"not_started,uploading,pending,processing,published,rejected,canceled,expired"`
+	Stage  string `query:"stage" enum:"not_started,uploading,pending,processing,published,composed,rejected,canceled,expired"`
 	Search string `query:"search" maxLength:"200" doc:"Part of the file name or of the uploader's name"`
 	UserID int    `query:"userId" minimum:"0"`
 	Failed bool   `query:"failed" doc:"Only uploads with a failure the browser reported"`

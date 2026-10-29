@@ -50,7 +50,7 @@ func TestADraftShowsItsPlanOnceThePatchIsRead(t *testing.T) {
 		`"file_name":"","estimated_size":8200,"size":null,"ahead":0,"step":null,"percent":0,` +
 		`"steps":[{"step":"fetch","state":"waiting","seconds":null},{"step":"unpack","state":"waiting","seconds":null},{"step":"apply","state":"waiting","seconds":null},` +
 		`{"step":"pack","state":"waiting","seconds":null},{"step":"check","state":"waiting","seconds":null},{"step":"store","state":"waiting","seconds":null}],` +
-		`"failure":null,"failure_detail":null,"queued_at":null,"started_at":null,"finished_at":null,"updated":"2026-10-03T01:02:03.000Z"}`
+		`"failure":null,"failure_detail":null,"queued_at":null,"started_at":null,"finished_at":null,"updated":"2026-10-03T01:02:03.000Z","discard_at":"2026-10-04T01:02:03.000Z"}`
 	if string(resp.Data) != want {
 		t.Fatalf("a draft with its plan:\n%s\nwant\n%s", resp.Data, want)
 	}
