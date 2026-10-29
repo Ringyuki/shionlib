@@ -2,6 +2,7 @@ import type { ChunkUpload } from '~/shared/api/chunk'
 import type { UploadSession, WaitReason } from './upload'
 import { chunkLength, stallTimeout } from './upload'
 import { locate, retrying, stalledConnection, type Waiting } from './upload-failure'
+import { linkSignals } from './upload-signal'
 import type { Slots } from './upload-slots'
 
 export type RunnerEvent =
@@ -41,7 +42,15 @@ export class UploadRunner {
 
   async run(signal: AbortSignal): Promise<void> {
     const failure = new AbortController()
-    const scope = AbortSignal.any([signal, failure.signal])
+    const scope = linkSignals([signal, failure.signal])
+    try {
+      await this.transfer(scope.signal, failure)
+    } finally {
+      scope.release()
+    }
+  }
+
+  private async transfer(scope: AbortSignal, failure: AbortController): Promise<void> {
     const sending = new Set<Promise<void>>()
     let first: unknown
     const stop = (error: unknown) => {
@@ -89,6 +98,7 @@ export class UploadRunner {
       scope,
       async () => {
         const stall = new AbortController()
+        const attempt = linkSignals([scope, stall.signal])
         let timer = setTimeout(() => stall.abort(stalledConnection()), stallTimeout)
         try {
           await this.deps.send({
@@ -97,7 +107,7 @@ export class UploadRunner {
             index,
             content,
             sha256,
-            signal: AbortSignal.any([scope, stall.signal]),
+            signal: attempt.signal,
             onProgress: sent => {
               clearTimeout(timer)
               timer = setTimeout(() => stall.abort(stalledConnection()), stallTimeout)
@@ -112,6 +122,7 @@ export class UploadRunner {
           throw error
         } finally {
           clearTimeout(timer)
+          attempt.release()
         }
       },
       this.waiting(),
