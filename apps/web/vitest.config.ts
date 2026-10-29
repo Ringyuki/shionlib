@@ -8,7 +8,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
-    include: ['app/**/*.test.{ts,tsx}', 'mdx/**/*.test.ts'],
+    include: ['app/**/*.test.{ts,tsx}', 'mdx/**/*.test.ts', 'eslint/**/*.test.js'],
     environment: 'node',
   },
 })

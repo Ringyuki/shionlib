@@ -41,16 +41,16 @@ func ReadableText(raw string) string {
 }
 
 func ReadableNames(names []string, expected Encoding) ([]string, Encoding) {
-	var sample []byte
+	var legacy []string
 	for _, name := range names {
-		if !utf8.ValidString(name) && len(sample) < EncodingSampleBytes {
-			sample = append(append(sample, name...), '\n')
+		if !utf8.ValidString(name) {
+			legacy = append(legacy, name)
 		}
 	}
-	if len(sample) == 0 {
+	if len(legacy) == 0 {
 		return names, EncodingUnknown
 	}
-	detected := DetectEncodingExpecting(sample, expected)
+	detected := DetectNameEncoding(legacy, expected)
 	if !detected.Legacy() {
 		detected = EncodingUnknown
 	}
@@ -60,11 +60,7 @@ func ReadableNames(names []string, expected Encoding) ([]string, Encoding) {
 		if utf8.ValidString(name) {
 			continue
 		}
-		from := detected
-		if !from.Legacy() {
-			from = DetectEncodingExpecting([]byte(name), expected)
-		}
-		if decoded, ok := Decode([]byte(name), from); ok {
+		if decoded, ok := Decode([]byte(name), detected); ok {
 			out[i] = decoded
 			continue
 		}

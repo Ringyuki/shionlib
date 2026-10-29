@@ -30,16 +30,13 @@ func (r *Reader) LegacyNames(ctx context.Context, path string) (scan.LegacyNames
 		return scan.LegacyNames{}, nil
 	}
 	defer func() { _ = archive.Close() }()
-	var sample []byte
+	var legacy []string
 	for _, file := range archive.File {
-		if file.NonUTF8 && len(sample) < inspection.EncodingSampleBytes {
-			sample = append(append(sample, file.Name...), '\n')
+		if file.NonUTF8 {
+			legacy = append(legacy, file.Name)
 		}
 	}
-	if len(sample) == 0 {
-		return scan.LegacyNames{}, nil
-	}
-	detected := inspection.DetectEncoding(sample)
+	detected := inspection.DetectNameEncoding(legacy, inspection.EncodingUnknown)
 	if !detected.Legacy() {
 		return scan.LegacyNames{}, nil
 	}
