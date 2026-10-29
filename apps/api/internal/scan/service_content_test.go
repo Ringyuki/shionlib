@@ -318,7 +318,7 @@ func TestContentsReadTheNamesOfAnyArchiveThatAreNotUnicode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := tree(contents.Draft); !slices.Equal(got, []string{"folder 汉化补丁", "file 汉化补丁/使用说明.txt", "file broken\uFFFD.dat"}) || contents.NameEncoding != "" {
+	if got := tree(contents.Draft); !slices.Equal(got, []string{"folder 汉化补丁", "file 汉化补丁/使用说明.txt", "file broken\uFFFD.dat"}) || contents.NameEncoding != "gbk" {
 		t.Fatalf("a name no encoding explains does not spoil the others: %q %q", got, contents.NameEncoding)
 	}
 }
