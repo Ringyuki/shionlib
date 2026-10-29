@@ -2,6 +2,8 @@ import js from '@eslint/js'
 import reactHooks from 'eslint-plugin-react-hooks'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import tseslint from 'typescript-eslint'
+import { supportedBrowsers } from './browsers.ts'
+import { browserSupport } from './eslint/browser-support.js'
 import { noComments } from './eslint/no-comments.js'
 
 const apiShapeMessage =
@@ -86,6 +88,8 @@ const rawSticky = {
 }
 
 const shellGeometry = ['app/features/shell/ui/site-shell.tsx']
+
+const featureDetection = ['app/features/auth/webauthn.ts']
 
 const ownWidth = {
   selector:
@@ -282,7 +286,9 @@ export default defineConfig([
   reactHooks.configs.flat.recommended,
   {
     files: ['**/*.{ts,tsx,js}'],
-    plugins: { shionlib: { rules: { 'no-comments': noComments } } },
+    plugins: {
+      shionlib: { rules: { 'no-comments': noComments, 'browser-support': browserSupport } },
+    },
     linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: 'error' },
     rules: {
       'shionlib/no-comments': 'error',
@@ -341,6 +347,13 @@ export default defineConfig([
     files: inPageTools,
     rules: {
       'no-restricted-syntax': ['error', ...appSyntax],
+    },
+  },
+  {
+    files: ['app/**/*.{ts,tsx}'],
+    ignores: ['**/*.server.ts', '**/*.test.{ts,tsx}', '**/*testing.ts', ...featureDetection],
+    rules: {
+      'shionlib/browser-support': ['error', supportedBrowsers],
     },
   },
   {

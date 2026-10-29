@@ -195,7 +195,11 @@ export function rateOf(counts: Counts): number | undefined {
 }
 
 export function hostOf(link: string): string {
-  return URL.canParse(link) ? new URL(link).host : link
+  try {
+    return new URL(link).host
+  } catch {
+    return link
+  }
 }
 
 export function previewOf(ad: Pick<AdminAd, 'banner' | 'side_icon' | 'side_image'>) {

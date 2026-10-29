@@ -3,9 +3,13 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
+import { buildTarget } from './browsers.ts'
 import { mdxOptions } from './mdx/options.ts'
 
 export default defineConfig({
+  build: {
+    target: buildTarget,
+  },
   plugins: [
     svgr({ svgrOptions: { dimensions: false } }),
     tailwindcss(),
