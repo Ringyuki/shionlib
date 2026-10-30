@@ -11,6 +11,7 @@ export {
   type ResourceViewer,
 } from './resource'
 export { runStatus, type Composition } from './resource-composition'
+export { unstartedDrafts } from './resource-composition-draft'
 export { loadOwnCompositions } from './resource-composition.use-cases'
 export { missingInfo } from './resource-info'
 export {
@@ -26,6 +27,7 @@ export {
   loadResourcePage,
 } from './resource.use-cases'
 export { CompositionProgress } from './ui/composition-progress'
+export { CompositionDraft } from './ui/composition-draft'
 export { CompositionTag } from './ui/composition-tag'
 export { FileState } from './ui/file-state'
 export { ResourceDetails } from './ui/resource-details'

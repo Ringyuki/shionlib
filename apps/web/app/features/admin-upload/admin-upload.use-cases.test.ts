@@ -30,6 +30,7 @@ const attempt: UploadDetail = {
   started: '2026-10-15T08:00:00Z',
   session: null,
   target: null,
+  composition: null,
   held: false,
   failures: [],
 }

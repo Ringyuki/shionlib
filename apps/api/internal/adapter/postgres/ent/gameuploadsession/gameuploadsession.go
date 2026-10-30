@@ -49,6 +49,8 @@ const (
 	FieldAbortedAt = "aborted_at"
 	// FieldEndedAt holds the string denoting the ended_at field in the database.
 	FieldEndedAt = "ended_at"
+	// FieldCompositionID holds the string denoting the composition_id field in the database.
+	FieldCompositionID = "composition_id"
 	// FieldCreated holds the string denoting the created field in the database.
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
@@ -113,6 +115,7 @@ var Columns = []string{
 	FieldSubmittedAt,
 	FieldAbortedAt,
 	FieldEndedAt,
+	FieldCompositionID,
 	FieldCreated,
 	FieldUpdated,
 }
@@ -279,6 +282,11 @@ func ByAbortedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByEndedAt orders the results by the ended_at field.
 func ByEndedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEndedAt, opts...).ToFunc()
+}
+
+// ByCompositionID orders the results by the composition_id field.
+func ByCompositionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCompositionID, opts...).ToFunc()
 }
 
 // ByCreated orders the results by the created field.

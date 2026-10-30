@@ -8,6 +8,7 @@ const tones = {
   pending: 'warning',
   processing: 'info',
   published: 'success',
+  composed: 'info',
   rejected: 'danger',
   canceled: 'neutral',
   expired: 'neutral',

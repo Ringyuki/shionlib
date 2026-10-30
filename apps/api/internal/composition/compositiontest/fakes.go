@@ -69,7 +69,7 @@ type Uploads struct {
 	Taken    []int
 }
 
-func (u *Uploads) Take(_ context.Context, who actor.Actor, sessionID int, target string) (upload.Session, error) {
+func (u *Uploads) Take(_ context.Context, who actor.Actor, sessionID int, target string, _ int) (upload.Session, error) {
 	session, ok := u.Sessions[sessionID]
 	switch {
 	case !ok:

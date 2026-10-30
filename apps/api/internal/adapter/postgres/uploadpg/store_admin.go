@@ -25,15 +25,18 @@ WITH entries AS (
 		s.submitted_at, s.aborted_at, s.ended_at, s.updated,
 		f.id AS file_id, f.type AS file_type, f.file_status, f.file_check_status, f.inspection_id, f.file_name AS file_label,
 		r.id AS resource_id, r.status AS resource_status, r.published_at, g.id AS game_id, g.title_jp, g.title_zh, g.title_en,
+		s.composition_id, c.state AS composition_state, c.resource_id AS composition_resource_id,
 		(SELECT count(*) FROM upload_failures u WHERE u.session_id = s.id) AS failures
 	FROM game_upload_sessions s
 	LEFT JOIN game_download_resource_files f ON f.upload_session_id = s.id
 	LEFT JOIN game_download_resources r ON r.id = f.game_download_resource_id
-	LEFT JOIN games g ON g.id = r.game_id
+	LEFT JOIN resource_compositions c ON c.id = s.composition_id
+	LEFT JOIN games g ON g.id = COALESCE(r.game_id, c.game_id)
 	UNION ALL
 	SELECT 'attempt', u.id, u.created, u.user_id, u.file_name, u.file_size,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL,
 		1
 	FROM upload_failures u
 	WHERE u.session_id IS NULL
@@ -48,6 +51,7 @@ WITH entries AS (
 			WHEN e.file_check_status = ANY($4::integer[]) THEN 'rejected'
 			ELSE 'processing'
 		END
+		WHEN e.composition_id IS NOT NULL THEN 'composed'
 		WHEN e.submitted_at IS NOT NULL THEN 'published'
 		WHEN e.status = 'COMPLETED' THEN 'pending'
 		WHEN e.status = 'UPLOADING' AND e.expires_at >= $5 THEN 'uploading'
@@ -59,7 +63,8 @@ SELECT st.kind, st.id, st.started, st.user_id, us.name, st.file_name, st.size, s
 	st.received, st.hash_algorithm, st.file_sha256, st.expires_at, st.last_chunk_at, st.completed_at, st.submitted_at,
 	st.aborted_at, st.ended_at, st.updated, st.file_id, st.file_type, st.file_status, st.file_check_status,
 	st.inspection_id, st.file_label, st.resource_id, st.resource_status, st.published_at, st.game_id,
-	st.title_jp, st.title_zh, st.title_en, st.failures, count(*) OVER () AS total
+	st.title_jp, st.title_zh, st.title_en, st.composition_id, st.composition_state, st.composition_resource_id,
+	st.failures, count(*) OVER () AS total
 FROM staged st
 JOIN users us ON us.id = st.user_id
 WHERE ($6 = '' OR st.stage = $6)

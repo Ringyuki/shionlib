@@ -127,6 +127,7 @@ type compositionDTO struct {
 	StartedAt     *time.Time             `json:"started_at"`
 	FinishedAt    *time.Time             `json:"finished_at"`
 	Updated       time.Time              `json:"updated"`
+	DiscardAt     *time.Time             `json:"discard_at" doc:"When a composition that has not started is cleared with what was uploaded for it; null once it has started"`
 }
 
 type compositionOriginDTO struct {
@@ -259,6 +260,7 @@ func toCompositionDTO(view composition.View) compositionDTO {
 		StartedAt:     view.StartedAt,
 		FinishedAt:    view.FinishedAt,
 		Updated:       view.Updated,
+		DiscardAt:     view.DiscardAt,
 	}
 	if view.Match != nil {
 		dto.Match = &compositionMatchDTO{Translators: listed(view.Match.Translators), Version: view.Match.Version, URL: view.Match.URL}

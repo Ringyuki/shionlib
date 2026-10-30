@@ -54,6 +54,8 @@ type GameUploadSession struct {
 	AbortedAt *time.Time `json:"aborted_at,omitempty"`
 	// EndedAt holds the value of the "ended_at" field.
 	EndedAt *time.Time `json:"ended_at,omitempty"`
+	// CompositionID holds the value of the "composition_id" field.
+	CompositionID *int `json:"composition_id,omitempty"`
 	// Created holds the value of the "created" field.
 	Created time.Time `json:"created,omitempty"`
 	// Updated holds the value of the "updated" field.
@@ -126,7 +128,7 @@ func (*GameUploadSession) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gameuploadsession.FieldUploadedChunks:
 			values[i] = new(pgvalue.Ints)
-		case gameuploadsession.FieldID, gameuploadsession.FieldTotalSize, gameuploadsession.FieldChunkSize, gameuploadsession.FieldTotalChunks, gameuploadsession.FieldCreatorID:
+		case gameuploadsession.FieldID, gameuploadsession.FieldTotalSize, gameuploadsession.FieldChunkSize, gameuploadsession.FieldTotalChunks, gameuploadsession.FieldCreatorID, gameuploadsession.FieldCompositionID:
 			values[i] = new(sql.NullInt64)
 		case gameuploadsession.FieldFileName, gameuploadsession.FieldMimeType, gameuploadsession.FieldHashAlgorithm, gameuploadsession.FieldFileSha256, gameuploadsession.FieldStatus, gameuploadsession.FieldStoragePath:
 			values[i] = new(sql.NullString)
@@ -261,6 +263,13 @@ func (_m *GameUploadSession) assignValues(columns []string, values []any) error 
 				_m.EndedAt = new(time.Time)
 				*_m.EndedAt = value.Time
 			}
+		case gameuploadsession.FieldCompositionID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field composition_id", values[i])
+			} else if value.Valid {
+				_m.CompositionID = new(int)
+				*_m.CompositionID = int(value.Int64)
+			}
 		case gameuploadsession.FieldCreated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created", values[i])
@@ -390,6 +399,11 @@ func (_m *GameUploadSession) String() string {
 	if v := _m.EndedAt; v != nil {
 		builder.WriteString("ended_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CompositionID; v != nil {
+		builder.WriteString("composition_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("created=")

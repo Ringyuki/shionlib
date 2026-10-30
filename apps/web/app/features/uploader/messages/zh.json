@@ -36,7 +36,8 @@
       "translation": "未注明翻译",
       "form": "未注明形态"
     },
-    "estimate": "约 {size}"
+    "estimate": "约 {size}",
+    "patch": "补丁：{name}"
   },
   "account": {
     "title": "存储空间与下载统计",

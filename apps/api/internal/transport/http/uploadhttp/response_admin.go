@@ -26,7 +26,7 @@ type AdminUploadItemDTO struct {
 	FileName     string              `json:"file_name"`
 	Size         int64               `json:"size"`
 	Uploader     adminUploadUserDTO  `json:"uploader"`
-	Stage        string              `json:"stage" enum:"not_started,uploading,pending,processing,published,rejected,canceled,expired"`
+	Stage        string              `json:"stage" enum:"not_started,uploading,pending,processing,published,composed,rejected,canceled,expired"`
 	FileStage    *string             `json:"file_stage" enum:"checking,awaiting_volumes,storing,stored,under_review,stalled,rejected" doc:"Where the file made from the upload is; null before a file was made"`
 	Rejection    *string             `json:"rejection" enum:"truncated,unsupported,encrypted,harmful,incomplete_set,abandoned" doc:"Why the check refused the file"`
 	Received     int                 `json:"received" doc:"Chunks received"`
@@ -57,6 +57,13 @@ type adminUploadTargetDTO struct {
 	ResourceRemoved     bool       `json:"resource_removed"`
 	ResourcePublishedAt *time.Time `json:"resource_published_at"`
 	InspectionID        *int       `json:"inspection_id"`
+}
+
+type adminUploadCompositionDTO struct {
+	_          struct{} `nullable:"true"`
+	ID         int      `json:"id"`
+	State      *string  `json:"state" enum:"draft,queued,running,done,failed" doc:"Null once the composition has been deleted"`
+	ResourceID *int     `json:"resource_id" doc:"The resource the composition made; null until it has started"`
 }
 
 type adminUploadErrorDTO struct {
@@ -91,10 +98,11 @@ type adminUploadFailureDTO struct {
 
 type adminUploadDTO struct {
 	AdminUploadItemDTO
-	Session  *adminUploadSessionDTO  `json:"session" doc:"Null for an attempt"`
-	Target   *adminUploadTargetDTO   `json:"target" doc:"The resource file made from the upload; null before one was made"`
-	Held     bool                    `json:"held" doc:"A browser is uploading it right now"`
-	Failures []adminUploadFailureDTO `json:"failures" doc:"Newest first"`
+	Session     *adminUploadSessionDTO     `json:"session" doc:"Null for an attempt"`
+	Target      *adminUploadTargetDTO      `json:"target" doc:"The resource file made from the upload; null before one was made"`
+	Composition *adminUploadCompositionDTO `json:"composition" doc:"The composition that took the upload as its patch or saved games; null for any other upload"`
+	Held        bool                       `json:"held" doc:"A browser is uploading it right now"`
+	Failures    []adminUploadFailureDTO    `json:"failures" doc:"Newest first"`
 }
 
 func toAdminUploadItem(entry download.Upload) AdminUploadItemDTO {
@@ -123,6 +131,10 @@ func toAdminUploadItem(entry download.Upload) AdminUploadItemDTO {
 		game := entry.Target.Game
 		dto.Game = &adminUploadGameDTO{ID: game.ID, TitleJP: game.TitleJP, TitleZH: game.TitleZH, TitleEN: game.TitleEN}
 	}
+	if entry.Target == nil && entry.Composition != nil && entry.Composition.Game.ID != 0 {
+		game := entry.Composition.Game
+		dto.Game = &adminUploadGameDTO{ID: game.ID, TitleJP: game.TitleJP, TitleZH: game.TitleZH, TitleEN: game.TitleEN}
+	}
 	return dto
 }
 
@@ -149,6 +161,13 @@ func toAdminUpload(detail download.UploadDetail) adminUploadDTO {
 			ResourceRemoved:     target.ResourceStatus != download.ResourceActive,
 			ResourcePublishedAt: target.ResourcePublishedAt,
 			InspectionID:        target.File.InspectionID,
+		}
+	}
+	if composition := detail.Composition; composition != nil {
+		dto.Composition = &adminUploadCompositionDTO{ID: composition.ID, ResourceID: composition.ResourceID}
+		if composition.State != "" {
+			state := composition.State
+			dto.Composition.State = &state
 		}
 	}
 	for i, failure := range detail.Failures {

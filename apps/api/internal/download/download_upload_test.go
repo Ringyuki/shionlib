@@ -41,7 +41,8 @@ func TestTheStageOfAnUploadFollowsItsLastStep(t *testing.T) {
 		{"stored", session(upload.StatusCompleted, nil), file(download.FileInObjectStore, download.CheckOK), download.UploadPublished},
 		{"encrypted", session(upload.StatusCompleted, nil), file(download.FileOnServer, download.CheckEncrypted), download.UploadRejected},
 		{"submitted, file replaced since", session(upload.StatusCompleted, func(s *upload.Session) { s.SubmittedAt = &at }), nil, download.UploadPublished},
-		{"handed to a composition", session(upload.StatusExpired, func(s *upload.Session) { s.SubmittedAt = &at }), nil, download.UploadPublished},
+		{"handed to a composition", session(upload.StatusExpired, func(s *upload.Session) { s.SubmittedAt, s.CompositionID = &at, ptr(7) }), nil, download.UploadComposed},
+		{"handed to a composition before it was recorded", session(upload.StatusExpired, func(s *upload.Session) { s.SubmittedAt = &at }), nil, download.UploadPublished},
 	}
 	for _, c := range cases {
 		if got := download.StageOfUpload(c.session, c.target, now); got != c.want {

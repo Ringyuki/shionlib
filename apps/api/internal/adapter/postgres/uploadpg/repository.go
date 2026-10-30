@@ -143,6 +143,16 @@ func (r *Repository) Complete(ctx context.Context, id int, hash, mimeType string
 	return changed > 0, nil
 }
 
+func (r *Repository) MarkComposed(ctx context.Context, id, compositionID int) error {
+	if err := r.db(ctx).GameUploadSession.UpdateOneID(id).SetCompositionID(compositionID).Exec(ctx); err != nil {
+		if ent.IsNotFound(err) {
+			return upload.ErrSessionNotFound
+		}
+		return fmt.Errorf("mark upload session %d taken by composition %d: %w", id, compositionID, err)
+	}
+	return nil
+}
+
 func (r *Repository) MarkSubmitted(ctx context.Context, id int) error {
 	if err := r.db(ctx).GameUploadSession.UpdateOneID(id).SetSubmittedAt(time.Now().UTC()).Exec(ctx); err != nil {
 		if ent.IsNotFound(err) {

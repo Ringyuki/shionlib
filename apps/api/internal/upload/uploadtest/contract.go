@@ -162,6 +162,18 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err := env.Repo.MarkSubmitted(ctx, 987654); !errors.Is(err, upload.ErrSessionNotFound) {
 			t.Fatalf("missing session: %v", err)
 		}
+		if done.CompositionID != nil {
+			t.Fatalf("an upload submitted to a resource belongs to no composition: %+v", done)
+		}
+		if err := env.Repo.MarkComposed(ctx, created.ID, 42); err != nil {
+			t.Fatal(err)
+		}
+		if composed, _ := env.Repo.GetSession(ctx, created.ID); composed.CompositionID == nil || *composed.CompositionID != 42 {
+			t.Fatalf("the composition that took the upload: %+v", composed)
+		}
+		if err := env.Repo.MarkComposed(ctx, 987654, 42); !errors.Is(err, upload.ErrSessionNotFound) {
+			t.Fatalf("missing session: %v", err)
+		}
 	})
 
 	t.Run("stale sessions and referenced paths", func(t *testing.T) {

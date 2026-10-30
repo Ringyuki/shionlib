@@ -1,3 +1,4 @@
+import type { GameHeader } from '~/features/game'
 import type { Composition } from '~/features/resource'
 import type { Allowance, Submission, Upload } from '~/features/upload'
 import type { ApiQuery, Schema } from '~/shared/api/types'
@@ -34,15 +35,26 @@ export type UploaderContent = {
   listing: Listing
   resources: OwnResource[]
   compositions: Composition[]
+  drafts: Draft[]
   total: number
 }
 
 export type Transfer = { submission: Submission; uploads: Upload[] }
 
+export type Draft = { composition: Composition; game: GameHeader | null }
+
 type Identified = { resource: Pick<OwnResource['resource'], 'id'> }
 
-export type Entry<Own extends Identified = OwnResource> =
+type Named = { name: string } | null
+
+type Waiting = {
+  composition: Pick<Composition, 'id' | 'file_name'> & { patch: Named; save: Named }
+  game: Pick<GameHeader, 'title_zh' | 'title_jp' | 'title_en'> | null
+}
+
+export type Entry<Own extends Identified = OwnResource, Pending extends Waiting = Draft> =
   | { kind: 'transfer'; key: string; transfer: Transfer }
+  | { kind: 'draft'; key: string; draft: Pending }
   | { kind: 'resource'; key: string; own: Own }
 
 export type Emptiness = 'nothing' | 'unmatched' | Stage
@@ -99,20 +111,47 @@ export function matchingTransfers(transfers: readonly Transfer[], search: string
   )
 }
 
-export function entriesOf<Own extends Identified>(
+export function matchingDrafts<Pending extends Waiting>(
+  drafts: readonly Pending[],
+  search: string,
+): Pending[] {
+  const wanted = search.trim().toLowerCase()
+  return drafts.filter(({ composition, game }) =>
+    [
+      composition.file_name,
+      composition.patch?.name,
+      composition.save?.name,
+      game?.title_zh,
+      game?.title_jp,
+      game?.title_en,
+    ]
+      .filter((name): name is string => name !== undefined && name !== '')
+      .some(name => name.toLowerCase().includes(wanted)),
+  )
+}
+
+export function entriesOf<Own extends Identified, Pending extends Waiting>(
   listing: Listing,
   transfers: readonly Transfer[],
+  drafts: readonly Pending[],
   resources: readonly Own[],
-): Entry<Own>[] {
+): Entry<Own, Pending>[] {
   const leading = listing.stage === undefined || listing.stage === 'uploading'
-  const queued = leading && listing.page === 1 ? matchingTransfers(transfers, listing.search) : []
+  const first = leading && listing.page === 1
+  const queued = first ? matchingTransfers(transfers, listing.search) : []
+  const waiting = first ? matchingDrafts(drafts, listing.search) : []
   return [
-    ...queued.map((transfer): Entry<Own> => ({
+    ...queued.map((transfer): Entry<Own, Pending> => ({
       kind: 'transfer',
       key: `transfer:${transfer.submission.id}`,
       transfer,
     })),
-    ...resources.map((own): Entry<Own> => ({
+    ...waiting.map((draft): Entry<Own, Pending> => ({
+      kind: 'draft',
+      key: `draft:${draft.composition.id}`,
+      draft,
+    })),
+    ...resources.map((own): Entry<Own, Pending> => ({
       kind: 'resource',
       key: `resource:${own.resource.id}`,
       own,

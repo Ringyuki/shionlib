@@ -327,6 +327,33 @@ func (_u *GameUploadSessionUpdate) ClearEndedAt() *GameUploadSessionUpdate {
 	return _u
 }
 
+// SetCompositionID sets the "composition_id" field.
+func (_u *GameUploadSessionUpdate) SetCompositionID(v int) *GameUploadSessionUpdate {
+	_u.mutation.ResetCompositionID()
+	_u.mutation.SetCompositionID(v)
+	return _u
+}
+
+// SetNillableCompositionID sets the "composition_id" field if the given value is not nil.
+func (_u *GameUploadSessionUpdate) SetNillableCompositionID(v *int) *GameUploadSessionUpdate {
+	if v != nil {
+		_u.SetCompositionID(*v)
+	}
+	return _u
+}
+
+// AddCompositionID adds value to the "composition_id" field.
+func (_u *GameUploadSessionUpdate) AddCompositionID(v int) *GameUploadSessionUpdate {
+	_u.mutation.AddCompositionID(v)
+	return _u
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (_u *GameUploadSessionUpdate) ClearCompositionID() *GameUploadSessionUpdate {
+	_u.mutation.ClearCompositionID()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *GameUploadSessionUpdate) SetUpdated(v time.Time) *GameUploadSessionUpdate {
 	_u.mutation.SetUpdated(v)
@@ -595,6 +622,15 @@ func (_u *GameUploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if _u.mutation.EndedAtCleared() {
 		_spec.ClearField(gameuploadsession.FieldEndedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CompositionID(); ok {
+		_spec.SetField(gameuploadsession.FieldCompositionID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCompositionID(); ok {
+		_spec.AddField(gameuploadsession.FieldCompositionID, field.TypeInt, value)
+	}
+	if _u.mutation.CompositionIDCleared() {
+		_spec.ClearField(gameuploadsession.FieldCompositionID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)
@@ -1062,6 +1098,33 @@ func (_u *GameUploadSessionUpdateOne) ClearEndedAt() *GameUploadSessionUpdateOne
 	return _u
 }
 
+// SetCompositionID sets the "composition_id" field.
+func (_u *GameUploadSessionUpdateOne) SetCompositionID(v int) *GameUploadSessionUpdateOne {
+	_u.mutation.ResetCompositionID()
+	_u.mutation.SetCompositionID(v)
+	return _u
+}
+
+// SetNillableCompositionID sets the "composition_id" field if the given value is not nil.
+func (_u *GameUploadSessionUpdateOne) SetNillableCompositionID(v *int) *GameUploadSessionUpdateOne {
+	if v != nil {
+		_u.SetCompositionID(*v)
+	}
+	return _u
+}
+
+// AddCompositionID adds value to the "composition_id" field.
+func (_u *GameUploadSessionUpdateOne) AddCompositionID(v int) *GameUploadSessionUpdateOne {
+	_u.mutation.AddCompositionID(v)
+	return _u
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (_u *GameUploadSessionUpdateOne) ClearCompositionID() *GameUploadSessionUpdateOne {
+	_u.mutation.ClearCompositionID()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *GameUploadSessionUpdateOne) SetUpdated(v time.Time) *GameUploadSessionUpdateOne {
 	_u.mutation.SetUpdated(v)
@@ -1360,6 +1423,15 @@ func (_u *GameUploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *GameU
 	}
 	if _u.mutation.EndedAtCleared() {
 		_spec.ClearField(gameuploadsession.FieldEndedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CompositionID(); ok {
+		_spec.SetField(gameuploadsession.FieldCompositionID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCompositionID(); ok {
+		_spec.AddField(gameuploadsession.FieldCompositionID, field.TypeInt, value)
+	}
+	if _u.mutation.CompositionIDCleared() {
+		_spec.ClearField(gameuploadsession.FieldCompositionID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)

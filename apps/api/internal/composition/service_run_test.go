@@ -273,6 +273,9 @@ func TestProgressIsKeptForWhoeverLooks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if view.DiscardAt != nil {
+		t.Fatalf("a composition that has started is never cleared as a draft: %v", view.DiscardAt)
+	}
 	steps := view.Steps
 	if len(steps) != len(composition.Steps) || !steps[0].Done || steps[0].Seconds == nil || !steps[1].Done || steps[2].Seconds != nil || steps[2].Done || steps[2].Running {
 		t.Fatalf("the steps taken and the ones never reached: %+v", steps)

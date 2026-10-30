@@ -5394,9 +5394,25 @@ export type components = {
             /** @enum {string} */
             wait: "network" | "busy" | "in_flight" | "signed_out";
         };
+        AdminUploadCompositionDTO: {
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description The resource the composition made; null until it has started
+             */
+            resource_id: number | null;
+            /**
+             * @description Null once the composition has been deleted
+             * @enum {string|null}
+             */
+            state: "draft" | "queued" | "running" | "done" | "failed" | null;
+        } | null;
         AdminUploadDTO: {
             /** Format: int64 */
             chunks: number;
+            /** @description The composition that took the upload as its patch or saved games; null for any other upload */
+            composition: components["schemas"]["AdminUploadCompositionDTO"] | null;
             /** Format: int64 */
             failure_count: number;
             /** @description Newest first */
@@ -5436,7 +5452,7 @@ export type components = {
             /** Format: int64 */
             size: number;
             /** @enum {string} */
-            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "composed" | "rejected" | "canceled" | "expired";
             /** Format: date-time */
             started: string;
             /** @description The resource file made from the upload; null before one was made */
@@ -5517,7 +5533,7 @@ export type components = {
             /** Format: int64 */
             size: number;
             /** @enum {string} */
-            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+            stage: "not_started" | "uploading" | "pending" | "processing" | "published" | "composed" | "rejected" | "canceled" | "expired";
             /** Format: date-time */
             started: string;
             uploader: components["schemas"]["AdminUploadUserDTO"];
@@ -7008,6 +7024,11 @@ export type components = {
             ahead: number;
             base: components["schemas"]["CompositionSourceDTO"];
             details: components["schemas"]["CompositionDetailsDTO"];
+            /**
+             * Format: date-time
+             * @description When a composition that has not started is cleared with what was uploaded for it; null once it has started
+             */
+            discard_at: string | null;
             /** Format: int64 */
             estimated_size: number;
             /** @enum {string|null} */
@@ -15877,7 +15898,7 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                stage?: "not_started" | "uploading" | "pending" | "processing" | "published" | "rejected" | "canceled" | "expired";
+                stage?: "not_started" | "uploading" | "pending" | "processing" | "published" | "composed" | "rejected" | "canceled" | "expired";
                 /** @description Part of the file name or of the uploader's name */
                 search?: string;
                 userId?: number;

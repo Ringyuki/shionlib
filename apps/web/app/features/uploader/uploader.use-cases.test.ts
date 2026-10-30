@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { ApiData, Schema } from '~/shared/api/types'
+import { composition } from '../resource/resource-composition-testing'
 import { firstListing, type Listing } from './uploader'
 import { loadUploader } from './uploader.use-cases'
 
@@ -38,6 +39,25 @@ const signedIn = () =>
     .on('get', '/game/download-source/mine/summary', summary)
     .on('get', '/game/download-source/mine', listed)
 
+const game: Schema<'GameHeaderDTO'> = {
+  id: 10,
+  v_id: null,
+  b_id: null,
+  h_id: 1748,
+  extra_info: [],
+  title_jp: 'アマカノ～Second Season～',
+  title_zh: '甜蜜女友～Second Season～',
+  title_en: '',
+  aliases: [],
+  covers: null,
+  developers: [],
+  release_date: null,
+  release_date_tba: false,
+  type: null,
+  platform: ['win'],
+  content_limit: 0,
+}
+
 const listQuery = (requests: readonly Request[]) =>
   requests
     .map(request => new URL(request.url))
@@ -54,6 +74,7 @@ describe('loadUploader', () => {
       listing,
       resources: [],
       compositions: [],
+      drafts: [],
       total: 23,
     })
     expect(listQuery(fake.requests)).toEqual([
@@ -91,9 +112,33 @@ describe('loadUploader', () => {
       listing,
       resources: [],
       compositions: [],
+      drafts: [],
       total: 0,
     })
     expect(listQuery(fake.requests)).toEqual([])
+  })
+
+  it('brings the game of each composition that has not started', async () => {
+    const draft = composition({ id: 7, game_id: 10, state: 'draft', resource_id: null })
+    const queued = composition({ id: 9, game_id: 10, state: 'queued', resource_id: 40 })
+    const fake = fakeApi()
+      .on('get', '/composition/mine', [draft, queued])
+      .on('get', '/game/{id}/header', game)
+      .on('get', '/uploads/quota', allowance)
+      .on('get', '/game/download-source/mine/summary', summary)
+    const content = await loadUploader(fake.api, { ...firstListing, stage: 'uploading' })
+    expect(content?.compositions).toEqual([draft, queued])
+    expect(content?.drafts).toEqual([{ composition: draft, game }])
+  })
+
+  it('keeps a draft whose game is gone', async () => {
+    const draft = composition({ id: 7, game_id: 404, state: 'draft', resource_id: null })
+    const fake = fakeApi()
+      .on('get', '/composition/mine', [draft])
+      .on('get', '/uploads/quota', allowance)
+      .on('get', '/game/download-source/mine/summary', summary)
+    const content = await loadUploader(fake.api, { ...firstListing, stage: 'uploading' })
+    expect(content?.drafts).toEqual([{ composition: draft, game: null }])
   })
 
   it('has nothing for a guest and asks for nothing more', async () => {

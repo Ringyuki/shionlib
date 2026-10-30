@@ -81,6 +81,7 @@ export function composition(changes: Partial<Composition> = {}): Composition {
     started_at: null,
     finished_at: null,
     updated: '2026-10-13T12:00:00.000Z',
+    discard_at: '2026-10-14T12:00:00.000Z',
     ...changes,
   }
 }

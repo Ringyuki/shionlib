@@ -241,10 +241,21 @@ func (r *Repository) list(ctx context.Context, action string, limit int, where .
 	return found, nil
 }
 
+func holds(column string) predicate.Composition {
+	return func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.WriteString("jsonb_typeof(").Ident(s.C(column)).WriteString(") = 'object'")
+		}))
+	}
+}
+
 func (r *Repository) ListActive(ctx context.Context, creatorID, limit int) ([]composition.Composition, error) {
 	shown := entcomposition.Or(
 		entcomposition.StateIn(string(composition.StateQueued), string(composition.StateRunning), string(composition.StateFailed)),
-		entcomposition.And(entcomposition.State(string(composition.StateDraft)), entcomposition.TargetFileIDNotNil()),
+		entcomposition.And(
+			entcomposition.State(string(composition.StateDraft)),
+			entcomposition.Or(entcomposition.TargetFileIDNotNil(), holds(entcomposition.FieldPatch), holds(entcomposition.FieldSave)),
+		),
 	)
 	return r.list(ctx, fmt.Sprintf("list the compositions of user %d", creatorID), limit, entcomposition.CreatorID(creatorID), shown)
 }

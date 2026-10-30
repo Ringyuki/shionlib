@@ -15,12 +15,13 @@ const (
 	UploadPending    UploadStage = "pending"
 	UploadProcessing UploadStage = "processing"
 	UploadPublished  UploadStage = "published"
+	UploadComposed   UploadStage = "composed"
 	UploadRejected   UploadStage = "rejected"
 	UploadCanceled   UploadStage = "canceled"
 	UploadExpired    UploadStage = "expired"
 )
 
-var uploadStages = []UploadStage{UploadNotStarted, UploadUploading, UploadPending, UploadProcessing, UploadPublished, UploadRejected, UploadCanceled, UploadExpired}
+var uploadStages = []UploadStage{UploadNotStarted, UploadUploading, UploadPending, UploadProcessing, UploadPublished, UploadComposed, UploadRejected, UploadCanceled, UploadExpired}
 
 func UploadStages() []UploadStage {
 	return slices.Clone(uploadStages)
@@ -53,6 +54,13 @@ type UploadTarget struct {
 	Game                UploadGame
 }
 
+type UploadComposition struct {
+	ID         int
+	State      string
+	ResourceID *int
+	Game       UploadGame
+}
+
 type Upload struct {
 	Kind         UploadKind
 	ID           int
@@ -62,6 +70,7 @@ type Upload struct {
 	UserName     string
 	Session      *upload.Session
 	Target       *UploadTarget
+	Composition  *UploadComposition
 	FailureCount int
 	Started      time.Time
 	Stage        UploadStage
@@ -104,6 +113,8 @@ func StageOfUpload(session *upload.Session, target *UploadTarget, now time.Time)
 		default:
 			return UploadProcessing
 		}
+	case session.CompositionID != nil:
+		return UploadComposed
 	case session.SubmittedAt != nil:
 		return UploadPublished
 	case session.Status == upload.StatusCompleted:

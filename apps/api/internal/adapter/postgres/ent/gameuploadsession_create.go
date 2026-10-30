@@ -185,6 +185,20 @@ func (_c *GameUploadSessionCreate) SetNillableEndedAt(v *time.Time) *GameUploadS
 	return _c
 }
 
+// SetCompositionID sets the "composition_id" field.
+func (_c *GameUploadSessionCreate) SetCompositionID(v int) *GameUploadSessionCreate {
+	_c.mutation.SetCompositionID(v)
+	return _c
+}
+
+// SetNillableCompositionID sets the "composition_id" field if the given value is not nil.
+func (_c *GameUploadSessionCreate) SetNillableCompositionID(v *int) *GameUploadSessionCreate {
+	if v != nil {
+		_c.SetCompositionID(*v)
+	}
+	return _c
+}
+
 // SetCreated sets the "created" field.
 func (_c *GameUploadSessionCreate) SetCreated(v time.Time) *GameUploadSessionCreate {
 	_c.mutation.SetCreated(v)
@@ -466,6 +480,10 @@ func (_c *GameUploadSessionCreate) createSpec() (*GameUploadSession, *sqlgraph.C
 	if value, ok := _c.mutation.EndedAt(); ok {
 		_spec.SetField(gameuploadsession.FieldEndedAt, field.TypeTime, value)
 		_node.EndedAt = &value
+	}
+	if value, ok := _c.mutation.CompositionID(); ok {
+		_spec.SetField(gameuploadsession.FieldCompositionID, field.TypeInt, value)
+		_node.CompositionID = &value
 	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gameuploadsession.FieldCreated, field.TypeTime, value)
@@ -856,6 +874,30 @@ func (u *GameUploadSessionUpsert) ClearEndedAt() *GameUploadSessionUpsert {
 	return u
 }
 
+// SetCompositionID sets the "composition_id" field.
+func (u *GameUploadSessionUpsert) SetCompositionID(v int) *GameUploadSessionUpsert {
+	u.Set(gameuploadsession.FieldCompositionID, v)
+	return u
+}
+
+// UpdateCompositionID sets the "composition_id" field to the value that was provided on create.
+func (u *GameUploadSessionUpsert) UpdateCompositionID() *GameUploadSessionUpsert {
+	u.SetExcluded(gameuploadsession.FieldCompositionID)
+	return u
+}
+
+// AddCompositionID adds v to the "composition_id" field.
+func (u *GameUploadSessionUpsert) AddCompositionID(v int) *GameUploadSessionUpsert {
+	u.Add(gameuploadsession.FieldCompositionID, v)
+	return u
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (u *GameUploadSessionUpsert) ClearCompositionID() *GameUploadSessionUpsert {
+	u.SetNull(gameuploadsession.FieldCompositionID)
+	return u
+}
+
 // SetUpdated sets the "updated" field.
 func (u *GameUploadSessionUpsert) SetUpdated(v time.Time) *GameUploadSessionUpsert {
 	u.Set(gameuploadsession.FieldUpdated, v)
@@ -1224,6 +1266,34 @@ func (u *GameUploadSessionUpsertOne) UpdateEndedAt() *GameUploadSessionUpsertOne
 func (u *GameUploadSessionUpsertOne) ClearEndedAt() *GameUploadSessionUpsertOne {
 	return u.Update(func(s *GameUploadSessionUpsert) {
 		s.ClearEndedAt()
+	})
+}
+
+// SetCompositionID sets the "composition_id" field.
+func (u *GameUploadSessionUpsertOne) SetCompositionID(v int) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetCompositionID(v)
+	})
+}
+
+// AddCompositionID adds v to the "composition_id" field.
+func (u *GameUploadSessionUpsertOne) AddCompositionID(v int) *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.AddCompositionID(v)
+	})
+}
+
+// UpdateCompositionID sets the "composition_id" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertOne) UpdateCompositionID() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateCompositionID()
+	})
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (u *GameUploadSessionUpsertOne) ClearCompositionID() *GameUploadSessionUpsertOne {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearCompositionID()
 	})
 }
 
@@ -1763,6 +1833,34 @@ func (u *GameUploadSessionUpsertBulk) UpdateEndedAt() *GameUploadSessionUpsertBu
 func (u *GameUploadSessionUpsertBulk) ClearEndedAt() *GameUploadSessionUpsertBulk {
 	return u.Update(func(s *GameUploadSessionUpsert) {
 		s.ClearEndedAt()
+	})
+}
+
+// SetCompositionID sets the "composition_id" field.
+func (u *GameUploadSessionUpsertBulk) SetCompositionID(v int) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.SetCompositionID(v)
+	})
+}
+
+// AddCompositionID adds v to the "composition_id" field.
+func (u *GameUploadSessionUpsertBulk) AddCompositionID(v int) *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.AddCompositionID(v)
+	})
+}
+
+// UpdateCompositionID sets the "composition_id" field to the value that was provided on create.
+func (u *GameUploadSessionUpsertBulk) UpdateCompositionID() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.UpdateCompositionID()
+	})
+}
+
+// ClearCompositionID clears the value of the "composition_id" field.
+func (u *GameUploadSessionUpsertBulk) ClearCompositionID() *GameUploadSessionUpsertBulk {
+	return u.Update(func(s *GameUploadSessionUpsert) {
+		s.ClearCompositionID()
 	})
 }
 

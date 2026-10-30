@@ -69,6 +69,9 @@ func TestADraftBelongsToWhoBeganIt(t *testing.T) {
 	if draft.State != composition.StateDraft || !draft.KeepPatch || draft.Base.Name != baseName || draft.Plan != nil || draft.FileName != "" {
 		t.Fatalf("a new draft: %+v", draft)
 	}
+	if want := draft.Updated.Add(composition.DraftTTL.Read(f.settings)); draft.DiscardAt == nil || !draft.DiscardAt.Equal(want) {
+		t.Fatalf("a draft untouched for the retention period is cleared at %v: %v", want, draft.DiscardAt)
+	}
 	_, err := f.service.Get(ctx, stranger, draft.ID)
 	expectCode(t, err, composition.ErrNotOwner)
 	if _, err := f.service.Get(ctx, admin, draft.ID); err != nil {

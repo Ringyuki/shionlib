@@ -103,7 +103,7 @@ func TestAdminUploadDetailAndTermination(t *testing.T) {
 	e.server.Expect(detail, http.StatusOK, 0)
 	want := `{"kind":"session","id":1,"file_name":"game.7z","size":8,"uploader":{"id":1,"name":"alice"},"stage":"uploading","file_stage":null,"rejection":null,"received":0,"chunks":2,"game":null,"failure_count":1,"started":"2026-10-03T01:02:03.000Z",` +
 		`"session":{"chunk_size":4,"hash_algorithm":"blake3","file_hash":"","expires_at":"2026-10-03T02:02:03.000Z","last_chunk_at":null,"completed_at":null,"submitted_at":null,"aborted_at":null,"ended_at":null,"updated":"2026-10-03T01:02:03.000Z"},` +
-		`"target":null,"held":false,"failures":[{"id":3,"at":"2026-10-03T01:02:03.000Z","stage":"chunk","reason":"rejected","error":{"name":"ApiError","message":"","status":403,"code":null,"request_id":null,"ray":"8f3c2a1b9d7e4c21-HKG"},"chunk":null,"file_name":"game.7z","file_size":8,` +
+		`"target":null,"composition":null,"held":false,"failures":[{"id":3,"at":"2026-10-03T01:02:03.000Z","stage":"chunk","reason":"rejected","error":{"name":"ApiError","message":"","status":403,"code":null,"request_id":null,"ray":"8f3c2a1b9d7e4c21-HKG"},"chunk":null,"file_name":"game.7z","file_size":8,` +
 		`"attempts":[{"at":"2026-10-03T01:02:03.000Z","wait":"network","error":{"name":"TypeError","message":"Failed to fetch","status":null,"code":null,"request_id":null,"ray":null}}],"client":"c41e","ip":"2409::1","user_agent":"Chrome"}]}`
 	if string(detail.Data) != want {
 		t.Fatalf("detail\n got %s\nwant %s", detail.Data, want)
