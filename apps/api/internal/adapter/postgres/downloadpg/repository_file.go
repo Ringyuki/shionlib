@@ -116,6 +116,7 @@ func (r *Repository) ReplaceFileContent(ctx context.Context, id int, content dow
 	}
 	update := r.db(ctx).GameDownloadResourceFile.UpdateOneID(id).
 		SetFilePath(content.Path).
+		SetOriginalName(content.OriginalName).
 		SetFileSize(content.Size).
 		SetFileHash(content.Hash).
 		SetHashAlgorithm(gamedownloadresourcefile.HashAlgorithm(content.HashAlgorithm)).

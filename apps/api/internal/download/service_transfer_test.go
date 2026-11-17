@@ -114,15 +114,20 @@ func TestStoringAFileAddedAfterPublicationIsRecorded(t *testing.T) {
 	f.spool.Put(addedPath, []byte("xy"), now)
 	replaced := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "patch.7z", Path: &replacedPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1, Created: published.Add(-time.Minute)})
 	added := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "特典.zip", Size: 2, Path: &addedPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1, Created: now})
+	reuploadedPath := f.spool.Path("9")
+	f.spool.Put(reuploadedPath, []byte("xyz"), now)
+	reuploaded := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "广播剧.zip", Size: 3, Path: &reuploadedPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1, Created: published.Add(time.Minute)})
+	f.repo.SeedHistory(download.History{FileID: reuploaded.ID, OperatorID: 1, Created: published.Add(time.Minute)})
+	f.repo.SeedHistory(download.History{FileID: reuploaded.ID, OperatorID: 1, Created: now})
 
-	for _, id := range []int{replaced.ID, added.ID} {
+	for _, id := range []int{replaced.ID, added.ID, reuploaded.ID} {
 		if err := f.transfers.Store(ctx, id); err != nil {
 			t.Fatal(err)
 		}
 	}
 	events := f.repo.Events(resource.ID)
 	if len(events) != 1 || events[0].Kind != download.EventFileAdded || events[0].Actor.ID != 1 || events[0].Data.Files[0] != (download.EventFile{Name: "特典.zip", Size: 2}) {
-		t.Fatalf("only the file that joined after publication counts as added: %+v", events)
+		t.Fatalf("only the file that joined after publication counts as added, not new content of a file that joined earlier: %+v", events)
 	}
 }
 
