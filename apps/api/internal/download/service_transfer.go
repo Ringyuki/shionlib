@@ -72,7 +72,8 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 		if current.ResourceStatus != ResourceActive || current.Status != FileOnServer || current.CheckStatus != CheckOK || current.Path == nil || *current.Path != localPath {
 			return nil
 		}
-		if err := t.recordHistory(ctx, current, key); err != nil {
+		replaced, err := t.recordHistory(ctx, current, key)
+		if err != nil {
 			return err
 		}
 		if err := t.repo.MarkFileStored(ctx, current.ID, key); err != nil {
@@ -81,7 +82,7 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 		if err := t.activities.Record(ctx, fileActivity(activity.TypeFileUploadToS3, current.CreatorID, current.GameID, current.ID, FileInObjectStore, CheckOK, nil, nil)); err != nil {
 			return err
 		}
-		if err := t.announce(ctx, current); err != nil {
+		if err := t.announce(ctx, current, replaced); err != nil {
 			return err
 		}
 		stored = true
@@ -94,7 +95,7 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 	return nil
 }
 
-func (t *TransferService) announce(ctx context.Context, file File) error {
+func (t *TransferService) announce(ctx context.Context, file File, replaced bool) error {
 	resource, err := t.repo.GetResource(ctx, file.ResourceID)
 	if err != nil {
 		return err
@@ -106,7 +107,7 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		if file, err = t.repo.GetFile(ctx, file.ID); err != nil {
 			return err
 		}
-		if file.Created.After(*resource.PublishedAt) {
+		if !replaced && file.Created.After(*resource.PublishedAt) {
 			if err := t.repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventFileAdded, ActorID: &file.CreatorID, Data: EventData{Files: []EventFile{{Name: file.Name, Size: file.Size}}}}); err != nil {
 				return err
 			}
@@ -162,15 +163,15 @@ func uploadMessage(receiverID, gameID, resourceID int, key string, meta message.
 	}
 }
 
-func (t *TransferService) recordHistory(ctx context.Context, file File, key string) error {
+func (t *TransferService) recordHistory(ctx context.Context, file File, key string) (bool, error) {
 	latest, found, err := t.repo.LatestHistory(ctx, file.ID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if found {
-		return t.repo.SetHistoryStorageKey(ctx, latest.ID, key)
+		return true, t.repo.SetHistoryStorageKey(ctx, latest.ID, key)
 	}
-	return t.repo.CreateHistory(ctx, NewHistory{
+	return false, t.repo.CreateHistory(ctx, NewHistory{
 		FileID:          file.ID,
 		Size:            file.Size,
 		HashAlgorithm:   file.HashAlgorithm,

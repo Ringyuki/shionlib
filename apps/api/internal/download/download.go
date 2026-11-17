@@ -230,6 +230,7 @@ type NewFile struct {
 
 type FileContent struct {
 	Path            string
+	OriginalName    string
 	Size            int64
 	Hash            string
 	HashAlgorithm   upload.HashAlgorithm

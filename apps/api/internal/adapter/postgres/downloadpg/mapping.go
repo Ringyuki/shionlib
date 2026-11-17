@@ -108,6 +108,16 @@ func toFile(row *ent.GameDownloadResourceFile, resource *ent.GameDownloadResourc
 	return file
 }
 
+func contentCases(row *ent.GameDownloadResourceFile) []download.MalwareCaseRef {
+	cases := make([]download.MalwareCaseRef, 0, len(row.Edges.MalwareScanCases))
+	for _, scanCase := range row.Edges.MalwareScanCases {
+		if scanCase.FileHash == row.FileHash {
+			cases = append(cases, download.MalwareCaseRef{ID: scanCase.ID, Viruses: nonNilStrings(scanCase.DetectedViruses)})
+		}
+	}
+	return cases
+}
+
 func toHistory(row *ent.GameDownloadResourceFileHistory) download.History {
 	return download.History{
 		ID:              row.ID,

@@ -559,6 +559,13 @@ func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in 
 		} else if found && other.ID != file.ID {
 			return upload.ErrSessionAlreadyUsed
 		}
+		replaced := EventData{Name: replacedName(file.Name, session.FileName), Reason: in.Reason, OldSize: &file.Size, NewSize: &session.TotalSize}
+		if replaced.Name != file.Name {
+			if err := s.repo.RenameFile(ctx, file.ID, replaced.Name); err != nil {
+				return err
+			}
+			replaced.OldName = file.Name
+		}
 		if err := s.repo.CreateHistory(ctx, NewHistory{
 			FileID:          file.ID,
 			Size:            session.TotalSize,
@@ -575,6 +582,7 @@ func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in 
 		}
 		if err := s.repo.ReplaceFileContent(ctx, file.ID, FileContent{
 			Path:            session.StoragePath,
+			OriginalName:    session.FileName,
 			Size:            session.TotalSize,
 			Hash:            session.FileHash,
 			HashAlgorithm:   session.HashAlgorithm,
@@ -583,10 +591,10 @@ func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in 
 		}); err != nil {
 			return err
 		}
-		if err := s.activities.Record(ctx, fileActivity(activity.TypeFileReupload, who.UserID, file.GameID, file.ID, FileOnServer, CheckPending, &session.TotalSize, &file.Name)); err != nil {
+		if err := s.activities.Record(ctx, fileActivity(activity.TypeFileReupload, who.UserID, file.GameID, file.ID, FileOnServer, CheckPending, &session.TotalSize, &replaced.Name)); err != nil {
 			return err
 		}
-		if err := recordEvent(ctx, s.repo, who, file.ResourceID, EventFileReplaced, EventData{Name: file.Name, Reason: in.Reason, OldSize: &file.Size, NewSize: &session.TotalSize}); err != nil {
+		if err := recordEvent(ctx, s.repo, who, file.ResourceID, EventFileReplaced, replaced); err != nil {
 			return err
 		}
 		if file.StorageKey != nil {

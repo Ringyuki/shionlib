@@ -86,7 +86,7 @@ func withFileDetails(query *ent.GameDownloadResourceQuery) *ent.GameDownloadReso
 			q.Order(ent.Asc(gamedownloadresourcefile.FieldID)).
 				WithCreator(userpg.SelectSummary).
 				WithMalwareScanCases(func(q *ent.MalwareScanCaseQuery) {
-					q.Select(malwarescancase.FieldID, malwarescancase.FieldDetectedViruses, malwarescancase.FieldFileID).
+					q.Select(malwarescancase.FieldID, malwarescancase.FieldDetectedViruses, malwarescancase.FieldFileID, malwarescancase.FieldFileHash).
 						Order(ent.Asc(malwarescancase.FieldID))
 				})
 		})
@@ -111,17 +111,13 @@ func (r *Repository) gameResources(ctx context.Context, rows []*ent.GameDownload
 			Files:    make([]download.GameFile, len(row.Edges.Files)),
 		}
 		for j, file := range row.Edges.Files {
-			cases := make([]download.MalwareCaseRef, len(file.Edges.MalwareScanCases))
-			for k, scanCase := range file.Edges.MalwareScanCases {
-				cases[k] = download.MalwareCaseRef{ID: scanCase.ID, Viruses: nonNilStrings(scanCase.DetectedViruses)}
-			}
 			history := recent[file.ID]
 			if history == nil {
 				history = []download.HistoryRef{}
 			}
 			resource.Files[j] = download.GameFile{
 				File:          toFile(file, row),
-				MalwareCases:  cases,
+				MalwareCases:  contentCases(file),
 				Creator:       userpg.ToSummary(file.Edges.Creator),
 				RecentHistory: history,
 			}

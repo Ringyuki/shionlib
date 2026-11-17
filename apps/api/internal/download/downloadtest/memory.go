@@ -679,8 +679,9 @@ func (r *MemoryRepository) FindFileBySession(_ context.Context, sessionID int) (
 
 func (r *MemoryRepository) ReplaceFileContent(_ context.Context, id int, content download.FileContent) error {
 	return r.mutateFile(id, func(f *download.File) {
-		path, session := content.Path, content.UploadSessionID
+		path, session, uploaded := content.Path, content.UploadSessionID, content.OriginalName
 		f.Path = &path
+		f.OriginalName = &uploaded
 		f.Size = content.Size
 		f.Hash = content.Hash
 		f.HashAlgorithm = content.HashAlgorithm

@@ -173,6 +173,14 @@ func NameSuffix(uploaded string) string {
 	return ""
 }
 
+func replacedName(name, uploaded string) string {
+	suffix, current := NameSuffix(uploaded), NameSuffix(name)
+	if suffix == "" || strings.EqualFold(suffix, current) {
+		return name
+	}
+	return strings.TrimSuffix(name, current) + suffix
+}
+
 func NamedMedium(name string) string {
 	found := nameMedium.FindStringSubmatch(name)
 	if found == nil {

@@ -373,19 +373,24 @@ func TestListGameResources(t *testing.T) {
 	middle := f.history(t, reuploaded.ID, operator, base.Add(time.Hour), ptr("fix"))
 	newest := f.history(t, reuploaded.ID, operator, base.Add(2*time.Hour), ptr("again"))
 
-	scanCase, err := f.db.Ent.MalwareScanCase.Create().
-		SetFileID(reuploaded.ID).
-		SetUploaderID(creator).
-		SetReviewDeadline(base).
-		SetDetector("clamscan").
-		SetDetectedViruses(pgvalue.Strings{"Eicar"}).
-		SetFileName("twice.7z").
-		SetFileSize(1).
-		SetFileHash("h").
-		Save(ctx)
-	if err != nil {
-		t.Fatal(err)
+	flag := func(hash, virus string) *ent.MalwareScanCase {
+		scanCase, err := f.db.Ent.MalwareScanCase.Create().
+			SetFileID(reuploaded.ID).
+			SetUploaderID(creator).
+			SetReviewDeadline(base).
+			SetDetector("clamscan").
+			SetDetectedViruses(pgvalue.Strings{virus}).
+			SetFileName("twice.7z").
+			SetFileSize(1).
+			SetFileHash(hash).
+			Save(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return scanCase
 	}
+	flag("hash of the replaced content", "Win.Malware.Old")
+	scanCase := flag(reuploaded.FileHash, "Eicar")
 
 	resources, err := f.repo.ListGameResources(ctx, gameID)
 	if err != nil {
@@ -410,7 +415,7 @@ func TestListGameResources(t *testing.T) {
 		t.Fatalf("latest reupload: %+v", latest)
 	}
 	if len(twice.MalwareCases) != 1 || twice.MalwareCases[0].ID != scanCase.ID || !slices.Equal(twice.MalwareCases[0].Viruses, []string{"Eicar"}) {
-		t.Fatalf("malware cases: %+v", twice.MalwareCases)
+		t.Fatalf("only the cases raised against the current content: %+v", twice.MalwareCases)
 	}
 	if empty, err := f.repo.ListGameResources(ctx, f.db.Game(t)); err != nil || len(empty) != 0 {
 		t.Fatalf("game without resources: %+v %v", empty, err)
@@ -641,7 +646,7 @@ func TestFileOperations(t *testing.T) {
 		if locked.GameID != gameID || locked.ResourceStatus != download.ResourceActive {
 			return fmt.Errorf("locked file lacks resource data: %+v", locked)
 		}
-		return f.repo.ReplaceFileContent(ctx, stored.ID, download.FileContent{Path: "/spool/new.sltf", Size: 7, Hash: "new", HashAlgorithm: upload.HashBLAKE3, UploadSessionID: session})
+		return f.repo.ReplaceFileContent(ctx, stored.ID, download.FileContent{Path: "/spool/new.sltf", OriginalName: "new upload.zip", Size: 7, Hash: "new", HashAlgorithm: upload.HashBLAKE3, UploadSessionID: session})
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -652,6 +657,9 @@ func TestFileOperations(t *testing.T) {
 	}
 	if replaced.Status != download.FileOnServer || replaced.CheckStatus != download.CheckPending || replaced.FalsePositive || replaced.StorageKey != nil || replaced.Path == nil || *replaced.Path != "/spool/new.sltf" || replaced.Size != 7 || replaced.Hash != "new" || replaced.UploadSessionID == nil || *replaced.UploadSessionID != session || replaced.ContentType != nil {
 		t.Fatalf("replaced content: %+v", replaced)
+	}
+	if replaced.OriginalName == nil || *replaced.OriginalName != "new upload.zip" || replaced.Name != "stored.7z" {
+		t.Fatalf("the new content keeps the file's name and records the name it was uploaded with: %+v", replaced)
 	}
 	if err := f.repo.MarkFileStored(ctx, stored.ID, "games/9/9/new.7z"); err != nil {
 		t.Fatal(err)

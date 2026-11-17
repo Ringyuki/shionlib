@@ -461,14 +461,14 @@ func TestReuploadRules(t *testing.T) {
 	f := newFixture()
 	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
 	oldSession := 40
-	file := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z", Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/a.7z"), UploadSessionID: &oldSession, CreatorID: owner.UserID})
+	file := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z", OriginalName: ptr("first rip.7z"), Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/a.7z"), UploadSessionID: &oldSession, CreatorID: owner.UserID})
 	pending := f.repo.SeedFile(download.File{ResourceID: resource.ID, Status: download.FileOnServer, CreatorID: owner.UserID})
 	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved})
 	hidden := f.repo.SeedFile(download.File{ResourceID: removed.ID, Status: download.FileInObjectStore, CreatorID: owner.UserID})
 	usedSession := 41
 	f.repo.SeedFile(download.File{ResourceID: resource.ID, Status: download.FileInObjectStore, UploadSessionID: &usedSession, CreatorID: owner.UserID})
 	f.sessions.byID[41] = upload.Session{ID: 41, Status: upload.StatusCompleted, CreatorID: admin.UserID}
-	f.sessions.byID[42] = upload.Session{ID: 42, Status: upload.StatusCompleted, CreatorID: admin.UserID, StoragePath: "/spool/42.part", TotalSize: 77, FileHash: "new", HashAlgorithm: upload.HashBLAKE3}
+	f.sessions.byID[42] = upload.Session{ID: 42, Status: upload.StatusCompleted, CreatorID: admin.UserID, FileName: "better rip.7z", StoragePath: "/spool/42.part", TotalSize: 77, FileHash: "new", HashAlgorithm: upload.HashBLAKE3}
 	f.repo.SeedFavorite(10, 5)
 	f.repo.SeedFavorite(10, 5)
 	f.repo.SeedFavorite(10, admin.UserID)
@@ -487,6 +487,9 @@ func TestReuploadRules(t *testing.T) {
 	updated, _ := f.repo.GetFile(ctx, file.ID)
 	if updated.Status != download.FileOnServer || updated.CheckStatus != download.CheckPending || updated.StorageKey != nil || *updated.Path != "/spool/42.part" || *updated.UploadSessionID != 42 || updated.Size != 77 || updated.Hash != "new" {
 		t.Fatalf("file after reupload %+v", updated)
+	}
+	if updated.Name != "a.7z" || updated.OriginalName == nil || *updated.OriginalName != "better rip.7z" {
+		t.Fatalf("the file keeps its name and takes the name the new content was uploaded with: %+v", updated)
 	}
 	if histories := f.repo.Histories(file.ID); len(histories) != 1 || histories[0].OperatorID != admin.UserID || *histories[0].Reason != "better rip" || histories[0].StorageKey != nil {
 		t.Fatalf("history %+v", histories)
@@ -765,6 +768,42 @@ func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
 	}
 	if renamed := events[4]; renamed.Actor.ID != admin.UserID || renamed.Data.OldName != "本体.7z" || renamed.Data.Name != "game v2.7z" {
 		t.Fatalf("renamed file: %+v", renamed)
+	}
+}
+
+func TestReuploadedContentGivesTheFileItsSuffix(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	seed := func(name string) download.File {
+		return f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: name, Size: 5, Status: download.FileInObjectStore, StorageKey: ptr("games/10/" + name), CreatorID: owner.UserID})
+	}
+	rar, volume, taken := seed("[ブランド] ゲーム 我改的名字 (files).rar"), seed("本体.part1.rar"), seed("特典.7z")
+	seed("特典.zip")
+	reupload := func(file download.File, session int, uploaded string) error {
+		f.sessions.byID[session] = upload.Session{ID: session, Status: upload.StatusCompleted, CreatorID: owner.UserID, FileName: uploaded, StoragePath: "/spool/" + uploaded, TotalSize: 9, FileHash: uploaded, HashAlgorithm: upload.HashBLAKE3}
+		return f.service.Reupload(ctx, owner, file.ID, download.ReuploadInput{UploadSessionID: session})
+	}
+
+	if err := reupload(rar, 50, "ゲーム.ZIP"); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetFile(ctx, rar.ID); got.Name != "[ブランド] ゲーム 我改的名字 (files).ZIP" || *got.OriginalName != "ゲーム.ZIP" {
+		t.Fatalf("the file keeps its name and takes the suffix of the new content: %+v", got)
+	}
+	if err := reupload(volume, 51, "本体.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetFile(ctx, volume.ID); got.Name != "本体.7z" {
+		t.Fatalf("a volume suffix is replaced whole: %+v", got)
+	}
+	expectCode(t, reupload(taken, 52, "特典.zip"), download.ErrDuplicateFileName)
+	if got, _ := f.repo.GetFile(ctx, taken.ID); got.Name != "特典.7z" || got.Status != download.FileInObjectStore {
+		t.Fatalf("a suffix that would repeat another file's name refuses the replacement: %+v", got)
+	}
+	events := f.repo.Events(resource.ID)
+	if len(events) != 2 || events[0].Kind != download.EventFileReplaced || events[0].Data.OldName != "[ブランド] ゲーム 我改的名字 (files).rar" || events[0].Data.Name != "[ブランド] ゲーム 我改的名字 (files).ZIP" {
+		t.Fatalf("the replacement records the name it gave the file: %+v", events)
 	}
 }
 
